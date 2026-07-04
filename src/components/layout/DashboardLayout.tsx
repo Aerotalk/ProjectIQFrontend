@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Ticket System');
@@ -39,26 +39,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     document.documentElement.classList.toggle('dark');
   };
 
+  const basePath = role === 'company' ? '/companydashboard' : '/orgdashboard';
+
   const navItems = [
     {
       name: 'Account',
       icon: User,
-      subItems: [{ name: 'Account Dashboard', path: '/orgdashboard/account' }]
+      subItems: [
+        { name: 'Account Dashboard', path: `${basePath}/account` },
+        ...(role === 'org' ? [{ name: 'My Accounts', path: `${basePath}/my-accounts` }] : [])
+      ]
     },
     {
       name: 'Sales',
       icon: LineChart,
-      subItems: [{ name: 'Sales Dashboard', path: '/orgdashboard/sales' }]
+      subItems: [{ name: 'Sales Dashboard', path: `${basePath}/sales` }]
     },
     {
       name: 'Finance',
       icon: PieChart,
-      subItems: [{ name: 'Finance Dashboard', path: '/orgdashboard/finance' }]
+      subItems: [{ name: 'Finance Dashboard', path: `${basePath}/finance` }]
     },
     {
       name: 'Ticket System',
       icon: Ticket,
-      subItems: [{ name: 'Ticket Dashboard', path: '/orgdashboard' }]
+      subItems: role === 'company' ? [
+        { name: 'Dashboard', path: `${basePath}` },
+        { name: 'All Tickets', path: `${basePath}/tickets` },
+        { name: 'Create Ticket', path: `${basePath}/tickets/create` },
+        { name: 'Projects', path: `${basePath}/projects` },
+        { name: 'Clients', path: `${basePath}/clients` },
+        { name: 'Reports', path: `${basePath}/reports` },
+        { name: 'Knowledge Base', path: `${basePath}/knowledge-base` },
+        { name: 'Notifications', path: `${basePath}/notifications` },
+        { name: 'Admin Settings', path: `${basePath}/admin` }
+      ] : [
+        { name: 'Ticket Dashboard', path: `${basePath}` }
+      ]
     },
   ];
 
@@ -70,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <CheckCircle2 size={20} />
         <div>
           <span className="block text-sm font-bold">Welcome back!</span>
-          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as AeroTalk Solutions.</span>
+          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}.</span>
         </div>
       </div>
 
@@ -92,7 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {navItems.map((item) => {
             const isExpanded = expandedMenu === item.name;
-            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== '/orgdashboard' && location.pathname.startsWith(sub.path)));
+            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path)));
 
             return (
               <div key={item.name} className="mb-1">
@@ -115,7 +132,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   <div className="pl-9 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-5 relative">
                     {item.subItems.map(sub => {
-                      const isActive = location.pathname === sub.path || (sub.path !== '/orgdashboard' && location.pathname.startsWith(sub.path));
+                      const exactMatch = location.pathname === sub.path;
+                      const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
+                      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path));
+                      
                       return (
                         <Link
                           key={sub.name}
@@ -127,7 +147,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#e6a8d0] border-2 border-[#3a112b]" />}
                           {sub.name}
                         </Link>
-                      );
+                       );
                     })}
                   </div>
                 </div>
@@ -139,11 +159,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs">
-              AT
+              {role === 'company' ? 'CC' : 'AT'}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title="AeroTalk Solutions">AeroTalk Solutions</span>
-              <span className="text-[10px] text-gray-400">Admin</span>
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? "Client Company" : "AeroTalk Solutions"}>
+                {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}
+              </span>
+              <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : 'Admin'}</span>
             </div>
           </div>
         </div>
@@ -197,11 +219,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title="AeroTalk Solutions">AeroTalk Solutions</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">admin@aerotalk.com</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? "Client Company" : "AeroTalk Solutions"}>
+                      {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{role === 'company' ? 'company@aerotalk.in' : 'admin@aerotalk.com'}</p>
                   </div>
                   <div className="py-1">
-                    <Link to="/orgdashboard/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5" onClick={() => setIsProfileOpen(false)}>
+                    <Link to={`${basePath}/profile`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5" onClick={() => setIsProfileOpen(false)}>
                       <User size={15} className="text-gray-400" />
                       View Profile
                     </Link>

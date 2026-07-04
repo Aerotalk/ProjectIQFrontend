@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import OrgDashboard from './pages/OrgDashboard';
 import Profile from './pages/Profile';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import CompanyDashboard from './pages/CompanyDashboard';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/superadmin/*" element={<SuperAdminDashboard />} />
+        <Route path="/companydashboard/*" element={<CompanyDashboard />} />
         <Route path="/orgdashboard/profile" element={<Profile />} />
         <Route path="/orgdashboard/*" element={<OrgDashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />

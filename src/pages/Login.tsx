@@ -86,6 +86,9 @@ export default function Login() {
               } else if (email === 'superadmin@aerotalk.in' && password === 'password123') {
                 sessionStorage.setItem('showWelcomeToast', 'true');
                 navigate('/superadmin/organizations', { replace: true });
+              } else if (email === 'company@aerotalk.in' && password === 'password123') {
+                sessionStorage.setItem('showWelcomeToast', 'true');
+                navigate('/companydashboard', { replace: true });
               } else {
                 setError(true);
                 setTimeout(() => setError(false), 3000);
