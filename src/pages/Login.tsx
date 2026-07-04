@@ -97,6 +97,8 @@ export default function Login() {
                 sessionStorage.setItem('showWelcomeToast', 'true');
                 if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
                   navigate('/superadmin/organizations', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
+                  navigate('/companydashboard', { replace: true });
                 } else {
                   navigate('/orgdashboard', { replace: true });
                 }
