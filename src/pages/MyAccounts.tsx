@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2 } from 'lucide-react';
+import { api } from '../lib/api';
 
 type ViewState = 'list' | 'add' | 'edit';
 
@@ -450,28 +451,62 @@ const AccountForm = ({
 
 export default function MyAccounts() {
   const [viewState, setViewState] = useState<ViewState>('list');
-  const [accounts, setAccounts] = useState<AccountData[]>(mockAccounts);
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null);
+  const [loading, setLoading] = useState(true);
   
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return;
+      const data = await api.get(`/admin/companies?organizationId=${orgId}`);
+      setAccounts(data);
+    } catch (error) {
+      console.error('Failed to fetch companies', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditAccount = (account: AccountData) => {
     setSelectedAccount(account);
     setViewState('edit');
   };
 
-  const handleSaveAccount = (data: AccountData) => {
-    if (viewState === 'add') {
-      const newAccount = { ...data, id: Date.now().toString() };
-      setAccounts([...accounts, newAccount]);
-    } else {
-      setAccounts(accounts.map(acc => acc.id === data.id ? data : acc));
+  const handleSaveAccount = async (data: AccountData) => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return;
+      
+      const payload = {
+        ...data,
+        companyCode: data.companyName.substring(0, 3).toUpperCase(),
+        organizationId: orgId,
+        status: 'ACTIVE'
+      };
+
+      if (viewState === 'add') {
+        await api.post(`/admin/companies`, payload);
+      } else {
+        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, payload);
+      }
+      
+      await fetchAccounts();
+      setViewState('list');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to save company', error);
+      alert('Failed to save company');
     }
-    setViewState('list');
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
   };
 
   const renderList = () => (
