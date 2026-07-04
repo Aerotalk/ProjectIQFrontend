@@ -79,7 +79,7 @@ export default function SuperAdminDashboard() {
       legal_name: formData.legal_name,
       organization_type: formData.organization_type,
       industry: formData.industry,
-      status: formData.status,
+      status: formData.status as 'Active' | 'Inactive' | 'Pending Approval',
       created_at: new Date().toISOString().split('T')[0]
     };
 
