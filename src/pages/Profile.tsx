@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Camera, Save, Key, User, Mail, Phone, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import CustomSelect from '../components/ui/CustomSelect';
 
 export default function Profile() {
   const [profileData, setProfileData] = useState({
@@ -181,15 +182,17 @@ export default function Profile() {
                   
                   <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Timezone</label>
-                    <div className="relative">
-                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <select className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors appearance-none">
-                        <option value="UTC-05:00">{profileData.timezone}</option>
-                        <option value="UTC+00:00">UTC+00:00 Greenwich Mean Time</option>
-                        <option value="UTC+01:00">UTC+01:00 Central European Time</option>
-                        <option value="UTC+05:30">UTC+05:30 Indian Standard Time</option>
-                      </select>
-                    </div>
+                    <CustomSelect 
+                      value={profileData.timezone}
+                      onChange={(val) => setProfileData({...profileData, timezone: val})}
+                      icon={<Globe size={14} />}
+                      options={[
+                        { value: 'UTC-05:00', label: 'UTC-05:00 Eastern Time' },
+                        { value: 'UTC+00:00', label: 'UTC+00:00 Greenwich Mean Time' },
+                        { value: 'UTC+01:00', label: 'UTC+01:00 Central European Time' },
+                        { value: 'UTC+05:30', label: 'UTC+05:30 Indian Standard Time' }
+                      ]}
+                    />
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">

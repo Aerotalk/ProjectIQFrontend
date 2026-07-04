@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import SuperAdminLayout from '../components/layout/SuperAdminLayout';
 import { Building2, Plus, Eye, EyeOff, Search, MoreHorizontal, CheckCircle2, ChevronDown, ArrowLeft } from 'lucide-react';
+import CustomSelect from '../components/ui/CustomSelect';
 
 interface Organization {
   id: string;
@@ -10,61 +11,9 @@ interface Organization {
   legal_name: string;
   organization_type: string;
   industry: string;
-  status: string;
+  status: 'Active' | 'Inactive' | 'Pending Approval';
   created_at: string;
 }
-
-// ----------------------------------------------------------------------
-// Custom Dropdown Component for a Modern Look
-// ----------------------------------------------------------------------
-const CustomSelect = ({ value, onChange, options }: { value: string, onChange: (val: string) => void, options: string[] }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all cursor-pointer flex items-center justify-between shadow-sm`}
-      >
-        <span className="truncate pr-4">{value || "Select..."}</span>
-        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </div>
-
-      {isOpen && (
-        <div className="absolute z-[200] w-full mt-1.5 bg-white dark:bg-[#1f2228] border border-gray-100 dark:border-white/10 rounded-md shadow-2xl max-h-60 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar">
-          {options.map((option) => (
-            <div 
-              key={option}
-              onClick={() => {
-                onChange(option);
-                setIsOpen(false);
-              }}
-              className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-2 ${
-                value === option 
-                  ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-medium' 
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-              }`}
-            >
-              {option}
-              {value === option && <CheckCircle2 size={14} className="ml-auto" />}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default function SuperAdminDashboard() {
   const [organizations, setOrganizations] = useState<Organization[]>([
