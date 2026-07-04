@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import SuperAdminLayout from '../components/layout/SuperAdminLayout';
-import { Building2, Plus, Eye, EyeOff, Search, MoreHorizontal, CheckCircle2, ChevronDown, ArrowLeft } from 'lucide-react';
+import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 
 interface Organization {
@@ -233,7 +233,7 @@ export default function SuperAdminDashboard() {
                       <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</label>
                       <CustomSelect 
                         value={formData.status}
-                        onChange={(val) => setFormData({...formData, status: val})}
+                        onChange={(val) => setFormData({...formData, status: val as 'Active' | 'Inactive' | 'Pending Approval'})}
                         options={['Active', 'Inactive', 'Pending Approval']}
                       />
                     </div>
@@ -449,7 +449,7 @@ export default function SuperAdminDashboard() {
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</label>
                     <CustomSelect 
                       value={editFormData.status}
-                      onChange={(val) => setEditFormData({...editFormData, status: val})}
+                      onChange={(val) => setEditFormData({...editFormData, status: val as 'Active' | 'Inactive' | 'Pending Approval'})}
                       options={['Active', 'Inactive', 'Pending Approval']}
                     />
                   </div>

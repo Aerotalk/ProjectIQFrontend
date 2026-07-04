@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   User,
-  Settings,
   LogOut,
   Sun,
   Moon,
-  LayoutDashboard,
   LineChart,
   PieChart,
   Ticket,
