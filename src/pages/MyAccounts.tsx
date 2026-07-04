@@ -42,44 +42,6 @@ interface AccountData {
   banks: BankData[];
 }
 
-const mockAccounts: AccountData[] = [
-  {
-    id: '1',
-    companyName: 'AeroTalk Solutions',
-    legalName: 'AeroTalk Solutions Pvt Ltd',
-    gstNumber: '29ABCDE1234F1Z5',
-    panNumber: 'ABCDE1234F',
-    tanNumber: 'BLRA12345B',
-    cinNumber: 'U72900KA2023PTC123456',
-    msmeNumber: 'UDYAM-KR-00-1234567',
-    iecCode: '0123456789',
-    email: 'contact@aerotalk.com',
-    phone: '+91 9876543210',
-    website: 'www.aerotalk.com',
-    primaryColor: '#792359',
-    secondaryColor: '#E6A8D0',
-    addressType: 'Registered',
-    addressLine1: '123 Tech Park',
-    addressLine2: 'Indiranagar',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    country: 'India',
-    postalCode: '560038',
-    banks: [
-      {
-        id: 'b1',
-        bankName: 'HDFC Bank',
-        accountHolderName: 'AeroTalk Solutions Pvt Ltd',
-        accountNumber: '50200012345678',
-        ifscCode: 'HDFC0001234',
-        swiftCode: 'HDFCINBBAXXX',
-        upiId: 'aerotalk@hdfc',
-        isPrimaryBank: true,
-      }
-    ]
-  }
-];
-
 const InputField = ({ 
   label, 
   type = "text", 
@@ -453,7 +415,6 @@ export default function MyAccounts() {
   const [viewState, setViewState] = useState<ViewState>('list');
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null);
-  const [loading, setLoading] = useState(true);
   
   const [showToast, setShowToast] = useState(false);
 
@@ -469,8 +430,6 @@ export default function MyAccounts() {
       setAccounts(data);
     } catch (error) {
       console.error('Failed to fetch companies', error);
-    } finally {
-      setLoading(false);
     }
   };
 
