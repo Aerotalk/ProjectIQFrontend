@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import SuperAdminLayout from '../components/layout/SuperAdminLayout';
-import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
+import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
 import { useEffect } from 'react';
@@ -20,21 +20,16 @@ interface Organization {
 
 export default function SuperAdminDashboard() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     fetchOrganizations();
   }, []);
 
   const fetchOrganizations = async () => {
     try {
-      setIsLoading(true);
       const res = await api.get('/admin/organizations');
       setOrganizations(res);
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsLoading(false);
     }
   };
 

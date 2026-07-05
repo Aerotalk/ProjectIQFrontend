@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import TicketDashboard from './tickets/TicketDashboard';
 import CreateTicket from './tickets/CreateTicket';

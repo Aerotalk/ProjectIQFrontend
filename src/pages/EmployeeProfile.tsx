@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Camera, Save, Key, User, Mail, Phone, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Camera, Save, Key, User, Mail, Phone, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
 import { useEffect } from 'react';
