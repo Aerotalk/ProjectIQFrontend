@@ -49,7 +49,7 @@ const mockCompanyData: AccountData = {
   cinNumber: 'U72900KA2023PTC123456',
   msmeNumber: 'UDYAM-KR-00-1234567',
   iecCode: '0123456789',
-  email: 'company@aerotalk.in',
+  email: localStorage.getItem('username') || '',
   phone: '+91 9876543210',
   website: 'www.clientcompany.in',
   primaryColor: '#792359',

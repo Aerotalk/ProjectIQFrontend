@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -78,18 +79,39 @@ export default function Login() {
 
           <form 
             className="space-y-6" 
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              if (email === 'admin@aerotalk.com' && password === 'password123') {
+              try {
+                const response = await api.post('/auth/login', { email, password });
+                localStorage.setItem('token', response.token);
+                if (response.refreshToken) {
+                  localStorage.setItem('refreshToken', response.refreshToken);
+                }
+                if (response.roles) {
+                  localStorage.setItem('roles', JSON.stringify(response.roles));
+                }
+                if (response.username) {
+                  localStorage.setItem('username', response.username);
+                }
+                if (response.organizationId) {
+                  localStorage.setItem('organizationId', response.organizationId);
+                }
+                if (response.organizationName) {
+                  localStorage.setItem('organizationName', response.organizationName);
+                }
+                
                 sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/orgdashboard', { replace: true });
-              } else if (email === 'superadmin@aerotalk.in' && password === 'password123') {
-                sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/superadmin/organizations', { replace: true });
-              } else if (email === 'company@aerotalk.in' && password === 'password123') {
-                sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/companydashboard', { replace: true });
-              } else {
+                if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
+                  navigate('/superadmin/organizations', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
+                  navigate('/companydashboard', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_EMPLOYEE')) {
+                  navigate('/employeedashboard', { replace: true });
+                } else {
+                  navigate('/orgdashboard', { replace: true });
+                }
+              } catch (err) {
+                console.error(err);
                 setError(true);
                 setTimeout(() => setError(false), 3000);
               }
