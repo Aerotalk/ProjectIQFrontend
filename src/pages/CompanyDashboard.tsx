@@ -8,9 +8,6 @@ import CreateTicket from './tickets/CreateTicket';
 import TicketDetails from './tickets/TicketDetails';
 import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
-import EmployeeDirectory from './EmployeeDirectory';
-import DepartmentDirectory from './DepartmentDirectory';
-import DesignationDirectory from './DesignationDirectory';
 
 function DefaultView() {
   return (

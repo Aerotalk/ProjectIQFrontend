@@ -1,4 +1,4 @@
-import { Download, PieChart, TrendingUp, IndianRupee, BarChart3 } from 'lucide-react';
+import { Download, PieChart, TrendingUp, BarChart3 } from 'lucide-react';
 
 const PROFIT_DATA = [
   { id: 'PRJ-1001', customer: 'TechNova Pvt Ltd', value: '₹50,00,000', expenses: '₹20,00,000', invoices: '₹30,00,000', received: '₹25,00,000', profit: '₹30,00,000', margin: '60%' },
