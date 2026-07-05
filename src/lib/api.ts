@@ -14,7 +14,7 @@ export const api = {
     };
 
     const token = localStorage.getItem('token');
-    if (token && !endpoint.startsWith('/auth/')) {
+    if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 

@@ -8,6 +8,9 @@ import CreateTicket from './tickets/CreateTicket';
 import TicketDetails from './tickets/TicketDetails';
 import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
+import EmployeeDirectory from './EmployeeDirectory';
+import DepartmentDirectory from './DepartmentDirectory';
+import DesignationDirectory from './DesignationDirectory';
 
 function DefaultView() {
   return (
@@ -40,6 +43,9 @@ export default function CompanyDashboard() {
         <Route path="/tickets/:id/report" element={<TicketReport />} />
         <Route path="/admin" element={<TicketAdmin />} />
         <Route path="/profile" element={<CompanyProfile />} />
+        <Route path="/employees" element={<EmployeeDirectory />} />
+        <Route path="/departments" element={<DepartmentDirectory />} />
+        <Route path="/designations" element={<DesignationDirectory />} />
         <Route path="*" element={<DefaultView />} />
       </Routes>
     </DashboardLayout>

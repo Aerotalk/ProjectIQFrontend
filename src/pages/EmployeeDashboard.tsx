@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import TicketDashboard from './tickets/TicketDashboard';
 import CreateTicket from './tickets/CreateTicket';
-import EmployeeProfile from './EmployeeProfile';
 
 function DefaultView() {
   return (
@@ -21,7 +20,6 @@ export default function EmployeeDashboard() {
         <Route path="/" element={<TicketDashboard />} />
         <Route path="/tickets/*" element={<TicketDashboard />} />
         <Route path="/tickets/create" element={<CreateTicket />} />
-        <Route path="/profile" element={<EmployeeProfile />} />
         <Route path="*" element={<DefaultView />} />
       </Routes>
     </DashboardLayout>

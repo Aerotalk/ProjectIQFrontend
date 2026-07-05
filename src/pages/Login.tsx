@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -78,15 +79,9 @@ export default function Login() {
 
           <form 
             className="space-y-6" 
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-<<<<<<< Updated upstream
-              if (email === 'admin@aerotalk.com' && password === 'password123') {
-=======
               try {
-                // Clear any previous session before logging in as a new user
-                localStorage.clear();
-
                 const response = await api.post('/auth/login', { email, password });
                 localStorage.setItem('token', response.token);
                 if (response.refreshToken) {
@@ -105,16 +100,18 @@ export default function Login() {
                   localStorage.setItem('organizationName', response.organizationName);
                 }
                 
->>>>>>> Stashed changes
                 sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/orgdashboard', { replace: true });
-              } else if (email === 'superadmin@aerotalk.in' && password === 'password123') {
-                sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/superadmin/organizations', { replace: true });
-              } else if (email === 'company@aerotalk.in' && password === 'password123') {
-                sessionStorage.setItem('showWelcomeToast', 'true');
-                navigate('/companydashboard', { replace: true });
-              } else {
+                if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
+                  navigate('/superadmin/organizations', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
+                  navigate('/companydashboard', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_EMPLOYEE')) {
+                  navigate('/employeedashboard', { replace: true });
+                } else {
+                  navigate('/orgdashboard', { replace: true });
+                }
+              } catch (err) {
+                console.error(err);
                 setError(true);
                 setTimeout(() => setError(false), 3000);
               }
