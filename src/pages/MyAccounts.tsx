@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2 } from 'lucide-react';
+import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { api } from '../lib/api';
 
 type ViewState = 'list' | 'add' | 'edit';
@@ -30,6 +30,7 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+  adminPassword?: string;
   
   addressType: string;
   addressLine1: string;
@@ -93,6 +94,7 @@ const AccountForm = ({
     website: initialData?.website || '',
     primaryColor: initialData?.primaryColor || '#792359',
     secondaryColor: initialData?.secondaryColor || '#E6A8D0',
+    adminPassword: '',
     addressType: initialData?.addressType || 'Registered',
     addressLine1: initialData?.addressLine1 || '',
     addressLine2: initialData?.addressLine2 || '',
@@ -101,6 +103,8 @@ const AccountForm = ({
     country: initialData?.country || 'India',
     postalCode: initialData?.postalCode || '',
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [banks, setBanks] = useState<BankData[]>(
     initialData?.banks || [{
@@ -229,7 +233,36 @@ const AccountForm = ({
               
               <InputField label="Phone Number" type="tel" required value={formData.phone as string || ''} onChange={(val) => updateField('phone', val)} />
               <InputField label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
-              <div className="col-span-1 hidden lg:block"></div>
+
+              {/* Admin Login Password - only for new accounts */}
+              {!isEditMode && (
+                <div className="space-y-1.5 lg:col-span-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1">
+                    <Lock size={12} className="text-[#792359]" />
+                    Admin Login Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required={!isEditMode}
+                      value={formData.adminPassword as string || ''}
+                      onChange={(e) => updateField('adminPassword', e.target.value)}
+                      placeholder="Set password for company admin login"
+                      className="w-full px-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400">This will be the login password for the company admin account ({formData.email || 'company email'}).</p>
+                </div>
+              )}
+
+
               
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Logo</label>
@@ -447,13 +480,16 @@ export default function MyAccounts() {
         ...data,
         companyCode: data.companyName.substring(0, 3).toUpperCase(),
         organizationId: orgId,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        adminPassword: data.adminPassword || undefined
       };
 
       if (viewState === 'add') {
         await api.post(`/admin/companies`, payload);
       } else {
-        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, payload);
+        // Don't send adminPassword on edit
+        const { adminPassword: _, ...editPayload } = payload;
+        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, editPayload);
       }
       
       await fetchAccounts();

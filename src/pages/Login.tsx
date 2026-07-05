@@ -93,6 +93,12 @@ export default function Login() {
                 if (response.username) {
                   localStorage.setItem('username', response.username);
                 }
+                if (response.organizationId) {
+                  localStorage.setItem('organizationId', response.organizationId);
+                }
+                if (response.organizationName) {
+                  localStorage.setItem('organizationName', response.organizationName);
+                }
                 
                 sessionStorage.setItem('showWelcomeToast', 'true');
                 if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {

@@ -15,12 +15,25 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
+function getTokenPayload() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch { return null; }
+}
+
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Ticket System');
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
+
+  const tokenPayload = getTokenPayload();
+  const userEmail = tokenPayload?.sub || tokenPayload?.email || 'user';
+  const orgName = localStorage.getItem('organizationName') || tokenPayload?.organizationName || 'My Organization';
+  const userInitials = userEmail.substring(0, 2).toUpperCase();
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -110,7 +123,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         <CheckCircle2 size={20} />
         <div>
           <span className="block text-sm font-bold">Welcome back!</span>
-          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : 'AeroTalk Solutions'}.</span>
+          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}.</span>
         </div>
       </div>
 
@@ -182,11 +195,11 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs">
-              {role === 'company' ? 'CC' : 'AT'}
+              {role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? "Client Company" : role === 'employee' ? "Employee Portal" : "AeroTalk Solutions"}>
-                {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : 'AeroTalk Solutions'}
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : orgName}>
+                {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : orgName}
               </span>
               <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
             </div>
@@ -234,7 +247,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 p-1.5 rounded-sm transition-colors"
               >
                 <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm">
-                  AT
+                  {userInitials}
                 </div>
                 <ChevronDown size={14} className="text-gray-400" />
               </button>
@@ -242,10 +255,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? "Client Company" : role === 'employee' ? "Employee" : "AeroTalk Solutions"}>
-                      {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : 'AeroTalk Solutions'}
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}>
+                      {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{role === 'company' ? 'company@aerotalk.in' : role === 'employee' ? 'Employee Account' : 'admin@aerotalk.com'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{userEmail}</p>
                   </div>
                   <div className="py-1">
                     <Link to={`${basePath}/profile`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5" onClick={() => setIsProfileOpen(false)}>

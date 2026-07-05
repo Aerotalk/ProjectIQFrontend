@@ -1,18 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Camera, Save, Key, User, Mail, Phone, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
+import { api } from '../lib/api';
 
 export default function Profile() {
+  const orgName = localStorage.getItem('organizationName') || '';
+
   const [profileData, setProfileData] = useState({
-    name: 'AeroTalk Solutions',
-    email: 'admin@aerotalk.com',
-    phone: '+1 (555) 123-4567',
-    industry: 'Telecommunications',
-    website: 'https://aerotalk.com',
-    taxId: 'US-987654321',
-    timezone: 'UTC-05:00 Eastern Time',
-    bio: 'AeroTalk Solutions is a leading provider of innovative communication platforms.'
+    name: orgName,
+    email: '',
+    phone: '',
+    industry: '',
+    website: '',
+    taxId: '',
+    legalName: '',
+    orgType: '',
+    timezone: 'UTC+05:30 Indian Standard Time',
+    bio: ''
   });
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -39,20 +44,51 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  // Fetch real org data on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await api.get('/org/profile');
+        setProfileData({
+          name: data.organizationName || '',
+          email: data.organizationEmail || '',
+          phone: '',
+          industry: data.industry || '',
+          website: '',
+          taxId: '',
+          legalName: data.legalName || '',
+          orgType: data.organizationType || '',
+          timezone: 'UTC+05:30 Indian Standard Time',
+          bio: ''
+        });
+      } catch (err) {
+        console.error('Failed to fetch org profile', err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    
-    // Mock API call delay
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await api.put('/org/profile', {
+        organizationName: profileData.name,
+        organizationEmail: profileData.email,
+        legalName: profileData.legalName,
+        organizationType: profileData.orgType,
+        industry: profileData.industry,
+      });
+      // Update localStorage so the sidebar reflects new name immediately
+      localStorage.setItem('organizationName', profileData.name);
       setShowToast(true);
-      
-      // Hide toast after 3 seconds
-      setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
-    }, 1200);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (err) {
+      console.error('Failed to save profile', err);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -94,7 +130,7 @@ export default function Profile() {
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="Company Logo" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">AT</span>
+                        <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">{orgName ? orgName.substring(0,2).toUpperCase() : 'ORG'}</span>
                       )}
                     </div>
                     <button 
@@ -139,13 +175,21 @@ export default function Profile() {
                 {/* Form Fields */}
                 <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5" onSubmit={handleSave}>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Name</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Name</label>
                     <div className="relative">
                       <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input type="text" value={profileData.name} onChange={(e) => setProfileData({...profileData, name: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
                     </div>
                   </div>
-                  
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Legal Name</label>
+                    <div className="relative">
+                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="text" value={profileData.legalName} onChange={(e) => setProfileData({...profileData, legalName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contact Email</label>
                     <div className="relative">
@@ -155,31 +199,15 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Phone Number</label>
-                    <div className="relative">
-                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                    </div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Type</label>
+                    <input type="text" value={profileData.orgType} onChange={(e) => setProfileData({...profileData, orgType: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Website URL</label>
-                    <div className="relative">
-                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="url" value={profileData.website} onChange={(e) => setProfileData({...profileData, website: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Industry Type</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Industry</label>
                     <input type="text" value={profileData.industry} onChange={(e) => setProfileData({...profileData, industry: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Tax ID / VAT Number</label>
-                    <input type="text" value={profileData.taxId} onChange={(e) => setProfileData({...profileData, taxId: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  
                   <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Timezone</label>
                     <CustomSelect 
