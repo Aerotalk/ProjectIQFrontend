@@ -1,43 +1,52 @@
 import React, { useState } from 'react';
 import SuperAdminLayout from '../components/layout/SuperAdminLayout';
-import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
+import { api } from '../lib/api';
+import { useEffect } from 'react';
 
 interface Organization {
   id: string;
-  organization_name: string;
-  organization_email: string;
-  organization_password?: string;
-  legal_name: string;
-  organization_type: string;
+  organizationCode: string;
+  organizationName: string;
+  organizationEmail: string;
+  organizationPassword?: string;
+  legalName: string;
+  organizationType: string;
   industry: string;
-  status: 'Active' | 'Inactive' | 'Pending Approval';
-  created_at: string;
+  status: string;
+  createdAt?: string;
 }
 
 export default function SuperAdminDashboard() {
-  const [organizations, setOrganizations] = useState<Organization[]>([
-    {
-      id: 'ORG-001',
-      organization_name: 'AeroTalk Solutions',
-      organization_email: 'admin@aerotalk.com',
-      organization_password: 'password123',
-      legal_name: 'AeroTalk Communications Pvt Ltd',
-      organization_type: 'Pvt Ltd',
-      industry: 'Telecommunications',
-      status: 'Active',
-      created_at: '2026-06-15'
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, []);
+
+  const fetchOrganizations = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.get('/admin/organizations');
+      setOrganizations(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
 
   const [formData, setFormData] = useState({
-    organization_name: '',
-    organization_email: '',
-    organization_password: '',
-    legal_name: '',
-    organization_type: 'Pvt Ltd',
+    organizationCode: '',
+    organizationName: '',
+    organizationEmail: '',
+    organizationPassword: '',
+    legalName: '',
+    organizationType: 'Pvt Ltd',
     industry: 'Technology',
-    status: 'Active'
+    status: 'ACTIVE'
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -68,36 +77,29 @@ export default function SuperAdminDashboard() {
     setTimeout(() => setShowEditToast(false), 3000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const newOrg: Organization = {
-      id: `ORG-${Math.floor(Math.random() * 900 + 100)}`,
-      organization_name: formData.organization_name,
-      organization_email: formData.organization_email,
-      organization_password: formData.organization_password,
-      legal_name: formData.legal_name,
-      organization_type: formData.organization_type,
-      industry: formData.industry,
-      status: formData.status as 'Active' | 'Inactive' | 'Pending Approval',
-      created_at: new Date().toISOString().split('T')[0]
-    };
-
-    setOrganizations([newOrg, ...organizations]);
-    setShowToast(true);
-    setIsFormVisible(false); // Hide the form after successful submission
-    setTimeout(() => setShowToast(false), 3000);
-    
-    // Reset form
-    setFormData({
-      organization_name: '',
-      organization_email: '',
-      organization_password: '',
-      legal_name: '',
-      organization_type: 'Pvt Ltd',
-      industry: 'Technology',
-      status: 'Active'
-    });
+    try {
+      const newOrg = await api.post('/admin/organizations', formData);
+      setOrganizations([newOrg, ...organizations]);
+      setShowToast(true);
+      setIsFormVisible(false); // Hide the form after successful submission
+      setTimeout(() => setShowToast(false), 3000);
+      
+      // Reset form
+      setFormData({
+        organizationCode: '',
+        organizationName: '',
+        organizationEmail: '',
+        organizationPassword: '',
+        legalName: '',
+        organizationType: 'Pvt Ltd',
+        industry: 'Technology',
+        status: 'ACTIVE'
+      });
+    } catch (err) {
+      console.error('Failed to create organization', err);
+    }
   };
 
   return (
@@ -155,12 +157,24 @@ export default function SuperAdminDashboard() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Code <span className="text-red-500">*</span></label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.organizationCode}
+                        onChange={(e) => setFormData({...formData, organizationCode: e.target.value})}
+                        placeholder="e.g. ACME" 
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Name <span className="text-red-500">*</span></label>
                       <input 
                         type="text" 
                         required
-                        value={formData.organization_name}
-                        onChange={(e) => setFormData({...formData, organization_name: e.target.value})}
+                        value={formData.organizationName}
+                        onChange={(e) => setFormData({...formData, organizationName: e.target.value})}
                         placeholder="e.g. Acme Corp" 
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
                       />
@@ -171,8 +185,8 @@ export default function SuperAdminDashboard() {
                       <input 
                         type="text" 
                         required
-                        value={formData.legal_name}
-                        onChange={(e) => setFormData({...formData, legal_name: e.target.value})}
+                        value={formData.legalName}
+                        onChange={(e) => setFormData({...formData, legalName: e.target.value})}
                         placeholder="e.g. Acme Corporation Pvt Ltd" 
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
                       />
@@ -183,8 +197,8 @@ export default function SuperAdminDashboard() {
                       <input 
                         type="email" 
                         required
-                        value={formData.organization_email}
-                        onChange={(e) => setFormData({...formData, organization_email: e.target.value})}
+                        value={formData.organizationEmail}
+                        onChange={(e) => setFormData({...formData, organizationEmail: e.target.value})}
                         placeholder="admin@acme.com" 
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
                       />
@@ -196,8 +210,8 @@ export default function SuperAdminDashboard() {
                         <input 
                           type={showPassword ? "text" : "password"} 
                           required
-                          value={formData.organization_password}
-                          onChange={(e) => setFormData({...formData, organization_password: e.target.value})}
+                          value={formData.organizationPassword}
+                          onChange={(e) => setFormData({...formData, organizationPassword: e.target.value})}
                           placeholder="••••••••" 
                           className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
                         />
@@ -214,8 +228,8 @@ export default function SuperAdminDashboard() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Type</label>
                       <CustomSelect 
-                        value={formData.organization_type}
-                        onChange={(val) => setFormData({...formData, organization_type: val})}
+                        value={formData.organizationType}
+                        onChange={(val) => setFormData({...formData, organizationType: val})}
                         options={['Pvt Ltd', 'LLP', 'Government', 'Proprietorship', 'NGO / Non-Profit']}
                       />
                     </div>
@@ -233,8 +247,8 @@ export default function SuperAdminDashboard() {
                       <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</label>
                       <CustomSelect 
                         value={formData.status}
-                        onChange={(val) => setFormData({...formData, status: val as 'Active' | 'Inactive' | 'Pending Approval'})}
-                        options={['Active', 'Inactive', 'Pending Approval']}
+                        onChange={(val) => setFormData({...formData, status: val})}
+                        options={['ACTIVE', 'INACTIVE']}
                       />
                     </div>
                   </div>
@@ -287,39 +301,41 @@ export default function SuperAdminDashboard() {
                   <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                     {organizations.map((org) => (
                       <tr key={org.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-sm bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs uppercase border border-[#792359]/20">
-                              {org.organization_name.substring(0, 2)}
+                            <div className="w-8 h-8 rounded-full bg-[#792359]/10 dark:bg-[#792359]/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0] font-bold text-sm">
+                              {org.organizationName.charAt(0)}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white">{org.organization_name}</p>
-                              <p className="text-xs text-gray-500">{org.id}</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">{org.organizationName}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{org.legalName}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
-                          {org.legal_name}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-gray-900 dark:text-white">{org.organizationEmail}</p>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                          {org.organization_email}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2 py-1 rounded-sm text-[11px] font-medium bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/5">
-                            {org.organization_type}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10">
+                            {org.organizationType}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                          {org.industry || '-'}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {org.industry}
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-sm text-[11px] font-medium border ${
-                            org.status === 'Active' ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20' : 
-                            org.status === 'Inactive' ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20' :
-                            'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20'
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                            org.status === 'ACTIVE' 
+                              ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
+                              : org.status === 'INACTIVE'
+                              ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20'
+                              : 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20'
                           }`}>
                             {org.status}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(org.createdAt || Date.now()).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button 
@@ -362,7 +378,7 @@ export default function SuperAdminDashboard() {
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <Building2 size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-                  {selectedOrg.organization_name}
+                  {selectedOrg.organizationName}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">Edit organization profile details below.</p>
               </div>
@@ -378,45 +394,44 @@ export default function SuperAdminDashboard() {
                     <input 
                       type="text" 
                       required
-                      value={editFormData.organization_name}
-                      onChange={(e) => setEditFormData({...editFormData, organization_name: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      value={editFormData.organizationName}
+                      onChange={(e) => setEditFormData({...editFormData, organizationName: e.target.value})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Registered Legal Name</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Legal Name</label>
                     <input 
                       type="text" 
                       required
-                      value={editFormData.legal_name}
-                      onChange={(e) => setEditFormData({...editFormData, legal_name: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      value={editFormData.legalName}
+                      onChange={(e) => setEditFormData({...editFormData, legalName: e.target.value})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Email</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email</label>
                     <input 
                       type="email" 
                       required
-                      value={editFormData.organization_email}
-                      onChange={(e) => setEditFormData({...editFormData, organization_email: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      value={editFormData.organizationEmail}
+                      onChange={(e) => setEditFormData({...editFormData, organizationEmail: e.target.value})}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Password</label>
                     <div className="relative">
-                      <input 
-                        type={showEditPassword ? "text" : "password"} 
-                        required
-                        value={editFormData.organization_password || ''}
-                        onChange={(e) => setEditFormData({...editFormData, organization_password: e.target.value})}
-                        placeholder="••••••••" 
-                        className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
-                      />
+                        <input 
+                          type={showEditPassword ? "text" : "password"} 
+                          value={editFormData.organizationPassword || ''}
+                          onChange={(e) => setEditFormData({...editFormData, organizationPassword: e.target.value})}
+                          placeholder="Leave blank to keep current"
+                          className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
+                        />
                       <button 
                         type="button"
                         onClick={() => setShowEditPassword(!showEditPassword)}
@@ -428,10 +443,10 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Type</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Type</label>
                     <CustomSelect 
-                      value={editFormData.organization_type}
-                      onChange={(val) => setEditFormData({...editFormData, organization_type: val})}
+                      value={editFormData.organizationType}
+                      onChange={(val) => setEditFormData({...editFormData, organizationType: val})}
                       options={['Pvt Ltd', 'LLP', 'Government', 'Proprietorship', 'NGO / Non-Profit']}
                     />
                   </div>
@@ -449,8 +464,8 @@ export default function SuperAdminDashboard() {
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</label>
                     <CustomSelect 
                       value={editFormData.status}
-                      onChange={(val) => setEditFormData({...editFormData, status: val as 'Active' | 'Inactive' | 'Pending Approval'})}
-                      options={['Active', 'Inactive', 'Pending Approval']}
+                      onChange={(val) => setEditFormData({...editFormData, status: val})}
+                      options={['ACTIVE', 'INACTIVE']}
                     />
                   </div>
                 </div>
