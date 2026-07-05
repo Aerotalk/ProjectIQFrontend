@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Building2, MapPin, CreditCard, Save, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
+import { api } from '../lib/api';
 
 interface BankData {
   id: string;
@@ -103,11 +104,50 @@ const InputField = ({
 );
 
 export default function CompanyProfile() {
-  const [formData, setFormData] = useState<Partial<AccountData>>({ ...mockCompanyData });
-  const [banks, setBanks] = useState<BankData[]>([...mockCompanyData.banks]);
+  const [formData, setFormData] = useState<Partial<AccountData>>({});
+  const [banks, setBanks] = useState<BankData[]>([]);
   
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const data = await api.get('/admin/company/profile');
+      setFormData({
+        ...data,
+        addressType: data.addresses?.[0]?.addressType || 'Registered',
+        addressLine1: data.addresses?.[0]?.addressLine1 || '',
+        addressLine2: data.addresses?.[0]?.addressLine2 || '',
+        city: data.addresses?.[0]?.city || '',
+        state: data.addresses?.[0]?.state || '',
+        country: data.addresses?.[0]?.country || 'India',
+        postalCode: data.addresses?.[0]?.postalCode || ''
+      });
+      if (data.bankAccounts && data.bankAccounts.length > 0) {
+        setBanks(data.bankAccounts.map((b: any) => ({
+          ...b,
+          isPrimaryBank: b.isPrimary || false
+        })));
+      } else {
+        setBanks([{
+          id: Date.now().toString(),
+          bankName: '',
+          accountHolderName: '',
+          accountNumber: '',
+          ifscCode: '',
+          swiftCode: '',
+          upiId: '',
+          isPrimaryBank: true
+        }]);
+      }
+    } catch (err) {
+      console.error('Failed to load profile', err);
+    }
+  };
 
   const addBank = () => {
     setBanks([...banks, {
@@ -141,14 +181,41 @@ export default function CompanyProfile() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      const payload = {
+        ...formData,
+        addresses: [{
+          addressType: formData.addressType || 'Registered',
+          addressLine1: formData.addressLine1 || '',
+          addressLine2: formData.addressLine2 || '',
+          city: formData.city || '',
+          state: formData.state || '',
+          country: formData.country || 'India',
+          postalCode: formData.postalCode || ''
+        }],
+        bankAccounts: banks.map(b => ({
+          bankName: b.bankName,
+          accountHolderName: b.accountHolderName,
+          accountNumber: b.accountNumber,
+          ifscCode: b.ifscCode,
+          swiftCode: b.swiftCode || '',
+          upiId: b.upiId || '',
+          isPrimary: !!b.isPrimaryBank
+        }))
+      };
+      
+      await api.put('/admin/company/profile', payload);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-    }, 800);
+    } catch (err) {
+      console.error('Failed to update company profile', err);
+      alert('Failed to update company profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateField = (field: keyof AccountData, value: string) => {
