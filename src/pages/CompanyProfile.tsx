@@ -40,41 +40,7 @@ interface AccountData {
   banks: BankData[];
 }
 
-const mockCompanyData: AccountData = {
-  id: '1',
-  companyName: 'Client Company',
-  legalName: 'Client Company Pvt Ltd',
-  gstNumber: '29ABCDE1234F1Z5',
-  panNumber: 'ABCDE1234F',
-  tanNumber: 'BLRA12345B',
-  cinNumber: 'U72900KA2023PTC123456',
-  msmeNumber: 'UDYAM-KR-00-1234567',
-  iecCode: '0123456789',
-  email: localStorage.getItem('username') || '',
-  phone: '+91 9876543210',
-  website: 'www.clientcompany.in',
-  primaryColor: '#792359',
-  secondaryColor: '#E6A8D0',
-  addressType: 'Registered',
-  addressLine1: '456 Business Park',
-  addressLine2: 'Tech Hub',
-  city: 'Mumbai',
-  state: 'Maharashtra',
-  country: 'India',
-  postalCode: '400001',
-  banks: [
-    {
-      id: 'b1',
-      bankName: 'ICICI Bank',
-      accountHolderName: 'Client Company Pvt Ltd',
-      accountNumber: '123401567890',
-      ifscCode: 'ICIC0001234',
-      swiftCode: 'ICICINBBAXXX',
-      upiId: 'client@icici',
-      isPrimaryBank: true,
-    }
-  ]
-};
+
 
 const InputField = ({ 
   label, 
