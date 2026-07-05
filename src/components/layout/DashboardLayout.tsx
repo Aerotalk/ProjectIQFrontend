@@ -232,7 +232,14 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
                   </div>
                   <div className="border-t border-gray-100 dark:border-white/5 py-1">
-                    <Link to="/login" className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                    <Link 
+                      to="/login" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                      onClick={() => {
+                        localStorage.clear();
+                        setIsProfileOpen(false);
+                      }}
+                    >
                       <LogOut size={15} />
                       Log Out
                     </Link>

@@ -29,6 +29,11 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+<<<<<<< Updated upstream
+=======
+  adminPassword?: string;
+  companyCode?: string;
+>>>>>>> Stashed changes
   
   addressType: string;
   addressLine1: string;
@@ -39,6 +44,8 @@ interface AccountData {
   postalCode: string;
   
   banks: BankData[];
+  addresses?: any[];
+  bankAccounts?: any[];
 }
 
 const mockAccounts: AccountData[] = [
@@ -115,6 +122,27 @@ const AccountForm = ({
   onSave: (data: AccountData) => void; 
   onCancel: () => void;
 }) => {
+  const primaryAddress = initialData?.addresses?.[0];
+  const mappedBanks = initialData?.bankAccounts?.map((b: any) => ({
+    id: b.id || Date.now().toString() + Math.random().toString(),
+    bankName: b.bankName || '',
+    accountHolderName: b.accountHolderName || '',
+    accountNumber: b.accountNumber || '',
+    ifscCode: b.ifscCode || '',
+    swiftCode: b.swiftCode || '',
+    upiId: b.upiId || '',
+    isPrimaryBank: !!b.isPrimary
+  })) || [{
+    id: Date.now().toString(),
+    bankName: '',
+    accountHolderName: '',
+    accountNumber: '',
+    ifscCode: '',
+    swiftCode: '',
+    upiId: '',
+    isPrimaryBank: true
+  }];
+
   const [formData, setFormData] = useState<Partial<AccountData>>({
     id: initialData?.id || '',
     companyName: initialData?.companyName || '',
@@ -130,6 +158,7 @@ const AccountForm = ({
     website: initialData?.website || '',
     primaryColor: initialData?.primaryColor || '#792359',
     secondaryColor: initialData?.secondaryColor || '#E6A8D0',
+<<<<<<< Updated upstream
     addressType: initialData?.addressType || 'Registered',
     addressLine1: initialData?.addressLine1 || '',
     addressLine2: initialData?.addressLine2 || '',
@@ -151,6 +180,21 @@ const AccountForm = ({
       isPrimaryBank: true
     }]
   );
+=======
+    adminPassword: '',
+    addressType: primaryAddress?.addressType || 'Registered',
+    addressLine1: primaryAddress?.addressLine1 || '',
+    addressLine2: primaryAddress?.addressLine2 || '',
+    city: primaryAddress?.city || '',
+    state: primaryAddress?.state || '',
+    country: primaryAddress?.country || 'India',
+    postalCode: primaryAddress?.postalCode || '',
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [banks, setBanks] = useState<BankData[]>(mappedBanks);
+>>>>>>> Stashed changes
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -460,12 +504,83 @@ export default function MyAccounts() {
     setViewState('edit');
   };
 
+<<<<<<< Updated upstream
   const handleSaveAccount = (data: AccountData) => {
     if (viewState === 'add') {
       const newAccount = { ...data, id: Date.now().toString() };
       setAccounts([...accounts, newAccount]);
     } else {
       setAccounts(accounts.map(acc => acc.id === data.id ? data : acc));
+=======
+  const handleSaveAccount = async (data: AccountData) => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return;
+      
+      const addresses = [
+        {
+          addressType: data.addressType || 'Registered',
+          addressLine1: data.addressLine1 || '',
+          addressLine2: data.addressLine2 || '',
+          city: data.city || '',
+          state: data.state || '',
+          country: data.country || 'India',
+          postalCode: data.postalCode || ''
+        }
+      ];
+
+      const bankAccounts = (data.banks || []).map(b => ({
+        bankName: b.bankName,
+        accountHolderName: b.accountHolderName,
+        accountNumber: b.accountNumber,
+        ifscCode: b.ifscCode,
+        swiftCode: b.swiftCode || '',
+        upiId: b.upiId || '',
+        isPrimary: !!b.isPrimaryBank
+      }));
+
+      const payload = {
+        companyName: data.companyName,
+        legalName: data.legalName,
+        gstNumber: data.gstNumber,
+        panNumber: data.panNumber,
+        tanNumber: data.tanNumber,
+        cinNumber: data.cinNumber,
+        msmeNumber: data.msmeNumber,
+        iecCode: data.iecCode,
+        email: data.email,
+        phone: data.phone,
+        website: data.website,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        status: 'ACTIVE',
+        organizationId: orgId,
+        companyCode: viewState === 'add'
+          ? `${data.companyName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+          : data.companyCode,
+        adminPassword: data.adminPassword || undefined,
+        addresses,
+        bankAccounts
+      };
+
+      if (viewState === 'add') {
+        await api.post(`/admin/companies`, payload);
+      } else {
+        // Don't send adminPassword on edit
+        const { adminPassword: _, ...editPayload } = payload;
+        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, editPayload);
+      }
+      
+      await fetchAccounts();
+      setViewState('list');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to save company', error);
+      alert('Failed to save company');
+>>>>>>> Stashed changes
     }
     setViewState('list');
     setShowToast(true);

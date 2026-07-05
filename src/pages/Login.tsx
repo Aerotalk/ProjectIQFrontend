@@ -80,7 +80,32 @@ export default function Login() {
             className="space-y-6" 
             onSubmit={(e) => {
               e.preventDefault();
+<<<<<<< Updated upstream
               if (email === 'admin@aerotalk.com' && password === 'password123') {
+=======
+              try {
+                // Clear any previous session before logging in as a new user
+                localStorage.clear();
+
+                const response = await api.post('/auth/login', { email, password });
+                localStorage.setItem('token', response.token);
+                if (response.refreshToken) {
+                  localStorage.setItem('refreshToken', response.refreshToken);
+                }
+                if (response.roles) {
+                  localStorage.setItem('roles', JSON.stringify(response.roles));
+                }
+                if (response.username) {
+                  localStorage.setItem('username', response.username);
+                }
+                if (response.organizationId) {
+                  localStorage.setItem('organizationId', response.organizationId);
+                }
+                if (response.organizationName) {
+                  localStorage.setItem('organizationName', response.organizationName);
+                }
+                
+>>>>>>> Stashed changes
                 sessionStorage.setItem('showWelcomeToast', 'true');
                 navigate('/orgdashboard', { replace: true });
               } else if (email === 'superadmin@aerotalk.in' && password === 'password123') {
