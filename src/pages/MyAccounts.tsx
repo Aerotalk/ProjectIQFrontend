@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
+import { api } from '../lib/api';
 
 type ViewState = 'list' | 'add' | 'edit';
 
@@ -29,6 +30,8 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+  adminPassword?: string;
+  companyCode?: string;
   
   addressType: string;
   addressLine1: string;
@@ -39,45 +42,9 @@ interface AccountData {
   postalCode: string;
   
   banks: BankData[];
+  addresses?: any[];
+  bankAccounts?: any[];
 }
-
-const mockAccounts: AccountData[] = [
-  {
-    id: '1',
-    companyName: 'AeroTalk Solutions',
-    legalName: 'AeroTalk Solutions Pvt Ltd',
-    gstNumber: '29ABCDE1234F1Z5',
-    panNumber: 'ABCDE1234F',
-    tanNumber: 'BLRA12345B',
-    cinNumber: 'U72900KA2023PTC123456',
-    msmeNumber: 'UDYAM-KR-00-1234567',
-    iecCode: '0123456789',
-    email: 'contact@aerotalk.com',
-    phone: '+91 9876543210',
-    website: 'www.aerotalk.com',
-    primaryColor: '#792359',
-    secondaryColor: '#E6A8D0',
-    addressType: 'Registered',
-    addressLine1: '123 Tech Park',
-    addressLine2: 'Indiranagar',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    country: 'India',
-    postalCode: '560038',
-    banks: [
-      {
-        id: 'b1',
-        bankName: 'HDFC Bank',
-        accountHolderName: 'AeroTalk Solutions Pvt Ltd',
-        accountNumber: '50200012345678',
-        ifscCode: 'HDFC0001234',
-        swiftCode: 'HDFCINBBAXXX',
-        upiId: 'aerotalk@hdfc',
-        isPrimaryBank: true,
-      }
-    ]
-  }
-];
 
 const InputField = ({ 
   label, 
@@ -115,6 +82,27 @@ const AccountForm = ({
   onSave: (data: AccountData) => void; 
   onCancel: () => void;
 }) => {
+  const primaryAddress = initialData?.addresses?.[0];
+  const mappedBanks = initialData?.bankAccounts?.map((b: any) => ({
+    id: b.id || Date.now().toString() + Math.random().toString(),
+    bankName: b.bankName || '',
+    accountHolderName: b.accountHolderName || '',
+    accountNumber: b.accountNumber || '',
+    ifscCode: b.ifscCode || '',
+    swiftCode: b.swiftCode || '',
+    upiId: b.upiId || '',
+    isPrimaryBank: !!b.isPrimary
+  })) || [{
+    id: Date.now().toString(),
+    bankName: '',
+    accountHolderName: '',
+    accountNumber: '',
+    ifscCode: '',
+    swiftCode: '',
+    upiId: '',
+    isPrimaryBank: true
+  }];
+
   const [formData, setFormData] = useState<Partial<AccountData>>({
     id: initialData?.id || '',
     companyName: initialData?.companyName || '',
@@ -130,27 +118,19 @@ const AccountForm = ({
     website: initialData?.website || '',
     primaryColor: initialData?.primaryColor || '#792359',
     secondaryColor: initialData?.secondaryColor || '#E6A8D0',
-    addressType: initialData?.addressType || 'Registered',
-    addressLine1: initialData?.addressLine1 || '',
-    addressLine2: initialData?.addressLine2 || '',
-    city: initialData?.city || '',
-    state: initialData?.state || '',
-    country: initialData?.country || 'India',
-    postalCode: initialData?.postalCode || '',
+    adminPassword: '',
+    addressType: primaryAddress?.addressType || 'Registered',
+    addressLine1: primaryAddress?.addressLine1 || '',
+    addressLine2: primaryAddress?.addressLine2 || '',
+    city: primaryAddress?.city || '',
+    state: primaryAddress?.state || '',
+    country: primaryAddress?.country || 'India',
+    postalCode: primaryAddress?.postalCode || '',
   });
 
-  const [banks, setBanks] = useState<BankData[]>(
-    initialData?.banks || [{
-      id: Date.now().toString(),
-      bankName: '',
-      accountHolderName: '',
-      accountNumber: '',
-      ifscCode: '',
-      swiftCode: '',
-      upiId: '',
-      isPrimaryBank: true
-    }]
-  );
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [banks, setBanks] = useState<BankData[]>(mappedBanks);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -266,7 +246,36 @@ const AccountForm = ({
               
               <InputField label="Phone Number" type="tel" required value={formData.phone as string || ''} onChange={(val) => updateField('phone', val)} />
               <InputField label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
-              <div className="col-span-1 hidden lg:block"></div>
+
+              {/* Admin Login Password - only for new accounts */}
+              {!isEditMode && (
+                <div className="space-y-1.5 lg:col-span-1">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1">
+                    <Lock size={12} className="text-[#792359]" />
+                    Admin Login Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required={!isEditMode}
+                      value={formData.adminPassword as string || ''}
+                      onChange={(e) => updateField('adminPassword', e.target.value)}
+                      placeholder="Set password for company admin login"
+                      className="w-full px-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400">This will be the login password for the company admin account ({formData.email || 'company email'}).</p>
+                </div>
+              )}
+
+
               
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Logo</label>
@@ -450,28 +459,100 @@ const AccountForm = ({
 
 export default function MyAccounts() {
   const [viewState, setViewState] = useState<ViewState>('list');
-  const [accounts, setAccounts] = useState<AccountData[]>(mockAccounts);
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null);
   
   const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return;
+      const data = await api.get(`/admin/companies?organizationId=${orgId}`);
+      setAccounts(data);
+    } catch (error) {
+      console.error('Failed to fetch companies', error);
+    }
+  };
 
   const handleEditAccount = (account: AccountData) => {
     setSelectedAccount(account);
     setViewState('edit');
   };
 
-  const handleSaveAccount = (data: AccountData) => {
-    if (viewState === 'add') {
-      const newAccount = { ...data, id: Date.now().toString() };
-      setAccounts([...accounts, newAccount]);
-    } else {
-      setAccounts(accounts.map(acc => acc.id === data.id ? data : acc));
+  const handleSaveAccount = async (data: AccountData) => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return;
+      
+      const addresses = [
+        {
+          addressType: data.addressType || 'Registered',
+          addressLine1: data.addressLine1 || '',
+          addressLine2: data.addressLine2 || '',
+          city: data.city || '',
+          state: data.state || '',
+          country: data.country || 'India',
+          postalCode: data.postalCode || ''
+        }
+      ];
+
+      const bankAccounts = (data.banks || []).map(b => ({
+        bankName: b.bankName,
+        accountHolderName: b.accountHolderName,
+        accountNumber: b.accountNumber,
+        ifscCode: b.ifscCode,
+        swiftCode: b.swiftCode || '',
+        upiId: b.upiId || '',
+        isPrimary: !!b.isPrimaryBank
+      }));
+
+      const payload = {
+        companyName: data.companyName,
+        legalName: data.legalName,
+        gstNumber: data.gstNumber,
+        panNumber: data.panNumber,
+        tanNumber: data.tanNumber,
+        cinNumber: data.cinNumber,
+        msmeNumber: data.msmeNumber,
+        iecCode: data.iecCode,
+        email: data.email,
+        phone: data.phone,
+        website: data.website,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        status: 'ACTIVE',
+        organizationId: orgId,
+        companyCode: viewState === 'add'
+          ? `${data.companyName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+          : data.companyCode,
+        adminPassword: data.adminPassword || undefined,
+        addresses,
+        bankAccounts
+      };
+
+      if (viewState === 'add') {
+        await api.post(`/admin/companies`, payload);
+      } else {
+        // Don't send adminPassword on edit
+        const { adminPassword: _, ...editPayload } = payload;
+        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, editPayload);
+      }
+      
+      await fetchAccounts();
+      setViewState('list');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to save company', error);
+      alert('Failed to save company');
     }
-    setViewState('list');
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
   };
 
   const renderList = () => (

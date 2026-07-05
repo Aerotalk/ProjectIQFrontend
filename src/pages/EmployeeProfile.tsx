@@ -1,27 +1,53 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Camera, Save, Key, User, Mail, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Camera, Save, Key, User, Mail, Phone, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
+import { useEffect } from 'react';
 
-export default function Profile() {
-  const orgName = localStorage.getItem('organizationName') || '';
-
+export default function EmployeeProfile() {
   const [profileData, setProfileData] = useState({
-    name: orgName,
-    email: '',
-    phone: '',
-    industry: '',
-    website: '',
-    taxId: '',
-    legalName: '',
-    orgType: '',
-    timezone: 'UTC+05:30 Indian Standard Time',
-    bio: ''
+    firstName: 'Test',
+    lastName: 'User',
+    email: 'test9999@example.com',
+    phone: '+1 (555) 000-0000',
+    employeeCode: 'EMP-9999',
+    designation: 'QA Engineer',
+    department: 'Quality Assurance',
+    gender: 'Male',
+    bio: 'Software QA Engineer focused on automated testing.'
   });
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/admin/employees/me');
+        setProfileData({
+          firstName: response.firstName || '',
+          lastName: response.lastName || '',
+          email: response.user?.email || '',
+          phone: response.user?.mobile || '',
+          employeeCode: response.employeeCode || '',
+          designation: response.designation?.designationName || '',
+          department: response.department?.departmentName || '',
+          gender: response.gender || 'Male',
+          bio: response.bio || ''
+        });
+        if (response.profilePicture) {
+          setAvatarUrl(response.profilePicture);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const [notifications, setNotifications] = useState({
     email: true,
@@ -44,55 +70,34 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  // Fetch real org data on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await api.get('/org/profile');
-        setProfileData({
-          name: data.organizationName || '',
-          email: data.organizationEmail || '',
-          phone: '',
-          industry: data.industry || '',
-          website: '',
-          taxId: '',
-          legalName: data.legalName || '',
-          orgType: data.organizationType || '',
-          timezone: 'UTC+05:30 Indian Standard Time',
-          bio: ''
-        });
-      } catch (err) {
-        console.error('Failed to fetch org profile', err);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    try {
-      await api.put('/org/profile', {
-        organizationName: profileData.name,
-        organizationEmail: profileData.email,
-        legalName: profileData.legalName,
-        organizationType: profileData.orgType,
-        industry: profileData.industry,
-      });
-      // Update localStorage so the sidebar reflects new name immediately
-      localStorage.setItem('organizationName', profileData.name);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    } catch (err) {
-      console.error('Failed to save profile', err);
-      alert('Failed to save profile. Please try again.');
-    } finally {
+    
+    // Mock API call delay
+    setTimeout(() => {
       setIsSaving(false);
-    }
+      setShowToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    }, 1200);
   };
 
+  if (isLoading) {
+    return (
+      <DashboardLayout role="employee">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout>
+    <DashboardLayout role="employee">
       <div className="max-w-6xl mx-auto space-y-6 relative">
         
         {/* Toast Notification */}
@@ -117,7 +122,7 @@ export default function Profile() {
               <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <User size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-                  Company Information
+                  Employee Information
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Update your basic profile details and public avatar.</p>
               </div>
@@ -130,7 +135,7 @@ export default function Profile() {
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="Company Logo" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">{orgName ? orgName.substring(0,2).toUpperCase() : 'ORG'}</span>
+                        <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">AT</span>
                       )}
                     </div>
                     <button 
@@ -141,7 +146,7 @@ export default function Profile() {
                     </button>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Company Logo</h3>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Profile Picture</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Recommended size is 256x256px. Max file size 2MB.</p>
                     <div className="flex gap-2">
                       <input 
@@ -175,56 +180,67 @@ export default function Profile() {
                 {/* Form Fields */}
                 <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5" onSubmit={handleSave}>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Name</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">First Name</label>
                     <div className="relative">
                       <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.name} onChange={(e) => setProfileData({...profileData, name: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                      <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({...profileData, firstName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Last Name</label>
+                    <div className="relative">
+                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({...profileData, lastName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Legal Name</label>
-                    <div className="relative">
-                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.legalName} onChange={(e) => setProfileData({...profileData, legalName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contact Email</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email Address</label>
                     <div className="relative">
                       <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="email" value={profileData.email} onChange={(e) => setProfileData({...profileData, email: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                      <input type="email" disabled value={profileData.email} className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Type</label>
-                    <input type="text" value={profileData.orgType} onChange={(e) => setProfileData({...profileData, orgType: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Phone Number</label>
+                    <div className="relative">
+                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="tel" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Industry</label>
-                    <input type="text" value={profileData.industry} onChange={(e) => setProfileData({...profileData, industry: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Employee Code</label>
+                    <input type="text" disabled value={profileData.employeeCode} className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed" />
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Timezone</label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Department</label>
+                    <input type="text" disabled value={profileData.department} className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Designation</label>
+                    <input type="text" disabled value={profileData.designation} className="w-full px-3 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Gender</label>
                     <CustomSelect 
-                      value={profileData.timezone}
-                      onChange={(val) => setProfileData({...profileData, timezone: val})}
-                      icon={<Globe size={14} />}
                       options={[
-                        { value: 'UTC-05:00', label: 'UTC-05:00 Eastern Time' },
-                        { value: 'UTC+00:00', label: 'UTC+00:00 Greenwich Mean Time' },
-                        { value: 'UTC+01:00', label: 'UTC+01:00 Central European Time' },
-                        { value: 'UTC+05:30', label: 'UTC+05:30 Indian Standard Time' }
+                        { value: 'Male', label: 'Male' },
+                        { value: 'Female', label: 'Female' },
+                        { value: 'Other', label: 'Other' }
                       ]}
+                      value={profileData.gender}
+                      onChange={(val) => setProfileData({...profileData, gender: val})}
                     />
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Description</label>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Employee Bio</label>
                     <textarea 
                       rows={3} 
                       value={profileData.bio} 
