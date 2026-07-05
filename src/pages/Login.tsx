@@ -99,6 +99,8 @@ export default function Login() {
                   navigate('/superadmin/organizations', { replace: true });
                 } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
                   navigate('/companydashboard', { replace: true });
+                } else if (response.roles && response.roles.includes('ROLE_EMPLOYEE')) {
+                  navigate('/employeedashboard', { replace: true });
                 } else {
                   navigate('/orgdashboard', { replace: true });
                 }

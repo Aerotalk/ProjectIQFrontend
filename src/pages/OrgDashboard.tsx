@@ -2,6 +2,9 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { LayoutGrid } from 'lucide-react';
 import { Routes, Route } from 'react-router-dom';
 import MyAccounts from './MyAccounts';
+import EmployeeDirectory from './EmployeeDirectory';
+import DepartmentDirectory from './DepartmentDirectory';
+import DesignationDirectory from './DesignationDirectory';
 
 function DefaultView() {
   return (
@@ -29,6 +32,9 @@ export default function OrgDashboard() {
       <Routes>
         <Route path="/" element={<DefaultView />} />
         <Route path="/my-accounts" element={<MyAccounts />} />
+        <Route path="/employees" element={<EmployeeDirectory />} />
+        <Route path="/departments" element={<DepartmentDirectory />} />
+        <Route path="/designations" element={<DesignationDirectory />} />
         <Route path="*" element={<DefaultView />} />
       </Routes>
     </DashboardLayout>

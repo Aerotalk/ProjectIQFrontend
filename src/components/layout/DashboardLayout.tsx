@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' }) {
+export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Ticket System');
@@ -39,9 +39,23 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     document.documentElement.classList.toggle('dark');
   };
 
-  const basePath = role === 'company' ? '/companydashboard' : '/orgdashboard';
+  const basePath = role === 'company' ? '/companydashboard' : role === 'employee' ? '/employeedashboard' : '/orgdashboard';
 
-  const navItems = [
+  const navItems = role === 'employee' ? [
+    {
+      name: 'My Profile',
+      icon: User,
+      subItems: [{ name: 'Profile Details', path: `${basePath}/profile` }]
+    },
+    {
+      name: 'Ticket System',
+      icon: Ticket,
+      subItems: [
+        { name: 'My Tickets', path: `${basePath}` },
+        { name: 'Create Ticket', path: `${basePath}/tickets/create` }
+      ]
+    }
+  ] : [
     {
       name: 'Account',
       icon: User,
@@ -59,6 +73,15 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       name: 'Finance',
       icon: PieChart,
       subItems: [{ name: 'Finance Dashboard', path: `${basePath}/finance` }]
+    },
+    {
+      name: 'HR / Employees',
+      icon: User,
+      subItems: [
+        { name: 'Employee Directory', path: `${basePath}/employees` },
+        { name: 'Departments', path: `${basePath}/departments` },
+        { name: 'Designations', path: `${basePath}/designations` }
+      ]
     },
     {
       name: 'Ticket System',
@@ -87,7 +110,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         <CheckCircle2 size={20} />
         <div>
           <span className="block text-sm font-bold">Welcome back!</span>
-          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}.</span>
+          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : 'AeroTalk Solutions'}.</span>
         </div>
       </div>
 
@@ -162,10 +185,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {role === 'company' ? 'CC' : 'AT'}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? "Client Company" : "AeroTalk Solutions"}>
-                {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? "Client Company" : role === 'employee' ? "Employee Portal" : "AeroTalk Solutions"}>
+                {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : 'AeroTalk Solutions'}
               </span>
-              <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : 'Admin'}</span>
+              <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
             </div>
           </div>
         </div>
@@ -219,10 +242,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? "Client Company" : "AeroTalk Solutions"}>
-                      {role === 'company' ? 'Client Company' : 'AeroTalk Solutions'}
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? "Client Company" : role === 'employee' ? "Employee" : "AeroTalk Solutions"}>
+                      {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : 'AeroTalk Solutions'}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{role === 'company' ? 'company@aerotalk.in' : 'admin@aerotalk.com'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{role === 'company' ? 'company@aerotalk.in' : role === 'employee' ? 'Employee Account' : 'admin@aerotalk.com'}</p>
                   </div>
                   <div className="py-1">
                     <Link to={`${basePath}/profile`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5" onClick={() => setIsProfileOpen(false)}>

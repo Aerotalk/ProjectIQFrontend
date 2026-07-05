@@ -39,7 +39,7 @@ export const api = {
     if (!response.ok) {
       throw {
         status: response.status,
-        message: data.message || data || 'An error occurred',
+        message: typeof data === 'string' ? data : (data?.message || data?.error || 'An error occurred'),
       };
     }
 

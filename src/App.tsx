@@ -5,6 +5,8 @@ import Profile from './pages/Profile';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import CompanyDashboard from './pages/CompanyDashboard';
+import EmployeeDashboard from './pages/EmployeeDashboard';
+import EmployeeProfile from './pages/EmployeeProfile';
 
 function App() {
   return (
@@ -19,6 +21,16 @@ function App() {
         <Route path="/companydashboard/*" element={
           <ProtectedRoute>
             <CompanyDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/employeedashboard/*" element={
+          <ProtectedRoute>
+            <EmployeeDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/employeedashboard/profile" element={
+          <ProtectedRoute>
+            <EmployeeProfile />
           </ProtectedRoute>
         } />
         <Route path="/orgdashboard/profile" element={
