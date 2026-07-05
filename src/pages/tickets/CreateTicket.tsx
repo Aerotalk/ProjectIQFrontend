@@ -1,238 +1,248 @@
+import { Search, Info, Paperclip, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
-import { ArrowLeft, CheckCircle2, ChevronRight } from 'lucide-react';
 
-const steps = [
-  'Select Project',
-  'Client Details',
-  'Ticket Details',
-  'Assignment',
-  'Review & Submit'
-];
+interface CreateTicketProps {
+  onCancel?: () => void;
+  onSubmit?: (ticket: any) => void;
+}
 
-export default function CreateTicket() {
-  const [currentStep, setCurrentStep] = useState(0);
+export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) {
+  const [caller, setCaller] = useState('');
+  const [shortDesc, setShortDesc] = useState('');
+  const [priority, setPriority] = useState('3 - Low');
+  const [state, setState] = useState('New');
+  const [assignedTo, setAssignedTo] = useState('');
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+  const randomId = `INC${Math.floor(Math.random() * 90000) + 10000}`;
+
+  const handleSubmit = () => {
+    if (onSubmit) {
+      onSubmit({
+        id: randomId,
+        subject: shortDesc || 'New Incident without description',
+        client: caller || 'Unknown Client',
+        priority: priority.includes('1') ? 'High' : priority.includes('2') ? 'Medium' : 'Low',
+        status: state,
+        assigned: assignedTo || 'Unassigned',
+        updated: 'Just now'
+      });
+    }
+  };
 
   return (
-    <div className="max-w-[1200px] mx-auto space-y-8 pb-12">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Create Ticket</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Log a new support ticket and assign it to a team.</p>
+    <div className="max-w-[1400px] mx-auto space-y-4 pb-12 text-sm">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
+        <div className="flex items-center gap-4">
+          {onCancel && (
+            <button onClick={onCancel} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm text-gray-500 transition-colors">
+              <ArrowLeft size={18} />
+            </button>
+          )}
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <span className="text-gray-500 font-normal">Incident</span>
+            <span>New record [Default view]</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm text-gray-600 dark:text-gray-300 transition-colors">
+            <Paperclip size={18} />
+          </button>
+          <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm text-gray-600 dark:text-gray-300 transition-colors">
+            <MoreHorizontal size={18} />
+          </button>
+          <button onClick={handleSubmit} className="px-4 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-800 dark:text-gray-200 rounded-sm font-medium transition-colors border border-gray-200 dark:border-white/10 text-xs">
+            Submit
+          </button>
+          <button onClick={onCancel} className="px-4 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-800 dark:text-gray-200 rounded-sm font-medium transition-colors border border-gray-200 dark:border-white/10 text-xs">
+            Resolve Incident
+          </button>
+        </div>
       </div>
 
-      {/* Stepper */}
-      <div className="flex items-center justify-between relative max-w-3xl mx-auto">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-gray-200 dark:bg-gray-800 -z-10"></div>
-        {steps.map((step, index) => {
-          const isActive = index === currentStep;
-          const isPast = index < currentStep;
-          
-          return (
-            <div key={index} className="flex flex-col items-center gap-2 bg-[#f8f9fc] dark:bg-[#0f1115] px-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-                isActive ? 'bg-[#792359] text-white ring-4 ring-[#792359]/20' :
-                isPast ? 'bg-[#792359] text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-500'
-              }`}>
-                {isPast ? <CheckCircle2 size={16} /> : index + 1}
-              </div>
-              <span className={`text-xs font-medium ${isActive || isPast ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>
-                {step}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Form Card */}
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+      {/* Form Container */}
+      <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm shadow-sm border border-gray-200 dark:border-white/10">
         
-        {/* Left Form Area */}
-        <div className="flex-1 p-8">
+        {/* Top 2 Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
           
-          {currentStep === 0 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Project Information</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Select Project <span className="text-red-500">*</span></label>
-                  <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                    <option value="">Choose a project...</option>
-                    <option value="analytics">Analytics Platform</option>
-                    <option value="portal">Customer Portal</option>
-                    <option value="mobile">Mobile App</option>
-                  </select>
-                </div>
+          {/* Left Column */}
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Number</label>
+              <div className="flex-1 flex">
+                <input type="text" readOnly value={randomId} className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none rounded-sm text-gray-800 dark:text-gray-300" />
               </div>
             </div>
-          )}
-
-          {currentStep === 1 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Client Details</h2>
-               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Select Client <span className="text-red-500">*</span></label>
-                  <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                    <option value="">TechNova Pvt Ltd</option>
-                  </select>
-                </div>
+            
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Caller</label>
+              <div className="flex-1 relative flex">
+                <input type="text" value={caller} onChange={(e) => setCaller(e.target.value)} className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
               </div>
             </div>
-          )}
 
-          {currentStep === 2 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ticket Information</h2>
-               <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Ticket Title <span className="text-red-500">*</span></label>
-                  <input type="text" placeholder="e.g., Unable to access analytics dashboard" className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Category <span className="text-red-500">*</span></label>
-                    <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                      <option>Technical Issue</option>
-                      <option>Billing</option>
-                      <option>Feature Request</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Sub Category <span className="text-red-500">*</span></label>
-                    <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                      <option>Dashboard / Reporting</option>
-                      <option>API Gateway</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Priority <span className="text-red-500">*</span></label>
-                    <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white text-red-700 font-medium">
-                      <option>High</option>
-                      <option>Medium</option>
-                      <option>Low</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Impact <span className="text-red-500">*</span></label>
-                    <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                      <option>Medium</option>
-                      <option>High</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Urgency <span className="text-red-500">*</span></label>
-                    <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white text-red-700 font-medium">
-                      <option>High</option>
-                      <option>Medium</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Description <span className="text-red-500">*</span></label>
-                  <textarea rows={5} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" defaultValue="We are unable to load the analytics dashboard since this morning. Getting error 'Failed to load data' on the dashboard widget. Please check and resolve this at the earliest." />
-                </div>
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Location</label>
+              <div className="flex-1 relative flex">
+                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
               </div>
             </div>
-          )}
 
-          {currentStep === 3 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Assignment</h2>
-               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Assign To Team</label>
-                  <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                    <option>L2 Support Team</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">Assign To Engineer</label>
-                  <select className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white">
-                    <option>Rohit Singh</option>
-                  </select>
-                </div>
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs"><span className="text-red-500 mr-1">*</span>Category</label>
+              <div className="flex-1">
+                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
+                  <option>-- None --</option>
+                  <option>Hardware</option>
+                  <option>Software</option>
+                  <option>Network</option>
+                </select>
               </div>
             </div>
-          )}
 
-          {currentStep === 4 && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Review & Submit</h2>
-               <p className="text-sm text-gray-500">Please review the ticket details before submitting.</p>
-               
-               <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-md space-y-3 text-sm">
-                 <div className="grid grid-cols-3"><span className="text-gray-500 font-medium">Title:</span> <span className="col-span-2 font-medium">Unable to access analytics dashboard</span></div>
-                 <div className="grid grid-cols-3"><span className="text-gray-500 font-medium">Client:</span> <span className="col-span-2">TechNova Pvt Ltd</span></div>
-                 <div className="grid grid-cols-3"><span className="text-gray-500 font-medium">Priority:</span> <span className="col-span-2 text-red-600 font-medium">High</span></div>
-                 <div className="grid grid-cols-3"><span className="text-gray-500 font-medium">Assigned:</span> <span className="col-span-2">Rohit Singh</span></div>
-               </div>
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Subcategory</label>
+              <div className="flex-1">
+                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
+                  <option>-- None --</option>
+                </select>
+              </div>
             </div>
-          )}
 
-        </div>
-
-        {/* Right Info Panel (Contextual based on step) */}
-        <div className="w-full md:w-[320px] bg-gray-50 dark:bg-black/20 border-l border-gray-100 dark:border-white/5 p-6">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Client Summary</h3>
-          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 p-4 rounded-md shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-sm">TechNova Pvt Ltd</span>
-              <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Active</span>
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Impact</label>
+              <div className="flex-1">
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
+                  <option value="1 - High">1 - High</option>
+                  <option value="2 - Medium">2 - Medium</option>
+                  <option value="3 - Low">3 - Low</option>
+                </select>
+              </div>
             </div>
-            <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
-              <div className="flex justify-between"><span>Client ID:</span> <span className="font-medium text-gray-900 dark:text-gray-200">CL-10024</span></div>
-              <div className="flex justify-between"><span>Email:</span> <span className="font-medium text-gray-900 dark:text-gray-200">admin@technova.com</span></div>
-              <div className="flex justify-between"><span>Phone:</span> <span className="font-medium text-gray-900 dark:text-gray-200">+91 98765 43210</span></div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Urgency</label>
+              <div className="flex-1">
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
+                  <option value="1 - High">1 - High</option>
+                  <option value="2 - Medium">2 - Medium</option>
+                  <option value="3 - Low">3 - Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Business Application</label>
+              <div className="flex-1 relative flex">
+                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+              </div>
             </div>
           </div>
-          
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 mt-6">Active Services</h3>
-          <div className="space-y-3">
-            <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 p-3 rounded-md shadow-sm flex justify-between items-center text-xs">
-              <span className="font-medium text-gray-800 dark:text-gray-200">Analytics Platform</span>
-              <span className="text-gray-500">Since 12 Jan 2024</span>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Opened</label>
+              <div className="flex-1 flex">
+                <input type="text" value={new Date().toISOString().replace('T', ' ').substring(0, 19)} readOnly className="flex-1 border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-black/20 px-2 py-1 outline-none rounded-sm text-gray-800 dark:text-gray-300" />
+              </div>
             </div>
-            <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 p-3 rounded-md shadow-sm flex justify-between items-center text-xs">
-              <span className="font-medium text-gray-800 dark:text-gray-200">Support Plan</span>
-              <span className="text-gray-500">Valid till 12 Jan 2025</span>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Opened by</label>
+              <div className="flex-1 flex">
+                <div className="flex-1 flex">
+                  <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm text-gray-800 dark:text-gray-200" defaultValue="System User" />
+                  <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 text-gray-500"><Search size={14}/></button>
+                </div>
+                <button className="ml-1 border border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-sm text-gray-500"><Info size={14}/></button>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Contact type</label>
+              <div className="flex-1">
+                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200" defaultValue="Phone">
+                  <option value="Email">Email</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Self-service">Self-service</option>
+                  <option value="Walk-in">Walk-in</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">State</label>
+              <div className="flex-1">
+                <select value={state} onChange={(e) => setState(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
+                  <option value="New">New</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Canceled">Canceled</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assignment group</label>
+              <div className="flex-1 flex">
+                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assigned to</label>
+              <div className="flex-1 flex">
+                <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Full Width Fields */}
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center">
+            <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs"><span className="text-red-500 mr-1">*</span>Short description</label>
+            <div className="flex-1">
+              <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm" />
+            </div>
+          </div>
+
+          <div className="flex items-start">
+            <label className="w-40 text-right pr-4 pt-1.5 text-gray-600 dark:text-gray-400 text-xs">
+              Additional comments<br />
+              <span className="text-[10px] opacity-70">(Customer visible)</span>
+            </label>
+            <div className="flex-1">
+              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm resize-y" />
+            </div>
+          </div>
+
+          <div className="flex items-start">
+            <label className="w-40 text-right pr-4 pt-1.5 text-gray-600 dark:text-gray-400 text-xs">Work notes</label>
+            <div className="flex-1">
+              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-[#792359] bg-[#fffdef] dark:bg-yellow-900/10 rounded-sm resize-y" />
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Active</label>
+            <div className="flex-1">
+              <input type="checkbox" defaultChecked className="rounded border-gray-400 text-[#792359] focus:ring-[#792359]" />
             </div>
           </div>
         </div>
       </div>
-
-      {/* Footer Navigation */}
-      <div className="flex justify-between items-center pt-4">
-        <button 
-          onClick={prevStep}
-          disabled={currentStep === 0}
-          className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-sm transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2 dark:bg-[#181a1f] dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
-        >
-          <ArrowLeft size={16} /> Previous
-        </button>
-
-        {currentStep < steps.length - 1 ? (
-          <button 
-            onClick={nextStep}
-            className="px-5 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm transition-colors shadow-sm flex items-center gap-2"
-          >
-            Next <ChevronRight size={16} />
-          </button>
-        ) : (
-          <button 
-            className="px-6 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm transition-colors shadow-sm flex items-center gap-2"
-          >
-            Submit Ticket <CheckCircle2 size={16} />
-          </button>
-        )}
-      </div>
-
     </div>
   );
 }

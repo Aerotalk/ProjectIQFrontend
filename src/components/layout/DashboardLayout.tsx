@@ -58,7 +58,19 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     {
       name: 'Finance',
       icon: PieChart,
-      subItems: [{ name: 'Finance Dashboard', path: `${basePath}/finance` }]
+      subItems: role === 'company' ? [
+        { name: 'Dashboard', path: `${basePath}/finance` },
+        { name: 'Projects', path: `${basePath}/finance/projects` },
+        { name: 'Vendors', path: `${basePath}/finance/vendors` },
+        { name: 'Purchase Orders', path: `${basePath}/finance/pos` },
+        { name: 'Delivery Challans', path: `${basePath}/finance/challans` },
+        { name: 'Expenses', path: `${basePath}/finance/expenses` },
+        { name: 'Invoices', path: `${basePath}/finance/invoices` },
+        { name: 'Payments', path: `${basePath}/finance/payments` },
+        { name: 'Reports', path: `${basePath}/finance/reports` }
+      ] : [
+        { name: 'Finance Dashboard', path: `${basePath}/finance` }
+      ]
     },
     {
       name: 'Ticket System',
@@ -66,7 +78,6 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       subItems: role === 'company' ? [
         { name: 'Dashboard', path: `${basePath}` },
         { name: 'All Tickets', path: `${basePath}/tickets` },
-        { name: 'Create Ticket', path: `${basePath}/tickets/create` },
         { name: 'Projects', path: `${basePath}/projects` },
         { name: 'Clients', path: `${basePath}/clients` },
         { name: 'Reports', path: `${basePath}/reports` },
