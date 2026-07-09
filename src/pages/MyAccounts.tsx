@@ -472,7 +472,8 @@ export default function MyAccounts() {
     try {
       const orgId = localStorage.getItem('organizationId');
       if (!orgId) return;
-      const data = await api.get(`/admin/companies?organizationId=${orgId}`);
+      const res = await api.get(`/admin/companies?organizationId=${orgId}`);
+      const data = Array.isArray(res) ? res : (res.content || []);
       setAccounts(data);
     } catch (error) {
       console.error('Failed to fetch companies', error);
