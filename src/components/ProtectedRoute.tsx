@@ -1,29 +1,50 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
+  requiredPermission?: string;
 }
 
-export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const token = localStorage.getItem('token');
-  const rolesString = localStorage.getItem('roles');
-  const roles = rolesString ? JSON.parse(rolesString) : [];
+export default function ProtectedRoute({ children, allowedRoles, requiredPermission }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const { can, hasRole } = usePermissions();
   const location = useLocation();
 
-  if (!token) {
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
-    const hasRole = roles.some((role: string) => allowedRoles.includes(role));
-    if (!hasRole) {
-      if (roles.includes('ROLE_SUPER_ADMIN')) {
+    const hasAllowedRole = allowedRoles.some(role => hasRole(role));
+    if (!hasAllowedRole) {
+      if (hasRole('ROLE_SUPER_ADMIN')) {
         return <Navigate to="/superadmin/organizations" replace />;
       }
       return <Navigate to="/orgdashboard" replace />;
     }
+  }
+
+  if (requiredPermission && !can(requiredPermission)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-gray-50 dark:bg-[#0f1115]">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">403 Forbidden</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">You do not have permission to access this page.</p>
+        <button 
+          onClick={() => window.history.back()}
+          className="px-4 py-2 bg-[#792359] text-white rounded-sm hover:bg-[#52173c] transition-colors"
+        >
+          Go Back
+        </button>
+      </div>
+    );
   }
 
   return <>{children}</>;

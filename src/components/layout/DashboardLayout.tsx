@@ -11,17 +11,12 @@ import {
   ChevronRight,
   Bell,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  Shield
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-
-function getTokenPayload() {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch { return null; }
-}
+import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -30,9 +25,11 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
-  const tokenPayload = getTokenPayload();
-  const userEmail = tokenPayload?.sub || tokenPayload?.email || 'user';
-  const orgName = localStorage.getItem('organizationName') || tokenPayload?.organizationName || 'My Organization';
+  const { user } = useAuth();
+  const { can } = usePermissions();
+  
+  const userEmail = user?.email || 'user';
+  const orgName = user?.organizationName || 'My Organization';
   const userInitials = userEmail.substring(0, 2).toUpperCase();
 
   useEffect(() => {
@@ -54,7 +51,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   const basePath = role === 'company' ? '/companydashboard' : role === 'employee' ? '/employeedashboard' : '/orgdashboard';
 
-  const navItems = role === 'employee' ? [
+  // Base configurations with permissions
+  const navConfig = role === 'employee' ? [
     {
       name: 'My Profile',
       icon: User,
@@ -63,9 +61,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     {
       name: 'Ticket System',
       icon: Ticket,
+      permission: 'ticket.view',
       subItems: [
-        { name: 'My Tickets', path: `${basePath}` },
-        { name: 'Create Ticket', path: `${basePath}/tickets/create` }
+        { name: 'My Tickets', path: `${basePath}`, permission: 'ticket.view' },
+        { name: 'Create Ticket', path: `${basePath}/tickets/create`, permission: 'ticket.create' }
       ]
     }
   ] : [
@@ -78,53 +77,75 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       ]
     },
     {
+      name: 'Administration',
+      icon: Shield,
+      permission: 'role.view',
+      subItems: [
+        { name: 'Roles', path: `${basePath}/roles`, permission: 'role.view' },
+        { name: 'Users', path: `${basePath}/users`, permission: 'user.view' }
+      ]
+    },
+    {
       name: 'Sales',
       icon: LineChart,
-      subItems: [{ name: 'Sales Dashboard', path: `${basePath}/sales` }]
+      permission: 'sales.view',
+      subItems: [{ name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }]
     },
     {
       name: 'Finance',
       icon: PieChart,
+      permission: 'finance.view',
       subItems: role === 'company' ? [
-        { name: 'Dashboard', path: `${basePath}/finance` },
-        { name: 'Projects', path: `${basePath}/finance/projects` },
-        { name: 'Vendors', path: `${basePath}/finance/vendors` },
-        { name: 'Purchase Orders', path: `${basePath}/finance/pos` },
-        { name: 'Delivery Challans', path: `${basePath}/finance/challans` },
-        { name: 'Expenses', path: `${basePath}/finance/expenses` },
-        { name: 'Invoices', path: `${basePath}/finance/invoices` },
-        { name: 'Payments', path: `${basePath}/finance/payments` },
-        { name: 'Reports', path: `${basePath}/finance/reports` }
+        { name: 'Dashboard', path: `${basePath}/finance`, permission: 'finance.view' },
+        { name: 'Projects', path: `${basePath}/finance/projects`, permission: 'finance.projects.view' },
+        { name: 'Vendors', path: `${basePath}/finance/vendors`, permission: 'finance.vendors.view' },
+        { name: 'Purchase Orders', path: `${basePath}/finance/pos`, permission: 'finance.pos.view' },
+        { name: 'Delivery Challans', path: `${basePath}/finance/challans`, permission: 'finance.challans.view' },
+        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' },
+        { name: 'Invoices', path: `${basePath}/finance/invoices`, permission: 'finance.invoices.view' },
+        { name: 'Payments', path: `${basePath}/finance/payments`, permission: 'finance.payments.view' },
+        { name: 'Reports', path: `${basePath}/finance/reports`, permission: 'finance.reports.view' }
       ] : [
-        { name: 'Finance Dashboard', path: `${basePath}/finance` }
+        { name: 'Finance Dashboard', path: `${basePath}/finance`, permission: 'finance.view' }
       ]
     },
     {
       name: 'HR / Employees',
       icon: User,
+      permission: 'employee.view',
       subItems: [
-        { name: 'Employee Directory', path: `${basePath}/employees` },
-        { name: 'Departments', path: `${basePath}/departments` },
-        { name: 'Designations', path: `${basePath}/designations` }
+        { name: 'Employee Directory', path: `${basePath}/employees`, permission: 'employee.view' },
+        { name: 'Departments', path: `${basePath}/departments`, permission: 'department.view' },
+        { name: 'Designations', path: `${basePath}/designations`, permission: 'designation.view' }
       ]
     },
     {
       name: 'Ticket System',
       icon: Ticket,
+      permission: 'ticket.view',
       subItems: role === 'company' ? [
-        { name: 'Dashboard', path: `${basePath}` },
-        { name: 'All Tickets', path: `${basePath}/tickets` },
-        { name: 'Projects', path: `${basePath}/projects` },
-        { name: 'Clients', path: `${basePath}/clients` },
-        { name: 'Reports', path: `${basePath}/reports` },
-        { name: 'Knowledge Base', path: `${basePath}/knowledge-base` },
-        { name: 'Notifications', path: `${basePath}/notifications` },
-        { name: 'Admin Settings', path: `${basePath}/admin` }
+        { name: 'Dashboard', path: `${basePath}`, permission: 'ticket.view' },
+        { name: 'All Tickets', path: `${basePath}/tickets`, permission: 'ticket.view' },
+        { name: 'Projects', path: `${basePath}/projects`, permission: 'ticket.projects.view' },
+        { name: 'Clients', path: `${basePath}/clients`, permission: 'ticket.clients.view' },
+        { name: 'Reports', path: `${basePath}/reports`, permission: 'ticket.reports.view' },
+        { name: 'Knowledge Base', path: `${basePath}/knowledge-base`, permission: 'ticket.kb.view' },
+        { name: 'Notifications', path: `${basePath}/notifications`, permission: 'ticket.notifications.view' },
+        { name: 'Admin Settings', path: `${basePath}/admin`, permission: 'ticket.admin.view' }
       ] : [
-        { name: 'Ticket Dashboard', path: `${basePath}` }
+        { name: 'Ticket Dashboard', path: `${basePath}`, permission: 'ticket.view' }
       ]
     },
   ];
+
+  // Filter based on permissions
+  const navItems = navConfig
+    .filter(item => !('permission' in item) || can(item.permission as string))
+    .map(item => ({
+      ...item,
+      subItems: item.subItems.filter(sub => !('permission' in sub) || can((sub as any).permission as string))
+    }))
+    .filter(item => item.subItems.length > 0 || !item.subItems);
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">

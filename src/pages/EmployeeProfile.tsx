@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Camera, Save, Key, User, Mail, Phone, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
-import { useEffect } from 'react';
+import PermissionGate from '../components/PermissionGate';
 
 export default function EmployeeProfile() {
   const [profileData, setProfileData] = useState({
@@ -250,23 +250,30 @@ export default function EmployeeProfile() {
                   </div>
 
                   <div className="md:col-span-2 pt-4 flex justify-end border-t border-gray-100 dark:border-white/5 mt-2">
-                    <button 
-                      type="submit" 
-                      disabled={isSaving}
-                      className="flex items-center justify-center gap-2 bg-[#792359] hover:bg-[#52173c] disabled:bg-[#792359]/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={16} />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
+                    <PermissionGate permission="employee.edit" fallback={
+                      <button type="button" disabled className="flex items-center justify-center gap-2 bg-gray-300 dark:bg-gray-700 text-gray-500 px-5 py-2 w-40 text-sm font-medium rounded-sm cursor-not-allowed">
+                        <Save size={16} />
+                        View Only
+                      </button>
+                    }>
+                      <button 
+                        type="submit" 
+                        disabled={isSaving}
+                        className="flex items-center justify-center gap-2 bg-[#792359] hover:bg-[#52173c] disabled:bg-[#792359]/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save size={16} />
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                    </PermissionGate>
                   </div>
                 </form>
               </div>

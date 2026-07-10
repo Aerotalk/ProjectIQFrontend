@@ -8,6 +8,8 @@ import CreateTicket from './tickets/CreateTicket';
 import TicketDetails from './tickets/TicketDetails';
 import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
+import RolesList from './RolesList';
+import PermissionGate from '../components/PermissionGate';
 
 function DefaultView() {
   return (
@@ -40,6 +42,11 @@ export default function CompanyDashboard() {
         <Route path="/tickets/:id/report" element={<TicketReport />} />
         <Route path="/admin" element={<TicketAdmin />} />
         <Route path="/profile" element={<CompanyProfile />} />
+        <Route path="/roles" element={
+          <PermissionGate permission="role.view">
+            <RolesList />
+          </PermissionGate>
+        } />
         <Route path="*" element={<DefaultView />} />
       </Routes>
     </DashboardLayout>

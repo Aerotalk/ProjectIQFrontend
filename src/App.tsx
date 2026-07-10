@@ -7,47 +7,61 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CompanyDashboard from './pages/CompanyDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import EmployeeProfile from './pages/EmployeeProfile';
+import { AuthProvider } from './contexts/AuthContext';
+import RolesList from './pages/RolesList';
+import SuperAdminLayout from './components/layout/SuperAdminLayout';
+import PermissionGate from './components/PermissionGate';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/superadmin/*" element={
-          <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
-            <SuperAdminDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/companydashboard/*" element={
-          <ProtectedRoute>
-            <CompanyDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/employeedashboard/*" element={
-          <ProtectedRoute>
-            <EmployeeDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/employeedashboard/profile" element={
-          <ProtectedRoute>
-            <EmployeeProfile />
-          </ProtectedRoute>
-        } />
-        <Route path="/orgdashboard/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/orgdashboard/*" element={
-          <ProtectedRoute>
-            <OrgDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/superadmin/*" element={
+            <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
+              <SuperAdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/superadmin/roles" element={
+            <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
+              <SuperAdminLayout>
+                <PermissionGate permission="role.view">
+                  <RolesList />
+                </PermissionGate>
+              </SuperAdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/companydashboard/*" element={
+            <ProtectedRoute>
+              <CompanyDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/employeedashboard/*" element={
+            <ProtectedRoute>
+              <EmployeeDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/employeedashboard/profile" element={
+            <ProtectedRoute>
+              <EmployeeProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/orgdashboard/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/orgdashboard/*" element={
+            <ProtectedRoute>
+              <OrgDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
 export default App;
-

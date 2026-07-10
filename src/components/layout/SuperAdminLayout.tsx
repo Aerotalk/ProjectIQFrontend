@@ -7,15 +7,18 @@ import {
   ChevronRight,
   Bell,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  Shield
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
+  const { can } = usePermissions();
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -34,13 +37,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     document.documentElement.classList.toggle('dark');
   };
 
-  const navItems = [
+  const navConfig = [
     {
       name: 'Organizations',
       icon: Building,
       path: '/superadmin/organizations'
+    },
+    {
+      name: 'Roles',
+      icon: Shield,
+      path: '/superadmin/roles',
+      permission: 'role.view'
     }
   ];
+
+  const navItems = navConfig.filter(item => !item.permission || can(item.permission));
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">

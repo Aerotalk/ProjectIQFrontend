@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth, type User } from '../contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fcf9fb] relative overflow-hidden">
       {/* --- Clean Geometric Animated Background --- */}
@@ -84,33 +86,43 @@ export default function Login() {
               e.preventDefault();
               try {
                 const response = await api.post('/auth/login', { email, password });
-                localStorage.setItem('token', response.token);
+                
                 if (response.refreshToken) {
                   localStorage.setItem('refreshToken', response.refreshToken);
                 }
-                if (response.roles) {
-                  localStorage.setItem('roles', JSON.stringify(response.roles));
-                }
-                if (response.username) {
-                  localStorage.setItem('username', response.username);
-                }
-                if (response.organizationId) {
-                  localStorage.setItem('organizationId', response.organizationId);
-                }
-                if (response.organizationName) {
-                  localStorage.setItem('organizationName', response.organizationName);
-                }
+
+                const userData: User = {
+                  id: response.id || '',
+                  username: response.username,
+                  email: email, // use the input email
+                  roles: response.roles || [],
+                  organizationId: response.organizationId || null,
+                  organizationName: response.organizationName || null,
+                  companyId: null, // login response currently doesn't have companyId, adjust if needed
+                  companyName: null,
+                  effectivePermissions: response.effectivePermissions || []
+                };
+                
+                login(response.token, userData);
+                
+                // Optional: keep old localStorage items if other parts still depend on them (though they should use AuthProvider now)
+                if (response.roles) localStorage.setItem('roles', JSON.stringify(response.roles));
+                if (response.username) localStorage.setItem('username', response.username);
+                if (response.organizationId) localStorage.setItem('organizationId', response.organizationId);
+                if (response.organizationName) localStorage.setItem('organizationName', response.organizationName);
                 
                 sessionStorage.setItem('showWelcomeToast', 'true');
+                
                 if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
-                  navigate('/superadmin/organizations', { replace: true });
+                  navigate('/superadmin/organizations');
                 } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
-                  navigate('/companydashboard', { replace: true });
+                  navigate('/companydashboard');
                 } else if (response.roles && response.roles.includes('ROLE_EMPLOYEE')) {
-                  navigate('/employeedashboard', { replace: true });
+                  navigate('/employeedashboard');
                 } else {
-                  navigate('/orgdashboard', { replace: true });
+                  navigate('/orgdashboard');
                 }
+                  
               } catch (err) {
                 console.error(err);
                 setError(true);
