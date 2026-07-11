@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logo from '../assets/BumbleERPLogo.png';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -40,14 +41,14 @@ export default function Login() {
 
       {/* Animated Grid Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-gray-50/50">
-        <div 
+        <div
           className="absolute w-full h-[200%] animate-grid opacity-40"
           style={{
             backgroundImage: 'linear-gradient(to right, #cbd5e1 1px, transparent 1px), linear-gradient(to bottom, #cbd5e1 1px, transparent 1px)',
             backgroundSize: '40px 40px'
           }}
         ></div>
-        
+
         {/* Geometric Floating Elements (Distinct) */}
         <div className="absolute top-[10%] left-[10%] w-28 h-28 border-4 border-[#792359]/40 rounded-full animate-float-slow opacity-90 shadow-sm"></div>
         <div className="absolute bottom-[15%] right-[10%] w-36 h-36 border-4 border-[#792359]/30 rotate-45 animate-float-slower opacity-90 shadow-sm"></div>
@@ -58,24 +59,17 @@ export default function Login() {
 
       {/* Login Container */}
       <div className="relative z-10 w-full max-w-[440px] px-6">
-        
+
         {/* Error Toast */}
         <div className={`absolute -top-16 left-6 right-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform z-50 ${error ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0 pointer-events-none'}`}>
           <AlertCircle size={20} />
           <span className="text-sm font-medium">Invalid email or password.</span>
         </div>
-        
+
         {/* Header/Logo */}
         <div className="mb-8 flex items-center justify-center gap-3">
-          <svg className="w-9 h-9 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 5L90 28V72L50 95L10 72V28L50 5Z" fill="#5c1642" />
-            <path d="M43 25 C43 25, 43 75, 43 75 L49 75 C62 75, 73 68, 73 53 C73 38, 62 31, 49 31 L49 25 Z" fill="white" />
-            <path d="M49 37 C58 37, 65 42, 65 53 C65 64, 58 69, 49 69 L49 37 Z" fill="#5c1642" />
-            <rect x="51" y="43" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="51" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="59" width="11" height="4" rx="2" fill="#E29A26" />
-          </svg>
-          <span className="text-3xl font-bold tracking-tight text-gray-900">Bumble <span className="text-[#E29A26]">ERP</span></span>
+          <img src={logo} alt="BumbleERP Logo" className="w-14 h-14 object-contain shadow-md rounded-sm" />
+          <span className="text-3xl font-bold tracking-tight text-gray-900">BumbleERP</span>
         </div>
 
         {/* Login Card */}
@@ -86,14 +80,14 @@ export default function Login() {
             <p className="text-sm text-gray-500 mt-2">Enter your email and password below to log in</p>
           </div>
 
-          <form 
-            className="space-y-6" 
+          <form
+            className="space-y-6"
             onSubmit={async (e) => {
               e.preventDefault();
               setIsLoading(true);
               try {
                 const response = await api.post('/auth/login', { email, password });
-                
+
                 if (response.refreshToken) {
                   localStorage.setItem('refreshToken', response.refreshToken);
                 }
@@ -109,17 +103,17 @@ export default function Login() {
                   companyName: null,
                   effectivePermissions: response.effectivePermissions || []
                 };
-                
+
                 login(response.token, userData);
-                
+
                 // Optional: keep old localStorage items if other parts still depend on them (though they should use AuthProvider now)
                 if (response.roles) localStorage.setItem('roles', JSON.stringify(response.roles));
                 if (response.username) localStorage.setItem('username', response.username);
                 if (response.organizationId) localStorage.setItem('organizationId', response.organizationId);
                 if (response.organizationName) localStorage.setItem('organizationName', response.organizationName);
-                
+
                 sessionStorage.setItem('showWelcomeToast', 'true');
-                
+
                 if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
                   navigate('/superadmin/organizations');
                 } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
@@ -129,7 +123,7 @@ export default function Login() {
                 } else {
                   navigate('/orgdashboard');
                 }
-                  
+
               } catch (err) {
                 console.error(err);
                 setError(true);
@@ -143,8 +137,8 @@ export default function Login() {
               <label className="text-sm font-semibold text-gray-700 flex">
                 Email address <span className="text-[#792359] ml-1">*</span>
               </label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
@@ -163,8 +157,8 @@ export default function Login() {
                 </a>
               </div>
               <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
+                <input
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -182,9 +176,9 @@ export default function Login() {
             </div>
 
             <div className="flex items-center pt-1 pb-2">
-              <input 
-                type="checkbox" 
-                id="remember" 
+              <input
+                type="checkbox"
+                id="remember"
                 className="w-4 h-4 rounded border-gray-300 text-[#792359] focus:ring-[#792359] cursor-pointer"
               />
               <label htmlFor="remember" className="ml-2.5 text-sm font-medium text-gray-600 cursor-pointer select-none">
@@ -192,7 +186,7 @@ export default function Login() {
               </label>
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-[#792359] hover:bg-[#631c49] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:shadow-[#792359]/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"

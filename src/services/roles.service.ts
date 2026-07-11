@@ -33,8 +33,16 @@ export const rolesService = {
     return api.delete(`/admin/roles/${id}`);
   },
 
-  assignRolesToEmployee: async (employeeId: string, roleIds: string[]): Promise<void> => {
-    return api.put(`/admin/roles/employees/${employeeId}/assign`, roleIds);
+  assignRolesToEmployee: async (employeeId: string, companyId: string | null, roleIds: string[]): Promise<void> => {
+    let url = `/admin/roles/employees/${employeeId}/assign`;
+    if (companyId) {
+      url += `?companyId=${companyId}`;
+    }
+    return api.put(url, roleIds);
+  },
+
+  getAssignedRolesForEmployee: async (employeeId: string, companyId: string): Promise<Role[]> => {
+    return api.get(`/admin/roles/employees/${employeeId}/companies/${companyId}`);
   },
 
   assignRoleToUser: async (roleId: string, targetUserId: string): Promise<void> => {

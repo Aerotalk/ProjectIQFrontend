@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logo from '../../assets/BumbleERPLogo.png';
 import {
   LogOut,
   Sun,
@@ -69,15 +70,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       <aside className="w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <svg className="w-8 h-8 mr-2.5 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 5L90 28V72L50 95L10 72V28L50 5Z" fill="#5c1642" />
-            <path d="M43 25 C43 25, 43 75, 43 75 L49 75 C62 75, 73 68, 73 53 C73 38, 62 31, 49 31 L49 25 Z" fill="white" />
-            <path d="M49 37 C58 37, 65 42, 65 53 C65 64, 58 69, 49 69 L49 37 Z" fill="#5c1642" />
-            <rect x="51" y="43" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="51" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="59" width="11" height="4" rx="2" fill="#E29A26" />
-          </svg>
-          <span className="font-bold text-lg tracking-wide text-white">Bumble <span className="text-[#E29A26]">ERP</span></span>
+          <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
+          <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
           <span className="ml-2 text-[10px] font-semibold bg-[#792359]/20 text-[#e6a8d0] px-1.5 py-0.5 rounded-sm border border-[#792359]/30">ADMIN</span>
         </div>
 
