@@ -22,6 +22,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Sales');
+  // @ts-ignore
   const [expandedSubMenu, setExpandedSubMenu] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
