@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import logo from '../assets/BumbleERPLogo.png';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth, type User } from '../contexts/AuthContext';
@@ -67,15 +68,8 @@ export default function Login() {
         
         {/* Header/Logo */}
         <div className="mb-8 flex items-center justify-center gap-3">
-          <svg className="w-9 h-9 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 5L90 28V72L50 95L10 72V28L50 5Z" fill="#5c1642" />
-            <path d="M43 25 C43 25, 43 75, 43 75 L49 75 C62 75, 73 68, 73 53 C73 38, 62 31, 49 31 L49 25 Z" fill="white" />
-            <path d="M49 37 C58 37, 65 42, 65 53 C65 64, 58 69, 49 69 L49 37 Z" fill="#5c1642" />
-            <rect x="51" y="43" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="51" width="11" height="4" rx="2" fill="#E29A26" />
-            <rect x="51" y="59" width="11" height="4" rx="2" fill="#E29A26" />
-          </svg>
-          <span className="text-3xl font-bold tracking-tight text-gray-900">Bumble <span className="text-[#E29A26]">ERP</span></span>
+          <img src={logo} alt="BumbleERP Logo" className="w-14 h-14 object-contain shadow-md rounded-sm" />
+          <span className="text-3xl font-bold tracking-tight text-gray-900">BumbleERP</span>
         </div>
 
         {/* Login Card */}
