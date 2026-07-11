@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logo from '../assets/BumbleERPLogo.png';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -66,10 +67,8 @@ export default function Login() {
         
         {/* Header/Logo */}
         <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="w-10 h-10 bg-[#792359] rounded-lg flex items-center justify-center font-bold text-white text-xl shadow-md">
-            IQ
-          </div>
-          <span className="text-3xl font-bold tracking-tight text-gray-900">PROJECT IQ</span>
+          <img src={logo} alt="BumbleERP Logo" className="w-10 h-10 object-contain shadow-md rounded-sm" />
+          <span className="text-3xl font-bold tracking-tight text-gray-900">BumbleERP</span>
         </div>
 
         {/* Login Card */}

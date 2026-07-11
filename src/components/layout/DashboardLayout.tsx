@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logo from '../../assets/BumbleERPLogo.png';
 import {
   User,
   LogOut,
@@ -163,10 +164,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       <aside className="w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <div className="w-7 h-7 bg-gradient-to-br from-[#b8458f] to-[#792359] text-white flex items-center justify-center font-bold text-sm mr-3 rounded-sm shadow-sm">
-            IQ
-          </div>
-          <span className="font-bold text-lg tracking-wide text-white">PROJECT IQ</span>
+          <img src={logo} alt="BumbleERP Logo" className="h-8 w-auto mr-3 rounded-sm shadow-sm" />
+          <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
         </div>
 
         {/* Navigation */}
