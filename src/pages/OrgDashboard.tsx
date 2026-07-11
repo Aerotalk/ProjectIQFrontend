@@ -8,6 +8,7 @@ import EmployeeDirectory from './EmployeeDirectory';
 import DepartmentDirectory from './DepartmentDirectory';
 import DesignationDirectory from './DesignationDirectory';
 import RolesList from './RolesList';
+import AdminUsersList from './AdminUsersList';
 import PermissionGate from '../components/PermissionGate';
 
 function DefaultView() {
@@ -111,6 +112,11 @@ export default function OrgDashboard() {
         <Route path="/roles" element={
           <PermissionGate permission="role.view">
             <RolesList />
+          </PermissionGate>
+        } />
+        <Route path="/users" element={
+          <PermissionGate permission="user.view">
+            <AdminUsersList />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />
