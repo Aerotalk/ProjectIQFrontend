@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { rolesService } from '../../services/roles.service';
-import type { Role } from '../../types/role.types';
+import type { Role } from '../../services/roles.service';
 
 interface EditRoleModalProps {
   role: Role;
