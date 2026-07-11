@@ -10,6 +10,12 @@ import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
 import RolesList from './RolesList';
 import PermissionGate from '../components/PermissionGate';
+import SalesDashboard from './sales/SalesDashboard';
+import ClientsList from './sales/ClientsList';
+import VendorsList from './sales/VendorsList';
+import ProductsList from './sales/ProductsList';
+import QuotationsList from './sales/QuotationsList';
+import QuotationDetails from './sales/QuotationDetails';
 
 function DefaultView() {
   return (
@@ -41,6 +47,36 @@ export default function CompanyDashboard() {
         <Route path="/tickets/:id" element={<TicketDetails />} />
         <Route path="/tickets/:id/report" element={<TicketReport />} />
         <Route path="/admin" element={<TicketAdmin />} />
+        <Route path="/sales" element={
+          <PermissionGate permission="sales.view">
+            <SalesDashboard />
+          </PermissionGate>
+        } />
+        <Route path="/sales/clients" element={
+          <PermissionGate permission="sales.clients.view">
+            <ClientsList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/vendors" element={
+          <PermissionGate permission="sales.vendors.view">
+            <VendorsList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/products" element={
+          <PermissionGate permission="sales.products.view">
+            <ProductsList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/quotations" element={
+          <PermissionGate permission="sales.quotations.view">
+            <QuotationsList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/quotations/:id" element={
+          <PermissionGate permission="sales.quotations.view">
+            <QuotationDetails />
+          </PermissionGate>
+        } />
         <Route path="/profile" element={<CompanyProfile />} />
         <Route path="/roles" element={
           <PermissionGate permission="role.view">

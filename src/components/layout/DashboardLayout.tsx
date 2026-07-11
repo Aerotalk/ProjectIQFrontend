@@ -21,7 +21,8 @@ import { usePermissions } from '../../hooks/usePermissions';
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState<string | null>('Ticket System');
+  const [expandedMenu, setExpandedMenu] = useState<string | null>('Sales');
+  const [expandedSubMenu, setExpandedSubMenu] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
@@ -51,8 +52,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   const basePath = role === 'company' ? '/companydashboard' : role === 'employee' ? '/employeedashboard' : '/orgdashboard';
 
+  type NestedItem = { name: string; path: string; permission?: string };
+  type SubItem = { name: string; path?: string; permission?: string; items?: NestedItem[] };
+  type NavItem = { name: string; icon: any; permission?: string; subItems: SubItem[] };
+
   // Base configurations with permissions
-  const navConfig = role === 'employee' ? [
+  const navConfig: NavItem[] = role === 'employee' ? [
     {
       name: 'My Profile',
       icon: User,
@@ -89,7 +94,22 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       name: 'Sales',
       icon: LineChart,
       permission: 'sales.view',
-      subItems: [{ name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }]
+      subItems: role === 'company' ? [
+        { name: 'Dashboard', path: `${basePath}/sales`, permission: 'sales.view' },
+        { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' },
+        { name: 'Vendors', path: `${basePath}/sales/vendors`, permission: 'sales.vendors.view' },
+        { name: 'Products', path: `${basePath}/sales/products`, permission: 'sales.products.view' },
+        { 
+          name: 'Quotations', 
+          permission: 'sales.quotations.view',
+          items: [
+            { name: 'All Quotations', path: `${basePath}/sales/quotations`, permission: 'sales.quotations.view' },
+            { name: 'Add Quotation', path: `${basePath}/sales/quotations/new`, permission: 'sales.quotations.create' }
+          ]
+        }
+      ] : [
+        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }
+      ]
     },
     {
       name: 'Finance',
@@ -143,9 +163,31 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     .filter(item => !('permission' in item) || can(item.permission as string))
     .map(item => ({
       ...item,
-      subItems: item.subItems.filter(sub => !('permission' in sub) || can((sub as any).permission as string))
+      subItems: item.subItems.filter(sub => {
+        if ('permission' in sub && !can(sub.permission as string)) return false;
+        
+        // Also check if nested items have permission
+        if (sub.items) {
+          // IMPORTANT: Do not mutate the original object in navConfig
+          const filteredItems = sub.items.filter(nested => !('permission' in nested) || can(nested.permission as string));
+          if (filteredItems.length === 0) return false;
+          // We need to return a new object to avoid mutation
+          return true;
+        }
+        return true;
+      }).map(sub => {
+        if (sub.items) {
+          return {
+            ...sub,
+            items: sub.items.filter(nested => !('permission' in nested) || can(nested.permission as string))
+          };
+        }
+        return sub;
+      })
     }))
     .filter(item => item.subItems.length > 0 || !item.subItems);
+
+  console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
@@ -163,10 +205,15 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       <aside className="w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <div className="w-7 h-7 bg-gradient-to-br from-[#b8458f] to-[#792359] text-white flex items-center justify-center font-bold text-sm mr-3 rounded-sm shadow-sm">
-            IQ
-          </div>
-          <span className="font-bold text-lg tracking-wide text-white">PROJECT IQ</span>
+          <svg className="w-8 h-8 mr-2.5 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 5L90 28V72L50 95L10 72V28L50 5Z" fill="#5c1642" />
+            <path d="M43 25 C43 25, 43 75, 43 75 L49 75 C62 75, 73 68, 73 53 C73 38, 62 31, 49 31 L49 25 Z" fill="white" />
+            <path d="M49 37 C58 37, 65 42, 65 53 C65 64, 58 69, 49 69 L49 37 Z" fill="#5c1642" />
+            <rect x="51" y="43" width="11" height="4" rx="2" fill="#E29A26" />
+            <rect x="51" y="51" width="11" height="4" rx="2" fill="#E29A26" />
+            <rect x="51" y="59" width="11" height="4" rx="2" fill="#E29A26" />
+          </svg>
+          <span className="font-bold text-lg tracking-wide text-white">Bumble <span className="text-[#E29A26]">ERP</span></span>
         </div>
 
         {/* Navigation */}
@@ -196,18 +243,59 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
                 {/* Dropdown Content */}
                 <div
-                  className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
+                  className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
                 >
                   <div className="pl-9 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-5 relative">
                     {item.subItems.map(sub => {
-                      const exactMatch = location.pathname === sub.path;
-                      const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
-                      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path));
+                      if (sub.items) {
+                        const isSubExpanded = expandedSubMenu === sub.name;
+                        const hasActiveNested = sub.items.some(s => location.pathname === s.path || (s.path !== basePath && location.pathname.startsWith(s.path)));
+                        
+                        return (
+                          <div key={sub.name} className="relative">
+                            <button
+                              onClick={() => setExpandedSubMenu(isSubExpanded ? null : sub.name)}
+                              className={`w-full flex items-center justify-between px-3 py-2 text-sm transition-colors rounded-sm
+                                ${hasActiveNested && !isSubExpanded ? 'text-white bg-white/10 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                              `}
+                            >
+                              <span>{sub.name}</span>
+                              <ChevronRight size={12} className={`transition-transform duration-200 ${isSubExpanded ? 'rotate-90 text-white' : 'text-gray-500'}`} />
+                            </button>
+                            
+                            <div className={`overflow-hidden transition-all duration-200 ease-in-out ${isSubExpanded ? 'max-h-[400px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                              <div className="pl-4 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-2 relative">
+                                {sub.items.map(nested => {
+                                  const exactNestedMatch = location.pathname === nested.path;
+                                  const hasExactNestedMatch = sub.items.some(s => location.pathname === s.path);
+                                  const isActive = exactNestedMatch || (!hasExactNestedMatch && nested.path !== basePath && location.pathname.startsWith(nested.path));
+                                  return (
+                                    <Link
+                                      key={nested.name}
+                                      to={nested.path}
+                                      className={`block py-1.5 text-sm transition-colors rounded-sm px-3 relative
+                                        ${isActive ? 'text-white bg-white/10 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                      `}
+                                    >
+                                      {isActive && <div className="absolute left-[-13px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#e6a8d0] border-2 border-[#3a112b]" />}
+                                      {nested.name}
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const exactMatch = sub.path && location.pathname === sub.path;
+                      const hasExactMatch = item.subItems.some(s => s.path && location.pathname === s.path);
+                      const isActive = exactMatch || (!hasExactMatch && sub.path && sub.path !== basePath && location.pathname.startsWith(sub.path));
                       
                       return (
                         <Link
                           key={sub.name}
-                          to={sub.path}
+                          to={sub.path || '#'}
                           className={`block py-2 text-sm transition-colors rounded-sm px-3 relative
                             ${isActive ? 'text-white bg-white/10 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}
                           `}
