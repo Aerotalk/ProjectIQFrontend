@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Download, MoreHorizontal, CreditCard, X, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, CreditCard, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const EXPENSES = [

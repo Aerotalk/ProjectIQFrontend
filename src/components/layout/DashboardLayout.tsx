@@ -219,7 +219,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
           {navItems.map((item) => {
             const isExpanded = expandedMenu === item.name;
-            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path)));
+            const hasActiveSub = item.subItems.some(sub => sub.path && (location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path))));
 
             return (
               <div key={item.name} className="mb-1">
@@ -262,7 +262,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                               <div className="pl-4 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-2 relative">
                                 {sub.items.map(nested => {
                                   const exactNestedMatch = location.pathname === nested.path;
-                                  const hasExactNestedMatch = sub.items.some(s => location.pathname === s.path);
+                                  const hasExactNestedMatch = sub.items?.some(s => location.pathname === s.path) || false;
                                   const isActive = exactNestedMatch || (!hasExactNestedMatch && nested.path !== basePath && location.pathname.startsWith(nested.path));
                                   return (
                                     <Link

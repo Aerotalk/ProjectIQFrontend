@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Calendar, ChevronDown, CheckCircle2, AlertCircle } from 'lucide-react';
+
+import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const KPI_DATA = [

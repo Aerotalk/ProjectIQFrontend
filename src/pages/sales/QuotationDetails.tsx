@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  ChevronRight, Edit, Download, MoreVertical, AlertCircle, Info, 
-  CheckCircle2, FileText, Send, Eye, MessageSquare, History, Plus
+  ChevronRight, Edit, Download, Info, 
+  CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

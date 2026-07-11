@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Edit, IndianRupee, FileText, FileDown, TrendingUp, Download, Eye, Link2, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, IndianRupee, FileText, FileDown, TrendingUp } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, Plus, ChevronDown, MoreVertical, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Filter, Plus, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Quotation {
@@ -32,7 +32,7 @@ export default function QuotationsList() {
     }
   };
 
-  const [quotations, setQuotations] = useState<Quotation[]>(() => {
+  const [quotations] = useState<Quotation[]>(() => {
     const saved = localStorage.getItem('demo_quotations');
     if (saved) {
       return JSON.parse(saved);

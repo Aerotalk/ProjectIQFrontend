@@ -1,4 +1,3 @@
-import React from 'react';
 import { FileText, Edit, UserCheck, CheckCircle2, Send, Trophy, ChevronDown, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,7 +48,7 @@ export default function SalesDashboard() {
         {stats.map((stat, i) => (
           <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-sm border ${stat.bgColor} ${stat.borderColor}`}>
+              <div className={`p-2 rounded-sm border ${stat.bgColor} border-transparent`}>
                 <stat.icon size={16} className={stat.color} strokeWidth={2} />
               </div>
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{stat.label}</span>

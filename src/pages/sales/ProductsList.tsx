@@ -33,7 +33,7 @@ export default function ProductsList() {
   ]);
 
   const [formData, setFormData] = useState({
-    name: '', category: '', unit: '', rate: '', gst: '', status: 'Active' as const
+    name: '', category: '', unit: '', rate: '', gst: '', status: 'Active' as 'Active' | 'Inactive'
   });
 
   const handleSaveProduct = async (e: React.FormEvent) => {

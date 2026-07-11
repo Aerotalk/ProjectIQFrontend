@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Download, MoreHorizontal, Truck, X, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Truck, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CHALLANS = [

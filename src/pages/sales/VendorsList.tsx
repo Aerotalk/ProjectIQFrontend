@@ -31,7 +31,7 @@ export default function VendorsList() {
   ]);
 
   const [formData, setFormData] = useState({
-    name: '', contactPerson: '', email: '', phone: '', city: '', status: 'Active' as const
+    name: '', contactPerson: '', email: '', phone: '', city: '', status: 'Active' as 'Active' | 'Inactive'
   });
 
   const handleSaveVendor = async (e: React.FormEvent) => {

@@ -31,7 +31,7 @@ export default function ClientsList() {
   ]);
 
   const [formData, setFormData] = useState({
-    name: '', contactPerson: '', email: '', phone: '', city: '', status: 'Active' as const
+    name: '', contactPerson: '', email: '', phone: '', city: '', status: 'Active' as 'Active' | 'Inactive'
   });
 
   const handleSaveClient = async (e: React.FormEvent) => {

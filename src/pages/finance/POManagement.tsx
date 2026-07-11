@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Download, MoreHorizontal, FileText, X, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, FileText, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const POS = [
