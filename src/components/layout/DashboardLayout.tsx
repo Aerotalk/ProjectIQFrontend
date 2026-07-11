@@ -111,7 +111,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       ]
     },
     {
-      name: 'HR / Employees',
+      name: 'HRMS',
       icon: User,
       permission: 'employee.view',
       subItems: [

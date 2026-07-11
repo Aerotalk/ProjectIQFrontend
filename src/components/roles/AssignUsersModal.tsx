@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type Role, rolesService } from '../../services/roles.service';
-import { X, Users, Save, CheckCircle2 } from 'lucide-react';
+import { X, Users, Save, CheckCircle2, Building2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { api } from '../../lib/api';
 
 interface Props {
   role: Role;
@@ -9,18 +11,34 @@ interface Props {
 
 export default function AssignUsersModal({ role, onClose }: Props) {
   const [employeeId, setEmployeeId] = useState('');
+  const [companyId, setCompanyId] = useState('');
+  const [companies, setCompanies] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      if (user?.organizationId) {
+        try {
+          const res: any = await api.get(`/admin/companies?organizationId=${user.organizationId}`);
+          setCompanies(Array.isArray(res) ? res : (res.content || []));
+        } catch (error) {
+          console.error('Failed to fetch companies', error);
+        }
+      }
+    };
+    fetchCompanies();
+  }, [user]);
 
   const handleSave = async () => {
-    if (!employeeId) return;
+    if (!employeeId || !companyId) return;
     try {
       setIsSaving(true);
-      // Example endpoint signature based on our service:
-      // rolesService.assignRoleToUser(role.id, employeeId) or assignRolesToEmployee
-      await rolesService.assignRoleToUser(role.id, employeeId);
+      await rolesService.assignRolesToEmployee(employeeId, companyId, [role.id]);
       
-      setSuccessMsg('User successfully assigned to role!');
+      setSuccessMsg('Role successfully assigned to employee for the selected company!');
       setTimeout(() => {
         setSuccessMsg('');
         onClose();
@@ -41,7 +59,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Users size={18} className="text-blue-600 dark:text-blue-400" />
-              Assign Role to User
+              Assign Role to Employee
             </h2>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
@@ -59,20 +77,37 @@ export default function AssignUsersModal({ role, onClose }: Props) {
         {/* Body */}
         <div className="p-6 space-y-4">
           <p className="text-sm text-gray-500">
-            Assign the <span className="font-semibold text-gray-900 dark:text-white">{role.roleName}</span> role to an existing user.
+            Assign the <span className="font-semibold text-gray-900 dark:text-white">{role.roleName}</span> role to an existing employee for a specific company.
           </p>
           
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">User ID / Employee ID</label>
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Target Company</label>
+            <div className="relative">
+              <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <select 
+                value={companyId}
+                onChange={(e) => setCompanyId(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white appearance-none"
+              >
+                <option value="" disabled>Select a company</option>
+                {companies.map(c => (
+                  <option key={c.id} value={c.id}>{c.companyName}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Employee ID</label>
             <input 
               type="text" 
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Enter User UUID" 
+              placeholder="Enter Employee UUID" 
               className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
-          <p className="text-xs text-gray-400">Note: In a full implementation, this would be a searchable dropdown of users.</p>
+          <p className="text-xs text-gray-400">Note: In a full implementation, this would be a searchable dropdown of employees.</p>
         </div>
 
         {/* Footer */}
@@ -82,7 +117,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
           </button>
           <button 
             onClick={handleSave} 
-            disabled={isSaving || !employeeId}
+            disabled={isSaving || !employeeId || !companyId}
             className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />

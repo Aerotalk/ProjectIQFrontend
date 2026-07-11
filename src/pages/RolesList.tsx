@@ -4,12 +4,16 @@ import PermissionGate from '../components/PermissionGate';
 import { Shield, Plus, Edit2, Users, Trash2, Key } from 'lucide-react';
 import ManagePermissionsMatrix from '../components/roles/ManagePermissionsMatrix';
 import AssignUsersModal from '../components/roles/AssignUsersModal';
+import CreateRoleModal from '../components/roles/CreateRoleModal';
+import EditRoleModal from '../components/roles/EditRoleModal';
 
 export default function RolesList() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(null);
   const [selectedRoleForPermissions, setSelectedRoleForPermissions] = useState<Role | null>(null);
   const [selectedRoleForUsers, setSelectedRoleForUsers] = useState<Role | null>(null);
 
@@ -34,8 +38,9 @@ export default function RolesList() {
       try {
         await rolesService.deleteRole(id);
         fetchRoles();
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to delete role', err);
+        alert(err.response?.data?.error || err.response?.data?.message || 'Failed to delete role');
       }
     }
   };
@@ -51,6 +56,7 @@ export default function RolesList() {
         </div>
         <PermissionGate permission="role.create">
           <button 
+            onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
           >
             <Plus size={16} />
@@ -104,7 +110,11 @@ export default function RolesList() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-100 transition-opacity">
                         <PermissionGate permission="role.edit">
-                          <button className="p-1.5 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-white/5" title="Edit Role">
+                          <button 
+                            onClick={() => setSelectedRoleForEdit(role)}
+                            className="p-1.5 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-white/5" 
+                            title="Edit Role"
+                          >
                             <Edit2 size={16} />
                           </button>
                         </PermissionGate>
@@ -150,6 +160,17 @@ export default function RolesList() {
       </div>
 
       {/* Modals */}
+      {selectedRoleForEdit && (
+        <EditRoleModal
+          role={selectedRoleForEdit}
+          onClose={() => setSelectedRoleForEdit(null)}
+          onSuccess={() => {
+            setSelectedRoleForEdit(null);
+            fetchRoles();
+          }}
+        />
+      )}
+
       {selectedRoleForPermissions && (
         <ManagePermissionsMatrix 
           role={selectedRoleForPermissions} 
@@ -161,6 +182,16 @@ export default function RolesList() {
         <AssignUsersModal 
           role={selectedRoleForUsers} 
           onClose={() => setSelectedRoleForUsers(null)} 
+        />
+      )}
+
+      {isCreateModalOpen && (
+        <CreateRoleModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            fetchRoles();
+          }}
         />
       )}
 
