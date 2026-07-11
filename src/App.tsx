@@ -12,10 +12,13 @@ import RolesList from './pages/RolesList';
 import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import PermissionGate from './components/PermissionGate';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/superadmin/*" element={

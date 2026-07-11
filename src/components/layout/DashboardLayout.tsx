@@ -22,7 +22,9 @@ import { usePermissions } from '../../hooks/usePermissions';
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState<string | null>('Ticket System');
+  const [expandedMenu, setExpandedMenu] = useState<string | null>('Sales');
+  // @ts-ignore
+  const [expandedSubMenu, setExpandedSubMenu] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
@@ -52,8 +54,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   const basePath = role === 'company' ? '/companydashboard' : role === 'employee' ? '/employeedashboard' : '/orgdashboard';
 
+  type NestedItem = { name: string; path: string; permission?: string };
+  type SubItem = { name: string; path?: string; permission?: string; items?: NestedItem[] };
+  type NavItem = { name: string; icon: any; permission?: string; subItems: SubItem[] };
+
   // Base configurations with permissions
-  const navConfig = role === 'employee' ? [
+  const navConfig: NavItem[] = role === 'employee' ? [
     {
       name: 'My Profile',
       icon: User,
@@ -90,7 +96,22 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       name: 'Sales',
       icon: LineChart,
       permission: 'sales.view',
-      subItems: [{ name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }]
+      subItems: role === 'company' ? [
+        { name: 'Dashboard', path: `${basePath}/sales`, permission: 'sales.view' },
+        { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' },
+        { name: 'Vendors', path: `${basePath}/sales/vendors`, permission: 'sales.vendors.view' },
+        { name: 'Products', path: `${basePath}/sales/products`, permission: 'sales.products.view' },
+        { 
+          name: 'Quotations', 
+          permission: 'sales.quotations.view',
+          items: [
+            { name: 'All Quotations', path: `${basePath}/sales/quotations`, permission: 'sales.quotations.view' },
+            { name: 'Add Quotation', path: `${basePath}/sales/quotations/new`, permission: 'sales.quotations.create' }
+          ]
+        }
+      ] : [
+        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }
+      ]
     },
     {
       name: 'Finance',
@@ -98,14 +119,9 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       permission: 'finance.view',
       subItems: role === 'company' ? [
         { name: 'Dashboard', path: `${basePath}/finance`, permission: 'finance.view' },
-        { name: 'Projects', path: `${basePath}/finance/projects`, permission: 'finance.projects.view' },
-        { name: 'Vendors', path: `${basePath}/finance/vendors`, permission: 'finance.vendors.view' },
         { name: 'Purchase Orders', path: `${basePath}/finance/pos`, permission: 'finance.pos.view' },
         { name: 'Delivery Challans', path: `${basePath}/finance/challans`, permission: 'finance.challans.view' },
-        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' },
-        { name: 'Invoices', path: `${basePath}/finance/invoices`, permission: 'finance.invoices.view' },
-        { name: 'Payments', path: `${basePath}/finance/payments`, permission: 'finance.payments.view' },
-        { name: 'Reports', path: `${basePath}/finance/reports`, permission: 'finance.reports.view' }
+        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' }
       ] : [
         { name: 'Finance Dashboard', path: `${basePath}/finance`, permission: 'finance.view' }
       ]
@@ -144,9 +160,31 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     .filter(item => !('permission' in item) || can(item.permission as string))
     .map(item => ({
       ...item,
-      subItems: item.subItems.filter(sub => !('permission' in sub) || can((sub as any).permission as string))
+      subItems: item.subItems.filter(sub => {
+        if ('permission' in sub && !can(sub.permission as string)) return false;
+        
+        // Also check if nested items have permission
+        if (sub.items) {
+          // IMPORTANT: Do not mutate the original object in navConfig
+          const filteredItems = sub.items.filter(nested => !('permission' in nested) || can(nested.permission as string));
+          if (filteredItems.length === 0) return false;
+          // We need to return a new object to avoid mutation
+          return true;
+        }
+        return true;
+      }).map(sub => {
+        if (sub.items) {
+          return {
+            ...sub,
+            items: sub.items.filter(nested => !('permission' in nested) || can(nested.permission as string))
+          };
+        }
+        return sub;
+      })
     }))
     .filter(item => item.subItems.length > 0 || !item.subItems);
+
+  console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
@@ -195,7 +233,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
                 {/* Dropdown Content */}
                 <div
-                  className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
+                  className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
                 >
                   <div className="pl-9 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-5 relative">
                     {item.subItems.map(sub => {
@@ -206,7 +244,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                       return (
                         <Link
                           key={sub.name}
-                          to={sub.path}
+                          to={sub.path || '#'}
                           className={`block py-2 text-sm transition-colors rounded-sm px-3 relative
                             ${isActive ? 'text-white bg-white/10 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}
                           `}
