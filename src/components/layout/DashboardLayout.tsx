@@ -117,14 +117,9 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       permission: 'finance.view',
       subItems: role === 'company' ? [
         { name: 'Dashboard', path: `${basePath}/finance`, permission: 'finance.view' },
-        { name: 'Projects', path: `${basePath}/finance/projects`, permission: 'finance.projects.view' },
-        { name: 'Vendors', path: `${basePath}/finance/vendors`, permission: 'finance.vendors.view' },
         { name: 'Purchase Orders', path: `${basePath}/finance/pos`, permission: 'finance.pos.view' },
         { name: 'Delivery Challans', path: `${basePath}/finance/challans`, permission: 'finance.challans.view' },
-        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' },
-        { name: 'Invoices', path: `${basePath}/finance/invoices`, permission: 'finance.invoices.view' },
-        { name: 'Payments', path: `${basePath}/finance/payments`, permission: 'finance.payments.view' },
-        { name: 'Reports', path: `${basePath}/finance/reports`, permission: 'finance.reports.view' }
+        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' }
       ] : [
         { name: 'Finance Dashboard', path: `${basePath}/finance`, permission: 'finance.view' }
       ]

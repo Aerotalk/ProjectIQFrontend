@@ -16,6 +16,11 @@ import VendorsList from './sales/VendorsList';
 import ProductsList from './sales/ProductsList';
 import QuotationsList from './sales/QuotationsList';
 import QuotationDetails from './sales/QuotationDetails';
+import FinanceDashboard from './finance/FinanceDashboard';
+import POManagement from './finance/POManagement';
+import ChallanManagement from './finance/ChallanManagement';
+import ExpenseManagement from './finance/ExpenseManagement';
+import ProjectFinanceDetails from './finance/ProjectFinanceDetails';
 
 function DefaultView() {
   return (
@@ -75,6 +80,31 @@ export default function CompanyDashboard() {
         <Route path="/sales/quotations/:id" element={
           <PermissionGate permission="sales.quotations.view">
             <QuotationDetails />
+          </PermissionGate>
+        } />
+        <Route path="/finance" element={
+          <PermissionGate permission="finance.view">
+            <FinanceDashboard />
+          </PermissionGate>
+        } />
+        <Route path="/finance/pos" element={
+          <PermissionGate permission="finance.pos.view">
+            <POManagement />
+          </PermissionGate>
+        } />
+        <Route path="/finance/challans" element={
+          <PermissionGate permission="finance.challans.view">
+            <ChallanManagement />
+          </PermissionGate>
+        } />
+        <Route path="/finance/expenses" element={
+          <PermissionGate permission="finance.expenses.view">
+            <ExpenseManagement />
+          </PermissionGate>
+        } />
+        <Route path="/finance/projects/:id" element={
+          <PermissionGate permission="finance.projects.view">
+            <ProjectFinanceDetails />
           </PermissionGate>
         } />
         <Route path="/profile" element={<CompanyProfile />} />
