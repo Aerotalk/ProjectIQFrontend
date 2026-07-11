@@ -70,7 +70,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       <aside className="w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <img src={logo} alt="BumbleERP Logo" className="h-8 w-auto mr-3 rounded-sm shadow-sm" />
+          <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
           <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
           <span className="ml-2 text-[10px] font-semibold bg-[#792359]/20 text-[#e6a8d0] px-1.5 py-0.5 rounded-sm border border-[#792359]/30">ADMIN</span>
         </div>

@@ -67,7 +67,7 @@ export default function Login() {
         
         {/* Header/Logo */}
         <div className="mb-8 flex items-center justify-center gap-3">
-          <img src={logo} alt="BumbleERP Logo" className="w-10 h-10 object-contain shadow-md rounded-sm" />
+          <img src={logo} alt="BumbleERP Logo" className="w-14 h-14 object-contain shadow-md rounded-sm" />
           <span className="text-3xl font-bold tracking-tight text-gray-900">BumbleERP</span>
         </div>
 
