@@ -177,7 +177,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
           {navItems.map((item) => {
             const isExpanded = expandedMenu === item.name;
-            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path)));
+            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path as string)));
 
             return (
               <div key={item.name} className="mb-1">
@@ -202,7 +202,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                     {item.subItems.map(sub => {
                       const exactMatch = location.pathname === sub.path;
                       const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
-                      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path));
+                      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path as string));
                       
                       return (
                         <Link
