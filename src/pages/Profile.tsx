@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Camera, Save, Key, User, Mail, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
@@ -42,7 +43,6 @@ export default function Profile() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
   // Fetch real org data on mount
   useEffect(() => {
@@ -81,11 +81,10 @@ export default function Profile() {
       });
       // Update localStorage so the sidebar reflects new name immediately
       localStorage.setItem('organizationName', profileData.name);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.success('Profile updated successfully!');
     } catch (err) {
       console.error('Failed to save profile', err);
-      alert('Failed to save profile. Please try again.');
+      toast.error('Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -95,12 +94,6 @@ export default function Profile() {
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-6 relative">
         
-        {/* Toast Notification */}
-        <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-          <CheckCircle2 size={20} />
-          <span className="text-sm font-medium">Profile updated successfully!</span>
-        </div>
-
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Profile Settings</h1>

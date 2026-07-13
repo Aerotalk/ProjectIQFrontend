@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
@@ -492,8 +493,6 @@ export default function MyAccounts() {
   const [viewState, setViewState] = useState<ViewState>('list');
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null);
-  
-  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
@@ -577,13 +576,10 @@ export default function MyAccounts() {
       
       await fetchAccounts();
       setViewState('list');
-      setShowToast(true);
-      setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
+      toast.success('Account details saved successfully!');
     } catch (error) {
       console.error('Failed to save company', error);
-      alert('Failed to save company');
+      toast.error('Failed to save company');
     }
   };
 
@@ -652,12 +648,6 @@ export default function MyAccounts() {
 
   return (
     <div className="w-full relative">
-      {/* Toast Notification */}
-      <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-        <CheckCircle2 size={20} />
-        <span className="text-sm font-medium">Account details saved successfully!</span>
-      </div>
-      
       {viewState === 'list' && renderList()}
       {viewState === 'add' && (
         <AccountForm 

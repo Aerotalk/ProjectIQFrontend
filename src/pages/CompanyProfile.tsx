@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { Plus, Building2, MapPin, CreditCard, Save, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
@@ -79,7 +80,6 @@ export default function CompanyProfile() {
   const statesList = State.getStatesOfCountry(selectedCountryCode);
   
   const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -199,11 +199,10 @@ export default function CompanyProfile() {
       };
       
       await api.put('/admin/company/profile', payload);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.success('Company profile updated successfully!');
     } catch (err) {
       console.error('Failed to update company profile', err);
-      alert('Failed to update company profile');
+      toast.error('Failed to update company profile');
     } finally {
       setIsSaving(false);
     }
@@ -216,12 +215,6 @@ export default function CompanyProfile() {
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">
       
-      {/* Toast Notification */}
-      <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-        <CheckCircle2 size={20} />
-        <span className="text-sm font-medium">Company profile updated successfully!</span>
-      </div>
-
       {/* Page Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

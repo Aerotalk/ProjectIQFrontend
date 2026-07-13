@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { api } from '../lib/api';
 import { Search, Plus, Trash2, Edit2, Loader2, Users } from 'lucide-react';
 
@@ -68,9 +69,10 @@ export default function DepartmentDirectory() {
       setNewDeptCode('');
       setNewDeptName('');
       setNewDeptDesc('');
+      toast.success('Department added successfully');
       fetchDepartments();
     } catch (err: any) {
-      alert(err.message || 'Failed to add department');
+      toast.error(err.message || 'Failed to add department');
     } finally {
       setSubmitting(false);
     }
@@ -81,9 +83,10 @@ export default function DepartmentDirectory() {
     try {
       const orgId = getOrgIdFromToken();
       await api.delete(`/admin/departments/${id}?organizationId=${orgId}`);
+      toast.success('Department deleted successfully');
       fetchDepartments();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete department');
+      toast.error(err.message || 'Failed to delete department');
     }
   };
 

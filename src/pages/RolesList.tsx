@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { rolesService, type Role } from '../services/roles.service';
 import PermissionGate from '../components/PermissionGate';
 import { Shield, Plus, Edit2, Users, Trash2, Key } from 'lucide-react';
@@ -40,7 +41,7 @@ export default function RolesList() {
         fetchRoles();
       } catch (err: any) {
         console.error('Failed to delete role', err);
-        alert(err.response?.data?.error || err.response?.data?.message || 'Failed to delete role');
+        toast.error(err.response?.data?.error || err.response?.data?.message || 'Failed to delete role');
       }
     }
   };

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import logo from '../assets/BumbleERPLogo.png';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth, type User } from '../contexts/AuthContext';
@@ -8,7 +9,6 @@ import { useAuth, type User } from '../contexts/AuthContext';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -59,12 +59,6 @@ export default function Login() {
 
       {/* Login Container */}
       <div className="relative z-10 w-full max-w-[440px] px-6">
-
-        {/* Error Toast */}
-        <div className={`absolute -top-16 left-6 right-6 flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform z-50 ${error ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0 pointer-events-none'}`}>
-          <AlertCircle size={20} />
-          <span className="text-sm font-medium">Invalid email or password.</span>
-        </div>
 
         {/* Header/Logo */}
         <div className="mb-8 flex items-center justify-center gap-3">
@@ -127,8 +121,7 @@ export default function Login() {
 
               } catch (err) {
                 console.error(err);
-                setError(true);
-                setTimeout(() => setError(false), 3000);
+                toast.error('Invalid email or password.');
               } finally {
                 setIsLoading(false);
               }

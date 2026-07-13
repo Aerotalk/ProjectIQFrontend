@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import SuperAdminLayout from '../components/layout/SuperAdminLayout';
 import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
-import { useEffect } from 'react';
 
 interface Organization {
   id: string;
@@ -46,13 +46,11 @@ export default function SuperAdminDashboard() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
   
   // Edit Modal State
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [editFormData, setEditFormData] = useState<Organization | null>(null);
-  const [showEditToast, setShowEditToast] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
 
   const openEditModal = (org: Organization) => {
@@ -69,8 +67,7 @@ export default function SuperAdminDashboard() {
     ));
     
     setSelectedOrg(null);
-    setShowEditToast(true);
-    setTimeout(() => setShowEditToast(false), 3000);
+    toast.success('Profile updated successfully!');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,9 +75,8 @@ export default function SuperAdminDashboard() {
     try {
       const newOrg = await api.post('/admin/organizations', formData);
       setOrganizations([newOrg, ...organizations]);
-      setShowToast(true);
       setIsFormVisible(false); // Hide the form after successful submission
-      setTimeout(() => setShowToast(false), 3000);
+      toast.success('Organization added successfully!');
       
       // Reset form
       setFormData({
@@ -95,24 +91,13 @@ export default function SuperAdminDashboard() {
       });
     } catch (err) {
       console.error('Failed to create organization', err);
+      toast.error('Failed to create organization');
     }
   };
 
   return (
     <SuperAdminLayout>
       <div className="max-w-7xl mx-auto space-y-6 relative">
-        
-        {/* Toast Notifications */}
-        <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-          <CheckCircle2 size={20} />
-          <span className="text-sm font-medium">Organization added successfully!</span>
-        </div>
-        
-        <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showEditToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-          <CheckCircle2 size={20} />
-          <span className="text-sm font-medium">Profile updated successfully!</span>
-        </div>
-
         {/* -------------------- MAIN DASHBOARD VIEW -------------------- */}
         {!selectedOrg && (
           <div className="animate-in fade-in duration-300">

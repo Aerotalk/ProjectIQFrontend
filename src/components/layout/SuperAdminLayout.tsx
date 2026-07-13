@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import logo from '../../assets/BumbleERPLogo.png';
 import {
   LogOut,
@@ -17,7 +18,6 @@ import { usePermissions } from '../../hooks/usePermissions';
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
   const { can } = usePermissions();
 
@@ -27,9 +27,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     }
 
     if (sessionStorage.getItem('showWelcomeToast') === 'true') {
-      setShowWelcome(true);
+      toast.success('Welcome back, Super Admin!');
       sessionStorage.removeItem('showWelcomeToast');
-      setTimeout(() => setShowWelcome(false), 4000);
     }
   }, []);
 
@@ -56,15 +55,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
-
-      {/* Welcome Toast Notification */}
-      <div className={`fixed top-20 right-8 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-5 py-3.5 rounded-sm shadow-xl transition-all duration-500 transform z-50 ${showWelcome ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0 pointer-events-none'}`}>
-        <CheckCircle2 size={20} />
-        <div>
-          <span className="block text-sm font-bold">Welcome back, Super Admin!</span>
-          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in.</span>
-        </div>
-      </div>
 
       {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
       <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
