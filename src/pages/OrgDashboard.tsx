@@ -10,6 +10,7 @@ import DesignationDirectory from './DesignationDirectory';
 import RolesList from './RolesList';
 import AdminUsersList from './AdminUsersList';
 import PermissionGate from '../components/PermissionGate';
+import ClientsList from './sales/ClientsList';
 
 function DefaultView() {
   const location = useLocation();
@@ -117,6 +118,11 @@ export default function OrgDashboard() {
         <Route path="/users" element={
           <PermissionGate permission="user.view">
             <AdminUsersList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/clients" element={
+          <PermissionGate permission="sales.clients.view">
+            <ClientsList />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

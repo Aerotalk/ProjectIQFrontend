@@ -110,7 +110,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           ]
         }
       ] : [
-        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }
+        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' },
+        { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' }
       ]
     },
     {
