@@ -29,6 +29,9 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+  logoFileId?: string;
+  invoiceLogoId?: string;
+  stampFileId?: string;
   
   addressType: string;
   addressLine1: string;
@@ -73,6 +76,10 @@ const InputField = ({
 export default function CompanyProfile() {
   const [formData, setFormData] = useState<Partial<AccountData>>({});
   const [banks, setBanks] = useState<BankData[]>([]);
+
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [invoiceLogoFile, setInvoiceLogoFile] = useState<File | null>(null);
+  const [stampFile, setStampFile] = useState<File | null>(null);
 
   const countries = Country.getAllCountries();
   const selectedCountryCode = countries.find(c => c.name === (formData.country || 'India'))?.isoCode || 'IN';
@@ -172,12 +179,48 @@ export default function CompanyProfile() {
     }));
   };
 
+  const uploadFile = async (file: File): Promise<string | null> => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return null;
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('organizationId', orgId);
+      
+      const res = await api.post('/admin/files/upload', formData);
+      return res.id || null;
+    } catch (err) {
+      console.error('Failed to upload file', err);
+      toast.error(`Failed to upload ${file.name}`);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      let { logoFileId, invoiceLogoId, stampFileId } = formData;
+
+      if (logoFile) {
+        const id = await uploadFile(logoFile);
+        if (id) logoFileId = id;
+      }
+      if (invoiceLogoFile) {
+        const id = await uploadFile(invoiceLogoFile);
+        if (id) invoiceLogoId = id;
+      }
+      if (stampFile) {
+        const id = await uploadFile(stampFile);
+        if (id) stampFileId = id;
+      }
+
       const payload = {
         ...formData,
+        logoFileId,
+        invoiceLogoId,
+        stampFileId,
         addresses: [{
           addressType: formData.addressType || 'Registered',
           addressLine1: formData.addressLine1 || '',
@@ -275,15 +318,15 @@ export default function CompanyProfile() {
               
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Logo</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Invoice Logo</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Stamp</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               
               <div className="space-y-1.5">

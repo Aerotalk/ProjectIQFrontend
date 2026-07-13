@@ -33,6 +33,9 @@ interface AccountData {
   secondaryColor: string;
   adminPassword?: string;
   companyCode?: string;
+  logoFileId?: string;
+  invoiceLogoId?: string;
+  stampFileId?: string;
   
   addressType: string;
   addressLine1: string;
@@ -129,6 +132,10 @@ const AccountForm = ({
     postalCode: primaryAddress?.postalCode || '',
   });
 
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [invoiceLogoFile, setInvoiceLogoFile] = useState<File | null>(null);
+  const [stampFile, setStampFile] = useState<File | null>(null);
+
   const [showPassword, setShowPassword] = useState(false);
 
   const countries = Country.getAllCountries();
@@ -191,13 +198,43 @@ const AccountForm = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const uploadFile = async (file: File): Promise<string | null> => {
+    try {
+      const orgId = localStorage.getItem('organizationId');
+      if (!orgId) return null;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('organizationId', orgId);
+      const res = await api.post('/admin/files/upload', formData);
+      return res.id || null;
+    } catch (err) {
+      console.error('Failed to upload file', err);
+      toast.error(`Failed to upload ${file.name}`);
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      onSave({ ...formData, banks } as AccountData);
-    }, 800);
+    
+    let { logoFileId, invoiceLogoId, stampFileId } = formData;
+
+    if (logoFile) {
+      const id = await uploadFile(logoFile);
+      if (id) logoFileId = id;
+    }
+    if (invoiceLogoFile) {
+      const id = await uploadFile(invoiceLogoFile);
+      if (id) invoiceLogoId = id;
+    }
+    if (stampFile) {
+      const id = await uploadFile(stampFile);
+      if (id) stampFileId = id;
+    }
+
+    onSave({ ...formData, logoFileId, invoiceLogoId, stampFileId, banks } as AccountData);
+    setIsSaving(false);
   };
 
   const isEditMode = !!initialData;
@@ -304,15 +341,15 @@ const AccountForm = ({
               
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Logo</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Invoice Logo</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Stamp</label>
-                <input type="file" className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <input type="file" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
               </div>
               
               <div className="space-y-1.5">
@@ -563,6 +600,9 @@ export default function MyAccounts() {
           ? `${data.companyName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
           : data.companyCode,
         adminPassword: data.adminPassword || undefined,
+        logoFileId: data.logoFileId,
+        invoiceLogoId: data.invoiceLogoId,
+        stampFileId: data.stampFileId,
         addresses,
         bankAccounts
       };

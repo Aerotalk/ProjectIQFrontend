@@ -9,9 +9,12 @@ export const api = {
     const url = `${API_BASE_URL}${endpoint}`;
     
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
+
+    if (!(options.data instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const token = localStorage.getItem('token');
     if (token && !endpoint.startsWith('/auth')) {
@@ -24,7 +27,11 @@ export const api = {
     };
 
     if (options.data) {
-      config.body = JSON.stringify(options.data);
+      if (options.data instanceof FormData) {
+        config.body = options.data;
+      } else {
+        config.body = JSON.stringify(options.data);
+      }
     }
 
     const response = await fetch(url, config);
