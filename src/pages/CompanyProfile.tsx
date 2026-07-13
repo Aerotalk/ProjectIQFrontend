@@ -115,6 +115,26 @@ export default function CompanyProfile() {
     }
   };
 
+  useEffect(() => {
+    if (formData.gstNumber && formData.gstNumber.length === 15) {
+      const fetchGstInfo = async () => {
+        try {
+          const res = await api.get(`/admin/utils/gst-info?gstNumber=${formData.gstNumber}`);
+          if (res) {
+            setFormData(prev => ({
+              ...prev,
+              panNumber: res.panNumber || prev.panNumber,
+              state: res.stateName || prev.state
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to fetch GST info", err);
+        }
+      };
+      fetchGstInfo();
+    }
+  }, [formData.gstNumber]);
+
   const addBank = () => {
     setBanks([...banks, {
       id: Date.now().toString(),
