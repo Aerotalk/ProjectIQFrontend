@@ -68,7 +68,7 @@ export default function VendorsList() {
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       {/* Breadcrumb & Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
             <span>Sales</span>

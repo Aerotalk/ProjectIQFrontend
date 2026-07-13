@@ -117,7 +117,7 @@ export default function SuperAdminDashboard() {
         {!selectedOrg && (
           <div className="animate-in fade-in duration-300">
             {/* Page Header */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Organization Management</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Register new organizations and manage existing tenant accounts.</p>
@@ -273,11 +273,11 @@ export default function SuperAdminDashboard() {
 
             {/* Organizations List */}
             <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden mt-8">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Registered Organizations</h2>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                  <input type="text" placeholder="Search orgs..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[#792359] rounded-sm transition-all outline-none w-64" />
+                  <input type="text" placeholder="Search orgs..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[#792359] rounded-sm transition-all outline-none w-48 xl:w-64" />
                 </div>
               </div>
               

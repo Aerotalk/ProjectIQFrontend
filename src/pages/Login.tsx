@@ -50,10 +50,10 @@ export default function Login() {
         ></div>
 
         {/* Geometric Floating Elements (Distinct) */}
-        <div className="absolute top-[10%] left-[10%] w-28 h-28 border-4 border-[#792359]/40 rounded-full animate-float-slow opacity-90 shadow-sm"></div>
-        <div className="absolute bottom-[15%] right-[10%] w-36 h-36 border-4 border-[#792359]/30 rotate-45 animate-float-slower opacity-90 shadow-sm"></div>
-        <div className="absolute top-[40%] right-[18%] w-16 h-16 border-[5px] border-[#792359]/50 rounded-full animate-float-slow opacity-100" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[30%] left-[15%] w-20 h-20 bg-[#792359]/10 rotate-12 rounded-lg animate-float-slower opacity-80 backdrop-blur-sm border border-[#792359]/20" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-[10%] left-[10%] w-28 h-28 border-4 border-[#792359]/40 rounded-full animate-float-slow opacity-90 shadow-sm hidden sm:block"></div>
+        <div className="absolute bottom-[15%] right-[10%] w-36 h-36 border-4 border-[#792359]/30 rotate-45 animate-float-slower opacity-90 shadow-sm hidden sm:block"></div>
+        <div className="absolute top-[40%] right-[18%] w-16 h-16 border-[5px] border-[#792359]/50 rounded-full animate-float-slow opacity-100 hidden md:block" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[30%] left-[15%] w-20 h-20 bg-[#792359]/10 rotate-12 rounded-lg animate-float-slower opacity-80 backdrop-blur-sm border border-[#792359]/20 hidden md:block" style={{ animationDelay: '3s' }}></div>
       </div>
       {/* ---------------------------------- */}
 

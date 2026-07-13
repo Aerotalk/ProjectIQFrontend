@@ -71,7 +71,7 @@ export default function QuotationsList() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Quotations</h1>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2">
             <Filter size={16} /> Filter
           </button>

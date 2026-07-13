@@ -128,7 +128,7 @@ export default function EmployeeDirectory() {
            <p className="text-gray-500 max-w-sm">We couldn't find any employees matching your search criteria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {filteredEmployees.map((emp) => (
             <div key={emp.id} className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col hover:-translate-y-1">
               <div className="h-20 bg-gradient-to-r from-[#792359]/10 to-[#e6a8d0]/10 dark:from-[#792359]/20 dark:to-transparent w-full"></div>
