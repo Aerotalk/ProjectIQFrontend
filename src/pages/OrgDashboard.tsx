@@ -1,7 +1,7 @@
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { LayoutGrid, Building2, ChevronDown } from 'lucide-react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import MyAccounts from './MyAccounts';
 import EmployeeDirectory from './EmployeeDirectory';
@@ -10,6 +10,7 @@ import DesignationDirectory from './DesignationDirectory';
 import RolesList from './RolesList';
 import AdminUsersList from './AdminUsersList';
 import PermissionGate from '../components/PermissionGate';
+import ClientsList from './sales/ClientsList';
 
 function DefaultView() {
   const location = useLocation();
@@ -41,12 +42,12 @@ function DefaultView() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  let title = 'Ticket Dashboard';
-  let description = 'The ticket system module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
+  let title = 'Profile Dashboard';
+  let description = 'The profile module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
   
   if (location.pathname.includes('/account')) {
-    title = 'Account Dashboard';
-    description = 'The account module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
+    title = 'Profile Dashboard';
+    description = 'The profile module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
   } else if (location.pathname.includes('/sales')) {
     title = 'Sales Dashboard';
     description = 'The sales module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
@@ -117,6 +118,11 @@ export default function OrgDashboard() {
         <Route path="/users" element={
           <PermissionGate permission="user.view">
             <AdminUsersList />
+          </PermissionGate>
+        } />
+        <Route path="/sales/clients" element={
+          <PermissionGate permission="sales.clients.view">
+            <ClientsList />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

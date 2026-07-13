@@ -1,0 +1,123 @@
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
+import { X, Loader2, Save } from 'lucide-react';
+import { useQuotationForm } from '../../hooks/useQuotationForm';
+import type { QuotationFormValues } from '../../validators/quotationValidation';
+import HeaderSection from './sections/HeaderSection';
+import LineItemsSection from './sections/LineItemsSection';
+import TotalsSection from './sections/TotalsSection';
+import WorkflowSection from './sections/WorkflowSection';
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: QuotationFormValues) => Promise<void>;
+  mode: 'create' | 'edit' | 'view';
+  initialData?: Partial<QuotationFormValues>;
+  quotationNo?: string;
+  isSubmitting?: boolean;
+}
+
+export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initialData, quotationNo, isSubmitting }: Props) {
+  const form = useQuotationForm(initialData);
+
+  // Reset form when drawer opens/closes or initialData changes
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        date: new Date().toISOString().split('T')[0],
+        validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: 'Draft',
+        lineItems: [],
+        subTotal: 0,
+        totalDiscount: 0,
+        totalTaxableAmount: 0,
+        totalGstAmount: 0,
+        grandTotal: 0,
+        ...initialData
+      });
+    }
+  }, [isOpen, initialData, form]);
+
+  if (!isOpen) return null;
+
+  const readOnly = mode === 'view';
+
+  const onSubmit = async (data: QuotationFormValues) => {
+    await onSave(data);
+  };
+
+  return (
+    <div 
+      className="fixed inset-y-0 right-0 w-full max-w-4xl lg:max-w-5xl bg-white dark:bg-[#181a1f] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-gray-200 dark:border-white/10 flex flex-col"
+      style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
+    >
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {mode === 'create' ? 'Create Quotation' : mode === 'edit' ? 'Edit Quotation' : 'View Quotation'}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            {mode === 'create' ? 'System will generate Quotation No on save.' : `Quotation No: ${initialData?.quotationNo || quotationNo}`}
+          </p>
+        </div>
+        <button 
+          onClick={onClose}
+          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <FormProvider {...form}>
+          <form id="quotation-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            
+            <HeaderSection readOnly={readOnly} />
+            
+            <LineItemsSection readOnly={readOnly} />
+            
+            <TotalsSection readOnly={readOnly} />
+            
+            <WorkflowSection readOnly={readOnly} />
+
+          </form>
+        </FormProvider>
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+        >
+          {mode === 'view' ? 'Close' : 'Cancel'}
+        </button>
+        
+        {!readOnly && (
+          <button
+            type="submit"
+            form="quotation-drawer-form"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Save Quotation
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
