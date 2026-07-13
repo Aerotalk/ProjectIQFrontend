@@ -101,14 +101,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' },
         { name: 'Vendors', path: `${basePath}/sales/vendors`, permission: 'sales.vendors.view' },
         { name: 'Products', path: `${basePath}/sales/products`, permission: 'sales.products.view' },
-        { 
-          name: 'Quotations', 
-          permission: 'sales.quotations.view',
-          items: [
-            { name: 'All Quotations', path: `${basePath}/sales/quotations`, permission: 'sales.quotations.view' },
-            { name: 'Add Quotation', path: `${basePath}/sales/quotations/new`, permission: 'sales.quotations.create' }
-          ]
-        }
+        { name: 'Quotations', path: `${basePath}/sales/quotations`, permission: 'sales.quotations.view' }
       ] : [
         { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' },
         { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' }
