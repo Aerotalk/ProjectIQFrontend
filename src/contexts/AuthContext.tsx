@@ -8,6 +8,7 @@ export interface User {
   organizationName: string | null;
   companyId: string | null;
   companyName: string | null;
+  logoUrl?: string | null;
   effectivePermissions: string[];
 }
 

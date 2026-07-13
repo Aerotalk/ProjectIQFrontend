@@ -203,8 +203,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
-          <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
+          <img src={user?.logoUrl || logo} alt={user?.logoUrl ? `${orgName} Logo` : "BumbleERP Logo"} className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
+          <span className="font-bold text-lg tracking-wide text-white truncate" title={user?.logoUrl ? orgName : "BumbleERP"}>
+            {user?.logoUrl ? orgName : "BumbleERP"}
+          </span>
         </div>
 
         {/* Navigation */}

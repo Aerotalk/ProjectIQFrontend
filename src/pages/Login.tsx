@@ -101,6 +101,7 @@ export default function Login() {
                   organizationName: response.organizationName || null,
                   companyId: null, // login response currently doesn't have companyId, adjust if needed
                   companyName: null,
+                  logoUrl: response.logoUrl || null,
                   effectivePermissions: response.effectivePermissions || []
                 };
 
