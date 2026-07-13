@@ -138,7 +138,7 @@ const AccountForm = ({
           if (res) {
             setFormData(prev => ({
               ...prev,
-              panNumber: res.panNumber || prev.panNumber,
+              panNumber: res.pan || prev.panNumber,
               state: res.stateName || prev.state
             }));
           }
