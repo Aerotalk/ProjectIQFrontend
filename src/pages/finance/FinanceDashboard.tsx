@@ -1,5 +1,5 @@
 
-import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Calendar } from 'lucide-react';
+import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const KPI_DATA = [
@@ -44,20 +44,27 @@ export default function FinanceDashboard() {
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
-      {/* Top Header & Date Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      {/* Header & Quick Actions */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-[#181a1f] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Finance Dashboard</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Overview of financial health and active projects</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-            01 May 2025 - 31 May 2025 <Calendar size={14} className="text-gray-400" />
+        <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 transition-colors">
+            Create PO
+          </button>
+          <button className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 transition-colors">
+            Add Expense
+          </button>
+          <button className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors shadow-sm flex items-center gap-2">
+            <Plus size={16} /> New Project
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {KPI_DATA.map((kpi, i) => (
           <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group">
             <div className="flex items-center gap-3 mb-3">

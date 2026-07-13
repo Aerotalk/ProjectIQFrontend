@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import logo from '../../assets/BumbleERPLogo.png';
 import {
   User,
@@ -76,11 +76,11 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   ] : [
     {
-      name: 'Account',
+      name: 'Profile',
       icon: User,
       subItems: [
-        { name: 'Account Dashboard', path: `${basePath}/account` },
-        ...(role === 'org' ? [{ name: 'My Accounts', path: `${basePath}/my-accounts` }] : [])
+        { name: 'Dashboard', path: `${basePath}/account` },
+        ...(role === 'org' ? [{ name: 'My Profiles', path: `${basePath}/my-profiles` }] : [])
       ]
     },
     {
@@ -110,7 +110,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           ]
         }
       ] : [
-        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' }
+        { name: 'Sales Dashboard', path: `${basePath}/sales`, permission: 'sales.view' },
+        { name: 'Clients', path: `${basePath}/sales/clients`, permission: 'sales.clients.view' }
       ]
     },
     {
@@ -199,7 +200,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       </div>
 
       {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
-      <aside className="w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
+      <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
           <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
@@ -277,21 +278,21 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-[260px] flex flex-col min-h-screen">
+      <div className="flex-1 ml-[220px] xl:ml-[260px] flex flex-col min-h-screen min-w-0">
 
         {/* Top Header - Clean, subtle border, highly professional */}
-        <header className="h-16 bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-8 sticky top-0 z-10 transition-colors duration-200">
+        <header className="h-16 bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 xl:px-8 sticky top-0 z-10 transition-colors duration-200">
 
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium">
-            <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer">Dashboard</span>
-            <ChevronRight size={14} className="mx-2" />
-            <span className="text-[#792359] dark:text-[#e6a8d0]">{expandedMenu || 'Overview'}</span>
+          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
+            <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</span>
+            <ChevronRight size={14} className="mx-2 shrink-0" />
+            <span className="text-[#792359] dark:text-[#e6a8d0] truncate">{expandedMenu || 'Overview'}</span>
           </div>
 
-          <div className="flex items-center gap-3 relative">
-            <div className="relative mr-4 hidden md:block">
+          <div className="flex items-center gap-2 lg:gap-3 relative shrink-0">
+            <div className="relative mr-2 hidden lg:block">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] rounded-sm transition-all outline-none w-48 focus:w-64 border" />
+              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
             </div>
 
             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors relative">
@@ -356,7 +357,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 lg:p-6 xl:p-8">
           {children}
         </main>
 

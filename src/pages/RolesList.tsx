@@ -49,7 +49,7 @@ export default function RolesList() {
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
       
       {/* Page Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Roles Management</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage system roles, permissions, and user assignments.</p>

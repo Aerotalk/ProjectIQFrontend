@@ -40,7 +40,7 @@ export default function TicketDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {[
           { label: 'Total Open', value: '128', icon: Ticket, trend: '+12%', trendColor: 'text-green-600' },
           { label: 'In Progress', value: '74', icon: Clock, trend: '+8%', trendColor: 'text-green-600' },

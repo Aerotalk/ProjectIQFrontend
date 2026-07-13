@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, CheckCircle2 } from 'lucide-react';
 
 export type SelectOption = string | { label: string; value: string };

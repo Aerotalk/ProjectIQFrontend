@@ -86,13 +86,13 @@ export default function TicketList() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Tickets</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all customer support tickets.</p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-56 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input 
               type="text" 
@@ -102,7 +102,7 @@ export default function TicketList() {
               className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
-          <div className="relative">
+          <div className="relative shrink-0">
             <select 
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -115,12 +115,12 @@ export default function TicketList() {
             </select>
             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           </div>
-          <button onClick={handleExport} className="px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
+          <button onClick={handleExport} className="shrink-0 px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
             <Download size={16} /> Export
           </button>
           <button 
             onClick={() => setIsCreating(true)}
-            className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+            className="shrink-0 px-3 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
           >
             <Plus size={16} /> Create Incident
           </button>
