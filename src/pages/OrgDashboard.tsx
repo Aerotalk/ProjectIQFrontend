@@ -41,12 +41,12 @@ function DefaultView() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  let title = 'Ticket Dashboard';
-  let description = 'The ticket system module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
+  let title = 'Profile Dashboard';
+  let description = 'The profile module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
   
   if (location.pathname.includes('/account')) {
-    title = 'Account Dashboard';
-    description = 'The account module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
+    title = 'Profile Dashboard';
+    description = 'The profile module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
   } else if (location.pathname.includes('/sales')) {
     title = 'Sales Dashboard';
     description = 'The sales module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
