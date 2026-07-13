@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { ClientService } from '../../../../clients/services/client.service';
-import type { Client } from '../../../../clients/types/client.types';
 import { Loader2 } from 'lucide-react';
+import { ClientService } from '@/services/client.service';
+import type { Client } from '@/types/client.types';
 
 interface Props {
   readOnly?: boolean;

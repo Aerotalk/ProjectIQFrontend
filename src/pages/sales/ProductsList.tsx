@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ProductService } from './products/../../services/product.service';
-import type { Product } from './products/../../types/product.types';
+import { ProductService } from '../../services/product.service';
+import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';

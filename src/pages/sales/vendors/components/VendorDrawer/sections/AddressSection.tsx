@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { shouldShowOverseasFields } from '../../../utils/gstRules';
+import { shouldShowOverseasFields } from '../../../../clients/utils/gstRules';
 
 interface Props {
   readOnly?: boolean;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
-import { ProductService } from '../../../../products/services/product.service';
-import type { Product } from '../../../../products/types/product.types';
+import { ProductService } from '../../../../../../services/product.service';
+import type { Product } from '../../../../../../types/product.types';
 
 interface Props {
   readOnly?: boolean;

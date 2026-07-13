@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { QuotationService } from './quotations/../../services/quotation.service';
-import type { Quotation } from './quotations/../../types/quotation.types';
+import { QuotationService } from '../../services/quotation.service';
+import type { Quotation } from '../../types/quotation.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';

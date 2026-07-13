@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
-import { GST_TREATMENTS } from '../../../clients/constants/gstTreatments';
+import { GST_TREATMENTS } from '../../../../clients/constants/gstTreatments';
 import { Card } from '@/components/ui/card';
 
 interface Props {
