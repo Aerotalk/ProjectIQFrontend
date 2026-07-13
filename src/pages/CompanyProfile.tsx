@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Building2, MapPin, CreditCard, Save, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import { api } from '../lib/api';
+import { Country, State } from 'country-state-city';
 
 interface BankData {
   id: string;
@@ -72,6 +73,10 @@ const InputField = ({
 export default function CompanyProfile() {
   const [formData, setFormData] = useState<Partial<AccountData>>({});
   const [banks, setBanks] = useState<BankData[]>([]);
+
+  const countries = Country.getAllCountries();
+  const selectedCountryCode = countries.find(c => c.name === (formData.country || 'India'))?.isoCode || 'IN';
+  const statesList = State.getStatesOfCountry(selectedCountryCode);
   
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -340,9 +345,10 @@ export default function CompanyProfile() {
                   onChange={(e) => updateField('state', e.target.value)}
                   className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
                 >
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Delhi">Delhi</option>
+                  <option value="">Select State</option>
+                  {statesList.map((s: any) => (
+                    <option key={s.isoCode} value={s.name}>{s.name}</option>
+                  ))}
                 </select>
               </div>
               
@@ -350,11 +356,16 @@ export default function CompanyProfile() {
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Country <span className="text-red-500">*</span></label>
                 <select 
                   value={formData.country}
-                  onChange={(e) => updateField('country', e.target.value)}
+                  onChange={(e) => {
+                    updateField('country', e.target.value);
+                    updateField('state', '');
+                  }}
                   className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
                 >
-                  <option value="India">India</option>
-                  <option value="USA">USA</option>
+                  <option value="">Select Country</option>
+                  {countries.map((c: any) => (
+                    <option key={c.isoCode} value={c.name}>{c.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="md:col-span-1">
