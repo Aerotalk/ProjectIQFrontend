@@ -13,7 +13,7 @@ import {
 export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
   const form = useForm<ClientFormValues>({
     resolver: async (data, context, options) => {
-      const dynamicSchema = getClientSchema(data.gstTreatment || 'business_gst');
+      const dynamicSchema = getClientSchema();
       return zodResolver(dynamicSchema)(data, context, options);
     },
     defaultValues: {

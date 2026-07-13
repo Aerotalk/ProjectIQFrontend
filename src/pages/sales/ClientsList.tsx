@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Users, Eye, Edit } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Eye, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ClientService } from '../../services/client.service';
 import type { Client } from '../../types/client.types';

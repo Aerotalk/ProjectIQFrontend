@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 

@@ -1,14 +1,13 @@
-import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { CheckCircle2, XCircle, UploadCloud, Clock } from 'lucide-react';
-import type { QuotationStatus } from '../../../../types/quotation.types';
+import type { QuotationStatus } from '../../../../../../types/quotation.types';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function WorkflowSection({ readOnly }: Props) {
-  const { control, setValue, register } = useFormContext();
+  const { control, setValue } = useFormContext();
 
   const status = useWatch({ control, name: 'status', defaultValue: 'Draft' }) as QuotationStatus;
 

@@ -1,7 +1,5 @@
-import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { GST_TREATMENTS } from '../../../constants/gstTreatments';
-import type { GSTTreatment } from '../../../../../../types/client.types';
 import { Card } from '../../../../../../components/ui/card';
 
 interface Props {

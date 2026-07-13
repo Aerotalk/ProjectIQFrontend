@@ -16,7 +16,7 @@ export const contactSchema = z.object({
   role: z.enum(['Billing', 'Purchase', 'Technical', 'Other']),
 });
 
-export const getClientSchema = (gstTreatment: string) => {
+export const getClientSchema = () => {
   return z.object({
     id: z.string().optional(),
     customerType: z.enum(['Business', 'Individual']),

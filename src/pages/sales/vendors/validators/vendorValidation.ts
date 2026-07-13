@@ -25,7 +25,7 @@ export const vendorBankDetailsSchema = z.object({
   swiftCode: z.string().optional(),
 });
 
-export const getVendorSchema = (gstTreatment: string) => {
+export const getVendorSchema = () => {
   return z.object({
     id: z.string().optional(),
     vendorType: z.enum(['Business', 'Individual']),

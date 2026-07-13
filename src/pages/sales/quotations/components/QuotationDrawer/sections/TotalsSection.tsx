@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 interface Props {
@@ -27,7 +26,7 @@ function numberToWords(num: number): string {
   return str.trim() + ' Rupees Only';
 }
 
-export default function TotalsSection({ readOnly }: Props) {
+export default function TotalsSection({ }: Props) {
   const { control } = useFormContext();
 
   const subTotal = useWatch({ control, name: 'subTotal', defaultValue: 0 });
