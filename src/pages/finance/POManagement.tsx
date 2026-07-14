@@ -1,100 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Search, MoreHorizontal, FileText, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { FinanceService } from '../../services/finance.service';
-import { VendorService } from '../../services/vendor.service';
-import { ProjectService } from '../../services/project.service';
-import type { PurchaseOrder } from '../../types/finance.types';
-import type { Vendor } from '../../types/vendor.types';
-import type { Project } from '../../services/project.service';
+
+const POS = [
+  { id: 'PO-014', vendor: 'AWS India Pvt Ltd', project: 'PRJ-001', date: '10 May 2025', amount: '1,50,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  { id: 'PO-013', vendor: 'SMS Solutions', project: 'PRJ-002', date: '09 May 2025', amount: '50,000', status: 'Pending', statusColor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  { id: 'PO-012', vendor: 'TechSoft Pvt Ltd', project: 'PRJ-003', date: '08 May 2025', amount: '2,20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  { id: 'PO-011', vendor: 'DigitalOcean', project: 'PRJ-003', date: '07 May 2025', amount: '1,80,000', status: 'Completed', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  { id: 'PO-010', vendor: 'Zoho Corporation', project: 'PRJ-004', date: '06 May 2025', amount: '75,000', status: 'Cancelled', statusColor: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  { id: 'PO-009', vendor: 'Microsoft India', project: 'PRJ-005', date: '05 May 2025', amount: '1,20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  { id: 'PO-008', vendor: 'Hostinger', project: 'PRJ-005', date: '04 May 2025', amount: '20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+];
 
 export default function POManagement() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const [pos, setPos] = useState<PurchaseOrder[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [file, setFile] = useState<File | null>(null);
-
   const [formData, setFormData] = useState({
-    projectId: '', vendorId: '', poNumber: '', poDate: '', amount: '', remarks: ''
+    project: '', vendor: '', poNumber: '', poDate: '', amount: '', remarks: ''
   });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const [posData, vendorsData, projectsData] = await Promise.all([
-        FinanceService.getPurchaseOrders(),
-        VendorService.getVendors(),
-        ProjectService.getProjects()
-      ]);
-      setPos(posData);
-      setVendors(vendorsData);
-      setProjects(projectsData);
-    } catch (error) {
-      toast.error('Failed to load data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSavePO = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    try {
-      let attachmentFileId = undefined;
-      if (file) {
-        const uploadRes = await FinanceService.uploadFile(file);
-        attachmentFileId = uploadRes.id;
-      }
-
-      await FinanceService.createPurchaseOrder({
-        projectId: formData.projectId,
-        vendorId: formData.vendorId,
-        poNumber: formData.poNumber,
-        poDate: formData.poDate,
-        amount: Number(formData.amount),
-        remarks: formData.remarks,
-        status: 'Pending',
-        projectName: projects.find(p => p.id === formData.projectId)?.projectName || '',
-        vendorName: vendors.find(v => v.id === formData.vendorId)?.displayName || '',
-        attachmentFileId
-      });
-
-      toast.success('Purchase Order created successfully');
-      setIsFormVisible(false);
-      setFormData({ projectId: '', vendorId: '', poNumber: '', poDate: '', amount: '', remarks: '' });
-      setFile(null);
-      fetchData();
-    } catch (error) {
-      toast.error('Failed to create Purchase Order');
-    } finally {
-      setIsSubmitting(false);
-    }
+    await new Promise(resolve => setTimeout(resolve, 800));
+    toast.success('Purchase Order created successfully');
+    setIsFormVisible(false);
+    setFormData({ project: '', vendor: '', poNumber: '', poDate: '', amount: '', remarks: '' });
+    setIsSubmitting(false);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case 'pending': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
-      case 'completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
-    }
-  };
-
-  const filteredPOs = pos.filter(po => 
-    po.poNumber?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    po.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPOs = POS.filter(po => 
+    po.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    po.vendor.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const totalPages = Math.ceil(filteredPOs.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -103,6 +44,7 @@ export default function POManagement() {
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -128,11 +70,15 @@ export default function POManagement() {
             <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
               <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
                 <option>All Projects</option>
-                {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
+                <option>PRJ-001</option>
               </select>
               <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
                 <option>All Vendors</option>
-                {vendors.map(v => <option key={v.id} value={v.id}>{v.displayName}</option>)}
+                <option>AWS India</option>
+              </select>
+              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
+                <option>Status</option>
+                <option>Approved</option>
               </select>
             </div>
             <div className="relative w-full sm:w-64">
@@ -161,20 +107,16 @@ export default function POManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isLoading ? (
-                  <tr><td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">Loading...</td></tr>
-                ) : currentItems.length === 0 ? (
-                  <tr><td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">No purchase orders found.</td></tr>
-                ) : currentItems.map((po) => (
+                {currentItems.map((po) => (
                   <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group text-sm">
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{po.poNumber}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{po.vendorName}</td>
-                    <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{po.projectName}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{po.poDate}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{po.id}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{po.vendor}</td>
+                    <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{po.project}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{po.date}</td>
                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{po.amount}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${getStatusColor(po.status)}`}>
-                        {po.status || 'Pending'}
+                      <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${po.statusColor}`}>
+                        {po.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -190,7 +132,7 @@ export default function POManagement() {
 
           <div className="p-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {filteredPOs.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredPOs.length)} of {filteredPOs.length} entries
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredPOs.length)} of {filteredPOs.length} entries
             </div>
             <div className="flex items-center gap-1">
               <button 
@@ -243,17 +185,17 @@ export default function POManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project <span className="text-red-500">*</span></label>
-                  <select required value={formData.projectId} onChange={e => setFormData({...formData, projectId: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
+                  <select required value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
                     <option value="">Select project</option>
-                    {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
+                    <option value="PRJ-001">PRJ-001 - Analytics Dashboard</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor <span className="text-red-500">*</span></label>
-                  <select required value={formData.vendorId} onChange={e => setFormData({...formData, vendorId: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
+                  <select required value={formData.vendor} onChange={e => setFormData({...formData, vendor: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
                     <option value="">Select vendor</option>
-                    {vendors.map(v => <option key={v.id} value={v.id}>{v.displayName}</option>)}
+                    <option value="AWS">AWS India Pvt Ltd</option>
                   </select>
                 </div>
 
@@ -269,22 +211,14 @@ export default function POManagement() {
 
                 <div className="space-y-1.5 md:col-span-2">
                   <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Amount (₹) <span className="text-red-500">*</span></label>
-                  <input required type="number" placeholder="e.g. 50000" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
+                  <input required type="text" placeholder="e.g. 50000" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
                 </div>
 
                 <div className="space-y-1.5 md:col-span-2">
                   <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Attachment</label>
-                  <div className="relative border-2 border-dashed border-gray-300 dark:border-white/10 rounded-sm p-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-                    <input 
-                      type="file" 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      onChange={(e) => setFile(e.target.files?.[0] || null)}
-                      accept=".pdf,.jpg,.jpeg,.png"
-                    />
+                  <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-sm p-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
                     <Upload size={24} className="text-[#792359] dark:text-[#e6a8d0] mb-3 group-hover:-translate-y-1 transition-transform" />
-                    <span className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">
-                      {file ? file.name : 'Click to upload file'}
-                    </span>
+                    <span className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">Click to upload file</span>
                     <span className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (Max 10MB)</span>
                   </div>
                 </div>
