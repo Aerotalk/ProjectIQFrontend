@@ -1,58 +1,38 @@
 import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { VendorService } from '../../services/vendor.service';
+import { useVendors } from '../../hooks/useVendors';
 import type { Vendor } from '../../types/vendor.types';
 import VendorDrawer from './vendors/components/VendorDrawer';
 import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 
 export default function VendorsList() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor } = useVendors({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
-    setIsLoading(true);
-    try {
-      const data = await VendorService.getVendors();
-      setVendors(data);
-    } catch (error) {
-      toast.error('Failed to load vendors');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSaveVendor = async (data: VendorFormValues) => {
-    setIsSubmitting(true);
     try {
       if (drawerMode === 'create') {
-        await VendorService.createVendor(data as unknown as Omit<Vendor, 'id'>);
+        await createVendor(data as unknown as Omit<Vendor, 'id' | 'vendorNo'>);
         toast.success('Vendor added successfully');
-      } else if (selectedVendor) {
-        await VendorService.updateVendor(selectedVendor.id, data as unknown as Omit<Vendor, 'id'>);
+      } else if (drawerMode === 'edit' && selectedVendor) {
+        await updateVendor(selectedVendor.id, data as unknown as Partial<Vendor>);
         toast.success('Vendor updated successfully');
       }
       setIsDrawerOpen(false);
-      fetchVendors();
-    } catch (error) {
-      toast.error('Failed to save vendor');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error: any) {
+      // Pass the error to the drawer to map validation errors
+      throw error;
     }
   };
 
