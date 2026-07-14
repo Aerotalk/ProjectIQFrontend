@@ -108,10 +108,10 @@ export const mapToClient = (dto: ClientDto): Client => {
 export const mapToClientDto = (client: Partial<Client>): Partial<ClientDto> => {
   // Strip out frontend-only fields that the backend doesn't support to prevent 400 Bad Request
   const {
-    billingAttention,
-    billingPhone,
-    shippingAttention,
-    shippingPhone,
+    billingAttention: _billingAttention,
+    billingPhone: _billingPhone,
+    shippingAttention: _shippingAttention,
+    shippingPhone: _shippingPhone,
     ...restOfClient
   } = client as any;
 
