@@ -3,9 +3,9 @@ import { z } from 'zod';
 export const poLineItemSchema = z.object({
   id: z.string().optional(),
   description: z.string().min(1, 'Description is required'),
-  quantity: z.number({ invalid_type_error: 'Quantity must be a number' }).min(0.01, 'Quantity must be greater than 0'),
+  quantity: z.number({ message: 'Quantity must be a number' }).min(0.01, 'Quantity must be greater than 0'),
   unit: z.string().min(1, 'Unit is required'),
-  unitPrice: z.number({ invalid_type_error: 'Unit price must be a number' }).min(0, 'Unit price cannot be negative'),
+  unitPrice: z.number({ message: 'Unit price must be a number' }).min(0, 'Unit price cannot be negative'),
   totalAmount: z.number().min(0),
 });
 

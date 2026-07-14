@@ -1,4 +1,6 @@
-import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Plus } from 'lucide-react';
+const fs = require('fs');
+
+const finalContent = `import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { POService } from '../../services/po.service';
@@ -45,7 +47,7 @@ export default function FinanceDashboard() {
           id: po.poNumber || po.id,
           vendor: po.vendorName,
           project: po.projectId,
-          amount: `₹ ${(po.grandTotal || 0).toLocaleString('en-IN')}`,
+          amount: \`₹ \${(po.grandTotal || 0).toLocaleString('en-IN')}\`,
           status: po.status,
           statusColor: po.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
         }));
@@ -58,7 +60,7 @@ export default function FinanceDashboard() {
           date: new Date(ex.expenseDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
           type: ex.category,
           project: ex.projectId,
-          amount: `₹ ${(ex.amount || 0).toLocaleString('en-IN')}`
+          amount: \`₹ \${(ex.amount || 0).toLocaleString('en-IN')}\`
         }));
         setRecentExpenses(formattedExpenses);
 
@@ -104,20 +106,20 @@ export default function FinanceDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {KPI_DATA.map((kpi, i) => {
           let displayValue = kpi.value;
-          if (kpi.label === 'PO Value') displayValue = `₹ ${poTotal.toLocaleString('en-IN')}`;
-          if (kpi.label === 'Expenses') displayValue = `₹ ${expenseTotal.toLocaleString('en-IN')}`;
+          if (kpi.label === 'PO Value') displayValue = \`₹ \${poTotal.toLocaleString('en-IN')}\`;
+          if (kpi.label === 'Expenses') displayValue = \`₹ \${expenseTotal.toLocaleString('en-IN')}\`;
           
           return (
             <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group">
               <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 rounded-sm border ${kpi.bgColor} border-transparent`}>
+                <div className={\`p-2 rounded-sm border \${kpi.bgColor} border-transparent\`}>
                   <kpi.icon size={18} className={kpi.color} strokeWidth={2} />
                 </div>
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{kpi.label}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{displayValue}</div>
-                <div className={`flex items-center gap-1 text-[11px] font-semibold ${kpi.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                <div className={\`flex items-center gap-1 text-[11px] font-semibold \${kpi.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}\`}>
                   {kpi.isPositive ? <ArrowUpRight size={12} strokeWidth={2.5} /> : <ArrowDownRight size={12} strokeWidth={2.5} />}
                   <span>{kpi.trend}</span>
                 </div>
@@ -158,7 +160,7 @@ export default function FinanceDashboard() {
                 <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group text-sm">
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${i % 3 === 0 ? 'bg-blue-500' : i % 3 === 1 ? 'bg-green-500' : i % 3 === 2 ? 'bg-orange-500' : 'bg-purple-500'}`}></div>
+                      <div className={\`w-1.5 h-1.5 rounded-full \${i % 3 === 0 ? 'bg-blue-500' : i % 3 === 1 ? 'bg-green-500' : i % 3 === 2 ? 'bg-orange-500' : 'bg-purple-500'}\`}></div>
                       <span className="font-medium text-gray-900 dark:text-white">{p.id}</span>
                     </div>
                   </td>
@@ -169,12 +171,12 @@ export default function FinanceDashboard() {
                   <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{p.profit}</td>
                   <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{p.profitPercent}</td>
                   <td className="px-6 py-3">
-                    <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${p.statusColor}`}>
+                    <span className={\`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide \${p.statusColor}\`}>
                       {p.status}
                     </span>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <button onClick={() => navigate(`/companydashboard/finance/projects/${p.id}`)} className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
+                    <button onClick={() => navigate(\`/companydashboard/finance/projects/\${p.id}\`)} className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
                       <Eye size={16} />
                     </button>
                   </td>
@@ -208,7 +210,7 @@ export default function FinanceDashboard() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap">{po.amount}</span>
-                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-sm ${po.statusColor} whitespace-nowrap`}>{po.status}</span>
+                  <span className={\`text-[9px] font-semibold px-1.5 py-0.5 rounded-sm \${po.statusColor} whitespace-nowrap\`}>{po.status}</span>
                 </div>
               </div>
             ))}
@@ -261,7 +263,7 @@ export default function FinanceDashboard() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{ch.date}</span>
-                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-sm ${ch.statusColor} whitespace-nowrap`}>{ch.status}</span>
+                  <span className={\`text-[9px] font-semibold px-1.5 py-0.5 rounded-sm \${ch.statusColor} whitespace-nowrap\`}>{ch.status}</span>
                 </div>
               </div>
             ))}
@@ -271,3 +273,5 @@ export default function FinanceDashboard() {
     </div>
   );
 }
+`;
+fs.writeFileSync('src/pages/finance/FinanceDashboard.tsx', finalContent);

@@ -22,7 +22,7 @@ interface Props {
 }
 
 export default function GSTSection({ readOnly }: Props) {
-  const { register, formState: { errors }, setValue, clearErrors } = useFormContext();
+  const { register, formState: { errors }, setValue } = useFormContext();
   const treatment = useWatch({ name: 'gstTreatment' });
 
 

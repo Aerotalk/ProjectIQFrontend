@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Search, MoreVertical, ShoppingCart,
   ChevronLeft, ChevronRight, Loader2, FileText,
@@ -24,7 +24,7 @@ const STATUS_STYLES: Record<POStatus, string> = {
   Cancelled: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20',
 };
 
-const STATUS_ICONS: Record<POStatus, JSX.Element> = {
+const STATUS_ICONS: Record<POStatus, React.ReactNode> = {
   Draft: <FileText size={11} />,
   'Pending Approval': <Clock size={11} />,
   Approved: <CheckCircle2 size={11} />,
@@ -64,7 +64,7 @@ export default function POManagement() {
 
   // Dropdown
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
 
   // ---------- Data fetching ----------
 
@@ -277,7 +277,7 @@ export default function POManagement() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto min-h-[320px]">
+        <div className="overflow-x-auto min-h-[320px] pb-32">
           {isLoading ? (
             <div className="flex items-center justify-center h-full py-24">
               <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
