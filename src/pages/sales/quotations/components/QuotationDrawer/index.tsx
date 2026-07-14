@@ -44,7 +44,23 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
   const readOnly = mode === 'view';
 
   const onSubmit = async (data: QuotationFormValues) => {
-    await onSave(data);
+    try {
+      await onSave(data);
+    } catch (err: any) {
+      if (err?.message && typeof err.message === 'object') {
+        Object.keys(err.message).forEach((key) => {
+          form.setError(key as any, { type: 'server', message: err.message[key] });
+        });
+      } else if (err?.message && typeof err.message === 'string') {
+        import('react-hot-toast').then(({ default: toast }) => {
+          toast.error(err.message);
+        });
+      } else {
+        import('react-hot-toast').then(({ default: toast }) => {
+          toast.error('An unexpected error occurred while saving.');
+        });
+      }
+    }
   };
 
   return (
