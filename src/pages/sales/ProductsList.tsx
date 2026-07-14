@@ -1,58 +1,37 @@
 import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ProductService } from '../../services/product.service';
+import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';
 
 export default function ProductsList() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const data = await ProductService.getProducts();
-      setProducts(data);
-    } catch (error) {
-      toast.error('Failed to load products');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSaveProduct = async (data: ProductFormValues) => {
-    setIsSubmitting(true);
     try {
       if (drawerMode === 'create') {
-        await ProductService.createProduct(data as unknown as Omit<Product, 'id'>);
+        await createProduct(data as unknown as Omit<Product, 'id'>);
         toast.success('Product added successfully');
-      } else if (selectedProduct) {
-        await ProductService.updateProduct(selectedProduct.id, data as unknown as Omit<Product, 'id'>);
+      } else if (drawerMode === 'edit' && selectedProduct) {
+        await updateProduct(selectedProduct.id, data as unknown as Partial<Product>);
         toast.success('Product updated successfully');
       }
       setIsDrawerOpen(false);
-      fetchProducts();
-    } catch (error) {
-      toast.error('Failed to save product');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error: any) {
+      throw error;
     }
   };
 
