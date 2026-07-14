@@ -1,0 +1,29 @@
+import { z } from 'zod';
+
+export const poLineItemSchema = z.object({
+  id: z.string().optional(),
+  description: z.string().min(1, 'Description is required'),
+  quantity: z.number({ invalid_type_error: 'Quantity must be a number' }).min(0.01, 'Quantity must be greater than 0'),
+  unit: z.string().min(1, 'Unit is required'),
+  unitPrice: z.number({ invalid_type_error: 'Unit price must be a number' }).min(0, 'Unit price cannot be negative'),
+  totalAmount: z.number().min(0),
+});
+
+export const poSchema = z.object({
+  projectId: z.string().min(1, 'Project is required'),
+  projectName: z.string().optional(),
+  vendorId: z.string().min(1, 'Vendor is required'),
+  vendorName: z.string().optional(),
+  poDate: z.string().min(1, 'PO Date is required'),
+  // TechSpec §4.2: Description is Required ("What is being procured. Clear description required.")
+  description: z.string().min(1, 'Description is required — specify what is being procured'),
+  lineItems: z.array(poLineItemSchema).min(1, 'At least one line item is required'),
+  grandTotal: z.number().min(0),
+  status: z.enum(['Draft', 'Pending Approval', 'Approved', 'Ordered', 'Partially Received', 'Completed', 'Cancelled']),
+  internalNotes: z.string().optional(),
+  // TechSpec §4.2: Optional fields
+  expectedDelivery: z.string().optional(),
+  attachmentName: z.string().optional(),
+});
+
+export type POFormValues = z.infer<typeof poSchema>;
