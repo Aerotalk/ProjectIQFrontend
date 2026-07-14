@@ -5,7 +5,7 @@ export const shouldShowGSTIN = (treatment: GSTTreatment) => {
 };
 
 export const shouldShowPAN = (treatment: GSTTreatment) => {
-  return treatment === 'business_gst' || treatment === 'business_none' || treatment === 'sez';
+  return treatment === 'business_gst' || treatment === 'business_none' || treatment === 'sez' || treatment === 'overseas';
 };
 
 export const shouldShowPlaceOfSupply = (treatment: GSTTreatment) => {
@@ -20,13 +20,15 @@ export const shouldShowOverseasFields = (treatment: GSTTreatment) => {
   return treatment === 'overseas';
 };
 
+export const shouldShowRegisteredGstAddress = (treatment: GSTTreatment) => {
+  return treatment === 'business_gst';
+};
+
 export const isRequiredGSTIN = (treatment: GSTTreatment) => {
   return treatment === 'business_gst' || treatment === 'sez';
 };
 
 export const isRequiredPAN = (treatment: GSTTreatment) => {
-  // PAN is Auto for business_gst and sez (extracted from GSTIN), Optional for business_none
-  // But required to be present basically if GSTIN is there. We can mark it required internally.
   return treatment === 'business_gst' || treatment === 'sez';
 };
 

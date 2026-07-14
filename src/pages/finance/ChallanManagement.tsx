@@ -1,49 +1,158 @@
-import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, Truck, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  Plus, Search, MoreVertical, Truck,
+  ChevronLeft, ChevronRight, Loader2, Package,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const CHALLANS = [
-  { id: 'DC-006', vendor: 'AWS India Pvt Ltd', project: 'PRJ-001', date: '10 May 2025', status: 'Received', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'DC-005', vendor: 'SMS Solutions', project: 'PRJ-002', date: '09 May 2025', status: 'Received', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'DC-004', vendor: 'TechSoft Pvt Ltd', project: 'PRJ-003', date: '07 May 2025', status: 'Pending', statusColor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  { id: 'DC-003', vendor: 'AWS India Pvt Ltd', project: 'PRJ-003', date: '05 May 2025', status: 'Received', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'DC-002', vendor: 'DigitalOcean', project: 'PRJ-004', date: '04 May 2025', status: 'Received', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'DC-001', vendor: 'Zoho Corporation', project: 'PRJ-005', date: '03 May 2025', status: 'Received', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-];
+import { ChallanService } from '../../services/challan.service';
+import type { DeliveryChallan } from '../../types/challan.types';
+import ChallanDrawer from './challan/components/ChallanDrawer';
+import type { ChallanFormValues } from './challan/validators/challanValidation';
+import { VendorService } from '../../services/vendor.service';
+import { MOCK_PROJECTS } from '../../services/po.service';
+import type { Vendor } from '../../types/vendor.types';
 
 export default function ChallanManagement() {
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [challans, setChallans] = useState<DeliveryChallan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedChallan, setSelectedChallan] = useState<DeliveryChallan | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filters & search
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterProject, setFilterProject] = useState('');
+  const [filterVendor, setFilterVendor] = useState('');
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
-  const [formData, setFormData] = useState({
-    project: '', vendor: '', challanNumber: '', challanDate: '', remarks: ''
-  });
+  // Dropdown
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
 
-  const handleSaveChallan = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast.success('Delivery Challan added successfully');
-    setIsFormVisible(false);
-    setFormData({ project: '', vendor: '', challanNumber: '', challanDate: '', remarks: '' });
-    setIsSubmitting(false);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [challanData, vendorData] = await Promise.all([
+        ChallanService.getAll(),
+        VendorService.getVendors(),
+      ]);
+      setChallans(challanData);
+      setVendors(vendorData);
+    } catch {
+      toast.error('Failed to load delivery challans');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredChallans = CHALLANS.filter(ch =>
-    ch.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ch.vendor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredChallans.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredChallans.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const openDrawer = (mode: 'create' | 'edit' | 'view', challan?: DeliveryChallan) => {
+    setDrawerMode(mode);
+    setSelectedChallan(challan || null);
+    setIsDrawerOpen(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleSaveChallan = async (data: ChallanFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const vendor = vendors.find(v => v.id === data.vendorId);
+      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+
+      const payload = {
+        ...data,
+        vendorName: vendor?.displayName || data.vendorName || '',
+        projectName: project?.name || data.projectName || '',
+      };
+
+      if (drawerMode === 'create') {
+        await ChallanService.create(payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
+        toast.success('Delivery Challan created successfully');
+      } else if (selectedChallan) {
+        await ChallanService.update(selectedChallan.id, payload as Omit<DeliveryChallan, 'id' | 'createdAt'>);
+        toast.success('Delivery Challan updated successfully');
+      }
+      setIsDrawerOpen(false);
+      setCurrentPage(1);
+      fetchData();
+    } catch {
+      toast.error('Failed to save Delivery Challan');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (challan: DeliveryChallan) => {
+    setOpenDropdownId(null);
+    if (!window.confirm(`Delete Challan ${challan.challanNumber}? This cannot be undone.`)) return;
+    try {
+      await ChallanService.delete(challan.id);
+      toast.success(`Challan ${challan.challanNumber} deleted`);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete Delivery Challan');
+    }
+  };
+
+  const filtered = challans.filter(ch => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch =
+      !term ||
+      ch.challanNumber.toLowerCase().includes(term) ||
+      (ch.vendorName || '').toLowerCase().includes(term) ||
+      (ch.projectName || '').toLowerCase().includes(term) ||
+      (ch.description || '').toLowerCase().includes(term);
+
+    const matchProject = !filterProject || ch.projectId === filterProject;
+    const matchVendor = !filterVendor || ch.vendorId === filterVendor;
+
+    return matchSearch && matchProject && matchVendor;
+  });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const idxLast = currentPage * itemsPerPage;
+  const idxFirst = idxLast - itemsPerPage;
+  const currentItems = filtered.slice(idxFirst, idxLast);
+
+  const resetPage = () => setCurrentPage(1);
+
+  const formatDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const selectClass =
+    'px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] transition-colors';
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      {/* Header */}
+      
+      {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -51,96 +160,190 @@ export default function ChallanManagement() {
             <span className="text-gray-300 dark:text-gray-600">/</span>
             <span className="text-gray-900 dark:text-gray-200">Delivery Challans</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isFormVisible ? 'Add Delivery Challan' : 'Delivery Challans'}
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Delivery Challans
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
-            {isFormVisible ? 'Add a new delivery challan' : 'Track deliveries received from vendors'}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Track deliveries received from vendors.
           </p>
         </div>
-        {!isFormVisible && (
-          <button
-            onClick={() => setIsFormVisible(true)}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-          >
-            <Plus size={16} /> Add Challan
-          </button>
-        )}
+        <button
+          onClick={() => openDrawer('create')}
+          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+        >
+          <Plus size={16} />
+          Add Challan
+        </button>
       </div>
 
-      {!isFormVisible ? (
-        <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
-            <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>All Projects</option>
-                <option>PRJ-001</option>
-              </select>
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>All Vendors</option>
-                <option>AWS India</option>
-              </select>
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>Status</option>
-                <option>Received</option>
-              </select>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359]"
-              />
-            </div>
+      {/* ── Table Card ── */}
+      <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
+        
+        {/* Filters row */}
+        <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
+          <div className="flex flex-wrap gap-2">
+            {/* Project filter */}
+            <select
+              value={filterProject}
+              onChange={e => { setFilterProject(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Projects</option>
+              {MOCK_PROJECTS.map(p => (
+                <option key={p.id} value={p.id}>{p.id}</option>
+              ))}
+            </select>
+
+            {/* Vendor filter */}
+            <select
+              value={filterVendor}
+              onChange={e => { setFilterVendor(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Vendors</option>
+              {vendors.map(v => (
+                <option key={v.id} value={v.id}>{v.displayName}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input
+              type="text"
+              placeholder="Search challan no., vendor…"
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto min-h-[320px] pb-32">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full py-24">
+              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
+              <Truck size={48} className="mb-4 opacity-20" />
+              <p className="text-base font-medium text-gray-900 dark:text-white">No Delivery Challans found</p>
+              <p className="text-sm mt-1">
+                {searchTerm || filterProject || filterVendor
+                  ? 'Try adjusting your filters or search term.'
+                  : 'Add your first challan by clicking "Add Challan".'}
+              </p>
+              {(searchTerm || filterProject || filterVendor) && (
+                <button
+                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); }}
+                  className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          ) : (
             <table className="w-full text-left whitespace-nowrap">
-              <thead className="bg-gray-50 dark:bg-white/[0.02] text-gray-700 dark:text-gray-300 text-xs font-semibold">
-                <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="px-6 py-3">Challan No</th>
-                  <th className="px-6 py-3">Vendor</th>
-                  <th className="px-6 py-3">Project</th>
-                  <th className="px-6 py-3">Challan Date</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3 text-center">Action</th>
+              <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Number</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {currentItems.map((ch) => (
-                  <tr key={ch.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group text-sm">
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{ch.id}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{ch.vendor}</td>
-                    <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{ch.project}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{ch.date}</td>
+                {currentItems.map(ch => (
+                  <tr
+                    key={ch.id}
+                    className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"
+                  >
+                    {/* Challan Number */}
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${ch.statusColor}`}>
-                        {ch.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
-                        <MoreHorizontal size={16} />
+                      <button
+                        onClick={() => openDrawer('view', ch)}
+                        className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+                      >
+                        {ch.challanNumber}
                       </button>
+                      {ch.description && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate max-w-[160px]" title={ch.description}>
+                          {ch.description}
+                        </p>
+                      )}
+                    </td>
+
+                    {/* Vendor */}
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {ch.vendorName || ch.vendorId}
+                    </td>
+
+                    {/* Project */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-gray-900 dark:text-white">{ch.projectId}</span>
+                      {ch.projectName && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{ch.projectName}</p>
+                      )}
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                      {formatDate(ch.challanDate)}
+                    </td>
+
+                    {/* Actions dropdown */}
+                    <td className="px-6 py-4 text-center relative" ref={openDropdownId === ch.id ? dropdownRef : undefined}>
+                      <button
+                        onClick={() => setOpenDropdownId(openDropdownId === ch.id ? null : ch.id)}
+                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                      {openDropdownId === ch.id && (
+                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-20 py-1 text-left">
+                          <button
+                            onClick={() => openDrawer('view', ch)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => openDrawer('edit', ch)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <div className="border-t border-gray-100 dark:border-white/5 my-1" />
+                          <button
+                            onClick={() => handleDelete(ch)}
+                            className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
+        </div>
 
+        {/* Pagination */}
+        {!isLoading && filtered.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredChallans.length)} of {filteredChallans.length} entries
+              Showing {idxFirst + 1}–{Math.min(idxLast, filtered.length)} of {filtered.length} entries
             </div>
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -148,105 +351,63 @@ export default function ChallanManagement() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
+                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
+                    currentPage === page
                       ? 'bg-[#792359] text-white shadow-sm'
-                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50'
-                    }`}
+                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                  }`}
                 >
                   {page}
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center rounded-t-sm">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Truck size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Add Delivery Challan
-            </h2>
-            <button
-              onClick={() => setIsFormVisible(false)}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
-            >
-              Cancel
-            </button>
+        )}
+      </div>
+      
+      {/* ── Statistics row ── */}
+      {!isLoading && challans.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-[#792359]/5 dark:bg-[#792359]/10">
+              <Truck size={18} className="text-[#792359] dark:text-[#c44997]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Total Challans</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{challans.length}</p>
+            </div>
           </div>
-
-          <div className="p-6">
-            <form onSubmit={handleSaveChallan} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project <span className="text-red-500">*</span></label>
-                  <select required value={formData.project} onChange={e => setFormData({ ...formData, project: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select project</option>
-                    <option value="PRJ-001">PRJ-001 - Analytics Dashboard</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor <span className="text-red-500">*</span></label>
-                  <select required value={formData.vendor} onChange={e => setFormData({ ...formData, vendor: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select vendor</option>
-                    <option value="AWS">AWS India Pvt Ltd</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Number <span className="text-red-500">*</span></label>
-                  <input required type="text" placeholder="Enter challan number" value={formData.challanNumber} onChange={e => setFormData({ ...formData, challanNumber: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Date <span className="text-red-500">*</span></label>
-                  <input required type="date" value={formData.challanDate} onChange={e => setFormData({ ...formData, challanDate: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Upload Document <span className="text-red-500">*</span></label>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-sm p-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-                    <Upload size={24} className="text-[#792359] dark:text-[#e6a8d0] mb-3 group-hover:-translate-y-1 transition-transform" />
-                    <span className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">Click to upload file</span>
-                    <span className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (Max 10MB)</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Remarks</label>
-                  <div className="relative">
-                    <textarea
-                      placeholder="Enter remarks (optional)"
-                      value={formData.remarks}
-                      onChange={e => setFormData({ ...formData, remarks: e.target.value })}
-                      className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors min-h-[120px] resize-none"
-                    />
-                    <span className="absolute bottom-2 right-2 text-[10px] text-gray-400">{formData.remarks.length} / 500</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-                  {isSubmitting ? 'Saving...' : 'Save Challan'}
-                </button>
-              </div>
-            </form>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-blue-50 dark:bg-blue-500/10">
+              <Package size={18} className="text-blue-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Deliveries This Month</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {challans.filter(c => new Date(c.challanDate).getMonth() === new Date().getMonth()).length}
+              </p>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ── Challan Drawer ── */}
+      <ChallanDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveChallan}
+        mode={drawerMode}
+        initialData={selectedChallan || undefined}
+        challanNumber={selectedChallan?.challanNumber}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

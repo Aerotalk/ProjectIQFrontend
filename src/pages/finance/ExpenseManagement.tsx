@@ -1,59 +1,167 @@
-import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, CreditCard, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  Plus, Search, MoreVertical, CreditCard,
+  ChevronLeft, ChevronRight, Loader2, IndianRupee,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ExpenseService } from '../../services/expense.service';
+import type { Expense } from '../../types/expense.types';
+import ExpenseDrawer from './expense/components/ExpenseDrawer';
+import type { ExpenseFormValues } from './expense/validators/expenseValidation';
+import { MOCK_PROJECTS } from '../../services/po.service';
 
-const EXPENSES = [
-  { id: 'EXP-014', date: '10 May 2025', project: 'PRJ-001', type: 'Travel Expense', amount: '5,000' },
-  { id: 'EXP-013', date: '09 May 2025', project: 'PRJ-002', type: 'Training Expense', amount: '10,000' },
-  { id: 'EXP-012', date: '08 May 2025', project: 'PRJ-003', type: 'Software License', amount: '25,000' },
-  { id: 'EXP-011', date: '07 May 2025', project: 'PRJ-001', type: 'Internet Expense', amount: '2,500' },
-  { id: 'EXP-010', date: '06 May 2025', project: 'PRJ-004', type: 'Hardware', amount: '45,000' },
-  { id: 'EXP-009', date: '05 May 2025', project: 'PRJ-005', type: 'Miscellaneous', amount: '1,200' },
-];
-
-const EXPENSE_TYPES = [
-  'Travel Expense',
-  'Vendor Payment',
-  'Software License',
-  'Training Expense',
-  'Hardware',
-  'Internet Expense',
+const EXPENSE_CATEGORIES = [
+  'Travel',
+  'Accommodation',
+  'Petty Cash',
+  'Material',
+  'Labour (non-vendor)',
+  'Communication',
   'Miscellaneous'
 ];
 
 export default function ExpenseManagement() {
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filters & search
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterProject, setFilterProject] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
-  const [formData, setFormData] = useState({
-    project: '', expenseType: '', amount: '', expenseDate: '', remarks: ''
-  });
+  // Dropdown
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
 
-  const handleSaveExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast.success('Expense added successfully');
-    setIsFormVisible(false);
-    setFormData({ project: '', expenseType: '', amount: '', expenseDate: '', remarks: '' });
-    setIsSubmitting(false);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await ExpenseService.getAll();
+      setExpenses(data);
+    } catch {
+      toast.error('Failed to load expenses');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredExpenses = EXPENSES.filter(ex => 
-    ex.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    ex.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredExpenses.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const openDrawer = (mode: 'create' | 'edit' | 'view', expense?: Expense) => {
+    setDrawerMode(mode);
+    setSelectedExpense(expense || null);
+    setIsDrawerOpen(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleSaveExpense = async (data: ExpenseFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+
+      const payload = {
+        ...data,
+        projectName: project?.name || data.projectName || '',
+      };
+
+      if (drawerMode === 'create') {
+        await ExpenseService.create(payload as Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>);
+        toast.success('Expense created successfully');
+      } else if (selectedExpense) {
+        await ExpenseService.update(selectedExpense.id, payload as Omit<Expense, 'id' | 'createdAt'>);
+        toast.success('Expense updated successfully');
+      }
+      setIsDrawerOpen(false);
+      setCurrentPage(1);
+      fetchData();
+    } catch {
+      toast.error('Failed to save Expense');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (expense: Expense) => {
+    setOpenDropdownId(null);
+    if (!window.confirm(`Delete Expense ${expense.id}? This cannot be undone.`)) return;
+    try {
+      await ExpenseService.delete(expense.id);
+      toast.success(`Expense ${expense.id} deleted`);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete Expense');
+    }
+  };
+
+  const filtered = expenses.filter(ex => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch =
+      !term ||
+      ex.id.toLowerCase().includes(term) ||
+      (ex.description || '').toLowerCase().includes(term) ||
+      (ex.projectName || '').toLowerCase().includes(term) ||
+      (ex.paidBy || '').toLowerCase().includes(term);
+
+    const matchProject = !filterProject || ex.projectId === filterProject;
+    const matchCategory = !filterCategory || ex.category === filterCategory;
+
+    return matchSearch && matchProject && matchCategory;
+  });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const idxLast = currentPage * itemsPerPage;
+  const idxFirst = idxLast - itemsPerPage;
+  const currentItems = filtered.slice(idxFirst, idxLast);
+
+  const resetPage = () => setCurrentPage(1);
+
+  const formatDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const selectClass =
+    'px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] transition-colors';
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      {/* Header */}
+      
+      {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -61,195 +169,266 @@ export default function ExpenseManagement() {
             <span className="text-gray-300 dark:text-gray-600">/</span>
             <span className="text-gray-900 dark:text-gray-200">Expenses</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isFormVisible ? 'Add Expense' : 'Project Expenses'}
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Expenses
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
-            {isFormVisible ? 'Record a new project expense' : 'Log and track all project-related expenses'}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Log and track all project-related expenses.
           </p>
         </div>
-        {!isFormVisible && (
-          <button 
-            onClick={() => setIsFormVisible(true)}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-          >
-            <Plus size={16} /> Add Expense
-          </button>
-        )}
+        <button
+          onClick={() => openDrawer('create')}
+          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+        >
+          <Plus size={16} />
+          Add Expense
+        </button>
       </div>
 
-      {!isFormVisible ? (
-        <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
-            <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>All Projects</option>
-                <option>PRJ-001</option>
-              </select>
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>Expense Type</option>
-                {EXPENSE_TYPES.map(t => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359]"
-              />
-            </div>
+      {/* ── Table Card ── */}
+      <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
+        
+        {/* Filters row */}
+        <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
+          <div className="flex flex-wrap gap-2">
+            {/* Project filter */}
+            <select
+              value={filterProject}
+              onChange={e => { setFilterProject(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Projects</option>
+              {MOCK_PROJECTS.map(p => (
+                <option key={p.id} value={p.id}>{p.id}</option>
+              ))}
+            </select>
+
+            {/* Category filter */}
+            <select
+              value={filterCategory}
+              onChange={e => { setFilterCategory(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Categories</option>
+              {EXPENSE_CATEGORIES.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="overflow-x-auto flex-1">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input
+              type="text"
+              placeholder="Search expenses..."
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto min-h-[320px] pb-32">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full py-24">
+              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
+              <CreditCard size={48} className="mb-4 opacity-20" />
+              <p className="text-base font-medium text-gray-900 dark:text-white">No Expenses found</p>
+              <p className="text-sm mt-1">
+                {searchTerm || filterProject || filterCategory
+                  ? 'Try adjusting your filters or search term.'
+                  : 'Add your first expense by clicking "Add Expense".'}
+              </p>
+              {(searchTerm || filterProject || filterCategory) && (
+                <button
+                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterCategory(''); }}
+                  className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          ) : (
             <table className="w-full text-left whitespace-nowrap">
-              <thead className="bg-gray-50 dark:bg-white/[0.02] text-gray-700 dark:text-gray-300 text-xs font-semibold">
-                <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="px-6 py-3">Expense ID</th>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Project</th>
-                  <th className="px-6 py-3">Type</th>
-                  <th className="px-6 py-3">Amount (₹)</th>
-                  <th className="px-6 py-3 text-center">Action</th>
+              <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Expense ID</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-right">Amount</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {currentItems.map((ex) => (
-                  <tr key={ex.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group text-sm">
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{ex.id}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{ex.date}</td>
-                    <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{ex.project}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{ex.type}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{ex.amount}</td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
-                        <MoreHorizontal size={16} />
+                {currentItems.map(ex => (
+                  <tr
+                    key={ex.id}
+                    className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"
+                  >
+                    {/* Expense ID */}
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => openDrawer('view', ex)}
+                        className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+                      >
+                        {ex.id}
                       </button>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 max-w-[150px] truncate" title={ex.description}>
+                        {ex.description}
+                      </p>
+                    </td>
+
+                    {/* Project */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-gray-900 dark:text-white">{ex.projectId}</span>
+                      {ex.projectName && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{ex.projectName}</p>
+                      )}
+                    </td>
+
+                    {/* Category & Paid By */}
+                    <td className="px-6 py-4">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">{ex.category}</span>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">By {ex.paidBy}</p>
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                      {formatDate(ex.expenseDate)}
+                    </td>
+
+                    {/* Amount */}
+                    <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">
+                      {formatCurrency(ex.amount)}
+                      {ex.isGstApplicable && ex.gstAmount && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 font-normal mt-0.5">
+                          incl. GST {formatCurrency(ex.gstAmount)}
+                        </p>
+                      )}
+                    </td>
+
+                    {/* Actions dropdown */}
+                    <td className="px-6 py-4 text-center relative" ref={openDropdownId === ex.id ? dropdownRef : undefined}>
+                      <button
+                        onClick={() => setOpenDropdownId(openDropdownId === ex.id ? null : ex.id)}
+                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                      {openDropdownId === ex.id && (
+                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-20 py-1 text-left">
+                          <button
+                            onClick={() => openDrawer('view', ex)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => openDrawer('edit', ex)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <div className="border-t border-gray-100 dark:border-white/5 my-1" />
+                          <button
+                            onClick={() => handleDelete(ex)}
+                            className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
+        </div>
 
+        {/* Pagination */}
+        {!isLoading && filtered.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredExpenses.length)} of {filteredExpenses.length} entries
+              Showing {idxFirst + 1}–{Math.min(idxLast, filtered.length)} of {filtered.length} entries
             </div>
             <div className="flex items-center gap-1">
-              <button 
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              <button
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button 
+                <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                    currentPage === page 
-                      ? 'bg-[#792359] text-white shadow-sm' 
-                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50'
+                    currentPage === page
+                      ? 'bg-[#792359] text-white shadow-sm'
+                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                   }`}
                 >
                   {page}
                 </button>
               ))}
-              <button 
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center rounded-t-sm">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <CreditCard size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Add Expense
-            </h2>
-            <button 
-              onClick={() => setIsFormVisible(false)}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
-            >
-              Cancel
-            </button>
+        )}
+      </div>
+      
+      {/* ── Statistics row ── */}
+      {!isLoading && expenses.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-[#792359]/5 dark:bg-[#792359]/10">
+              <IndianRupee size={18} className="text-[#792359] dark:text-[#c44997]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Total Expenses Logged</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(expenses.reduce((sum, ex) => sum + ex.amount, 0))}
+              </p>
+            </div>
           </div>
-          
-          <div className="p-6">
-            <form onSubmit={handleSaveExpense} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project <span className="text-red-500">*</span></label>
-                  <select required value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select project</option>
-                    <option value="PRJ-001">PRJ-001 - Analytics Dashboard</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Expense Type <span className="text-red-500">*</span></label>
-                  <select required value={formData.expenseType} onChange={e => setFormData({...formData, expenseType: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select expense type</option>
-                    {EXPENSE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Amount (₹) <span className="text-red-500">*</span></label>
-                  <input required type="text" placeholder="Enter amount" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Expense Date <span className="text-red-500">*</span></label>
-                  <input required type="date" value={formData.expenseDate} onChange={e => setFormData({...formData, expenseDate: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Upload Bill</label>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-sm p-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-                    <Upload size={24} className="text-[#792359] dark:text-[#e6a8d0] mb-3 group-hover:-translate-y-1 transition-transform" />
-                    <span className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">Click to upload bill/receipt</span>
-                    <span className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (Max 10MB)</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Remarks</label>
-                  <div className="relative">
-                    <textarea 
-                      placeholder="Enter remarks (optional)" 
-                      value={formData.remarks} 
-                      onChange={e => setFormData({...formData, remarks: e.target.value})} 
-                      className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors min-h-[120px] resize-none"
-                    />
-                    <span className="absolute bottom-2 right-2 text-[10px] text-gray-400">{formData.remarks.length} / 500</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-                  {isSubmitting ? 'Saving...' : 'Save Expense'}
-                </button>
-              </div>
-            </form>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-blue-50 dark:bg-blue-500/10">
+              <CreditCard size={18} className="text-blue-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">GST Claimable (Total)</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(expenses.reduce((sum, ex) => sum + (ex.isInputCreditClaimable && ex.gstAmount ? ex.gstAmount : 0), 0))}
+              </p>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ── Expense Drawer ── */}
+      <ExpenseDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveExpense}
+        mode={drawerMode}
+        initialData={selectedExpense || undefined}
+        expenseId={selectedExpense?.id}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

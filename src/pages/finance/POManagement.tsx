@@ -1,50 +1,202 @@
-import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, FileText, Upload, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Plus, Search, MoreVertical, ShoppingCart,
+  ChevronLeft, ChevronRight, Loader2, FileText,
+  CheckCircle2, Clock, XCircle, Truck, Package, AlertCircle,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import { POService, MOCK_PROJECTS } from '../../services/po.service';
+import type { PurchaseOrder, POStatus } from '../../types/po.types';
+import PODrawer from './po/components/PODrawer';
+import type { POFormValues } from './po/validators/poValidation';
+import { VendorService } from '../../services/vendor.service';
+import type { Vendor } from '../../types/vendor.types';
 
-const POS = [
-  { id: 'PO-014', vendor: 'AWS India Pvt Ltd', project: 'PRJ-001', date: '10 May 2025', amount: '1,50,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'PO-013', vendor: 'SMS Solutions', project: 'PRJ-002', date: '09 May 2025', amount: '50,000', status: 'Pending', statusColor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  { id: 'PO-012', vendor: 'TechSoft Pvt Ltd', project: 'PRJ-003', date: '08 May 2025', amount: '2,20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'PO-011', vendor: 'DigitalOcean', project: 'PRJ-003', date: '07 May 2025', amount: '1,80,000', status: 'Completed', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  { id: 'PO-010', vendor: 'Zoho Corporation', project: 'PRJ-004', date: '06 May 2025', amount: '75,000', status: 'Cancelled', statusColor: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-  { id: 'PO-009', vendor: 'Microsoft India', project: 'PRJ-005', date: '05 May 2025', amount: '1,20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'PO-008', vendor: 'Hostinger', project: 'PRJ-005', date: '04 May 2025', amount: '20,000', status: 'Approved', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+// ---------- Status helpers ----------
+
+const STATUS_STYLES: Record<POStatus, string> = {
+  Draft: 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-300 dark:border-gray-500/20',
+  'Pending Approval': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+  Approved: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+  Ordered: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
+  'Partially Received': 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
+  Completed: 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/20',
+  Cancelled: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20',
+};
+
+const STATUS_ICONS: Record<POStatus, React.ReactNode> = {
+  Draft: <FileText size={11} />,
+  'Pending Approval': <Clock size={11} />,
+  Approved: <CheckCircle2 size={11} />,
+  Ordered: <Truck size={11} />,
+  'Partially Received': <Package size={11} />,
+  Completed: <CheckCircle2 size={11} />,
+  Cancelled: <XCircle size={11} />,
+};
+
+const ALL_STATUSES: POStatus[] = [
+  'Draft', 'Pending Approval', 'Approved', 'Ordered',
+  'Partially Received', 'Completed', 'Cancelled',
 ];
 
+// ---------- Component ----------
+
 export default function POManagement() {
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [pos, setPos] = useState<PurchaseOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filters & search
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterProject, setFilterProject] = useState('');
+  const [filterVendor, setFilterVendor] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
-  const [formData, setFormData] = useState({
-    project: '', vendor: '', poNumber: '', poDate: '', amount: '', remarks: ''
-  });
+  // Dropdown
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
 
-  const handleSavePO = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    toast.success('Purchase Order created successfully');
-    setIsFormVisible(false);
-    setFormData({ project: '', vendor: '', poNumber: '', poDate: '', amount: '', remarks: '' });
-    setIsSubmitting(false);
+  // ---------- Data fetching ----------
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [poData, vendorData] = await Promise.all([
+        POService.getAll(),
+        VendorService.getVendors(),
+      ]);
+      setPos(poData);
+      setVendors(vendorData);
+    } catch {
+      toast.error('Failed to load purchase orders');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredPOs = POS.filter(po => 
-    po.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    po.vendor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredPOs.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredPOs.slice(indexOfFirstItem, indexOfLastItem);
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // ---------- Drawer actions ----------
+
+  const openDrawer = (mode: 'create' | 'edit' | 'view', po?: PurchaseOrder) => {
+    setDrawerMode(mode);
+    setSelectedPO(po || null);
+    setIsDrawerOpen(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleSavePO = async (data: POFormValues) => {
+    setIsSubmitting(true);
+    try {
+      // Hydrate display names from current vendors/projects
+      const vendor = vendors.find(v => v.id === data.vendorId);
+      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+
+      const payload = {
+        ...data,
+        vendorName: vendor?.displayName || data.vendorName || '',
+        projectName: project?.name || data.projectName || '',
+      };
+
+      if (drawerMode === 'create') {
+        await POService.create(payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
+        toast.success('Purchase Order created successfully');
+      } else if (selectedPO) {
+        await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);
+        toast.success('Purchase Order updated successfully');
+      }
+      setIsDrawerOpen(false);
+      setCurrentPage(1);
+      fetchData();
+    } catch {
+      toast.error('Failed to save Purchase Order');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (po: PurchaseOrder) => {
+    setOpenDropdownId(null);
+    if (!window.confirm(`Cancel/delete PO ${po.poNumber}? This cannot be undone.`)) return;
+    try {
+      await POService.delete(po.id);
+      toast.success(`PO ${po.poNumber} deleted`);
+      fetchData();
+    } catch {
+      toast.error('Failed to delete Purchase Order');
+    }
+  };
+
+  // ---------- Filtering & pagination ----------
+
+  const filtered = pos.filter(po => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch =
+      !term ||
+      po.poNumber.toLowerCase().includes(term) ||
+      (po.vendorName || '').toLowerCase().includes(term) ||
+      (po.projectName || '').toLowerCase().includes(term) ||
+      (po.description || '').toLowerCase().includes(term);
+
+    const matchProject = !filterProject || po.projectId === filterProject;
+    const matchVendor = !filterVendor || po.vendorId === filterVendor;
+    const matchStatus = !filterStatus || po.status === filterStatus;
+
+    return matchSearch && matchProject && matchVendor && matchStatus;
+  });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const idxLast = currentPage * itemsPerPage;
+  const idxFirst = idxLast - itemsPerPage;
+  const currentItems = filtered.slice(idxFirst, idxLast);
+
+  const resetPage = () => setCurrentPage(1);
+
+  const formatDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const formatAmount = (n: number) =>
+    n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const selectClass =
+    'px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] transition-colors';
+
+  // ---------- Render ----------
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      {/* Header */}
+
+      {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -52,205 +204,300 @@ export default function POManagement() {
             <span className="text-gray-300 dark:text-gray-600">/</span>
             <span className="text-gray-900 dark:text-gray-200">Purchase Orders</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Purchase Orders</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Purchase Orders
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Manage vendor POs, track delivery status and approvals.
+          </p>
         </div>
-        {!isFormVisible && (
-          <button 
-            onClick={() => setIsFormVisible(true)}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-          >
-            <Plus size={16} /> Create PO
-          </button>
-        )}
+        <button
+          onClick={() => openDrawer('create')}
+          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+        >
+          <Plus size={16} />
+          Create PO
+        </button>
       </div>
 
-      {!isFormVisible ? (
-        <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
-            <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>All Projects</option>
-                <option>PRJ-001</option>
-              </select>
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>All Vendors</option>
-                <option>AWS India</option>
-              </select>
-              <select className="px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359]">
-                <option>Status</option>
-                <option>Approved</option>
-              </select>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359]"
-              />
-            </div>
+      {/* ── Table Card ── */}
+      <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
+
+        {/* Filters row */}
+        <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
+          <div className="flex flex-wrap gap-2">
+            {/* Project filter */}
+            <select
+              value={filterProject}
+              onChange={e => { setFilterProject(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Projects</option>
+              {MOCK_PROJECTS.map(p => (
+                <option key={p.id} value={p.id}>{p.id}</option>
+              ))}
+            </select>
+
+            {/* Vendor filter */}
+            <select
+              value={filterVendor}
+              onChange={e => { setFilterVendor(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Vendors</option>
+              {vendors.map(v => (
+                <option key={v.id} value={v.id}>{v.displayName}</option>
+              ))}
+            </select>
+
+            {/* Status filter */}
+            <select
+              value={filterStatus}
+              onChange={e => { setFilterStatus(e.target.value); resetPage(); }}
+              className={selectClass}
+            >
+              <option value="">All Statuses</option>
+              {ALL_STATUSES.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input
+              type="text"
+              placeholder="Search PO no., vendor, project…"
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto min-h-[320px] pb-32">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full py-24">
+              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
+              <ShoppingCart size={48} className="mb-4 opacity-20" />
+              <p className="text-base font-medium text-gray-900 dark:text-white">No Purchase Orders found</p>
+              <p className="text-sm mt-1">
+                {searchTerm || filterProject || filterVendor || filterStatus
+                  ? 'Try adjusting your filters or search term.'
+                  : 'Create your first PO by clicking "Create PO".'}
+              </p>
+              {(searchTerm || filterProject || filterVendor || filterStatus) && (
+                <button
+                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); setFilterStatus(''); }}
+                  className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          ) : (
             <table className="w-full text-left whitespace-nowrap">
-              <thead className="bg-gray-50 dark:bg-white/[0.02] text-gray-700 dark:text-gray-300 text-xs font-semibold">
-                <tr className="border-b border-gray-200 dark:border-white/5">
-                  <th className="px-6 py-3">PO Number</th>
-                  <th className="px-6 py-3">Vendor</th>
-                  <th className="px-6 py-3">Project</th>
-                  <th className="px-6 py-3">PO Date</th>
-                  <th className="px-6 py-3">Amount (₹)</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3 text-center">Action</th>
+              <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">PO Number</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">PO Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-right">Amount (₹)</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {currentItems.map((po) => (
-                  <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group text-sm">
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{po.id}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{po.vendor}</td>
-                    <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{po.project}</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{po.date}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{po.amount}</td>
+                {currentItems.map(po => (
+                  <tr
+                    key={po.id}
+                    className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"
+                  >
+                    {/* PO Number */}
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${po.statusColor}`}>
+                      <button
+                        onClick={() => openDrawer('view', po)}
+                        className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+                      >
+                        {po.poNumber}
+                      </button>
+                      {po.description && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate max-w-[160px]" title={po.description}>
+                          {po.description}
+                        </p>
+                      )}
+                    </td>
+
+                    {/* Vendor */}
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {po.vendorName || po.vendorId}
+                    </td>
+
+                    {/* Project */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium text-gray-900 dark:text-white">{po.projectId}</span>
+                      {po.projectName && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{po.projectName}</p>
+                      )}
+                    </td>
+
+                    {/* Date */}
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                      {formatDate(po.poDate)}
+                    </td>
+
+                    {/* Amount */}
+                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white text-right">
+                      {formatAmount(po.grandTotal)}
+                    </td>
+
+                    {/* Status badge */}
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold border ${STATUS_STYLES[po.status]}`}>
+                        {STATUS_ICONS[po.status]}
                         {po.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
-                        <MoreHorizontal size={16} />
+
+                    {/* Actions dropdown */}
+                    <td className="px-6 py-4 text-center relative" ref={openDropdownId === po.id ? dropdownRef : undefined}>
+                      <button
+                        onClick={() => setOpenDropdownId(openDropdownId === po.id ? null : po.id)}
+                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
+                      >
+                        <MoreVertical size={16} />
                       </button>
+                      {openDropdownId === po.id && (
+                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-20 py-1 text-left">
+                          <button
+                            onClick={() => openDrawer('view', po)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => openDrawer('edit', po)}
+                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <div className="border-t border-gray-100 dark:border-white/5 my-1" />
+                          <button
+                            onClick={() => handleDelete(po)}
+                            className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          )}
+        </div>
 
+        {/* Pagination */}
+        {!isLoading && filtered.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredPOs.length)} of {filteredPOs.length} entries
+              Showing {idxFirst + 1}–{Math.min(idxLast, filtered.length)} of {filtered.length} entries
             </div>
             <div className="flex items-center gap-1">
-              <button 
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              <button
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button 
+                <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                    currentPage === page 
-                      ? 'bg-[#792359] text-white shadow-sm' 
-                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50'
+                    currentPage === page
+                      ? 'bg-[#792359] text-white shadow-sm'
+                      : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                   }`}
                 >
                   {page}
                 </button>
               ))}
-              <button 
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages || totalPages === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center rounded-t-sm">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Add New Purchase Order
-            </h2>
-            <button 
-              onClick={() => setIsFormVisible(false)}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
+        )}
+      </div>
+
+      {/* ── Statistics row ── */}
+      {!isLoading && pos.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            {
+              label: 'Total POs',
+              value: pos.length,
+              icon: <ShoppingCart size={18} className="text-[#792359] dark:text-[#c44997]" />,
+              bg: 'bg-[#792359]/5 dark:bg-[#792359]/10',
+            },
+            {
+              label: 'Pending Approval',
+              value: pos.filter(p => p.status === 'Pending Approval').length,
+              icon: <AlertCircle size={18} className="text-amber-500" />,
+              bg: 'bg-amber-50 dark:bg-amber-500/10',
+            },
+            {
+              label: 'Approved / Ordered',
+              value: pos.filter(p => p.status === 'Approved' || p.status === 'Ordered').length,
+              icon: <CheckCircle2 size={18} className="text-emerald-500" />,
+              bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+            },
+            {
+              label: 'Total Value (₹)',
+              value: `${pos.reduce((s, p) => s + p.grandTotal, 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
+              icon: <Package size={18} className="text-blue-500" />,
+              bg: 'bg-blue-50 dark:bg-blue-500/10',
+            },
+          ].map(stat => (
+            <div
+              key={stat.label}
+              className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4"
             >
-              Cancel
-            </button>
-          </div>
-          
-          <div className="p-6">
-            <form onSubmit={handleSavePO} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project <span className="text-red-500">*</span></label>
-                  <select required value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select project</option>
-                    <option value="PRJ-001">PRJ-001 - Analytics Dashboard</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor <span className="text-red-500">*</span></label>
-                  <select required value={formData.vendor} onChange={e => setFormData({...formData, vendor: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors">
-                    <option value="">Select vendor</option>
-                    <option value="AWS">AWS India Pvt Ltd</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">PO Number <span className="text-red-500">*</span></label>
-                  <input required type="text" placeholder="e.g. PO-2025-001" value={formData.poNumber} onChange={e => setFormData({...formData, poNumber: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">PO Date <span className="text-red-500">*</span></label>
-                  <input required type="date" value={formData.poDate} onChange={e => setFormData({...formData, poDate: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Amount (₹) <span className="text-red-500">*</span></label>
-                  <input required type="text" placeholder="e.g. 50000" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors" />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Attachment</label>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-sm p-8 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-                    <Upload size={24} className="text-[#792359] dark:text-[#e6a8d0] mb-3 group-hover:-translate-y-1 transition-transform" />
-                    <span className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">Click to upload file</span>
-                    <span className="text-xs text-gray-500 mt-1">PDF, JPG, PNG (Max 10MB)</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Remarks</label>
-                  <div className="relative">
-                    <textarea 
-                      placeholder="Enter remarks (optional)" 
-                      value={formData.remarks} 
-                      onChange={e => setFormData({...formData, remarks: e.target.value})} 
-                      className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors min-h-[120px] resize-none"
-                    />
-                    <span className="absolute bottom-2 right-2 text-[10px] text-gray-400">{formData.remarks.length} / 500</span>
-                  </div>
-                </div>
+              <div className={`w-10 h-10 rounded-sm flex items-center justify-center shrink-0 ${stat.bg}`}>
+                {stat.icon}
               </div>
-
-              <div className="flex justify-end pt-2">
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-                  {isSubmitting ? 'Saving...' : 'Save Purchase Order'}
-                </button>
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</p>
               </div>
-            </form>
-          </div>
+            </div>
+          ))}
         </div>
       )}
+
+      {/* ── PO Drawer ── */}
+      <PODrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSavePO}
+        mode={drawerMode}
+        initialData={selectedPO || undefined}
+        poNumber={selectedPO?.poNumber}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

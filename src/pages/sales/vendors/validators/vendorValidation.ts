@@ -54,20 +54,24 @@ export const getVendorSchema = () => {
     additionalContacts: z.array(vendorContactSchema).optional(),
 
     // Address
+    billingAttention: z.string().optional(),
     billingAddressLine1: z.string().min(1, 'Billing Address Line 1 is required'),
     billingAddressLine2: z.string().optional(),
     billingCity: z.string().min(1, 'City is required'),
     billingState: z.string().optional(),
     billingPinCode: z.string().optional(),
     billingCountry: z.string().optional(),
+    billingPhone: z.string().optional(),
 
     sameAsBillingAddress: z.boolean(),
+    shippingAttention: z.string().optional(),
     shippingAddressLine1: z.string().optional(),
     shippingAddressLine2: z.string().optional(),
     shippingCity: z.string().optional(),
     shippingState: z.string().optional(),
     shippingPinCode: z.string().optional(),
     shippingCountry: z.string().optional(),
+    shippingPhone: z.string().optional(),
 
     // Commercial
     paymentTerms: z.string().optional(),

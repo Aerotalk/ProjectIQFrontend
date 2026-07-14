@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Eye, Edit } from 'lucide-react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Eye, Edit, Archive } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { ClientService } from '../../services/client.service';
+import { useClients } from '../../hooks/useClients';
 import type { Client } from '../../types/client.types';
 import ClientDrawer from './clients/components/ClientDrawer';
 import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 
 export default function ClientsList() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const { clients, isListLoading: isLoading, isSaveLoading, createClient, updateClient, archiveClient } = useClients({ companyId });
   const [searchTerm, setSearchTerm] = useState('');
   
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,39 +23,29 @@ export default function ClientsList() {
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
-  const fetchClients = async () => {
-    setIsLoading(true);
-    try {
-      const data = await ClientService.getClients();
-      setClients(data);
-    } catch (err) {
-      toast.error('Failed to load clients');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Removed duplicate fetchClients state because hook handles it
 
   const handleSaveClient = async (data: ClientFormValues) => {
-    setIsSubmitting(true);
     try {
       if (drawerMode === 'create') {
-        await ClientService.createClient(data as unknown as Omit<Client, 'id'>);
+        await createClient(data as unknown as Omit<Client, 'id' | 'clientNo'>);
         toast.success('Client added successfully');
       } else if (drawerMode === 'edit' && selectedClient) {
-        await ClientService.updateClient(selectedClient.id, data as unknown as Omit<Client, 'id'>);
+        await updateClient(selectedClient.id, data as unknown as Partial<Client>);
         toast.success('Client updated successfully');
       }
       setIsDrawerOpen(false);
-      fetchClients(); // Refresh list to get new IDs etc.
-    } catch (err) {
-      toast.error('Failed to save client');
-    } finally {
-      setIsSubmitting(false);
+    } catch (err: any) {
+      // Pass the error to the drawer to map validation errors
+      throw err;
     }
+  };
+
+  const handleArchiveClient = async (client: Client) => {
+    if (window.confirm(`Are you sure you want to archive client ${client.displayName}?`)) {
+      await archiveClient(client);
+    }
+    setOpenDropdownId(null);
   };
 
   const handleOpenDrawer = (mode: 'create' | 'edit' | 'view', client?: Client) => {
@@ -143,7 +132,7 @@ export default function ClientsList() {
               ) : (
                 currentItems.map((client) => (
                   <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-400">{client.id}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-400">{client.clientNo || client.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">{client.displayName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{client.primaryContactPerson}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{client.billingCity}</td>
@@ -185,6 +174,14 @@ export default function ClientsList() {
                           >
                             <Edit size={14} /> Edit
                           </button>
+                          {client.status !== 'Inactive' && (
+                            <button 
+                              onClick={() => handleArchiveClient(client)}
+                              className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                            >
+                              <Archive size={14} /> Archive
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -236,9 +233,9 @@ export default function ClientsList() {
         onClose={() => setIsDrawerOpen(false)}
         mode={drawerMode}
         initialData={selectedClient as Partial<ClientFormValues>}
-        clientId={selectedClient?.id}
+        clientId={selectedClient?.clientNo || selectedClient?.id}
         onSave={handleSaveClient}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSaveLoading}
       />
     </div>
   );
