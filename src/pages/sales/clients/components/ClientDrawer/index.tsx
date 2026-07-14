@@ -30,7 +30,7 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
       form.reset({
         customerType: 'Business',
         gstTreatment: 'business_gst',
-        sameAsBillingAddress: true,
+        sameAsBillingAddress: false,
         status: 'Active',
         displayName: '',
         billingCountry: 'India',

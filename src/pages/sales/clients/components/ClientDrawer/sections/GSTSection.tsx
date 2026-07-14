@@ -1,10 +1,11 @@
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { 
   shouldShowGSTIN, 
   shouldShowPAN, 
   shouldShowPlaceOfSupply, 
   shouldShowSEZFields,
-  shouldShowOverseasFields 
+  shouldShowOverseasFields,
+  shouldShowRegisteredGstAddress
 } from '../../../utils/gstRules';
 
 // Common Indian States list
@@ -21,19 +22,20 @@ interface Props {
 }
 
 export default function GSTSection({ readOnly }: Props) {
-  const { register, watch, formState: { errors }, setValue } = useFormContext();
-  const treatment = watch('gstTreatment');
+  const { register, formState: { errors }, setValue, clearErrors } = useFormContext();
+  const treatment = useWatch({ name: 'gstTreatment' });
 
-  // If consumer and no place of supply needed, or similar. Actually, PDF says consumer shows place of supply.
-  // We just rely on functions.
-  
+
   const showGSTIN = shouldShowGSTIN(treatment);
   const showPAN = shouldShowPAN(treatment);
   const showPlaceOfSupply = shouldShowPlaceOfSupply(treatment);
   const showSEZ = shouldShowSEZFields(treatment);
   const showOverseas = shouldShowOverseasFields(treatment);
+  const showRegisteredGstAddress = shouldShowRegisteredGstAddress(treatment);
 
-  if (!showGSTIN && !showPAN && !showPlaceOfSupply && !showSEZ && !showOverseas) {
+
+
+  if (!showGSTIN && !showPAN && !showPlaceOfSupply && !showSEZ && !showOverseas && !showRegisteredGstAddress) {
     return null; // Consumer might only show place of supply. If all false, hide section.
   }
 
@@ -69,7 +71,8 @@ export default function GSTSection({ readOnly }: Props) {
         {showPAN && (
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
-              PAN Number {treatment !== 'business_none' && '*'}
+              PAN Number {treatment !== 'business_none' && treatment !== 'overseas' && '*'}
+              {(treatment === 'business_none' || treatment === 'overseas') && <span className="text-gray-400 font-normal normal-case ml-1">(optional)</span>}
             </label>
             <input 
               type="text" 
@@ -104,6 +107,20 @@ export default function GSTSection({ readOnly }: Props) {
               />
             </div>
           </>
+        )}
+
+        {showRegisteredGstAddress && (
+          <div className="md:col-span-2">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Registered GST Address</label>
+            <textarea
+              {...register('registeredGstAddress')}
+              disabled={readOnly}
+              rows={2}
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors custom-scrollbar"
+              placeholder="Full address as per GST registration"
+            />
+            {errors.registeredGstAddress && <p className="text-red-500 text-xs mt-1">{errors.registeredGstAddress.message as string}</p>}
+          </div>
         )}
 
         {showPlaceOfSupply && (
