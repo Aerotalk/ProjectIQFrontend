@@ -43,9 +43,10 @@ export default function ChallanManagement() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
       const [challanData, vendorData] = await Promise.all([
         ChallanService.getAll(),
-        VendorService.getVendors(),
+        VendorService.getVendors(companyId),
       ]);
       setChallans(challanData);
       setVendors(vendorData);

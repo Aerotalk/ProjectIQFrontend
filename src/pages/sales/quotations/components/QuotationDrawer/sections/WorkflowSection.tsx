@@ -10,6 +10,7 @@ export default function WorkflowSection({ readOnly }: Props) {
   const { control, setValue } = useFormContext();
 
   const status = useWatch({ control, name: 'status', defaultValue: 'Draft' }) as QuotationStatus;
+  const woPoDocumentUrl = useWatch({ control, name: 'woPoDocumentUrl' });
 
   const handleApprove = () => {
     setValue('status', 'Approved', { shouldDirty: true });
@@ -113,7 +114,7 @@ export default function WorkflowSection({ readOnly }: Props) {
               />
             </label>
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {useWatch({ control, name: 'woPoDocumentUrl' }) || 'No file chosen'}
+              {woPoDocumentUrl || 'No file chosen'}
             </span>
           </div>
         </div>

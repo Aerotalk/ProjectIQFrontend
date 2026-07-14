@@ -30,8 +30,9 @@ export default function ChallanFormSection({ readOnly }: Props) {
   const attachmentName = useWatch({ control, name: 'attachmentName' });
 
   useEffect(() => {
+    const companyId = localStorage.getItem('selectedCompanyId') || '';
     Promise.all([
-      VendorService.getVendors(),
+      VendorService.getVendors(companyId),
       POService.getAll()
     ]).then(([vendorData, poData]) => {
       setVendors(vendorData);

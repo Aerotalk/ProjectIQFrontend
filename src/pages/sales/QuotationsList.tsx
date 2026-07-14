@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQuotations } from '../../hooks/useQuotations';

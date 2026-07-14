@@ -75,9 +75,10 @@ export default function POManagement() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
       const [poData, vendorData] = await Promise.all([
         POService.getAll(),
-        VendorService.getVendors(),
+        VendorService.getVendors(companyId),
       ]);
       setPos(poData);
       setVendors(vendorData);

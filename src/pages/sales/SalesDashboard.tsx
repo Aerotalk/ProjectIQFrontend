@@ -15,7 +15,7 @@ export default function SalesDashboard() {
         if (!companyId) return;
         
         const [quots, clis] = await Promise.all([
-          QuotationService.getQuotations(),
+          QuotationService.getQuotations(companyId),
           ClientService.getClients(companyId)
         ]);
         setQuotations(quots);

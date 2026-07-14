@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useVendors } from '../../hooks/useVendors';

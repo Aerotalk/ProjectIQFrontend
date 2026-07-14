@@ -1,4 +1,4 @@
-import type { Quotation, QuotationLineItem } from '../../types/quotation.types';
+import type { Quotation } from '../../types/quotation.types';
 
 export interface QuotationLineItemDto {
   id?: string;

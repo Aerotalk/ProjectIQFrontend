@@ -1,4 +1,4 @@
-import type { Client, AdditionalContact } from '../../types/client.types';
+import type { Client } from '../../types/client.types';
 
 // The backend DTO interfaces
 export interface ClientDto {

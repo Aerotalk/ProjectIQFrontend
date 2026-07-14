@@ -2,6 +2,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { LayoutGrid } from 'lucide-react';
 import { Routes, Route } from 'react-router-dom';
 import CompanyProfile from './CompanyProfile';
+import AdminProfile from './AdminProfile';
 import TicketDashboard from './tickets/TicketDashboard';
 import TicketList from './tickets/TicketList';
 import CreateTicket from './tickets/CreateTicket';
@@ -107,7 +108,8 @@ export default function CompanyDashboard() {
             <ProjectFinanceDetails />
           </PermissionGate>
         } />
-        <Route path="/profile" element={<CompanyProfile />} />
+        <Route path="/account" element={<CompanyProfile />} />
+        <Route path="/profile" element={<AdminProfile />} />
         <Route path="/roles" element={
           <PermissionGate permission="role.view">
             <RolesList />

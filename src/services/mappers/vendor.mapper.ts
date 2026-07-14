@@ -125,10 +125,10 @@ export const mapToVendor = (dto: VendorDto): Vendor => {
 
 export const mapToVendorDto = (vendor: Partial<Vendor>): Partial<VendorDto> => {
   const {
-    billingAttention,
-    billingPhone,
-    shippingAttention,
-    shippingPhone,
+    billingAttention: _billingAttention,
+    billingPhone: _billingPhone,
+    shippingAttention: _shippingAttention,
+    shippingPhone: _shippingPhone,
     ...restOfVendor
   } = vendor as any;
 
