@@ -14,7 +14,9 @@ export const api = {
     };
 
     const token = localStorage.getItem('token');
-    if (token && !endpoint.startsWith('/auth')) {
+    const publicAuthPaths = ['/auth/login', '/auth/setup-super-admin', '/auth/register', '/auth/verify-email', '/auth/forgot-password', '/auth/reset-password', '/auth/refresh'];
+    const isPublicAuth = publicAuthPaths.some(p => endpoint.startsWith(p));
+    if (token && !isPublicAuth) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 

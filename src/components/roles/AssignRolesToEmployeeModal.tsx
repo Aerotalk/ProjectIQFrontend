@@ -65,7 +65,15 @@ export default function AssignRolesToEmployeeModal({ employee, onClose }: Props)
     if (!companyId) return;
     try {
       setIsSaving(true);
-      await rolesService.assignRolesToEmployee(employee.id, companyId, selectedRoleIds);
+      
+      // Ensure ROLE_EMPLOYEE is always included to prevent accidental removal
+      const employeeRole = allRoles.find(r => r.roleName === 'ROLE_EMPLOYEE');
+      const finalRoleIds = [...selectedRoleIds];
+      if (employeeRole && !finalRoleIds.includes(employeeRole.id)) {
+        finalRoleIds.push(employeeRole.id);
+      }
+      
+      await rolesService.assignRolesToEmployee(employee.id, companyId, finalRoleIds);
       
       setSuccessMsg('Roles successfully assigned to the employee for the selected company!');
       setTimeout(() => {
@@ -129,20 +137,26 @@ export default function AssignRolesToEmployeeModal({ employee, onClose }: Props)
               {allRoles.length === 0 ? (
                 <p className="text-sm text-gray-500">No roles found.</p>
               ) : (
-                allRoles.map(role => (
-                  <label key={role.id} className="flex items-start gap-3 p-3 border border-gray-100 dark:border-white/5 rounded-sm hover:bg-gray-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors">
+                allRoles.map(role => {
+                  const isEmployeeRole = role.roleName === 'ROLE_EMPLOYEE';
+                  return (
+                  <label key={role.id} className={`flex items-start gap-3 p-3 border border-gray-100 dark:border-white/5 rounded-sm hover:bg-gray-50 dark:hover:bg-white/[0.02] ${isEmployeeRole ? 'cursor-not-allowed opacity-75 bg-gray-50 dark:bg-white/[0.02]' : 'cursor-pointer'} transition-colors`}>
                     <input 
                       type="checkbox" 
-                      checked={selectedRoleIds.includes(role.id)}
+                      checked={isEmployeeRole || selectedRoleIds.includes(role.id)}
+                      disabled={isEmployeeRole}
                       onChange={() => toggleRole(role.id)}
-                      className="mt-1 shrink-0 text-[#792359] focus:ring-[#792359] border-gray-300 rounded"
+                      className="mt-1 shrink-0 text-[#792359] focus:ring-[#792359] border-gray-300 rounded disabled:opacity-50"
                     />
                     <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{role.roleName}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        {role.roleName}
+                        {isEmployeeRole && <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-sm font-bold tracking-wider">LOCKED</span>}
+                      </div>
                       {role.description && <div className="text-xs text-gray-500 mt-0.5">{role.description}</div>}
                     </div>
                   </label>
-                ))
+                )})
               )}
             </div>
           </div>

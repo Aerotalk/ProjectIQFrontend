@@ -35,8 +35,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (storedToken && storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
           setToken(storedToken);
+          if (parsedUser.companyId && !localStorage.getItem('selectedCompanyId')) {
+            localStorage.setItem('selectedCompanyId', parsedUser.companyId);
+          }
         } catch (error) {
           console.error("Failed to parse user data, clearing token", error);
           localStorage.removeItem('token');
@@ -59,6 +63,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = (newToken: string, userData: User) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    if (userData.companyId) {
+      localStorage.setItem('selectedCompanyId', userData.companyId);
+    }
     setToken(newToken);
     setUser(userData);
   };

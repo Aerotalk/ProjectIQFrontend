@@ -73,8 +73,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       name: 'Account',
       icon: User,
       subItems: [
-        { name: 'Account Dashboard', path: `${basePath}/account` },
-        ...(role === 'org' ? [{ name: 'My Accounts', path: `${basePath}/my-accounts` }] : [])
+        { name: 'Dashboard', path: `${basePath}/account` },
+        ...(role === 'org' ? [{ name: 'Companies', path: `${basePath}/my-accounts` }] : [])
       ]
     },
     {
