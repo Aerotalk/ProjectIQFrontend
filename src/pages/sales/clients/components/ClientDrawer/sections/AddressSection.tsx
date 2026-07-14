@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { shouldShowOverseasFields } from '../../../utils/gstRules';
 
@@ -25,24 +25,22 @@ export default function AddressSection({ readOnly }: Props) {
   const billingCountry = watch('billingCountry');
   const billingPhone = watch('billingPhone');
 
-  const [lastCopied, setLastCopied] = useState(false);
-
-  // Effect to copy billing to shipping ONE-TIME when checkbox goes from false to true
+  // Effect to copy billing to shipping when checkbox is checked
   useEffect(() => {
-    if (sameAsBilling && !lastCopied && !readOnly) {
-      setValue('shippingAttention', billingAttention);
-      setValue('shippingAddressLine1', billingLine1);
-      setValue('shippingAddressLine2', billingLine2);
-      setValue('shippingCity', billingCity);
-      setValue('shippingState', billingState);
-      setValue('shippingPinCode', billingPinCode);
-      setValue('shippingCountry', billingCountry);
-      setValue('shippingPhone', billingPhone);
-      setLastCopied(true);
-    } else if (!sameAsBilling && lastCopied) {
-      setLastCopied(false);
+    if (sameAsBilling && !readOnly) {
+      const opts = { shouldValidate: true, shouldDirty: true };
+      setValue('shippingAttention', billingAttention || '', opts);
+      setValue('shippingAddressLine1', billingLine1 || '', opts);
+      setValue('shippingAddressLine2', billingLine2 || '', opts);
+      setValue('shippingCity', billingCity || '', opts);
+      setValue('shippingState', billingState || '', opts);
+      setValue('shippingPinCode', billingPinCode || '', opts);
+      setValue('shippingCountry', billingCountry || '', opts);
+      setValue('shippingPhone', billingPhone || '', opts);
     }
-  }, [sameAsBilling, lastCopied, billingAttention, billingLine1, billingLine2, billingCity, billingState, billingPinCode, billingCountry, billingPhone, setValue, readOnly]);
+  }, [sameAsBilling, billingAttention, billingLine1, billingLine2, billingCity, billingState, billingPinCode, billingCountry, billingPhone, setValue, readOnly]);
+
+  const pointerEventsClass = sameAsBilling && !readOnly ? 'pointer-events-none opacity-60 bg-gray-50 dark:bg-white/5' : '';
 
   return (
     <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -161,8 +159,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingAttention')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
 
@@ -171,7 +169,7 @@ export default function AddressSection({ readOnly }: Props) {
             <select 
               {...register('shippingCountry')} 
               disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors"
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`}
             >
               <option value="">Select Country</option>
               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -183,8 +181,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingAddressLine1')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
           
@@ -193,8 +191,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingAddressLine2')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
 
@@ -203,8 +201,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingCity')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
 
@@ -213,8 +211,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingState')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
 
@@ -223,8 +221,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingPinCode')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
           
@@ -233,8 +231,8 @@ export default function AddressSection({ readOnly }: Props) {
             <input 
               type="text" 
               {...register('shippingPhone')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+              readOnly={readOnly || sameAsBilling}
+              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
             />
           </div>
         </div>
@@ -242,4 +240,3 @@ export default function AddressSection({ readOnly }: Props) {
     </div>
   );
 }
-

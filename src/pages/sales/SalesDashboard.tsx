@@ -11,9 +11,12 @@ export default function SalesDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const companyId = localStorage.getItem('selectedCompanyId');
+        if (!companyId) return;
+        
         const [quots, clis] = await Promise.all([
           QuotationService.getQuotations(),
-          ClientService.getClients()
+          ClientService.getClients(companyId)
         ]);
         setQuotations(quots);
         setClients(clis);
