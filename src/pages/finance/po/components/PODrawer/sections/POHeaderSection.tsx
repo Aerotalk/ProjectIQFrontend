@@ -22,7 +22,8 @@ export default function POHeaderSection({ readOnly }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    VendorService.getVendors().then((data) => {
+    const companyId = localStorage.getItem('selectedCompanyId') || '';
+    VendorService.getVendors(companyId).then((data) => {
       setVendors(data);
       setIsLoadingVendors(false);
     });

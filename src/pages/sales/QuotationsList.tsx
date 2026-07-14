@@ -1,58 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { QuotationService } from '../../services/quotation.service';
+import { useQuotations } from '../../hooks/useQuotations';
 import type { Quotation } from '../../types/quotation.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
 
 export default function QuotationsList() {
-  const [quotations, setQuotations] = useState<Quotation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const { quotations, isListLoading: isLoading, isSaveLoading: isSubmitting, createQuotation, updateQuotation } = useQuotations({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchQuotations();
-  }, []);
-
-  const fetchQuotations = async () => {
-    setIsLoading(true);
-    try {
-      const data = await QuotationService.getQuotations();
-      setQuotations(data);
-    } catch (error) {
-      toast.error('Failed to load quotations');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSaveQuotation = async (data: QuotationFormValues) => {
-    setIsSubmitting(true);
     try {
       if (drawerMode === 'create') {
-        await QuotationService.createQuotation(data as unknown as Omit<Quotation, 'id'>);
+        await createQuotation(data as unknown as Omit<Quotation, 'id'>);
         toast.success('Quotation created successfully');
-      } else if (selectedQuotation) {
-        await QuotationService.updateQuotation(selectedQuotation.id, data as unknown as Omit<Quotation, 'id'>);
+      } else if (drawerMode === 'edit' && selectedQuotation) {
+        await updateQuotation(selectedQuotation.id, data as unknown as Partial<Quotation>);
         toast.success('Quotation updated successfully');
       }
       setIsDrawerOpen(false);
-      fetchQuotations();
-    } catch (error) {
-      toast.error('Failed to save quotation');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error: any) {
+      throw error;
     }
   };
 

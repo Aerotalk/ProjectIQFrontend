@@ -1,10 +1,27 @@
-import type { Client } from '../../types/client.types';
+import type { Vendor } from '../../types/vendor.types';
 
-// The backend DTO interfaces
-export interface ClientDto {
+export interface VendorAdditionalContactDto {
+  id?: string;
+  name: string;
+  designation?: string;
+  email: string;
+  phone: string;
+  role: string;
+}
+
+export interface VendorBankDetailsDto {
+  accountName: string;
+  accountNumber: string;
+  ifscCode: string;
+  bankName: string;
+  branchName?: string;
+  swiftCode?: string;
+}
+
+export interface VendorDto {
   id: string;
-  clientNo?: string;
-  customerType: string;
+  vendorNo?: string;
+  vendorType: string;
   companyName?: string;
   firstName?: string;
   lastName?: string;
@@ -23,7 +40,7 @@ export interface ClientDto {
   email: string;
   phone: string;
   alternatePhone?: string;
-  additionalContacts?: ClientAdditionalContactDto[];
+  additionalContacts?: VendorAdditionalContactDto[];
   billingAddressLine1: string;
   billingAddressLine2?: string;
   billingCity: string;
@@ -39,25 +56,17 @@ export interface ClientDto {
   shippingCountry?: string;
   paymentTerms?: string;
   creditLimit?: number;
-  industry?: string;
   notes?: string;
   status: string;
+  bankDetails?: VendorBankDetailsDto;
+  tdsPercentage?: number;
+  reverseCharge?: boolean;
 }
 
-export interface ClientAdditionalContactDto {
-  id?: string;
-  name: string;
-  designation?: string;
-  email: string;
-  phone: string;
-  role: string;
-}
-
-export const mapToClient = (dto: ClientDto): Client => {
+export const mapToVendor = (dto: VendorDto): Vendor => {
   return {
     id: dto.id,
-    clientNo: dto.clientNo,
-    customerType: dto.customerType as any,
+    vendorType: dto.vendorType as any,
     companyName: dto.companyName,
     firstName: dto.firstName,
     lastName: dto.lastName,
@@ -99,28 +108,40 @@ export const mapToClient = (dto: ClientDto): Client => {
     shippingCountry: dto.shippingCountry,
     paymentTerms: dto.paymentTerms,
     creditLimit: dto.creditLimit,
-    industry: dto.industry,
     notes: dto.notes,
     status: dto.status as 'Active' | 'Inactive',
+    bankDetails: dto.bankDetails ? {
+      accountName: dto.bankDetails.accountName,
+      accountNumber: dto.bankDetails.accountNumber,
+      ifscCode: dto.bankDetails.ifscCode,
+      bankName: dto.bankDetails.bankName,
+      branchName: dto.bankDetails.branchName,
+      swiftCode: dto.bankDetails.swiftCode,
+    } : undefined,
+    tdsPercentage: dto.tdsPercentage,
+    reverseCharge: dto.reverseCharge,
   };
 };
 
-export const mapToClientDto = (client: Partial<Client>): Partial<ClientDto> => {
-  // Strip out frontend-only fields that the backend doesn't support to prevent 400 Bad Request
+export const mapToVendorDto = (vendor: Partial<Vendor>): Partial<VendorDto> => {
   const {
     billingAttention: _billingAttention,
     billingPhone: _billingPhone,
     shippingAttention: _shippingAttention,
     shippingPhone: _shippingPhone,
-    ...restOfClient
-  } = client as any;
+    ...restOfVendor
+  } = vendor as any;
 
-  const dto: Partial<ClientDto> = {
-    ...restOfClient,
-    additionalContacts: client.additionalContacts?.map((c) => ({
+  const dto: Partial<VendorDto> = {
+    ...restOfVendor,
+    additionalContacts: vendor.additionalContacts?.map((c) => ({
       ...c,
       role: c.role,
     })),
+    bankDetails: vendor.bankDetails ? {
+      ...vendor.bankDetails,
+    } : undefined,
   };
+  
   return dto;
 };

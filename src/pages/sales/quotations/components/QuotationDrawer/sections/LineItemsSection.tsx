@@ -19,8 +19,15 @@ export default function LineItemsSection({ readOnly }: Props) {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   useEffect(() => {
-    ProductService.getProducts().then((data) => {
+    const companyId = localStorage.getItem('selectedCompanyId');
+    if (!companyId) {
+      setIsLoadingProducts(false);
+      return;
+    }
+    ProductService.getProducts(companyId).then((data) => {
       setProducts(data);
+      setIsLoadingProducts(false);
+    }).catch(() => {
       setIsLoadingProducts(false);
     });
   }, []);

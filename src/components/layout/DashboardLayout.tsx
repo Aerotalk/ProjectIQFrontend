@@ -13,7 +13,8 @@ import {
   Bell,
   Search,
   CheckCircle2,
-  Shield
+  Shield,
+  Building2
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -76,10 +77,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   ] : [
     {
-      name: 'Profile',
-      icon: User,
+      name: 'Company',
+      icon: Building2, // Changed from User to Building2 to match Company
       subItems: [
-        { name: 'Dashboard', path: `${basePath}/account` },
+        { name: 'Overview', path: `${basePath}/account` },
         ...(role === 'org' ? [{ name: 'My Profiles', path: `${basePath}/my-profiles` }] : [])
       ]
     },

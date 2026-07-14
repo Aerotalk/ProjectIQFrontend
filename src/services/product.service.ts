@@ -1,76 +1,33 @@
+import { api } from '../lib/api';
 import type { Product } from '../types/product.types';
-
-// Mock data initialization
-let mockProducts: Product[] = [
-  {
-    id: 'PROD-0001',
-    itemCode: 'ITEM-001',
-    itemName: 'Premium SaaS Subscription',
-    description: 'Monthly enterprise subscription',
-    type: 'Service',
-    unit: 'Months',
-    standardRate: 50000,
-    hsnSac: '9983',
-    gstRate: '18%',
-    status: 'Active'
-  },
-  {
-    id: 'PROD-0002',
-    itemCode: 'ITEM-002',
-    itemName: 'Consulting Hours',
-    description: 'Technical consulting per hour',
-    type: 'Service',
-    unit: 'Hours',
-    standardRate: 2500,
-    hsnSac: '998311',
-    gstRate: '18%',
-    status: 'Active'
-  },
-  {
-    id: 'PROD-0003',
-    itemCode: 'ITEM-003',
-    itemName: 'Server Hardware Type A',
-    description: 'Rackmount server',
-    type: 'Product',
-    unit: 'Pieces',
-    standardRate: 150000,
-    hsnSac: '8471',
-    gstRate: '18%',
-    status: 'Active'
-  }
-];
-
-let nextId = 4;
+import { mapToProduct, mapToProductDto } from './mappers/product.mapper';
+import type { ProductDto } from './mappers/product.mapper';
 
 export const ProductService = {
-  getProducts: async (): Promise<Product[]> => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    return [...mockProducts];
+  getProducts: async (companyId: string): Promise<Product[]> => {
+    if (!companyId) return [];
+    const response = await api.get(`/admin/sales/products?companyId=${companyId}`);
+    return (response as ProductDto[]).map(mapToProduct);
   },
 
-  createProduct: async (data: Omit<Product, 'id'>): Promise<Product> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const newProduct: Product = {
-      ...data,
-      id: `PROD-${String(nextId++).padStart(4, '0')}`
-    };
-    mockProducts = [newProduct, ...mockProducts];
-    return newProduct;
+  getProduct: async (id: string): Promise<Product> => {
+    const response = await api.get(`/admin/sales/products/${id}`);
+    return mapToProduct(response as ProductDto);
   },
 
-  updateProduct: async (id: string, data: Omit<Product, 'id'>): Promise<Product> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const index = mockProducts.findIndex(p => p.id === id);
-    if (index === -1) throw new Error('Product not found');
-    
-    const updatedProduct = { ...data, id };
-    mockProducts[index] = updatedProduct;
-    return updatedProduct;
+  createProduct: async (companyId: string, data: Omit<Product, 'id'>): Promise<Product> => {
+    const dto = mapToProductDto(data);
+    const response = await api.post(`/admin/sales/products?companyId=${companyId}`, dto);
+    return mapToProduct(response as ProductDto);
+  },
+
+  updateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
+    const dto = mapToProductDto(data);
+    const response = await api.put(`/admin/sales/products/${id}`, dto);
+    return mapToProduct(response as ProductDto);
   },
 
   deleteProduct: async (id: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    mockProducts = mockProducts.filter(p => p.id !== id);
+    await api.delete(`/admin/sales/products/${id}`);
   }
 };
