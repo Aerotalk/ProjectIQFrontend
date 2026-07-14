@@ -1,0 +1,137 @@
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
+import { X, Loader2, Save } from 'lucide-react';
+import { useChallanForm } from '../../hooks/useChallanForm';
+import type { ChallanFormValues } from '../../validators/challanValidation';
+import ChallanFormSection from './sections/ChallanFormSection';
+import type { DeliveryChallan } from '@/types/challan.types';
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: ChallanFormValues) => Promise<void>;
+  mode: 'create' | 'edit' | 'view';
+  initialData?: Partial<DeliveryChallan>;
+  challanNumber?: string;
+  isSubmitting?: boolean;
+}
+
+export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialData, challanNumber, isSubmitting }: Props) {
+  const form = useChallanForm();
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialData && (mode === 'edit' || mode === 'view')) {
+        form.reset({
+          challanNumber: initialData.challanNumber || '',
+          projectId: initialData.projectId || '',
+          projectName: initialData.projectName || '',
+          vendorId: initialData.vendorId || '',
+          vendorName: initialData.vendorName || '',
+          challanDate: initialData.challanDate || new Date().toISOString().split('T')[0],
+          description: initialData.description || '',
+          linkedVendorPoId: initialData.linkedVendorPoId || '',
+          linkedVendorPoNumber: initialData.linkedVendorPoNumber || '',
+          attachmentName: initialData.attachmentName || '',
+          remarks: initialData.remarks || '',
+        });
+      } else {
+        form.reset({
+          challanNumber: '',
+          projectId: '',
+          vendorId: '',
+          challanDate: new Date().toISOString().split('T')[0],
+          description: '',
+          linkedVendorPoId: '',
+          attachmentName: '',
+          remarks: '',
+        });
+      }
+    }
+  }, [isOpen, initialData, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!isOpen) return null;
+
+  const readOnly = mode === 'view';
+
+  const onSubmit = async (data: ChallanFormValues) => {
+    await onSave(data);
+  };
+
+  const drawerTitle = mode === 'create'
+    ? 'Add Delivery Challan'
+    : mode === 'edit'
+      ? 'Edit Delivery Challan'
+      : 'View Delivery Challan';
+
+  const drawerSubtitle = mode === 'create'
+    ? 'Record an inbound delivery from a vendor.'
+    : `Challan Number: ${challanNumber || initialData?.challanNumber || '—'}`;
+
+  return (
+    <div
+      className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white dark:bg-[#181a1f] shadow-2xl z-50 flex flex-col border-l border-gray-200 dark:border-white/10 transition-transform duration-300 ease-in-out"
+      style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
+    >
+      {/* Drawer Header */}
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {drawerTitle}
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            {drawerSubtitle}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+          title="Close"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <FormProvider {...form}>
+          <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <ChallanFormSection readOnly={readOnly} />
+          </form>
+        </FormProvider>
+      </div>
+
+      {/* Drawer Footer */}
+      <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3 shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+        >
+          {mode === 'view' ? 'Close' : 'Cancel'}
+        </button>
+
+        {!readOnly && (
+          <button
+            type="submit"
+            form="challan-drawer-form"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                {mode === 'create' ? 'Save Challan' : 'Update Challan'}
+              </>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -17,7 +17,8 @@ export interface AdditionalContact {
 }
 
 export interface Client {
-  id: string; // generated, e.g., CUST-0001
+  id: string; // UUID from backend
+  clientNo?: string; // generated, e.g., CUST-0001
   customerType: CustomerType;
   companyName?: string;
   firstName?: string;
@@ -44,20 +45,24 @@ export interface Client {
   additionalContacts?: AdditionalContact[];
 
   // Address Details
+  billingAttention?: string;
   billingAddressLine1: string;
   billingAddressLine2?: string;
   billingCity: string;
   billingState?: string;
   billingPinCode?: string;
   billingCountry?: string; // prefilled 'India' or selected
+  billingPhone?: string;
 
   sameAsBillingAddress: boolean;
+  shippingAttention?: string;
   shippingAddressLine1?: string;
   shippingAddressLine2?: string;
   shippingCity?: string;
   shippingState?: string;
   shippingPinCode?: string;
   shippingCountry?: string;
+  shippingPhone?: string;
 
   // Commercial Settings
   paymentTerms?: string;

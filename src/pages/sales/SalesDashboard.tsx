@@ -1,7 +1,32 @@
 import { FileText, Edit, UserCheck, CheckCircle2, Send, Trophy, ChevronDown, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { QuotationService } from '../../services/quotation.service';
+import { ClientService } from '../../services/client.service';
 
 export default function SalesDashboard() {
+  const [quotations, setQuotations] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const companyId = localStorage.getItem('selectedCompanyId');
+        if (!companyId) return;
+        
+        const [quots, clis] = await Promise.all([
+          QuotationService.getQuotations(),
+          ClientService.getClients(companyId)
+        ]);
+        setQuotations(quots);
+        setClients(clis);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchData();
+  }, []);
+
   const navigate = useNavigate();
   const stats = [
     { label: 'Total Quotations', value: '56', trend: '+12.5%', icon: FileText, color: 'text-[#b8458f]', bgColor: 'bg-pink-50 dark:bg-[#b8458f]/10' },
@@ -13,29 +38,31 @@ export default function SalesDashboard() {
   ];
 
   const pipelineStages = [
-    { label: 'Draft', count: 18, amount: '₹ 18,45,000', color: 'bg-blue-100/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' },
-    { label: 'Sent for Approval', count: 12, amount: '₹ 12,41,000', color: 'bg-purple-100/50 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200' },
-    { label: 'Approved', count: 10, amount: '₹ 10,30,000', color: 'bg-orange-100/50 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200' },
-    { label: 'Sent to Client', count: 8, amount: '₹ 8,40,000', color: 'bg-emerald-100/50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200' },
-    { label: 'Client Asked for Changes', count: 5, amount: '₹ 4,81,000', color: 'bg-fuchsia-100/50 text-fuchsia-800 dark:bg-fuchsia-900/20 dark:text-fuchsia-200' },
-    { label: 'Converted', count: 7, amount: '₹ 7,23,000', color: 'bg-green-100/50 text-green-800 dark:bg-green-900/20 dark:text-green-200' },
+    { label: 'Draft', count: quotations.filter(q => q.status === 'Draft').length, amount: '₹ 18,45,000', color: 'bg-blue-100/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' },
+    { label: 'Sent for Approval', count: quotations.filter(q => q.status === 'Pending Approval' || q.status === 'Sent for Approval').length, amount: '₹ 12,41,000', color: 'bg-purple-100/50 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200' },
+    { label: 'Approved', count: quotations.filter(q => q.status === 'Approved').length, amount: '₹ 10,30,000', color: 'bg-orange-100/50 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200' },
+    { label: 'Sent to Client', count: quotations.filter(q => q.status === 'Sent to Client').length, amount: '₹ 8,40,000', color: 'bg-emerald-100/50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200' },
+    { label: 'Client Asked for Changes', count: quotations.filter(q => q.status === 'Rejected' || q.status === 'Changes Requested').length, amount: '₹ 4,81,000', color: 'bg-fuchsia-100/50 text-fuchsia-800 dark:bg-fuchsia-900/20 dark:text-fuchsia-200' },
+    { label: 'Converted', count: quotations.filter(q => q.status === 'Accepted').length, amount: '₹ 7,23,000', color: 'bg-green-100/50 text-green-800 dark:bg-green-900/20 dark:text-green-200' },
   ];
 
-  const recentQuotations = [
-    { id: '1', no: 'QTN-100245', client: 'TechNova Pvt Ltd', project: 'Analytics Dashboard', amount: '₹ 2,71,400', status: 'Sent for Approval', statusColor: 'bg-blue-100 text-blue-600', validTill: '20 May 2025', owner: 'Arjun Dev' },
-    { id: '2', no: 'QTN-100244', client: 'Glober Corporation', project: 'Data Integration Platform', amount: '₹ 1,05,000', status: 'Draft', statusColor: 'bg-gray-100 text-gray-600', validTill: '18 May 2025', owner: 'Sneha Iyer' },
-    { id: '3', no: 'QTN-100243', client: 'Hexa Finance', project: 'Support Portal', amount: '₹ 3,30,000', status: 'Approved', statusColor: 'bg-green-100 text-green-600', validTill: '25 May 2025', owner: 'Rohit Singh' },
-    { id: '4', no: 'QTN-100242', client: 'NexGen Retail', project: 'Customer Portal', amount: '₹ 96,800', status: 'Sent to Client', statusColor: 'bg-purple-100 text-purple-600', validTill: '17 May 2025', owner: 'Amit Verma' },
-    { id: '5', no: 'QTN-100241', client: 'BlueStone Ltd', project: 'Mobile App Development', amount: '₹ 1,08,000', status: 'Client Asked for Changes', statusColor: 'bg-orange-100 text-orange-600', validTill: '22 May 2025', owner: 'Neha Patil' },
-  ];
+  const recentQuotations = quotations.slice(0, 5).map(q => ({
+    id: q.id,
+    no: q.quotationNo,
+    client: q.clientName,
+    project: q.subject,
+    amount: `₹ ${(q.grandTotal || 0).toLocaleString('en-IN')}`,
+    status: q.status,
+    statusColor: q.status === 'Approved' ? 'bg-green-100 text-green-600' : (q.status === 'Draft' ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-600'),
+    validTill: new Date(q.validUntil).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    owner: 'System'
+  }));
 
-  const topClients = [
-    { rank: 1, name: 'TechNova Pvt Ltd', amount: '₹ 12,75,000' },
-    { rank: 2, name: 'Glober Corporation', amount: '₹ 9,40,000' },
-    { rank: 3, name: 'Hexa Finance', amount: '₹ 8,30,000' },
-    { rank: 4, name: 'NexGen Retail', amount: '₹ 6,20,000' },
-    { rank: 5, name: 'BlueStone Ltd', amount: '₹ 4,35,000' },
-  ];
+  const topClients = clients.slice(0, 5).map((c, i) => ({
+    rank: i + 1,
+    name: c.companyName,
+    amount: `₹ ${(Math.random() * 1000000).toLocaleString('en-IN')}` // Mock value since client doesn't store total sales yet
+  }));
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -114,7 +141,7 @@ export default function SalesDashboard() {
                     <td className="py-3 text-[#792359] font-medium text-xs group-hover:underline">{q.no}</td>
                     <td className="py-3 text-gray-900 dark:text-white font-medium text-xs">{q.client}</td>
                     <td className="py-3 text-gray-500 dark:text-gray-400 text-xs">{q.project}</td>
-                    <td className="py-3 text-gray-900 dark:text-white font-medium text-xs">{q.amount}</td>
+                    <td className="py-3 text-gray-900 dark:text-white font-medium text-xs whitespace-nowrap">{q.amount}</td>
                     <td className="py-3">
                       <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${q.statusColor}`}>{q.status}</span>
                     </td>
@@ -153,7 +180,7 @@ export default function SalesDashboard() {
                   </div>
                   <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-[#792359] transition-colors">{client.name}</span>
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">{client.amount}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">{client.amount}</span>
               </div>
             ))}
           </div>

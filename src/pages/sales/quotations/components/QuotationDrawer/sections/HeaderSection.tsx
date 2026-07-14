@@ -15,7 +15,9 @@ export default function HeaderSection({ readOnly }: Props) {
   const [isLoadingClients, setIsLoadingClients] = useState(true);
 
   useEffect(() => {
-    ClientService.getClients().then((data) => {
+    const companyId = localStorage.getItem('selectedCompanyId');
+    if (!companyId) return;
+    ClientService.getClients(companyId).then((data) => {
       setClients(data);
       setIsLoadingClients(false);
     });

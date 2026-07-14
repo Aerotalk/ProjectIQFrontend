@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getClientSchema, type ClientFormValues } from '../validators/clientValidation';
@@ -7,7 +7,8 @@ import {
   shouldShowPAN, 
   shouldShowPlaceOfSupply, 
   shouldShowSEZFields,
-  shouldShowOverseasFields 
+  shouldShowOverseasFields,
+  shouldShowRegisteredGstAddress
 } from '../utils/gstRules';
 
 export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
@@ -19,7 +20,7 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
     defaultValues: {
       customerType: 'Business',
       gstTreatment: 'business_gst',
-      sameAsBillingAddress: true,
+      sameAsBillingAddress: false,
       status: 'Active',
       displayName: '',
       billingCountry: 'India',
@@ -37,36 +38,61 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
     if (!gstTreatment) return;
 
     // Clear hidden fields when treatment changes to prevent stale data
-    if (!shouldShowGSTIN(gstTreatment)) setValue('gstin', undefined);
-    if (!shouldShowPAN(gstTreatment)) setValue('panNumber', undefined);
-    if (!shouldShowPlaceOfSupply(gstTreatment)) setValue('placeOfSupply', undefined);
+    if (!shouldShowGSTIN(gstTreatment)) setValue('gstin', '');
+    if (!shouldShowPAN(gstTreatment)) setValue('panNumber', '');
+    if (!shouldShowPlaceOfSupply(gstTreatment)) setValue('placeOfSupply', '');
+    if (!shouldShowRegisteredGstAddress(gstTreatment)) setValue('registeredGstAddress', '');
     if (!shouldShowSEZFields(gstTreatment)) {
-      setValue('sezUnitName', undefined);
-      setValue('lutBondNo', undefined);
+      setValue('sezUnitName', '');
+      setValue('lutBondNo', '');
     }
     if (!shouldShowOverseasFields(gstTreatment)) {
-      setValue('country', undefined);
-      setValue('currency', undefined);
-      setValue('foreignTaxId', undefined);
+      setValue('country', '');
+      setValue('currency', '');
+      setValue('foreignTaxId', '');
       setValue('billingCountry', 'India');
     } else {
-      setValue('billingState', undefined);
-      setValue('billingPinCode', undefined);
+      setValue('billingState', '');
+      setValue('billingPinCode', '');
     }
 
     clearErrors();
   }, [gstTreatment, setValue, clearErrors]);
 
+  const companyName = watch('companyName');
+  const firstName = watch('firstName');
+  const lastName = watch('lastName');
+  const displayName = watch('displayName');
+  const lastGeneratedDisplayName = useRef<string>('');
+
   // Handle Customer Type changes
   useEffect(() => {
     if (customerType === 'Individual') {
-      setValue('companyName', undefined);
+      setValue('companyName', '');
     } else {
-      setValue('firstName', undefined);
-      setValue('lastName', undefined);
+      setValue('firstName', '');
+      setValue('lastName', '');
     }
     clearErrors();
   }, [customerType, setValue, clearErrors]);
+
+  // Handle Display Name auto-fill
+  useEffect(() => {
+    let newGenerated = '';
+    if (customerType === 'Business' && companyName) {
+      newGenerated = companyName;
+    } else if (customerType === 'Individual') {
+      newGenerated = [firstName, lastName].filter(Boolean).join(' ');
+    }
+    
+    if (newGenerated) {
+      // Update if empty OR if the current value matches the last generated value (meaning user hasn't manually overridden it)
+      if (!displayName || displayName === lastGeneratedDisplayName.current) {
+        setValue('displayName', newGenerated, { shouldValidate: true });
+        lastGeneratedDisplayName.current = newGenerated;
+      }
+    }
+  }, [companyName, firstName, lastName, customerType, displayName, setValue]);
 
   return form;
 };

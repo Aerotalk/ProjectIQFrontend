@@ -21,6 +21,50 @@ interface Props {
   isSubmitting?: boolean;
 }
 
+const defaultEmptyClient: Partial<ClientFormValues> = {
+  customerType: 'Business',
+  gstTreatment: 'business_gst',
+  sameAsBillingAddress: false,
+  status: 'Active',
+  displayName: '',
+  companyName: '',
+  firstName: '',
+  lastName: '',
+  gstin: '',
+  panNumber: '',
+  placeOfSupply: '',
+  sezUnitName: '',
+  lutBondNo: '',
+  country: '',
+  currency: '',
+  foreignTaxId: '',
+  primaryContactPerson: '',
+  designation: '',
+  email: '',
+  phone: '',
+  alternatePhone: '',
+  billingAttention: '',
+  billingAddressLine1: '',
+  billingAddressLine2: '',
+  billingCity: '',
+  billingState: '',
+  billingPinCode: '',
+  billingCountry: 'India',
+  billingPhone: '',
+  shippingAttention: '',
+  shippingAddressLine1: '',
+  shippingAddressLine2: '',
+  shippingCity: '',
+  shippingState: '',
+  shippingPinCode: '',
+  shippingCountry: '',
+  shippingPhone: '',
+  paymentTerms: '',
+  creditLimit: null,
+  industry: '',
+  notes: ''
+};
+
 export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialData, clientId, isSubmitting }: Props) {
   const form = useClientForm(initialData);
 
@@ -28,13 +72,8 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
   React.useEffect(() => {
     if (isOpen) {
       form.reset({
-        customerType: 'Business',
-        gstTreatment: 'business_gst',
-        sameAsBillingAddress: true,
-        status: 'Active',
-        displayName: '',
-        billingCountry: 'India',
-        ...initialData
+        ...defaultEmptyClient,
+        ...(initialData || {})
       });
     }
   }, [isOpen, initialData, form]);
@@ -44,7 +83,24 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
   const readOnly = mode === 'view';
 
   const onSubmit = async (data: ClientFormValues) => {
-    await onSave(data);
+    try {
+      await onSave(data);
+    } catch (err: any) {
+      if (err?.message && typeof err.message === 'object') {
+        // Backend validation errors format mapping
+        Object.keys(err.message).forEach((key) => {
+          form.setError(key as any, { type: 'server', message: err.message[key] });
+        });
+      } else if (err?.message && typeof err.message === 'string') {
+        import('react-hot-toast').then(({ default: toast }) => {
+          toast.error(err.message);
+        });
+      } else {
+        import('react-hot-toast').then(({ default: toast }) => {
+          toast.error('An unexpected error occurred while saving.');
+        });
+      }
+    }
   };
 
   return (

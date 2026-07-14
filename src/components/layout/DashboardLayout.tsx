@@ -180,6 +180,33 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
 
+  // Determine active breadcrumb based on current path
+  let activeModuleName = '';
+  let activePageName = '';
+
+  for (const item of navItems) {
+    for (const sub of item.subItems) {
+      const exactMatch = location.pathname === sub.path;
+      const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
+      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path as string));
+      
+      if (isActive) {
+        activeModuleName = item.name;
+        activePageName = sub.name;
+        break;
+      }
+    }
+    if (activeModuleName) break;
+  }
+
+  // Handle special routes not in sidebar
+  if (!activeModuleName) {
+    if (location.pathname.includes('/profile')) {
+      activeModuleName = 'Profile';
+      activePageName = 'Profile Settings';
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
 
@@ -277,9 +304,21 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         <header className="h-16 bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 xl:px-8 sticky top-0 z-10 transition-colors duration-200">
 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
-            <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</span>
-            <ChevronRight size={14} className="mx-2 shrink-0" />
-            <span className="text-[#792359] dark:text-[#e6a8d0] truncate">{expandedMenu || 'Overview'}</span>
+            <Link to={basePath} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</Link>
+            {(activeModuleName || expandedMenu) && (
+              <>
+                <ChevronRight size={14} className="mx-2 shrink-0" />
+                <span className={activePageName ? "hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0" : "text-[#792359] dark:text-[#e6a8d0] truncate"}>
+                  {activeModuleName || expandedMenu || 'Overview'}
+                </span>
+              </>
+            )}
+            {activePageName && (
+              <>
+                <ChevronRight size={14} className="mx-2 shrink-0" />
+                <span className="text-[#792359] dark:text-[#e6a8d0] truncate">{activePageName}</span>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3 relative shrink-0">
