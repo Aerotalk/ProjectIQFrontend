@@ -16,14 +16,10 @@ export const api = {
       headers['Content-Type'] = 'application/json';
     }
 
-    const token = localStorage.getItem('token');
-    if (token && !endpoint.startsWith('/auth')) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const config: RequestInit = {
       ...options,
       headers,
+      credentials: 'include', // Ensure cookies are sent and received
     };
 
     if (options.data) {
@@ -34,7 +30,31 @@ export const api = {
       }
     }
 
-    const response = await fetch(url, config);
+    let response = await fetch(url, config);
+
+    // If 401 and we are not already trying to refresh or log in
+    if (response.status === 401 && !endpoint.includes('/auth/')) {
+      try {
+        const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include', // Send refresh token cookie
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (refreshResponse.ok) {
+          // Token refreshed, retry original request
+          response = await fetch(url, config);
+        } else {
+          // Refresh failed, clear user context
+          window.location.href = '/login';
+        }
+      } catch (err) {
+        window.location.href = '/login';
+      }
+    }
+
     const text = await response.text();
     let data;
     try {

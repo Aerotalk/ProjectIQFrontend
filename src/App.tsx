@@ -23,20 +23,18 @@ function App() {
         <ErrorBoundary>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/superadmin/*" element={
+            <Route path="/superadmin" element={
               <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
-                <SuperAdminDashboard />
+                <SuperAdminLayout />
               </ProtectedRoute>
-            } />
-            <Route path="/superadmin/roles" element={
-              <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
-                <SuperAdminLayout>
-                  <PermissionGate permission="role.view">
-                    <RolesList />
-                  </PermissionGate>
-                </SuperAdminLayout>
-              </ProtectedRoute>
-            } />
+            }>
+              <Route path="organizations" element={<SuperAdminDashboard />} />
+              <Route path="roles" element={
+                <PermissionGate permission="role.view">
+                  <RolesList />
+                </PermissionGate>
+              } />
+            </Route>
             <Route path="/companydashboard/*" element={
               <ProtectedRoute>
                 <CompanyDashboard />

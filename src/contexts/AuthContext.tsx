@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { api } from '../lib/api';
+
 export interface User {
   id: string;
   username: string;
@@ -13,11 +15,10 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: User) => void;
-  logout: () => void;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
 }
 
@@ -25,68 +26,49 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchUser = async () => {
+    try {
+      const userData = await api.get('/auth/me');
+      setUser(userData);
+    } catch (error) {
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-      
-      if (storedToken && storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-          setToken(storedToken);
-        } catch (error) {
-          console.error("Failed to parse user data, clearing token", error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setToken(null);
-          setUser(null);
-        }
-      } else {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setToken(null);
-          setUser(null);
-      }
+      await fetchUser();
       setIsLoading(false);
     };
 
     initAuth();
   }, []);
 
-  const login = (newToken: string, userData: User) => {
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setToken(newToken);
+  const login = (userData: User) => {
     setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('roles');
-    localStorage.removeItem('username');
-    localStorage.removeItem('organizationId');
-    localStorage.removeItem('organizationName');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
-    // Optional: Call backend /auth/logout here
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      setUser(null);
+      window.location.href = '/login';
+    }
   };
 
   const refetchUser = async () => {
-    // In a stateless JWT architecture, user is updated on login.
-    // To refresh permissions mid-session, a specific token refresh or permission fetch would be needed.
-    // For now, it reads from state.
+    await fetchUser();
   };
 
   return (
     <AuthContext.Provider value={{
       user,
-      token,
-      isAuthenticated: !!user && !!token,
+      isAuthenticated: !!user,
       isLoading,
       login,
       logout,

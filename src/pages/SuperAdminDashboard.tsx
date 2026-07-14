@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import SuperAdminLayout from '../components/layout/SuperAdminLayout';
+import { useState, useEffect } from 'react';
 import { Building2, Plus, Eye, EyeOff, Search, CheckCircle2, ArrowLeft } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
-import { useEffect } from 'react';
 
 interface Organization {
   id: string;
@@ -99,7 +97,6 @@ export default function SuperAdminDashboard() {
   };
 
   return (
-    <SuperAdminLayout>
       <div className="max-w-7xl mx-auto space-y-6 relative">
         
         {/* Toast Notifications */}
@@ -487,6 +484,5 @@ export default function SuperAdminDashboard() {
         )}
 
       </div>
-    </SuperAdminLayout>
   );
 }

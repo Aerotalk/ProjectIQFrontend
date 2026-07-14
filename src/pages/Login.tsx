@@ -88,10 +88,6 @@ export default function Login() {
               try {
                 const response = await api.post('/auth/login', { email, password });
 
-                if (response.refreshToken) {
-                  localStorage.setItem('refreshToken', response.refreshToken);
-                }
-
                 const userData: User = {
                   id: response.id || '',
                   username: response.username,
@@ -104,13 +100,7 @@ export default function Login() {
                   effectivePermissions: response.effectivePermissions || []
                 };
 
-                login(response.token, userData);
-
-                // Optional: keep old localStorage items if other parts still depend on them (though they should use AuthProvider now)
-                if (response.roles) localStorage.setItem('roles', JSON.stringify(response.roles));
-                if (response.username) localStorage.setItem('username', response.username);
-                if (response.organizationId) localStorage.setItem('organizationId', response.organizationId);
-                if (response.organizationName) localStorage.setItem('organizationName', response.organizationName);
+                login(userData);
 
                 sessionStorage.setItem('showWelcomeToast', 'true');
 

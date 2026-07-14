@@ -11,10 +11,10 @@ import {
   CheckCircle2,
   Shield
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { usePermissions } from '../../hooks/usePermissions';
 
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+export default function SuperAdminLayout({ children }: { children?: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -183,7 +183,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
         {/* Main Content */}
         <main className="flex-1 p-4 lg:p-6 xl:p-8">
-          {children}
+          {children || <Outlet />}
         </main>
 
       </div>
