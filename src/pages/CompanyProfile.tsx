@@ -182,12 +182,8 @@ export default function CompanyProfile() {
 
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
-      const orgId = localStorage.getItem('organizationId');
-      if (!orgId) return null;
-      
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('organizationId', orgId);
       
       const res = await api.post('/admin/files/upload', formData);
       return res.id || null;

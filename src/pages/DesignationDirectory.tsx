@@ -29,25 +29,10 @@ export default function DesignationDirectory() {
     fetchDesignations();
   }, []);
 
-  const getOrgIdFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.organizationId) return payload.organizationId;
-      } catch (e) {
-        console.error("Failed to parse token", e);
-      }
-    }
-    return '00000000-0000-0000-0000-000000000000';
-  };
-
   const fetchDesignations = async () => {
     try {
       setLoading(true);
-      const orgId = getOrgIdFromToken();
-      
-      const response = await api.get(`/admin/designations?organizationId=${orgId}`);
+      const response = await api.get(`/admin/designations`);
       setDesignations(response);
     } catch (err: any) {
       setError(err.message || 'Failed to load designations');
@@ -60,8 +45,7 @@ export default function DesignationDirectory() {
     e.preventDefault();
     try {
       setSubmitting(true);
-      const orgId = getOrgIdFromToken();
-      await api.post(`/admin/designations?organizationId=${orgId}`, {
+      await api.post(`/admin/designations`, {
         designationCode: newDesigCode,
         designationName: newDesigName,
         description: newDesigDesc,
@@ -83,8 +67,7 @@ export default function DesignationDirectory() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this designation?')) return;
     try {
-      const orgId = getOrgIdFromToken();
-      await api.delete(`/admin/designations/${id}?organizationId=${orgId}`);
+      await api.delete(`/admin/designations/${id}`);
       fetchDesignations();
     } catch (err: any) {
       alert(err.message || 'Failed to delete designation');

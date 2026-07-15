@@ -27,25 +27,10 @@ export default function DepartmentDirectory() {
     fetchDepartments();
   }, []);
 
-  const getOrgIdFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.organizationId) return payload.organizationId;
-      } catch (e) {
-        console.error("Failed to parse token", e);
-      }
-    }
-    return '00000000-0000-0000-0000-000000000000';
-  };
-
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const orgId = getOrgIdFromToken();
-      
-      const response = await api.get(`/admin/departments?organizationId=${orgId}`);
+      const response = await api.get(`/admin/departments`);
       setDepartments(response);
     } catch (err: any) {
       setError(err.message || 'Failed to load departments');
@@ -58,8 +43,7 @@ export default function DepartmentDirectory() {
     e.preventDefault();
     try {
       setSubmitting(true);
-      const orgId = getOrgIdFromToken();
-      await api.post(`/admin/departments?organizationId=${orgId}`, {
+      await api.post(`/admin/departments`, {
         departmentCode: newDeptCode,
         departmentName: newDeptName,
         description: newDeptDesc
@@ -79,8 +63,7 @@ export default function DepartmentDirectory() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this department?')) return;
     try {
-      const orgId = getOrgIdFromToken();
-      await api.delete(`/admin/departments/${id}?organizationId=${orgId}`);
+      await api.delete(`/admin/departments/${id}`);
       fetchDepartments();
     } catch (err: any) {
       alert(err.message || 'Failed to delete department');
