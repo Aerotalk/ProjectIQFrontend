@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useEffect, useRef, useMemo } from 'react';
+import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Paperclip, X as XIcon } from 'lucide-react';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { MOCK_PROJECTS } from '@/services/po.service';
 
 interface Props {
@@ -52,6 +53,17 @@ export default function ExpenseFormSection({ readOnly }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  useEffect(() => {
+    if (!isGstApplicable && !readOnly) {
+      setValue('gstAmount', undefined, { shouldValidate: true });
+      setValue('isInputCreditClaimable', false, { shouldValidate: true });
+    }
+  }, [isGstApplicable, setValue, readOnly]);
+
+  const PROJECT_OPTIONS = useMemo(() => {
+    return MOCK_PROJECTS.map(p => ({ label: `${p.id} – ${p.name}`, value: p.id }));
+  }, []);
+
   const fieldClass = (hasError: boolean) =>
     `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
     `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
@@ -76,16 +88,19 @@ export default function ExpenseFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Project <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <select
-              {...register('projectId')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.projectId)}
-            >
-              <option value="">Select a Project</option>
-              {MOCK_PROJECTS.map(p => (
-                <option key={p.id} value={p.id}>{p.id} – {p.name}</option>
-              ))}
-            </select>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="projectId"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={PROJECT_OPTIONS}
+                  />
+                )}
+              />
+            </div>
             {errors.projectId && (
               <p className="text-red-500 text-xs mt-1">{errors.projectId.message as string}</p>
             )}
@@ -112,15 +127,19 @@ export default function ExpenseFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Category <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <select
-              {...register('category')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.category)}
-            >
-              {EXPENSE_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={EXPENSE_CATEGORIES}
+                  />
+                )}
+              />
+            </div>
             {errors.category && (
               <p className="text-red-500 text-xs mt-1">{errors.category.message as string}</p>
             )}

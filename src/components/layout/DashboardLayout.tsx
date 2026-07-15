@@ -14,7 +14,8 @@ import {
   Search,
   CheckCircle2,
   Shield,
-  Building2
+  Building2,
+  FolderKanban
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -116,7 +117,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         { name: 'Dashboard', path: `${basePath}/finance`, permission: 'finance.view' },
         { name: 'Purchase Orders', path: `${basePath}/finance/pos`, permission: 'finance.pos.view' },
         { name: 'Delivery Challans', path: `${basePath}/finance/challans`, permission: 'finance.challans.view' },
-        { name: 'Expenses', path: `${basePath}/finance/expenses`, permission: 'finance.expenses.view' }
+        { name: 'Payments', path: `${basePath}/finance/payments`, permission: 'finance.payments.view' }
       ] : [
         { name: 'Finance Dashboard', path: `${basePath}/finance`, permission: 'finance.view' }
       ]
@@ -132,18 +133,24 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       ]
     },
     {
+      name: 'Projects',
+      icon: FolderKanban,
+      permission: 'ticket.projects.view', // Keep existing permissions or add a generic one
+      subItems: role === 'company' ? [
+        { name: 'Dashboard', path: `${basePath}/projects`, permission: 'ticket.projects.view' },
+        { name: 'Expenses', path: `${basePath}/projects/expenses`, permission: 'finance.expenses.view' }
+      ] : [
+        { name: 'Projects Dashboard', path: `${basePath}/projects`, permission: 'ticket.projects.view' }
+      ]
+    },
+    {
       name: 'Ticket System',
       icon: Ticket,
       permission: 'ticket.view',
       subItems: role === 'company' ? [
         { name: 'Dashboard', path: `${basePath}`, permission: 'ticket.view' },
         { name: 'All Tickets', path: `${basePath}/tickets`, permission: 'ticket.view' },
-        { name: 'Projects', path: `${basePath}/projects`, permission: 'ticket.projects.view' },
-        { name: 'Clients', path: `${basePath}/clients`, permission: 'ticket.clients.view' },
-        { name: 'Reports', path: `${basePath}/reports`, permission: 'ticket.reports.view' },
-        { name: 'Knowledge Base', path: `${basePath}/knowledge-base`, permission: 'ticket.kb.view' },
-        { name: 'Notifications', path: `${basePath}/notifications`, permission: 'ticket.notifications.view' },
-        { name: 'Admin Settings', path: `${basePath}/admin`, permission: 'ticket.admin.view' }
+        { name: 'Knowledge Base', path: `${basePath}/tickets/kb`, permission: 'ticket.kb.view' }
       ] : [
         { name: 'Ticket Dashboard', path: `${basePath}`, permission: 'ticket.view' }
       ]
@@ -185,19 +192,32 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   let activeModuleName = '';
   let activePageName = '';
 
+  // Pass 1: exact match
   for (const item of navItems) {
     for (const sub of item.subItems) {
-      const exactMatch = location.pathname === sub.path;
-      const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
-      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path as string));
-      
-      if (isActive) {
+      if (sub.path && location.pathname === sub.path) {
         activeModuleName = item.name;
         activePageName = sub.name;
         break;
       }
     }
     if (activeModuleName) break;
+  }
+
+  // Pass 2: prefix match if no exact match
+  if (!activeModuleName) {
+    let longestMatchLen = 0;
+    for (const item of navItems) {
+      for (const sub of item.subItems) {
+        if (sub.path && sub.path !== basePath && location.pathname.startsWith(sub.path)) {
+          if (sub.path.length > longestMatchLen) {
+            longestMatchLen = sub.path.length;
+            activeModuleName = item.name;
+            activePageName = sub.name;
+          }
+        }
+      }
+    }
   }
 
   // Handle special routes not in sidebar
@@ -236,7 +256,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
           {navItems.map((item) => {
             const isExpanded = expandedMenu === item.name;
-            const hasActiveSub = item.subItems.some(sub => location.pathname === sub.path || (sub.path !== basePath && location.pathname.startsWith(sub.path as string)));
+            const hasActiveSub = activeModuleName === item.name;
 
             return (
               <div key={item.name} className="mb-1">
@@ -259,9 +279,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 >
                   <div className="pl-9 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-5 relative">
                     {item.subItems.map(sub => {
-                      const exactMatch = location.pathname === sub.path;
-                      const hasExactMatch = item.subItems.some(s => location.pathname === s.path);
-                      const isActive = exactMatch || (!hasExactMatch && sub.path !== basePath && location.pathname.startsWith(sub.path as string));
+                      const isActive = activeModuleName === item.name && activePageName === sub.name;
                       
                       return (
                         <Link

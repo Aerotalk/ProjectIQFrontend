@@ -9,6 +9,7 @@ import CreateTicket from './tickets/CreateTicket';
 import TicketDetails from './tickets/TicketDetails';
 import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
+import KnowledgeBase from './tickets/KnowledgeBase';
 import RolesList from './RolesList';
 import PermissionGate from '../components/PermissionGate';
 import SalesDashboard from './sales/SalesDashboard';
@@ -20,7 +21,8 @@ import QuotationDetails from './sales/QuotationDetails';
 import FinanceDashboard from './finance/FinanceDashboard';
 import POManagement from './finance/POManagement';
 import ChallanManagement from './finance/ChallanManagement';
-import ExpenseManagement from './finance/ExpenseManagement';
+import PaymentManagement from './finance/PaymentManagement';
+import ExpenseManagement from './projects/ExpenseManagement';
 import ProjectFinanceDetails from './finance/ProjectFinanceDetails';
 
 function DefaultView() {
@@ -49,6 +51,7 @@ export default function CompanyDashboard() {
       <Routes>
         <Route path="/" element={<TicketDashboard />} />
         <Route path="/tickets" element={<TicketList />} />
+        <Route path="/tickets/kb" element={<KnowledgeBase />} />
         <Route path="/tickets/create" element={<CreateTicket />} />
         <Route path="/tickets/:id" element={<TicketDetails />} />
         <Route path="/tickets/:id/report" element={<TicketReport />} />
@@ -98,7 +101,12 @@ export default function CompanyDashboard() {
             <ChallanManagement />
           </PermissionGate>
         } />
-        <Route path="/finance/expenses" element={
+        <Route path="/finance/payments" element={
+          <PermissionGate permission="finance.payments.view">
+            <PaymentManagement />
+          </PermissionGate>
+        } />
+        <Route path="/projects/expenses" element={
           <PermissionGate permission="finance.expenses.view">
             <ExpenseManagement />
           </PermissionGate>

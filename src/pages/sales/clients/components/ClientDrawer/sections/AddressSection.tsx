@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { shouldShowOverseasFields } from '../../../utils/gstRules';
 
 interface Props {
@@ -10,8 +11,26 @@ const COUNTRIES = [
   'India', 'United States', 'United Kingdom', 'United Arab Emirates', 'Singapore', 'Australia', 'Other'
 ];
 
+const STATES_MAP: Record<string, string[]> = {
+  'India': ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi'],
+  'United States': ['California', 'Texas', 'New York', 'Florida', 'Illinois', 'Pennsylvania', 'Ohio', 'Georgia', 'North Carolina', 'Michigan'],
+  'United Kingdom': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+  'United Arab Emirates': ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al-Quwain', 'Fujairah', 'Ras Al Khaimah'],
+  'Singapore': ['Central Region', 'East Region', 'North Region', 'North-East Region', 'West Region'],
+  'Australia': ['New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia', 'Tasmania', 'Australian Capital Territory', 'Northern Territory']
+};
+
+const COUNTRY_CODES: Record<string, string> = {
+  'India': '+91 ',
+  'United States': '+1 ',
+  'United Kingdom': '+44 ',
+  'United Arab Emirates': '+971 ',
+  'Singapore': '+65 ',
+  'Australia': '+61 '
+};
+
 export default function AddressSection({ readOnly }: Props) {
-  const { register, watch, formState: { errors }, setValue } = useFormContext();
+  const { register, watch, formState: { errors }, setValue, control } = useFormContext();
   const treatment = watch('gstTreatment');
   const isOverseas = shouldShowOverseasFields(treatment);
   const sameAsBilling = watch('sameAsBillingAddress');
@@ -24,6 +43,27 @@ export default function AddressSection({ readOnly }: Props) {
   const billingPinCode = watch('billingPinCode');
   const billingCountry = watch('billingCountry');
   const billingPhone = watch('billingPhone');
+
+  // Phone code auto-detection
+  useEffect(() => {
+    if (billingCountry && !readOnly) {
+      const code = COUNTRY_CODES[billingCountry];
+      if (code && (!billingPhone || billingPhone.trim() === '')) {
+        setValue('billingPhone', code, { shouldValidate: true });
+      }
+    }
+  }, [billingCountry, setValue, readOnly]);
+
+  const shippingCountry = watch('shippingCountry');
+  const shippingPhone = watch('shippingPhone');
+  useEffect(() => {
+    if (shippingCountry && !readOnly) {
+      const code = COUNTRY_CODES[shippingCountry];
+      if (code && (!shippingPhone || shippingPhone.trim() === '')) {
+        setValue('shippingPhone', code, { shouldValidate: true });
+      }
+    }
+  }, [shippingCountry, setValue, readOnly]);
 
   // Effect to copy billing to shipping when checkbox is checked
   useEffect(() => {
@@ -63,14 +103,22 @@ export default function AddressSection({ readOnly }: Props) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Country / Region</label>
-            <select 
-              {...register('billingCountry')} 
-              disabled={readOnly}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors"
-            >
-              <option value="">Select Country</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="billingCountry"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      setValue('billingState', ''); // reset state when country changes
+                    }}
+                    options={COUNTRIES}
+                  />
+                )}
+              />
+            </div>
           </div>
 
           <div>
@@ -107,12 +155,19 @@ export default function AddressSection({ readOnly }: Props) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">State / Province {!isOverseas && '*'}</label>
-            <input 
-              type="text" 
-              {...register('billingState')} 
-              disabled={readOnly}
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.billingState ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
-            />
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="billingState"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={STATES_MAP[billingCountry] || []}
+                  />
+                )}
+              />
+            </div>
             {errors.billingState && <p className="text-red-500 text-xs mt-1">{errors.billingState.message as string}</p>}
           </div>
 
@@ -166,14 +221,22 @@ export default function AddressSection({ readOnly }: Props) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Country / Region</label>
-            <select 
-              {...register('shippingCountry')} 
-              disabled={readOnly}
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`}
-            >
-              <option value="">Select Country</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <div className={readOnly || sameAsBilling ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="shippingCountry"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      setValue('shippingState', ''); // reset state when country changes
+                    }}
+                    options={COUNTRIES}
+                  />
+                )}
+              />
+            </div>
           </div>
           
           <div>
@@ -208,12 +271,19 @@ export default function AddressSection({ readOnly }: Props) {
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">State / Province</label>
-            <input 
-              type="text" 
-              {...register('shippingState')} 
-              readOnly={readOnly || sameAsBilling}
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
-            />
+            <div className={readOnly || sameAsBilling ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="shippingState"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={STATES_MAP[shippingCountry] || []}
+                  />
+                )}
+              />
+            </div>
           </div>
 
           <div>

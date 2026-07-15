@@ -1,7 +1,7 @@
 import { ArrowLeft, Save, RefreshCw, MessageSquare, UserPlus, FileText } from 'lucide-react';
 import { useState } from 'react';
 
-const STATES = ['Open', 'In Progress', 'On Hold', 'Resolved', 'Closed', 'Canceled'];
+const STATES = ['Open', 'In Progress', 'Closed'];
 
 interface ViewTicketProps {
   ticket: any;
