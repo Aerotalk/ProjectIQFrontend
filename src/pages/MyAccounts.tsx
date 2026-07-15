@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
-import { useAuth } from '../contexts/AuthContext';
+
 
 type ViewState = 'list' | 'add' | 'edit';
 
@@ -88,7 +88,6 @@ const AccountForm = ({
   onSave: (data: AccountData) => void; 
   onCancel: () => void;
 }) => {
-  const { user } = useAuth();
   const primaryAddress = initialData?.addresses?.[0];
   const mappedBanks = initialData?.bankAccounts?.map((b: any) => ({
     id: b.id || Date.now().toString() + Math.random().toString(),
@@ -527,7 +526,6 @@ const AccountForm = ({
 };
 
 export default function MyAccounts() {
-  const { user } = useAuth();
   const [viewState, setViewState] = useState<ViewState>('list');
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null);

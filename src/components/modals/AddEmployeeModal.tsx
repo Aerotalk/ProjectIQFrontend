@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Lock, Briefcase } from 'lucide-react';
 import { api } from '../../lib/api';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface AddEmployeeModalProps {
   isOpen: boolean;
@@ -33,7 +32,6 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
     }
   }, [isOpen]);
 
-  const { user } = useAuth();
 
   const fetchDropdownData = async () => {
     try {
