@@ -11,6 +11,7 @@ export const challanSchema = z.object({
   linkedVendorPoId: z.string().optional(),
   linkedVendorPoNumber: z.string().optional(),
   attachmentName: z.string().optional(),
+  ewayBillNo: z.string().optional(),
   remarks: z.string().optional(),
 });
 

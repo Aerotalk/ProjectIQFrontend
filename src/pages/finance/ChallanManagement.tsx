@@ -45,7 +45,7 @@ export default function ChallanManagement() {
     try {
       const companyId = localStorage.getItem('selectedCompanyId') || '';
       const [challanData, vendorData] = await Promise.all([
-        ChallanService.getAll(),
+        ChallanService.getAll(companyId),
         VendorService.getVendors(companyId),
       ]);
       setChallans(challanData);
@@ -87,7 +87,8 @@ export default function ChallanManagement() {
       };
 
       if (drawerMode === 'create') {
-        await ChallanService.create(payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
+        const companyId = localStorage.getItem('selectedCompanyId') || '';
+        await ChallanService.create(companyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Delivery Challan created successfully');
       } else if (selectedChallan) {
         await ChallanService.update(selectedChallan.id, payload as Omit<DeliveryChallan, 'id' | 'createdAt'>);

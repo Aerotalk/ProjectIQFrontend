@@ -77,7 +77,7 @@ export default function POManagement() {
     try {
       const companyId = localStorage.getItem('selectedCompanyId') || '';
       const [poData, vendorData] = await Promise.all([
-        POService.getAll(),
+        POService.getAll(companyId),
         VendorService.getVendors(companyId),
       ]);
       setPos(poData);
@@ -123,7 +123,8 @@ export default function POManagement() {
       };
 
       if (drawerMode === 'create') {
-        await POService.create(payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
+        const companyId = localStorage.getItem('selectedCompanyId') || '';
+        await POService.create(companyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
         toast.success('Purchase Order created successfully');
       } else if (selectedPO) {
         await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);

@@ -27,7 +27,7 @@ export const useExpenseForm = (defaultValues?: Partial<ExpenseFormValues>) => {
 
   useEffect(() => {
     if (!isGstApplicable) {
-      form.setValue('gstAmount', undefined, { shouldValidate: true });
+      form.setValue('gstAmount', 0, { shouldValidate: true });
       form.setValue('isInputCreditClaimable', false, { shouldValidate: true });
     }
   }, [isGstApplicable, form]);

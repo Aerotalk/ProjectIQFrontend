@@ -26,7 +26,7 @@ function numberToWords(num: number): string {
   return str.trim() + ' Rupees Only';
 }
 
-export default function TotalsSection({ }: Props) {
+export default function TotalsSection({ readOnly }: Props) {
   const { control } = useFormContext();
 
   const subTotal = useWatch({ control, name: 'subTotal', defaultValue: 0 });
@@ -65,6 +65,21 @@ export default function TotalsSection({ }: Props) {
         <div className="flex justify-between text-sm border-b border-gray-200 dark:border-white/10 pb-3">
           <span className="text-gray-600 dark:text-gray-400">Total GST</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{totalGstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm border-b border-gray-200 dark:border-white/10 pb-3">
+          <span className="text-gray-600 dark:text-gray-400">Delivery Cost</span>
+          <div className="flex items-center gap-1">
+            <span className="text-gray-500">₹</span>
+            <input 
+              type="number" 
+              {...useFormContext().register('deliveryCost', { valueAsNumber: true })}
+              disabled={readOnly}
+              className="w-24 px-2 py-1 text-right bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 hide-arrows" 
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
         </div>
         <div className="flex justify-between text-base font-bold pt-1">
           <span className="text-gray-900 dark:text-white">Grand Total</span>

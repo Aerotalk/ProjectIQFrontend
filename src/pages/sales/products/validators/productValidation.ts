@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const productSchema = z.object({
   id: z.string().optional(),
-  itemCode: z.string().min(1, 'Item Code is required'),
+  itemCode: z.string().optional(),
   itemName: z.string().min(1, 'Item Name is required'),
   description: z.string().optional(),
   type: z.enum(['Product', 'Service']),

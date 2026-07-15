@@ -1,22 +1,18 @@
 import { Search, Filter, Plus, Download, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
-import CreateTicket from './CreateTicket';
-import ViewTicket from './ViewTicket';
-
-const initialTickets = [
-  { id: 'INC0004929', subject: 'Issue with login to portal', client: 'TechNova Pvt Ltd', priority: 'High', status: 'Open', assigned: 'Arjun Dev', updated: '10m ago' },
-  { id: 'INC0004930', subject: 'Unable to access reports', client: 'Globex Corporation', priority: 'Medium', status: 'In Progress', assigned: 'Sneha Iyer', updated: '35m ago' },
-  { id: 'INC0004931', subject: 'API integration failure', client: 'Hexa Finance', priority: 'High', status: 'Open', assigned: 'Rohit Singh', updated: '1h ago' },
-  { id: 'INC0004932', subject: 'Data sync not working', client: 'NextGen Retail', priority: 'Low', status: 'Resolved', assigned: 'Amit Verma', updated: '2h ago' },
-  { id: 'INC0004933', subject: 'Payment gateway error', client: 'BlueStone Ltd', priority: 'Medium', status: 'In Progress', assigned: 'Neha Patil', updated: '3h ago' },
-];
+import TicketDrawer from './components/TicketDrawer';
+import { MOCK_TICKETS, type TicketFormValues } from '../../services/ticket.service';
+import toast from 'react-hot-toast';
 
 export default function TicketList() {
-  const [tickets, setTickets] = useState(initialTickets);
-  const [isCreating, setIsCreating] = useState(false);
+  const [tickets, setTickets] = useState(MOCK_TICKETS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [openActionId, setOpenActionId] = useState<string | null>(null);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
 
   // Click outside to close action menu
@@ -28,22 +24,52 @@ export default function TicketList() {
     };
   }
 
-  const handleCreateSubmit = (newTicket: any) => {
-    setTickets([newTicket, ...tickets]);
-    setIsCreating(false);
-  };
-
   const markAsClosed = (id: string) => {
     setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Closed' } : t));
+    toast.success('Ticket marked as closed');
   };
 
   const reopenTicket = (id: string) => {
     setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Open' } : t));
+    toast.success('Ticket reopened');
   };
 
-  const handleViewSave = (updatedTicket: any) => {
-    setTickets(tickets.map(t => t.id === updatedTicket.id ? updatedTicket : t));
+  const handleCreate = () => {
+    setDrawerMode('create');
     setSelectedTicket(null);
+    setIsDrawerOpen(true);
+  };
+
+  const handleEdit = (ticket: any) => {
+    setDrawerMode('edit');
+    setSelectedTicket(ticket);
+    setIsDrawerOpen(true);
+  };
+
+  const handleView = (ticket: any) => {
+    setDrawerMode('view');
+    setSelectedTicket(ticket);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSaveTicket = async (data: TicketFormValues) => {
+    // Mock save logic
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulating API call
+
+    if (drawerMode === 'create') {
+      const newTicket = {
+        ...data,
+        id: `TKT-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`,
+        updated: 'Just now'
+      };
+      setTickets([newTicket as any, ...tickets]);
+      toast.success('Ticket created successfully');
+    } else {
+      setTickets(tickets.map(t => t.id === selectedTicket.id ? { ...t, ...data, updated: 'Just now' } : t));
+      toast.success('Ticket updated successfully');
+    }
+    
+    setIsDrawerOpen(false);
   };
 
   const filteredTickets = tickets.filter(t => {
@@ -70,19 +96,8 @@ export default function TicketList() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success('Tickets exported successfully');
   };
-
-  if (isCreating) {
-    return (
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        <CreateTicket onCancel={() => setIsCreating(false)} onSubmit={handleCreateSubmit} />
-      </div>
-    );
-  }
-
-  if (selectedTicket) {
-    return <ViewTicket ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onSave={handleViewSave} />;
-  }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
@@ -111,7 +126,7 @@ export default function TicketList() {
               <option value="All">All Statuses</option>
               <option value="Open">Open</option>
               <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
             </select>
             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           </div>
@@ -119,7 +134,7 @@ export default function TicketList() {
             <Download size={16} /> Export
           </button>
           <button 
-            onClick={() => setIsCreating(true)}
+            onClick={handleCreate}
             className="shrink-0 px-3 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
           >
             <Plus size={16} /> Create Incident
@@ -144,14 +159,15 @@ export default function TicketList() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {filteredTickets.map((t) => (
-                <tr key={t.id} onClick={() => setSelectedTicket(t)} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-                  <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{t.id}</td>
+                <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
+                  <td onClick={() => handleView(t)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{t.id}</td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                      t.priority === 'High' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
-                      t.priority === 'Medium' ? 'text-orange-700 bg-orange-50 dark:bg-orange-500/10' :
+                      t.priority === 'Critical' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
+                      t.priority === 'High' ? 'text-orange-700 bg-orange-50 dark:bg-orange-500/10' :
+                      t.priority === 'Medium' ? 'text-yellow-700 bg-yellow-50 dark:bg-yellow-500/10' :
                       'text-green-700 bg-green-50 dark:bg-green-500/10'
                     }`}>
                       {t.priority}
@@ -182,8 +198,11 @@ export default function TicketList() {
                     </button>
                     {openActionId === t.id && (
                       <div className="action-menu-dropdown absolute right-12 top-10 w-40 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm">
-                        <button onClick={(e) => { e.stopPropagation(); setSelectedTicket(t); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
+                        <button onClick={(e) => { e.stopPropagation(); handleView(t); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
                           View Details
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleEdit(t); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
+                          Edit Ticket
                         </button>
                         {t.status !== 'Closed' && (
                           <button 
@@ -225,6 +244,14 @@ export default function TicketList() {
           </div>
         </div>
       </div>
+
+      <TicketDrawer 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveTicket}
+        mode={drawerMode}
+        initialData={selectedTicket}
+      />
     </div>
   );
 }

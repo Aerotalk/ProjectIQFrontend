@@ -1,12 +1,23 @@
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function PricingSection({ readOnly }: Props) {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, control, formState: { errors } } = useFormContext();
+
+  const UNITS = [
+    'Piece (Nos)', 'Unit', 'Box', 'Carton', 'Packet', 'Pair', 'Set',
+    'Kilogram (Kg)', 'Gram (g)', 'Metric Ton (MT)', 
+    'Litre (L)', 'Millilitre (ml)',
+    'Meter (m)', 'Centimeter (cm)', 'Millimeter (mm)', 
+    'Square Meter (Sq. m)', 'Cubic Meter (Cu. m)',
+    'Feet', 'Inch', 'Roll', 'Bundle', 'Bag', 'Bottle', 'Can', 
+    'Hour', 'Day', 'Month'
+  ];
 
   return (
     <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -29,22 +40,19 @@ export default function PricingSection({ readOnly }: Props) {
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Unit of Measure *</label>
-          <select 
-            {...register('unit')} 
-            disabled={readOnly}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.unit ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
-          >
-            <option value="">Select Unit</option>
-            <option value="Pieces">Pieces (pcs)</option>
-            <option value="Numbers">Numbers (nos)</option>
-            <option value="Kilograms">Kilograms (kg)</option>
-            <option value="Liters">Liters (ltr)</option>
-            <option value="Meters">Meters (m)</option>
-            <option value="Months">Months</option>
-            <option value="Hours">Hours</option>
-            <option value="Days">Days</option>
-            <option value="Services">Services</option>
-          </select>
+          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+            <Controller
+              name="unit"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={UNITS}
+                />
+              )}
+            />
+          </div>
           {errors.unit && <p className="text-red-500 text-xs mt-1">{errors.unit.message as string}</p>}
         </div>
       </div>

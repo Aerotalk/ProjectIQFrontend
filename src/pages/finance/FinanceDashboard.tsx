@@ -32,10 +32,11 @@ export default function FinanceDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        const companyId = localStorage.getItem('selectedCompanyId') || '';
         const [pos, expenses, challans] = await Promise.all([
-          POService.getAll(),
-          ExpenseService.getAll(),
-          ChallanService.getAll()
+          POService.getAll(companyId),
+          ExpenseService.getAll(companyId),
+          ChallanService.getAll(companyId)
         ]);
 
         const poSum = pos.reduce((acc, po) => acc + (po.grandTotal || 0), 0);

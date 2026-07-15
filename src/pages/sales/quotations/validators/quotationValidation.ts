@@ -31,6 +31,7 @@ export const quotationSchema = z.object({
   totalDiscount: z.number().min(0),
   totalTaxableAmount: z.number().min(0),
   totalGstAmount: z.number().min(0),
+  deliveryCost: z.number().min(0).optional(),
   grandTotal: z.number().min(0),
 
   notes: z.string().optional(),

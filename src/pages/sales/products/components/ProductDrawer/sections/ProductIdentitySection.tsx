@@ -32,7 +32,9 @@ export default function ProductIdentitySection({ readOnly }: Props) {
         <div></div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Item Code *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
+            Item Code <span className="text-[10px] text-gray-400 normal-case font-normal">(optional)</span>
+          </label>
           <Input 
             type="text" 
             {...register('itemCode')} 

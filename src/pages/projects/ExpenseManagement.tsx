@@ -50,7 +50,8 @@ export default function ExpenseManagement() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const data = await ExpenseService.getAll();
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      const data = await ExpenseService.getAll(companyId);
       setExpenses(data);
     } catch {
       toast.error('Failed to load expenses');
@@ -79,6 +80,7 @@ export default function ExpenseManagement() {
   const handleSaveExpense = async (data: ExpenseFormValues) => {
     setIsSubmitting(true);
     try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
       const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
 
       const payload = {
@@ -87,7 +89,7 @@ export default function ExpenseManagement() {
       };
 
       if (drawerMode === 'create') {
-        await ExpenseService.create(payload as Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>);
+        await ExpenseService.create(companyId, payload as Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Expense created successfully');
       } else if (selectedExpense) {
         await ExpenseService.update(selectedExpense.id, payload as Omit<Expense, 'id' | 'createdAt'>);
@@ -165,7 +167,7 @@ export default function ExpenseManagement() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Finance</span>
+            <span>Projects</span>
             <span className="text-gray-300 dark:text-gray-600">/</span>
             <span className="text-gray-900 dark:text-gray-200">Expenses</span>
           </div>

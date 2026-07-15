@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
 import { POService, MOCK_PROJECTS } from '@/services/po.service';
+import CustomSelect from '@/components/ui/CustomSelect';
 import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
 
@@ -33,7 +34,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
     const companyId = localStorage.getItem('selectedCompanyId') || '';
     Promise.all([
       VendorService.getVendors(companyId),
-      POService.getAll()
+      POService.getAll(companyId)
     ]).then(([vendorData, poData]) => {
       setVendors(vendorData);
       setPurchaseOrders(poData);
@@ -118,6 +119,18 @@ export default function ChallanFormSection({ readOnly }: Props) {
 
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
+  const PROJECT_OPTIONS = useMemo(() => {
+    return MOCK_PROJECTS.map(p => ({ label: `${p.id} – ${p.name}`, value: p.id }));
+  }, []);
+
+  const VENDOR_OPTIONS = useMemo(() => {
+    return filteredVendors.map(v => ({ label: v.displayName, value: v.id }));
+  }, [filteredVendors]);
+
+  const PO_OPTIONS = useMemo(() => {
+    return filteredPOs.map(po => ({ label: po.poNumber, value: po.id }));
+  }, [filteredPOs]);
+
   return (
     <div className="space-y-6">
       
@@ -167,16 +180,19 @@ export default function ChallanFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Project <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <select
-              {...register('projectId')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.projectId)}
-            >
-              <option value="">Select a Project</option>
-              {MOCK_PROJECTS.map(p => (
-                <option key={p.id} value={p.id}>{p.id} – {p.name}</option>
-              ))}
-            </select>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="projectId"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={PROJECT_OPTIONS}
+                  />
+                )}
+              />
+            </div>
             {errors.projectId && (
               <p className="text-red-500 text-xs mt-1">{errors.projectId.message as string}</p>
             )}
@@ -188,18 +204,19 @@ export default function ChallanFormSection({ readOnly }: Props) {
               Vendor <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className="relative">
-              <select
-                {...register('vendorId')}
-                disabled={readOnly || isLoadingData || !selectedProjectId}
-                className={fieldClass(!!errors.vendorId)}
-              >
-                <option value="">
-                  {!selectedProjectId ? 'Select a project first' : 'Select a Vendor'}
-                </option>
-                {filteredVendors.map(v => (
-                  <option key={v.id} value={v.id}>{v.displayName}</option>
-                ))}
-              </select>
+              <div className={readOnly || isLoadingData || !selectedProjectId ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="vendorId"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={VENDOR_OPTIONS}
+                    />
+                  )}
+                />
+              </div>
               {isLoadingData && (
                 <Loader2 className="absolute right-3 top-2.5 w-4 h-4 animate-spin text-gray-400" />
               )}
@@ -216,19 +233,35 @@ export default function ChallanFormSection({ readOnly }: Props) {
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
             <div className="relative">
-              <select
-                {...register('linkedVendorPoId')}
-                disabled={readOnly || isLoadingData || !selectedProjectId || !selectedVendorId}
-                className={fieldClass(false)}
-              >
-                <option value="">
-                  {!selectedVendorId ? 'Select a vendor first' : 'Select PO (Optional)'}
-                </option>
-                {filteredPOs.map(po => (
-                  <option key={po.id} value={po.id}>{po.poNumber}</option>
-                ))}
-              </select>
+              <div className={readOnly || isLoadingData || !selectedProjectId || !selectedVendorId ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="linkedVendorPoId"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={PO_OPTIONS}
+                    />
+                  )}
+                />
+              </div>
             </div>
+          </div>
+          
+          {/* E-Way Bill Number */}
+          <div>
+            <label className={labelClass}>
+              E-Way Bill Number
+              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
+            </label>
+            <input
+              type="text"
+              {...register('ewayBillNo')}
+              disabled={readOnly}
+              placeholder="e.g. 123456789012"
+              className={fieldClass(!!errors.ewayBillNo)}
+            />
           </div>
           
           {/* Attachment */}

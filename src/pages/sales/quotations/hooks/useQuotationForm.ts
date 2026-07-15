@@ -15,6 +15,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       totalDiscount: 0,
       totalTaxableAmount: 0,
       totalGstAmount: 0,
+      deliveryCost: 0,
       grandTotal: 0,
       ...defaultValues
     },
@@ -29,7 +30,13 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     defaultValue: []
   });
 
-  // Calculate totals whenever lineItems change
+  const deliveryCost = useWatch({
+    control,
+    name: 'deliveryCost',
+    defaultValue: 0
+  });
+
+  // Calculate totals whenever lineItems or deliveryCost change
   useEffect(() => {
     let subTotal = 0;
     let totalDiscount = 0;
@@ -60,13 +67,15 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       grandTotal += rowTotalAmount;
     });
 
+    grandTotal += Number(deliveryCost) || 0;
+
     setValue('subTotal', subTotal, { shouldValidate: false });
     setValue('totalDiscount', totalDiscount, { shouldValidate: false });
     setValue('totalTaxableAmount', totalTaxableAmount, { shouldValidate: false });
     setValue('totalGstAmount', totalGstAmount, { shouldValidate: false });
     setValue('grandTotal', grandTotal, { shouldValidate: false });
 
-  }, [lineItems, setValue]);
+  }, [lineItems, deliveryCost, setValue]);
 
   return form;
 };

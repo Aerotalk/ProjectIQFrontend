@@ -34,6 +34,7 @@ export interface Quotation {
   totalDiscount: number;
   totalTaxableAmount: number;
   totalGstAmount: number;
+  deliveryCost?: number;
   grandTotal: number;
 
   notes?: string;

@@ -9,7 +9,7 @@ export const useProductForm = (defaultValues?: Partial<ProductFormValues>) => {
       type: 'Product',
       status: 'Active',
       standardRate: 0,
-      unit: 'Pieces',
+      unit: 'Piece (Nos)',
       gstRate: '18%',
       ...defaultValues
     },
