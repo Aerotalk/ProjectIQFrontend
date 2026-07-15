@@ -32,26 +32,12 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
     }
   }, [isOpen]);
 
-  const getOrgIdFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.organizationId) return payload.organizationId;
-      } catch (e) {
-        console.error("Failed to parse token", e);
-      }
-    }
-    return '00000000-0000-0000-0000-000000000000';
-  };
 
   const fetchDropdownData = async () => {
     try {
-      const orgId = getOrgIdFromToken();
-      
       const [deptRes, desigRes] = await Promise.all([
-        api.get(`/admin/departments?organizationId=${orgId}`),
-        api.get(`/admin/designations?organizationId=${orgId}`)
+        api.get(`/admin/departments`),
+        api.get(`/admin/designations`)
       ]);
 
       setDepartments(deptRes);
@@ -73,8 +59,6 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
     setError(null);
 
     try {
-      const orgId = getOrgIdFromToken();
-
       // 1. Create the User account
       const userPayload = {
         username: formData.email,
@@ -82,7 +66,6 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
         mobile: formData.mobile,
         password: formData.password,
         status: 'ACTIVE',
-        organizationId: orgId,
         role: 'ROLE_EMPLOYEE'
       };
 
@@ -91,7 +74,6 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
 
       // 2. Create the Employee profile linked to the User
       const empPayload = {
-        organizationId: orgId,
         userId: userId,
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -101,7 +83,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
         employmentStatus: formData.employmentStatus
       };
 
-      await api.post(`/admin/employees?organizationId=${orgId}`, empPayload);
+      await api.post(`/admin/employees`, empPayload);
 
       onSuccess();
       onClose();

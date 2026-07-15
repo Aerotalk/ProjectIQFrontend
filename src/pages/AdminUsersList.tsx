@@ -13,24 +13,10 @@ export default function AdminUsersList() {
     fetchEmployees();
   }, []);
 
-  const getOrgIdFromToken = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.organizationId) return payload.organizationId;
-      } catch (e) {
-        console.error("Failed to parse token", e);
-      }
-    }
-    return '00000000-0000-0000-0000-000000000000';
-  };
-
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const orgId = getOrgIdFromToken();
-      const response = await api.get(`/admin/employees?organizationId=${orgId}`);
+      const response = await api.get(`/admin/employees`);
       setEmployees(response);
     } catch (err: any) {
       console.error(err);

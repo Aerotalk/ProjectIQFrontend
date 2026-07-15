@@ -22,7 +22,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
     const fetchCompanies = async () => {
       if (user?.organizationId) {
         try {
-          const res: any = await api.get(`/admin/companies?organizationId=${user.organizationId}`);
+          const res: any = await api.get(`/admin/companies`);
           setCompanies(Array.isArray(res) ? res : (res.content || []));
         } catch (error) {
           console.error('Failed to fetch companies', error);
@@ -36,7 +36,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
     if (!employeeId || !companyId) return;
     try {
       setIsSaving(true);
-      await rolesService.assignRolesToEmployee(employeeId, companyId, [role.id]);
+      await rolesService.assignRolesToEmployee(employeeId, [role.id], companyId);
       
       setSuccessMsg('Role successfully assigned to employee for the selected company!');
       setTimeout(() => {

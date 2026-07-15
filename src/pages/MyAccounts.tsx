@@ -4,6 +4,7 @@ import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, Ch
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
 
+
 type ViewState = 'list' | 'add' | 'edit';
 
 interface BankData {
@@ -201,11 +202,9 @@ const AccountForm = ({
 
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
-      const orgId = localStorage.getItem('organizationId');
-      if (!orgId) return null;
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('organizationId', orgId);
+      // organizationId is automatically inferred by the backend
       const res = await api.post('/admin/files/upload', formData);
       return res.id || null;
     } catch (err) {
@@ -539,9 +538,7 @@ export default function MyAccounts() {
 
   const fetchAccounts = async () => {
     try {
-      const orgId = localStorage.getItem('organizationId');
-      if (!orgId) return;
-      const res = await api.get(`/admin/companies?organizationId=${orgId}`);
+      const res = await api.get(`/admin/companies`);
       const data = Array.isArray(res) ? res : (res.content || []);
       setAccounts(data);
     } catch (error) {
@@ -556,9 +553,6 @@ export default function MyAccounts() {
 
   const handleSaveAccount = async (data: AccountData) => {
     try {
-      const orgId = localStorage.getItem('organizationId');
-      if (!orgId) return;
-      
       const addresses = [
         {
           addressType: data.addressType || 'Registered',
@@ -596,7 +590,7 @@ export default function MyAccounts() {
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
         status: 'ACTIVE',
-        organizationId: orgId,
+        // organizationId is inferred by backend
         companyCode: viewState === 'add'
           ? `${data.companyName.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
           : data.companyCode,
@@ -613,7 +607,7 @@ export default function MyAccounts() {
       } else {
         // Don't send adminPassword on edit
         const { adminPassword: _, ...editPayload } = payload;
-        await api.put(`/admin/companies/${data.id}?organizationId=${orgId}`, editPayload);
+        await api.put(`/admin/companies/${data.id}`, editPayload);
       }
       
       await fetchAccounts();

@@ -18,22 +18,19 @@ function DefaultView() {
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
 
   useEffect(() => {
-    const orgId = localStorage.getItem('organizationId');
-    if (orgId) {
-      api.get(`/admin/companies?organizationId=${orgId}`)
-        .then((res: any) => {
-          const data = Array.isArray(res) ? res : (res.content || []);
-          setAccounts(data);
-          const storedId = localStorage.getItem('selectedCompanyId');
-          if (storedId && data.some((acc: any) => acc.id === storedId)) {
-            setSelectedAccountId(storedId);
-          } else if (data.length > 0) {
-            setSelectedAccountId(data[0].id);
-            localStorage.setItem('selectedCompanyId', data[0].id);
-          }
-        })
-        .catch(console.error);
-    }
+    api.get(`/admin/companies`)
+      .then((res: any) => {
+        const data = Array.isArray(res) ? res : (res.content || []);
+        setAccounts(data);
+        const storedId = localStorage.getItem('selectedCompanyId');
+        if (storedId && data.some((acc: any) => acc.id === storedId)) {
+          setSelectedAccountId(storedId);
+        } else if (data.length > 0) {
+          setSelectedAccountId(data[0].id);
+          localStorage.setItem('selectedCompanyId', data[0].id);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
