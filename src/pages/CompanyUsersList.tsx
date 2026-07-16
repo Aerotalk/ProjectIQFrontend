@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Search, Loader2, User as UserIcon, Shield, Edit2 } from 'lucide-react';
+import { Search, Loader2, User as UserIcon, Edit2 } from 'lucide-react';
 import UserDrawer from '../components/users/UserDrawer';
 
 interface Role {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2 } from 'lucide-react';
+
 import { api } from '../lib/api';
 import CustomSelect from './ui/CustomSelect';
 import { useAuth } from '../contexts/AuthContext';

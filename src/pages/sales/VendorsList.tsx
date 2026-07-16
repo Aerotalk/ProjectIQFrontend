@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 
 export default function VendorsList() {
   const { selectedCompanyId: companyId } = useAuth();
-  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor, archiveVendor } = useVendors({ companyId });
+  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor } = useVendors({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');

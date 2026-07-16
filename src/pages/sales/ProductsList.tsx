@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 
 export default function ProductsList() {
   const { selectedCompanyId: companyId } = useAuth();
-  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct, archiveProduct } = useProducts({ companyId });
+  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');

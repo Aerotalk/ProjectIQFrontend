@@ -35,13 +35,7 @@ export default function AddressSection({ readOnly }: Props) {
   const isOverseas = shouldShowOverseasFields(treatment);
   const sameAsBilling = watch('sameAsBillingAddress');
 
-  const billingAttention = watch('billingAttention');
-  const billingLine1 = watch('billingAddressLine1');
-  const billingLine2 = watch('billingAddressLine2');
-  const billingCity = watch('billingCity');
-  const billingState = watch('billingState');
-  const billingPinCode = watch('billingPinCode');
-  const billingPhone = watch('billingPhone');
+
   const billingCountry = watch('billingCountry');
 
   const { getValues } = useFormContext();
@@ -80,7 +74,7 @@ export default function AddressSection({ readOnly }: Props) {
   }, [billingCountry, setValue, readOnly, getValues]);
 
   const shippingCountry = watch('shippingCountry');
-  const shippingPhone = watch('shippingPhone');
+
   
   // Handle shipping country change
   useEffect(() => {

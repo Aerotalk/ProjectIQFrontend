@@ -195,9 +195,6 @@ export default function POManagement() {
   const formatAmount = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const selectClass =
-    'px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] transition-colors';
-
   // ---------- Render ----------
 
   return (

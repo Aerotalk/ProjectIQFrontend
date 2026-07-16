@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { type Role, rolesService } from '../../services/roles.service';
-import { X, Users, Save, CheckCircle2, Building2 } from 'lucide-react';
+import { X, Users, Save, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';

@@ -16,7 +16,7 @@ export interface ProductDto {
 export const mapToProduct = (dto: ProductDto): Product => {
   return {
     id: dto.id,
-    itemCode: dto.itemCode,
+    itemCode: dto.itemCode || '',
     itemName: dto.itemName,
     description: dto.description,
     type: dto.type as 'Product' | 'Service',

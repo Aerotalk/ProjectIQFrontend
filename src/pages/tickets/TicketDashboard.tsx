@@ -28,12 +28,7 @@ const recentActivities = [
   { id: 4, text: 'SLA breached for Ticket #TK-100175', time: '2h ago', type: 'breach' },
 ];
 
-const recentTickets = [
-  { id: 'TK-100289', subject: 'Issue with login to portal', client: 'TechNova Pvt Ltd', priority: 'High', status: 'Open', assigned: 'Arjun Dev', updated: '10m ago' },
-  { id: 'TK-100288', subject: 'Unable to access reports', client: 'Globex Corporation', priority: 'Medium', status: 'In Progress', assigned: 'Sneha Iyer', updated: '35m ago' },
-  { id: 'TK-100287', subject: 'API integration failure', client: 'Hexa Finance', priority: 'High', status: 'Open', assigned: 'Rohit Singh', updated: '1h ago' },
-  { id: 'TK-100286', subject: 'Data sync not working', client: 'NextGen Retail', priority: 'Low', status: 'Resolved', assigned: 'Amit Verma', updated: '2h ago' },
-];
+
 
 export default function TicketDashboard() {
   const [trendRange, setTrendRange] = useState('Last 7 Days');

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Save, Loader2, Shield, User as UserIcon, Mail } from 'lucide-react';
 import { api } from '../../lib/api';
-import CustomSelect from '../ui/CustomSelect';
+
 
 interface Role {
   id: string;

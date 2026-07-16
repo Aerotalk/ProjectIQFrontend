@@ -152,9 +152,6 @@ export default function ChallanManagement() {
     }
   };
 
-  const selectClass =
-    'px-3 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] transition-colors';
-
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
       
