@@ -5,8 +5,11 @@ import {
 import { 
   Ticket, Clock, CheckCircle, AlertTriangle, UserCheck, ChevronRight 
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { TicketService } from '../../services/ticket.service';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const trendData = [
   { name: 'May 12', created: 40, resolved: 24 },
@@ -34,6 +37,40 @@ const recentTickets = [
 
 export default function TicketDashboard() {
   const [trendRange, setTrendRange] = useState('Last 7 Days');
+  const { selectedCompanyId: companyId } = useAuth();
+  const navigate = useNavigate();
+  const [tickets, setTickets] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      if (!companyId) return;
+      try {
+        const data = await TicketService.getAll(companyId);
+        setTickets(data);
+      } catch (err) {
+        console.error('Failed to fetch tickets:', err);
+      }
+    };
+    fetchTickets();
+  }, [companyId]);
+
+  const openTicketsCount = tickets.filter(t => t.state === 'Open' || t.state === 'New').length;
+  const inProgressCount = tickets.filter(t => t.state === 'In Progress').length;
+  const closedCount = tickets.filter(t => t.state === 'Resolved' || t.state === 'Closed').length;
+  // SLA breach is mock for now since it might require complex date math
+  const slaBreachedCount = 0; 
+  const assignedToMeCount = 0; // Mock until user tracking is complete
+
+  const displayTickets = tickets.slice(0, 5).map(t => ({
+    id: t.ticketNo || t.id,
+    realId: t.id,
+    subject: t.shortDescription || 'No Subject',
+    client: t.customerCompany || 'N/A',
+    priority: t.priority || 'Low',
+    status: t.state || 'Open',
+    assigned: t.assignedTo || 'Unassigned',
+    updated: t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'
+  }));
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
@@ -46,11 +83,11 @@ export default function TicketDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {[
-          { label: 'Total Open', value: '128', icon: Ticket, trend: '+12%', trendColor: 'text-green-600' },
-          { label: 'In Progress', value: '74', icon: Clock, trend: '+8%', trendColor: 'text-green-600' },
-          { label: 'Closed Tickets', value: '356', icon: CheckCircle, trend: '+15%', trendColor: 'text-green-600' },
-          { label: 'SLA Breached', value: '16', icon: AlertTriangle, trend: '+4%', trendColor: 'text-red-600', textClass: 'text-red-600' },
-          { label: 'Assigned To Me', value: '32', icon: UserCheck, trend: '+10%', trendColor: 'text-green-600' }
+          { label: 'Total Open', value: openTicketsCount.toString(), icon: Ticket, trend: 'N/A', trendColor: 'text-gray-500' },
+          { label: 'In Progress', value: inProgressCount.toString(), icon: Clock, trend: 'N/A', trendColor: 'text-gray-500' },
+          { label: 'Closed Tickets', value: closedCount.toString(), icon: CheckCircle, trend: 'N/A', trendColor: 'text-gray-500' },
+          { label: 'SLA Breached', value: slaBreachedCount.toString(), icon: AlertTriangle, trend: 'N/A', trendColor: 'text-gray-500', textClass: 'text-red-600' },
+          { label: 'Assigned To Me', value: assignedToMeCount.toString(), icon: UserCheck, trend: 'N/A', trendColor: 'text-gray-500' }
         ].map((stat, i) => (
           <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
@@ -136,7 +173,10 @@ export default function TicketDashboard() {
       <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 dark:border-white/5 flex justify-between items-center">
           <h3 className="text-base font-semibold text-gray-900 dark:text-white">Recent Tickets</h3>
-          <button className="text-sm font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+          <button 
+            onClick={() => navigate('/companydashboard/tickets')}
+            className="text-sm font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1"
+          >
             View All <ChevronRight size={14} />
           </button>
         </div>
@@ -154,8 +194,8 @@ export default function TicketDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-              {recentTickets.map((t) => (
-                <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer">
+              {displayTickets.map((t) => (
+                <tr key={t.realId} onClick={() => navigate(`/companydashboard/tickets/${t.realId}`)} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer">
                   <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{t.id}</td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
@@ -170,7 +210,7 @@ export default function TicketDashboard() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                      t.status === 'Open' ? 'text-blue-700 bg-blue-50 dark:bg-blue-500/10' :
+                      t.status === 'Open' || t.status === 'New' ? 'text-blue-700 bg-blue-50 dark:bg-blue-500/10' :
                       t.status === 'In Progress' ? 'text-purple-700 bg-purple-50 dark:bg-purple-500/10' :
                       'text-green-700 bg-green-50 dark:bg-green-500/10'
                     }`}>
@@ -181,6 +221,13 @@ export default function TicketDashboard() {
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{t.updated}</td>
                 </tr>
               ))}
+              {displayTickets.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-sm">
+                    No tickets found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
