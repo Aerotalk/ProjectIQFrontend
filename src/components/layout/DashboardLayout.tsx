@@ -21,6 +21,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import CompanySelector from '../CompanySelector';
+import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -229,8 +230,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   }
 
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-  const avatarUrl = user?.profilePhotoId ? `${apiBaseUrl}/admin/files/${user.profilePhotoId}` : null;
+  const avatarUrl = useAvatarUrl(user?.profilePhotoId);
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">

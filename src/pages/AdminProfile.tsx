@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
+import { useAvatarUrl } from '../hooks/useAvatarUrl';
 
 export default function AdminProfile() {
   const { user, refetchUser } = useAuth();
@@ -38,30 +39,18 @@ export default function AdminProfile() {
   const [toastMessage, setToastMessage] = useState('Profile updated successfully!');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-  // Load existing profile photo on mount
-  useEffect(() => {
-    let objectUrl: string | null = null;
-    const loadAvatar = async () => {
-      if (user?.profilePhotoId) {
-        try {
-          const response = await api.get(`/admin/files/${user.profilePhotoId}`, {
-            responseType: 'blob'
-          });
-          objectUrl = URL.createObjectURL(response.data);
-          setAvatarUrl(objectUrl);
-        } catch (error) {
-          console.error("Failed to load avatar", error);
-        }
-      }
-    };
-    loadAvatar();
+  const fetchedAvatarUrl = useAvatarUrl(user?.profilePhotoId);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [user?.profilePhotoId]);
+  useEffect(() => {
+    // If the hook fetched a new avatar, update our local state
+    // We keep a local state so that when the user selects a file, it can preview immediately
+    if (fetchedAvatarUrl) {
+      setAvatarUrl(fetchedAvatarUrl);
+    } else if (!user?.profilePhotoId) {
+      setAvatarUrl(null);
+    }
+  }, [fetchedAvatarUrl, user?.profilePhotoId]);
 
   // Keep form in sync with user context
   useEffect(() => {
