@@ -15,7 +15,7 @@ export default function DepartmentDirectory() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
-  
+
   // Add modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newDeptCode, setNewDeptCode] = useState('');
@@ -70,7 +70,7 @@ export default function DepartmentDirectory() {
     }
   };
 
-  const filteredDepartments = departments.filter(dept => 
+  const filteredDepartments = departments.filter(dept =>
     dept.departmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     dept.departmentCode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -82,8 +82,8 @@ export default function DepartmentDirectory() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Department Directory</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage organization departments and structural units.</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => setIsAddModalOpen(true)}
           className="flex items-center gap-2 bg-[#792359] hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-sm font-medium text-sm transition-colors shadow-sm hover:shadow-md"
         >
@@ -95,9 +95,9 @@ export default function DepartmentDirectory() {
       <div className="bg-white dark:bg-[#181a1f] p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input 
-            type="text" 
-            placeholder="Search by code or name..." 
+          <input
+            type="text"
+            placeholder="Search by code or name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] transition-all outline-none text-gray-800 dark:text-gray-200"
@@ -164,7 +164,7 @@ export default function DepartmentDirectory() {
                         <button className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-sm transition-colors" title="Edit">
                           <Edit2 size={16} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(dept.id)}
                           className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors" title="Delete">
                           <Trash2 size={16} />
@@ -185,7 +185,7 @@ export default function DepartmentDirectory() {
           <div className="bg-white dark:bg-[#1f2229] rounded-xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-white/10 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add Department</h3>
-              <button 
+              <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
               >
