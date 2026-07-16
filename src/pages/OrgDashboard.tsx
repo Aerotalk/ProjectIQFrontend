@@ -1,7 +1,7 @@
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { LayoutGrid } from 'lucide-react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { api } from '../lib/api';
 import MyAccounts from './MyAccounts';
 import EmployeeDirectory from './EmployeeDirectory';
