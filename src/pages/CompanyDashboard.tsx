@@ -25,6 +25,10 @@ import ChallanManagement from './finance/ChallanManagement';
 import PaymentManagement from './finance/PaymentManagement';
 import ExpenseManagement from './projects/ExpenseManagement';
 import ProjectFinanceDetails from './finance/ProjectFinanceDetails';
+import ProjectDashboard from './projects/ProjectDashboard';
+import EmployeeDirectory from './EmployeeDirectory';
+import DepartmentDirectory from './DepartmentDirectory';
+import DesignationDirectory from './DesignationDirectory';
 
 function DefaultView() {
   return (
@@ -107,6 +111,11 @@ export default function CompanyDashboard() {
             <PaymentManagement />
           </PermissionGate>
         } />
+        <Route path="/projects" element={
+          <PermissionGate permission="ticket.projects.view">
+            <ProjectDashboard />
+          </PermissionGate>
+        } />
         <Route path="/projects/expenses" element={
           <PermissionGate permission="finance.expenses.view">
             <ExpenseManagement />
@@ -127,6 +136,21 @@ export default function CompanyDashboard() {
         <Route path="/users" element={
           <PermissionGate permission="user.view">
             <CompanyUsersList />
+          </PermissionGate>
+        } />
+        <Route path="/employees" element={
+          <PermissionGate permission="employee.view">
+            <EmployeeDirectory />
+          </PermissionGate>
+        } />
+        <Route path="/departments" element={
+          <PermissionGate permission="department.view">
+            <DepartmentDirectory />
+          </PermissionGate>
+        } />
+        <Route path="/designations" element={
+          <PermissionGate permission="designation.view">
+            <DesignationDirectory />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

@@ -180,7 +180,7 @@ export default function KnowledgeBase() {
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.author || 'System'}</td>
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'Just now'}</td>
-                  <td className="px-6 py-4 text-center relative">
+                  <td className={`px-6 py-4 text-center ${openActionId === a.id ? 'relative z-50' : 'relative z-10'}`}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); if (a.id) setOpenActionId(openActionId === a.id ? null : a.id); }}
                       className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"

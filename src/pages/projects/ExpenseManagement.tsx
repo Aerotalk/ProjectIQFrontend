@@ -8,7 +8,7 @@ import { ExpenseService } from '../../services/expense.service';
 import type { Expense } from '../../types/expense.types';
 import ExpenseDrawer from './expense/components/ExpenseDrawer';
 import type { ExpenseFormValues } from './expense/validators/expenseValidation';
-import { MOCK_PROJECTS } from '../../services/po.service';
+import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,7 +23,8 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function ExpenseManagement() {
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId } = useAuth();
+  const { projects } = useProjects();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,13 +49,13 @@ export default function ExpenseManagement() {
 
   useEffect(() => {
     fetchData();
-  }, [companyId]);
+  }, [selectedCompanyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      if (!companyId) return;
-      const data = await ExpenseService.getAll(companyId);
+      if (!selectedCompanyId) return;
+      const data = await ExpenseService.getAll(selectedCompanyId);
       setExpenses(data);
     } catch {
       toast.error('Failed to load expenses');
@@ -83,16 +84,16 @@ export default function ExpenseManagement() {
   const handleSaveExpense = async (data: ExpenseFormValues) => {
     setIsSubmitting(true);
     try {
-      if (!companyId) throw new Error('No company ID');
-      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+      if (!selectedCompanyId) throw new Error('No company ID');
+      const project = projects.find(p => p.id === data.projectId);
 
       const payload = {
         ...data,
-        projectName: project?.name || data.projectName || '',
+        projectName: project?.projectName || '',
       };
 
       if (drawerMode === 'create') {
-        await ExpenseService.create(companyId, payload as Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>);
+        await ExpenseService.create(selectedCompanyId, payload as Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Expense created successfully');
       } else if (selectedExpense) {
         await ExpenseService.update(selectedExpense.id, payload as Omit<Expense, 'id' | 'createdAt'>);
@@ -203,7 +204,7 @@ export default function ExpenseManagement() {
                 onChange={val => { setFilterProject(val); resetPage(); }}
                 options={[
                   { label: 'All Projects', value: '' },
-                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                  ...projects.map(p => ({ label: p.projectName, value: p.id }))
                 ]}
               />
             </div>

@@ -9,7 +9,7 @@ import { PaymentService } from '../../services/payment.service';
 import type { PaymentRecord } from '../../types/payment.types';
 import PaymentDrawer from './payment/components/PaymentDrawer';
 import type { PaymentFormValues } from './payment/validators/paymentValidation';
-import { MOCK_PROJECTS } from '../../services/po.service';
+import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -28,7 +28,8 @@ const STATUS_ICONS: Record<PaymentRecord['status'], React.ReactNode> = {
 };
 
 export default function PaymentManagement() {
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId } = useAuth();
+  const { projects } = useProjects();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,13 +54,13 @@ export default function PaymentManagement() {
 
   useEffect(() => {
     fetchData();
-  }, [companyId]);
+  }, [selectedCompanyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      if (companyId) {
-        const data = await PaymentService.getAll(companyId);
+      if (selectedCompanyId) {
+        const data = await PaymentService.getAll(selectedCompanyId);
         setPayments(data);
       }
     } catch {
@@ -89,15 +90,15 @@ export default function PaymentManagement() {
   const handleSave = async (data: PaymentFormValues) => {
     setIsSubmitting(true);
     try {
-      if (!companyId) throw new Error('No company ID');
-      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+      if (!selectedCompanyId) throw new Error('No company ID');
+      const project = projects.find(p => p.id === data.projectId);
       const payload = {
         ...data,
-        projectName: project?.name || '',
+        projectName: project?.projectName || '',
       };
 
       if (drawerMode === 'create') {
-        await PaymentService.create(companyId, payload as any);
+        await PaymentService.create(selectedCompanyId, payload as any);
         toast.success('Payment recorded successfully');
       } else if (selectedPayment) {
         await PaymentService.update(selectedPayment.id, payload as any);
@@ -193,7 +194,7 @@ export default function PaymentManagement() {
                 onChange={val => { setFilterProject(val); resetPage(); }}
                 options={[
                   { label: 'All Projects', value: '' },
-                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                  ...projects.map(p => ({ label: p.projectName, value: p.id }))
                 ]}
               />
             </div>

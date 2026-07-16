@@ -1,16 +1,6 @@
 import { api } from '../lib/api';
 import type { PurchaseOrder } from '../types/po.types';
 
-// Mock projects list (shared across the app)
-export const MOCK_PROJECTS = [
-  { id: 'PRJ-001', name: 'Analytics Dashboard' },
-  { id: 'PRJ-002', name: 'Mobile App Relaunch' },
-  { id: 'PRJ-003', name: 'ERP Integration' },
-  { id: 'PRJ-004', name: 'Cloud Migration' },
-  { id: 'PRJ-005', name: 'Data Warehouse Setup' },
-  { id: 'PRJ-006', name: 'CRM Implementation' },
-];
-
 // Removed unused getFinancialYearCode
 
 export const POService = {

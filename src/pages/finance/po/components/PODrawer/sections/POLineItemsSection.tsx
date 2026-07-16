@@ -59,7 +59,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
         <p className="text-red-500 text-xs">{lineItemsError.message}</p>
       )}
 
-      <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10">
+      <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10 min-h-[250px]">
         <table className="w-full text-left min-w-[700px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
@@ -89,7 +89,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
               const lineErrors = (errors.lineItems as any)?.[index];
 
               return (
-                <tr key={field.id} className="group">
+                <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
                   {/* Description */}
                   <td className="px-3 py-2">
                     <input
@@ -120,7 +120,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
                   </td>
 
                   {/* Unit */}
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 relative" style={{ zIndex: 100 - index }}>
                     <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
                       <Controller
                         name={`lineItems.${index}.unit`}

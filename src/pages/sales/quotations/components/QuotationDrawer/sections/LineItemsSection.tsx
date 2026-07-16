@@ -67,7 +67,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         )}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[250px]">
         <table className="w-full text-left min-w-[800px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
@@ -86,8 +86,8 @@ export default function LineItemsSection({ readOnly }: Props) {
               const currentTotal = lineItems?.[index]?.totalAmount || 0;
               return (
                 <tr key={field.id} className="group">
-                  <td className="px-3 py-2">
-                    <div className={readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none relative' : 'relative'}>
+                  <td className="px-3 py-2 relative" style={{ zIndex: 100 - index }}>
+                    <div className={readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none' : ''}>
                       <Controller
                         name={`lineItems.${index}.productId`}
                         control={control}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Paperclip, X as XIcon } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { MOCK_PROJECTS } from '@/services/po.service';
+import { useProjects } from '@/hooks/useProjects';
 
 interface Props {
   readOnly?: boolean;
@@ -27,6 +27,7 @@ export default function ExpenseFormSection({ readOnly }: Props) {
   } = useFormContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { projects } = useProjects();
 
   // Watch for dependent fields
   const selectedProjectId = useWatch({ control, name: 'projectId' });
@@ -35,9 +36,9 @@ export default function ExpenseFormSection({ readOnly }: Props) {
 
   // Sync display names
   useEffect(() => {
-    const project = MOCK_PROJECTS.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.name, { shouldValidate: false });
-  }, [selectedProjectId, setValue]);
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
+  }, [selectedProjectId, setValue, projects]);
 
   // File selection handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,8 +62,8 @@ export default function ExpenseFormSection({ readOnly }: Props) {
   }, [isGstApplicable, setValue, readOnly]);
 
   const PROJECT_OPTIONS = useMemo(() => {
-    return MOCK_PROJECTS.map(p => ({ label: `${p.id} – ${p.name}`, value: p.id }));
-  }, []);
+    return projects.map(p => ({ label: `${p.projectCode} – ${p.projectName}`, value: p.id }));
+  }, [projects]);
 
   const fieldClass = (hasError: boolean) =>
     `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +

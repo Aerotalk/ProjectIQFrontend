@@ -134,7 +134,7 @@ export default function ProductsList() {
                         {product.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center relative">
+                    <td className={`px-6 py-4 text-center ${openDropdownId === product.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
                         onClick={() => setOpenDropdownId(openDropdownId === product.id ? null : product.id)}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"

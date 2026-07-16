@@ -3,7 +3,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
-import { MOCK_PROJECTS } from '@/services/po.service';
+import { useProjects } from '@/hooks/useProjects';
 import type { Vendor } from '@/types/vendor.types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,6 +20,7 @@ export default function POHeaderSection({ readOnly }: Props) {
     control,
   } = useFormContext();
 
+  const { projects } = useProjects();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,9 +41,9 @@ export default function POHeaderSection({ readOnly }: Props) {
   const attachmentName = watch('attachmentName');
 
   useEffect(() => {
-    const project = MOCK_PROJECTS.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.name, { shouldValidate: false });
-  }, [selectedProjectId, setValue]);
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
+  }, [selectedProjectId, setValue, projects]);
 
   useEffect(() => {
     const vendor = vendors.find(v => v.id === selectedVendorId);
@@ -93,7 +94,7 @@ export default function POHeaderSection({ readOnly }: Props) {
                 <CustomSelect
                   value={field.value || ''}
                   onChange={field.onChange}
-                  options={MOCK_PROJECTS.map(p => ({ label: `${p.id} - ${p.name}`, value: p.id }))}
+                  options={projects.map(p => ({ label: `${p.projectCode} - ${p.projectName}`, value: p.id }))}
                 />
               )}
             />

@@ -151,7 +151,7 @@ export default function ClientsList() {
                         {client.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center relative">
+                    <td className={`px-6 py-4 text-center ${openDropdownId === client.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();

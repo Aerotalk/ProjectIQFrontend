@@ -5,7 +5,8 @@ import {
   CheckCircle2, Clock, XCircle, Truck, Package, AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { POService, MOCK_PROJECTS } from '../../services/po.service';
+import { POService } from '../../services/po.service';
+import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
 import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
@@ -44,7 +45,8 @@ const ALL_STATUSES: POStatus[] = [
 // ---------- Component ----------
 
 export default function POManagement() {
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId } = useAuth();
+  const { projects } = useProjects();
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -73,15 +75,15 @@ export default function POManagement() {
 
   useEffect(() => {
     fetchData();
-  }, [companyId]);
+  }, [selectedCompanyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      if (!companyId) return;
+      if (!selectedCompanyId) return;
       const [poData, vendorData] = await Promise.all([
-        POService.getAll(companyId),
-        VendorService.getVendors(companyId),
+        POService.getAll(selectedCompanyId),
+        VendorService.getVendors(selectedCompanyId),
       ]);
       setPos(poData);
       setVendors(vendorData);
@@ -117,17 +119,17 @@ export default function POManagement() {
     try {
       // Hydrate display names from current vendors/projects
       const vendor = vendors.find(v => v.id === data.vendorId);
-      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+      const project = projects.find(p => p.id === data.projectId);
 
       const payload = {
         ...data,
         vendorName: vendor?.displayName || data.vendorName || '',
-        projectName: project?.name || data.projectName || '',
+        projectName: project?.projectName || '',
       };
 
       if (drawerMode === 'create') {
-        if (!companyId) throw new Error('No company ID');
-        await POService.create(companyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
+        if (!selectedCompanyId) throw new Error('No company ID');
+        await POService.create(selectedCompanyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
         toast.success('Purchase Order created successfully');
       } else if (selectedPO) {
         await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);
@@ -238,7 +240,7 @@ export default function POManagement() {
                 onChange={val => { setFilterProject(val); resetPage(); }}
                 options={[
                   { label: 'All Projects', value: '' },
-                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                  ...projects.map(p => ({ label: p.projectName, value: p.id }))
                 ]}
               />
             </div>

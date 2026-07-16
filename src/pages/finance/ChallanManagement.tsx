@@ -9,13 +9,14 @@ import type { DeliveryChallan } from '../../types/challan.types';
 import ChallanDrawer from './challan/components/ChallanDrawer';
 import type { ChallanFormValues } from './challan/validators/challanValidation';
 import { VendorService } from '../../services/vendor.service';
-import { MOCK_PROJECTS } from '../../services/po.service';
+import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChallanManagement() {
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId } = useAuth();
+  const { projects } = useProjects();
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -41,15 +42,15 @@ export default function ChallanManagement() {
 
   useEffect(() => {
     fetchData();
-  }, [companyId]);
+  }, [selectedCompanyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      if (!companyId) return;
+      if (!selectedCompanyId) return;
       const [challanData, vendorData] = await Promise.all([
-        ChallanService.getAll(companyId),
-        VendorService.getVendors(companyId),
+        ChallanService.getAll(selectedCompanyId),
+        VendorService.getVendors(selectedCompanyId),
       ]);
       setChallans(challanData);
       setVendors(vendorData);
@@ -81,17 +82,17 @@ export default function ChallanManagement() {
     setIsSubmitting(true);
     try {
       const vendor = vendors.find(v => v.id === data.vendorId);
-      const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
+      const project = projects.find(p => p.id === data.projectId);
 
       const payload = {
         ...data,
         vendorName: vendor?.displayName || data.vendorName || '',
-        projectName: project?.name || data.projectName || '',
+        projectName: project?.projectName || '',
       };
 
       if (drawerMode === 'create') {
-        if (!companyId) throw new Error('No company ID');
-        await ChallanService.create(companyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
+        if (!selectedCompanyId) throw new Error('No company ID');
+        await ChallanService.create(selectedCompanyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Delivery Challan created successfully');
       } else if (selectedChallan) {
         await ChallanService.update(selectedChallan.id, payload as Omit<DeliveryChallan, 'id' | 'createdAt'>);
@@ -194,7 +195,7 @@ export default function ChallanManagement() {
                 onChange={val => { setFilterProject(val); resetPage(); }}
                 options={[
                   { label: 'All Projects', value: '' },
-                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                  ...projects.map(p => ({ label: p.projectName, value: p.id }))
                 ]}
               />
             </div>
