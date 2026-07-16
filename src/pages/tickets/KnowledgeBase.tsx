@@ -97,7 +97,7 @@ export default function KnowledgeBase() {
 
   const filteredArticles = articles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          a.id.toLowerCase().includes(searchQuery.toLowerCase());
+                          (a.id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterCategory === 'All' || a.category === filterCategory;
     return matchesSearch && matchesFilter;
   });
@@ -144,7 +144,12 @@ export default function KnowledgeBase() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
+      {isLoading ? (
+        <div className="flex justify-center py-20 text-gray-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-black/20 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
@@ -176,7 +181,7 @@ export default function KnowledgeBase() {
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'Just now'}</td>
                   <td className="px-6 py-4 text-center relative">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === a.id ? null : a.id); }}
+                      onClick={(e) => { e.stopPropagation(); if (a.id) setOpenActionId(openActionId === a.id ? null : a.id); }}
                       className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
                     >
                       <MoreHorizontal size={16} />
@@ -189,7 +194,7 @@ export default function KnowledgeBase() {
                         <button onClick={(e) => { e.stopPropagation(); handleEdit(a); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
                           Edit Article
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete(a.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
+                        <button onClick={(e) => { e.stopPropagation(); if (a.id) handleDelete(a.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
                           Delete Article
                         </button>
                       </div>
@@ -206,6 +211,7 @@ export default function KnowledgeBase() {
           )}
         </div>
       </div>
+      )}
 
       <KBDrawer 
         isOpen={isDrawerOpen}

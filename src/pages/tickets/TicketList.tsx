@@ -174,7 +174,12 @@ export default function TicketList() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
+      {isLoading ? (
+        <div className="flex justify-center py-20 text-gray-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-black/20 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
@@ -223,7 +228,7 @@ export default function TicketList() {
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'}</td>
                   <td className="px-6 py-4 text-center relative">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === t.id ? null : t.id); }}
+                      onClick={(e) => { e.stopPropagation(); if (t.id) setOpenActionId(openActionId === t.id ? null : t.id); }}
                       className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
                     >
                       <MoreHorizontal size={16} />
@@ -238,7 +243,7 @@ export default function TicketList() {
                         </button>
                         {t.state !== 'Closed' && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); markAsClosed(t.id); setOpenActionId(null); }}
+                            onClick={(e) => { e.stopPropagation(); if (t.id) markAsClosed(t.id); setOpenActionId(null); }}
                             className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5"
                           >
                             Mark as Closed
@@ -246,7 +251,7 @@ export default function TicketList() {
                         )}
                         {t.state === 'Closed' && (
                           <button 
-                            onClick={(e) => { e.stopPropagation(); reopenTicket(t.id); setOpenActionId(null); }}
+                            onClick={(e) => { e.stopPropagation(); if (t.id) reopenTicket(t.id); setOpenActionId(null); }}
                             className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5"
                           >
                             Reopen Incident
@@ -276,6 +281,7 @@ export default function TicketList() {
           </div>
         </div>
       </div>
+      )}
 
       <TicketDrawer 
         isOpen={isDrawerOpen}
