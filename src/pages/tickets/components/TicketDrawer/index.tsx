@@ -22,11 +22,10 @@ export default function TicketDrawer({ isOpen, onClose, onSave, mode, initialDat
   React.useEffect(() => {
     if (isOpen) {
       form.reset({
-        subject: '',
-        client: '',
+        projectId: '',
+        shortDescription: '',
+        state: 'Open',
         priority: 'Low',
-        status: 'Open',
-        assigned: '',
         description: '',
         ...initialData
       });
@@ -79,7 +78,7 @@ export default function TicketDrawer({ isOpen, onClose, onSave, mode, initialDat
       {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
         <FormProvider {...form}>
-          <form id="ticket-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form id="ticket-drawer-form" onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
             <TicketFormSection readOnly={readOnly} />
           </form>
         </FormProvider>

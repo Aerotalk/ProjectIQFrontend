@@ -1,35 +1,82 @@
 import { z } from 'zod';
+import { api } from '../lib/api';
 
 export const ticketSchema = z.object({
   id: z.string().optional(),
-  subject: z.string().min(1, 'Ticket Title is required').max(200, 'Max 200 characters'),
-  description: z.string().min(1, 'Description is required'),
-  client: z.string().optional(),
-  clientContact: z.string().optional(),
+  ticketNo: z.string().optional(),
   projectId: z.string().min(1, 'Project is required'),
-  category: z.enum(['Complaint', 'Query', 'Service Request', 'Billing Issue', 'Technical Issue', 'Others']),
-  priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-  status: z.enum(['Open', 'In Progress', 'Closed']),
-  assigned: z.string().min(1, 'Assigned Owner is required'),
-  supportingMember: z.string().optional(),
-  finalRemarks: z.string().optional(),
-  updated: z.string().optional()
-}).superRefine((data, ctx) => {
-  if (data.status === 'Closed' && (!data.finalRemarks || data.finalRemarks.trim() === '')) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Final Remarks are required to close a ticket",
-      path: ["finalRemarks"]
-    });
-  }
+  shortDescription: z.string().optional(),
+  description: z.string().optional(),
+  module: z.string().optional(),
+  category: z.string().optional(),
+  subCategory: z.string().optional(),
+  assignmentGroup: z.string().optional(),
+  assignedTo: z.string().optional(),
+  reportedBy: z.string().optional(),
+  contactEmail: z.string().optional(),
+  contactNumber: z.string().optional(),
+  customerCompany: z.string().optional(),
+  organization: z.string().optional(),
+  location: z.string().optional(),
+  environment: z.string().optional(),
+  impact: z.string().optional(),
+  urgency: z.string().optional(),
+  priority: z.string().optional(),
+  state: z.string().optional(),
+  incidentType: z.string().optional(),
+  source: z.string().optional(),
+  severity: z.string().optional(),
+  slaPolicy: z.string().optional(),
+  dueDate: z.string().optional(),
+  resolutionCode: z.string().optional(),
+  resolutionNotes: z.string().optional(),
+  rootCause: z.string().optional(),
+  workNotes: z.string().optional(),
+  customerComments: z.string().optional(),
+  relatedChange: z.string().optional(),
+  relatedProblem: z.string().optional(),
+  parentIncident: z.string().optional(),
+  duplicateOf: z.string().optional(),
+  watchList: z.string().optional(),
+  browser: z.string().optional(),
+  operatingSystem: z.string().optional(),
+  deviceType: z.string().optional(),
+  ipAddress: z.string().optional(),
+  resolvedOn: z.string().optional(),
+  closedOn: z.string().optional(),
+  closedBy: z.string().optional(),
+  reopenCount: z.number().optional(),
+  escalationLevel: z.string().optional(),
+  tags: z.string().optional(),
+  knowledgeArticle: z.string().optional(),
+  businessService: z.string().optional(),
+  configurationItem: z.string().optional(),
+  isMajorIncident: z.boolean().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional()
 });
 
 export type TicketFormValues = z.infer<typeof ticketSchema>;
 
-export const MOCK_TICKETS = [
-  { id: 'TKT-0001', subject: 'Issue with login to portal', client: 'TechNova Pvt Ltd', projectId: 'PRJ-001', category: 'Technical Issue', priority: 'Critical', status: 'Open', assigned: 'Arjun Dev', updated: '10m ago', description: 'User cannot login.' },
-  { id: 'TKT-0002', subject: 'Unable to access reports', client: 'Globex Corporation', projectId: 'PRJ-002', category: 'Technical Issue', priority: 'Medium', status: 'In Progress', assigned: 'Sneha Iyer', updated: '35m ago', description: 'Reports page is throwing 500 error.' },
-  { id: 'TKT-0003', subject: 'API integration failure', client: 'Hexa Finance', projectId: 'PRJ-003', category: 'Technical Issue', priority: 'High', status: 'Open', assigned: 'Rohit Singh', updated: '1h ago', description: 'Payment gateway API not responding.' },
-  { id: 'TKT-0004', subject: 'Data sync not working', client: 'NextGen Retail', projectId: 'PRJ-004', category: 'Query', priority: 'Low', status: 'Closed', assigned: 'Amit Verma', updated: '2h ago', description: 'Offline data not syncing to cloud.', finalRemarks: 'Restarted sync service.' },
-  { id: 'TKT-0005', subject: 'Payment gateway error', client: 'BlueStone Ltd', projectId: 'PRJ-005', category: 'Billing Issue', priority: 'Medium', status: 'In Progress', assigned: 'Neha Patil', updated: '3h ago', description: 'Getting invalid token error on checkout.' }
-];
+export const TicketService = {
+  getAll: async (companyId: string): Promise<TicketFormValues[]> => {
+    if (!companyId) return [];
+    return await api.get(`/admin/tickets?companyId=${companyId}`);
+  },
+
+  getById: async (id: string): Promise<TicketFormValues | undefined> => {
+    return await api.get(`/admin/tickets/${id}`);
+  },
+
+  create: async (companyId: string, data: Omit<TicketFormValues, 'id' | 'ticketNo' | 'createdAt' | 'updatedAt'>): Promise<TicketFormValues> => {
+    return await api.post(`/admin/tickets?companyId=${companyId}`, data);
+  },
+
+  update: async (id: string, data: Omit<TicketFormValues, 'id' | 'ticketNo' | 'createdAt'>): Promise<TicketFormValues> => {
+    return await api.put(`/admin/tickets/${id}`, data);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/admin/tickets/${id}`);
+  },
+};

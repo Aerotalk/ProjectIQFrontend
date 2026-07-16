@@ -1,11 +1,12 @@
 import { Search, Filter, Plus, MoreHorizontal, BookOpen } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import KBDrawer from './components/KBDrawer';
-import { MOCK_KB_ARTICLES, type KBFormValues } from '../../services/kb.service';
+import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
 
 export default function KnowledgeBase() {
-  const [articles, setArticles] = useState(MOCK_KB_ARTICLES);
+  const [articles, setArticles] = useState<KBFormValues[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
   const [openActionId, setOpenActionId] = useState<string | null>(null);
@@ -23,6 +24,26 @@ export default function KnowledgeBase() {
       }
     };
   }
+
+  // Fetch articles from backend
+  const fetchArticles = async () => {
+    try {
+      setIsLoading(true);
+      const companyId = localStorage.getItem('selectedCompanyId');
+      if (companyId) {
+        const data = await KBService.getAll(companyId);
+        setArticles(data);
+      }
+    } catch (err) {
+      toast.error('Failed to load articles');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
   const handleCreate = () => {
     setDrawerMode('create');
@@ -42,36 +63,41 @@ export default function KnowledgeBase() {
     setIsDrawerOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setArticles(articles.filter(a => a.id !== id));
-    toast.success('Article deleted successfully');
+  const handleDelete = async (id: string) => {
+    try {
+      await KBService.delete(id);
+      setArticles(articles.filter(a => a.id !== id));
+      toast.success('Article deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete article');
+    }
   };
 
   const handleSaveArticle = async (data: KBFormValues) => {
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API call
-
-    if (drawerMode === 'create') {
-      const newArticle = {
-        ...data,
-        id: `KB00${articles.length + 1}`,
-        author: 'System Admin',
-        updated: 'Just now'
-      };
-      setArticles([newArticle as any, ...articles]);
-      toast.success('Article created successfully');
-    } else {
-      setArticles(articles.map(a => a.id === selectedArticle.id ? { ...a, ...data, updated: 'Just now' } : a));
-      toast.success('Article updated successfully');
+    try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      
+      if (drawerMode === 'create') {
+        data.author = 'System Admin'; // Hardcoded for now, can be dynamically fetched later
+        const newArticle = await KBService.create(companyId, data);
+        setArticles([newArticle, ...articles]);
+        toast.success('Article created successfully');
+      } else {
+        const updated = await KBService.update(selectedArticle.id, data);
+        setArticles(articles.map(a => a.id === selectedArticle.id ? updated : a));
+        toast.success('Article updated successfully');
+      }
+      setIsDrawerOpen(false);
+    } catch (err) {
+      toast.error('Failed to save article');
     }
-    
-    setIsDrawerOpen(false);
   };
 
   const categories = ['All', ...Array.from(new Set(articles.map(a => a.category)))];
 
   const filteredArticles = articles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          a.id.toLowerCase().includes(searchQuery.toLowerCase());
+                          (a.id || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterCategory === 'All' || a.category === filterCategory;
     return matchesSearch && matchesFilter;
   });
@@ -118,7 +144,12 @@ export default function KnowledgeBase() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
+      {isLoading ? (
+        <div className="flex justify-center py-20 text-gray-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-black/20 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
@@ -135,7 +166,7 @@ export default function KnowledgeBase() {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {filteredArticles.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{a.id}</td>
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{a.id?.substring(0,8)}</td>
                   <td onClick={() => handleView(a)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{a.title}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.category}</td>
                   <td className="px-6 py-4">
@@ -146,11 +177,11 @@ export default function KnowledgeBase() {
                       {a.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.author}</td>
-                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updated}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.author || 'System'}</td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'Just now'}</td>
                   <td className="px-6 py-4 text-center relative">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === a.id ? null : a.id); }}
+                      onClick={(e) => { e.stopPropagation(); if (a.id) setOpenActionId(openActionId === a.id ? null : a.id); }}
                       className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
                     >
                       <MoreHorizontal size={16} />
@@ -163,7 +194,7 @@ export default function KnowledgeBase() {
                         <button onClick={(e) => { e.stopPropagation(); handleEdit(a); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
                           Edit Article
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete(a.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
+                        <button onClick={(e) => { e.stopPropagation(); if (a.id) handleDelete(a.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
                           Delete Article
                         </button>
                       </div>
@@ -180,6 +211,7 @@ export default function KnowledgeBase() {
           )}
         </div>
       </div>
+      )}
 
       <KBDrawer 
         isOpen={isDrawerOpen}
