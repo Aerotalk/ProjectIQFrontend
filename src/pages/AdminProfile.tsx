@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
-import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
 
 export default function AdminProfile() {
-  const { user } = useAuth();
+  const { user, refetchUser } = useAuth();
   
   const [profileData, setProfileData] = useState({
     username: user?.username || '',
@@ -11,6 +12,7 @@ export default function AdminProfile() {
   });
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [notifications, setNotifications] = useState({
@@ -33,16 +35,81 @@ export default function AdminProfile() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('Profile updated successfully!');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+  // Load existing profile photo on mount
+  useEffect(() => {
+    if (user?.profilePhotoId) {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      setAvatarUrl(`${apiBaseUrl}/admin/files/${user.profilePhotoId}`);
+    }
+  }, [user?.profilePhotoId]);
+
+  // Keep form in sync with user context
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        username: user.username || '',
+        email: user.email || '',
+      });
+    }
+  }, [user]);
+
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    // Simulate save
-    setTimeout(() => {
-      setShowToast(true);
+    
+    try {
+      let profilePhotoId: string | null = user?.profilePhotoId || null;
+
+      // If a new file was selected, upload it first
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        const uploadedFile = await api.post('/admin/files/upload', formData);
+        profilePhotoId = uploadedFile.id;
+      }
+
+      // Update the profile
+      await api.put('/auth/profile', {
+        username: profileData.username,
+        profilePhotoId: profilePhotoId,
+      });
+
+      // Refresh the user context so the rest of the app picks up the changes
+      await refetchUser();
+      setSelectedFile(null);
+      showNotification('Profile updated successfully!', 'success');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      showNotification(error?.message || 'Failed to update profile', 'error');
+    } finally {
       setIsSaving(false);
-      setTimeout(() => setShowToast(false), 3000);
-    }, 1000);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setAvatarUrl(null);
+    setSelectedFile(null);
+    // Clear the profilePhotoId by saving immediately
+    try {
+      await api.put('/auth/profile', {
+        username: profileData.username,
+        profilePhotoId: null,
+      });
+      await refetchUser();
+      showNotification('Profile photo removed', 'success');
+    } catch (error: any) {
+      showNotification(error?.message || 'Failed to remove photo', 'error');
+    }
   };
 
   const userInitials = user?.username ? user.username.substring(0, 2).toUpperCase() : 'AD';
@@ -51,9 +118,13 @@ export default function AdminProfile() {
     <div className="max-w-6xl mx-auto space-y-6 relative">
       
       {/* Toast Notification */}
-      <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
-        <CheckCircle2 size={20} />
-        <span className="text-sm font-medium">Profile updated successfully!</span>
+      <div className={`fixed bottom-6 right-6 flex items-center gap-3 ${
+        toastType === 'success' 
+          ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400'
+          : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400'
+      } border px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
+        {toastType === 'success' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+        <span className="text-sm font-medium">{toastMessage}</span>
       </div>
 
       {/* Page Header */}
@@ -106,7 +177,9 @@ export default function AdminProfile() {
                       accept="image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          const url = URL.createObjectURL(e.target.files[0]);
+                          const file = e.target.files[0];
+                          setSelectedFile(file);
+                          const url = URL.createObjectURL(file);
                           setAvatarUrl(url);
                         }
                       }}
@@ -118,7 +191,7 @@ export default function AdminProfile() {
                       Change Photo
                     </button>
                     <button 
-                      onClick={() => setAvatarUrl(null)}
+                      onClick={handleRemovePhoto}
                       className="px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-medium rounded-sm transition-colors"
                     >
                       Remove
