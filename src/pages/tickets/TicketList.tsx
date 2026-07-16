@@ -1,11 +1,12 @@
 import { Search, Filter, Plus, Download, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import TicketDrawer from './components/TicketDrawer';
-import { MOCK_TICKETS, type TicketFormValues } from '../../services/ticket.service';
+import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import toast from 'react-hot-toast';
 
 export default function TicketList() {
-  const [tickets, setTickets] = useState(MOCK_TICKETS);
+  const [tickets, setTickets] = useState<TicketFormValues[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [openActionId, setOpenActionId] = useState<string | null>(null);
@@ -24,14 +25,45 @@ export default function TicketList() {
     };
   }
 
-  const markAsClosed = (id: string) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Closed' } : t));
-    toast.success('Ticket marked as closed');
+  // Fetch tickets from backend
+  const fetchTickets = async () => {
+    try {
+      setIsLoading(true);
+      const companyId = localStorage.getItem('selectedCompanyId');
+      if (companyId) {
+        const data = await TicketService.getAll(companyId);
+        setTickets(data);
+      }
+    } catch (err) {
+      toast.error('Failed to load tickets');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const reopenTicket = (id: string) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Open' } : t));
-    toast.success('Ticket reopened');
+  import { useEffect } from 'react';
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const markAsClosed = async (id: string) => {
+    try {
+      await TicketService.update(id, { status: 'Closed' } as any); // Minimal update
+      setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Closed' } : t));
+      toast.success('Ticket marked as closed');
+    } catch (err) {
+      toast.error('Failed to close ticket');
+    }
+  };
+
+  const reopenTicket = async (id: string) => {
+    try {
+      await TicketService.update(id, { status: 'Open' } as any);
+      setTickets(tickets.map(t => t.id === id ? { ...t, status: 'Open' } : t));
+      toast.success('Ticket reopened');
+    } catch (err) {
+      toast.error('Failed to reopen ticket');
+    }
   };
 
   const handleCreate = () => {
@@ -53,23 +85,22 @@ export default function TicketList() {
   };
 
   const handleSaveTicket = async (data: TicketFormValues) => {
-    // Mock save logic
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulating API call
-
-    if (drawerMode === 'create') {
-      const newTicket = {
-        ...data,
-        id: `TKT-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`,
-        updated: 'Just now'
-      };
-      setTickets([newTicket as any, ...tickets]);
-      toast.success('Ticket created successfully');
-    } else {
-      setTickets(tickets.map(t => t.id === selectedTicket.id ? { ...t, ...data, updated: 'Just now' } : t));
-      toast.success('Ticket updated successfully');
+    try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      
+      if (drawerMode === 'create') {
+        const newTicket = await TicketService.create(companyId, data);
+        setTickets([newTicket, ...tickets]);
+        toast.success('Ticket created successfully');
+      } else {
+        const updated = await TicketService.update(selectedTicket.id, data);
+        setTickets(tickets.map(t => t.id === selectedTicket.id ? updated : t));
+        toast.success('Ticket updated successfully');
+      }
+      setIsDrawerOpen(false);
+    } catch (err) {
+      toast.error('Failed to save ticket');
     }
-    
-    setIsDrawerOpen(false);
   };
 
   const filteredTickets = tickets.filter(t => {
@@ -160,9 +191,9 @@ export default function TicketList() {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {filteredTickets.map((t) => (
                 <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
-                  <td onClick={() => handleView(t)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{t.id}</td>
+                  <td onClick={() => handleView(t)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{t.ticketNo || t.id?.substring(0,8)}</td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
+                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client || 'N/A'}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
                       t.priority === 'Critical' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
@@ -184,11 +215,11 @@ export default function TicketList() {
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300 flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
-                      {t.assigned.split(' ').map((n: string) => n[0]).join('')}
+                      {t.assigned ? t.assigned.split(' ').map((n: string) => n[0]).join('') : 'U'}
                     </div>
-                    {t.assigned}
+                    {t.assigned || 'Unassigned'}
                   </td>
-                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{t.updated}</td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'}</td>
                   <td className="px-6 py-4 text-center relative">
                     <button 
                       onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === t.id ? null : t.id); }}
