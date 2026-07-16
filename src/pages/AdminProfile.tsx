@@ -74,7 +74,7 @@ export default function AdminProfile() {
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
-        const uploadedFile = await api.post('/admin/files/upload', formData);
+        const uploadedFile = await api.post('/admin/files/upload?module=avatars', formData);
         profilePhotoId = uploadedFile.id;
       }
 
