@@ -228,6 +228,9 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   }
 
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const avatarUrl = user?.profilePhotoId ? `${apiBaseUrl}/admin/files/${user.profilePhotoId}` : null;
+
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
 
@@ -303,8 +306,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs">
-              {role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials}
+            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+              ) : (
+                role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials
+              )}
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : orgName}>
@@ -367,8 +374,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 p-1.5 rounded-sm transition-colors"
               >
-                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm">
-                  {userInitials}
+                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm overflow-hidden">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    userInitials
+                  )}
                 </div>
                 <ChevronDown size={14} className="text-gray-400" />
               </button>
