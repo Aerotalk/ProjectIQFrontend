@@ -1,5 +1,5 @@
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { LayoutGrid, Building2, ChevronDown } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
@@ -14,30 +14,18 @@ import ClientsList from './sales/ClientsList';
 
 function DefaultView() {
   const location = useLocation();
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
-
   useEffect(() => {
+    // Only fetch for UI side effects if needed. Unused state removed.
     api.get(`/admin/companies`)
       .then((res: any) => {
         const data = Array.isArray(res) ? res : (res.content || []);
-        setAccounts(data);
         const storedId = localStorage.getItem('selectedCompanyId');
-        if (storedId && data.some((acc: any) => acc.id === storedId)) {
-          setSelectedAccountId(storedId);
-        } else if (data.length > 0) {
-          setSelectedAccountId(data[0].id);
+        if (!storedId && data.length > 0) {
           localStorage.setItem('selectedCompanyId', data[0].id);
         }
       })
       .catch(console.error);
   }, []);
-
-  const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAccountId(e.target.value);
-    localStorage.setItem('selectedCompanyId', e.target.value);
-    window.dispatchEvent(new Event('storage'));
-  };
 
   let title = 'Profile Dashboard';
   let description = 'The profile module is currently being configured. Select an option from the sidebar menu to navigate, or check back later to view your analytics and data.';
