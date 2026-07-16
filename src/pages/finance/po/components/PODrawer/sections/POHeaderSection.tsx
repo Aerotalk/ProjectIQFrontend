@@ -5,6 +5,7 @@ import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
 import { MOCK_PROJECTS } from '@/services/po.service';
 import type { Vendor } from '@/types/vendor.types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -23,13 +24,15 @@ export default function POHeaderSection({ readOnly }: Props) {
   const [isLoadingVendors, setIsLoadingVendors] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId') || '';
+    if (!companyId) return;
     VendorService.getVendors(companyId).then((data) => {
       setVendors(data);
       setIsLoadingVendors(false);
     });
-  }, []);
+  }, [companyId]);
 
   // Sync display names when selection changes
   const selectedProjectId = watch('projectId');

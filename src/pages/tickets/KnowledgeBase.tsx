@@ -4,8 +4,10 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function KnowledgeBase() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [articles, setArticles] = useState<KBFormValues[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +32,6 @@ export default function KnowledgeBase() {
   const fetchArticles = async () => {
     try {
       setIsLoading(true);
-      const companyId = localStorage.getItem('selectedCompanyId');
       if (companyId) {
         const data = await KBService.getAll(companyId);
         setArticles(data);
@@ -44,7 +45,7 @@ export default function KnowledgeBase() {
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [companyId]);
 
   const handleCreate = () => {
     setDrawerMode('create');
@@ -76,7 +77,7 @@ export default function KnowledgeBase() {
 
   const handleSaveArticle = async (data: KBFormValues) => {
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) throw new Error('No company ID');
       
       if (drawerMode === 'create') {
         data.author = 'System Admin'; // Hardcoded for now, can be dynamically fetched later

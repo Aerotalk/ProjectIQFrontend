@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { POService } from '../../services/po.service';
 import { ExpenseService } from '../../services/expense.service';
 import { ChallanService } from '../../services/challan.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 const KPI_DATA = [
   { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-[#792359]', bgColor: 'bg-purple-50 dark:bg-[#792359]/10', isPositive: true },
@@ -22,6 +23,7 @@ const PROJECTS = [
 ];
 
 export default function FinanceDashboard() {
+  const { selectedCompanyId: companyId } = useAuth();
   const navigate = useNavigate();
   const [recentPOs, setRecentPOs] = useState<any[]>([]);
   const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
@@ -32,7 +34,7 @@ export default function FinanceDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const companyId = localStorage.getItem('selectedCompanyId') || '';
+        if (!companyId) return;
         const [pos, expenses, challans] = await Promise.all([
           POService.getAll(companyId),
           ExpenseService.getAll(companyId),
@@ -78,7 +80,7 @@ export default function FinanceDashboard() {
     };
     
     fetchDashboardData();
-  }, []);
+  }, [companyId]);
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">

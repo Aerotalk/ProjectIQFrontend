@@ -6,6 +6,7 @@ import { POService, MOCK_PROJECTS } from '@/services/po.service';
 import CustomSelect from '@/components/ui/CustomSelect';
 import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -30,8 +31,10 @@ export default function ChallanFormSection({ readOnly }: Props) {
   const selectedPoId = useWatch({ control, name: 'linkedVendorPoId' });
   const attachmentName = useWatch({ control, name: 'attachmentName' });
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId') || '';
+    if (!companyId) return;
     Promise.all([
       VendorService.getVendors(companyId),
       POService.getAll(companyId)
@@ -40,7 +43,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
       setPurchaseOrders(poData);
       setIsLoadingData(false);
     });
-  }, []);
+  }, [companyId]);
 
   // Filter vendors based on selected project
   // Note: Since vendors aren't formally linked to projects in the mock MOCK_PROJECTS array, 

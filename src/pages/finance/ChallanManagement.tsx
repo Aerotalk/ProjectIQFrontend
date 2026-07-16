@@ -12,8 +12,10 @@ import { VendorService } from '../../services/vendor.service';
 import { MOCK_PROJECTS } from '../../services/po.service';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChallanManagement() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -39,12 +41,12 @@ export default function ChallanManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) return;
       const [challanData, vendorData] = await Promise.all([
         ChallanService.getAll(companyId),
         VendorService.getVendors(companyId),
@@ -88,7 +90,7 @@ export default function ChallanManagement() {
       };
 
       if (drawerMode === 'create') {
-        const companyId = localStorage.getItem('selectedCompanyId') || '';
+        if (!companyId) throw new Error('No company ID');
         await ChallanService.create(companyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Delivery Challan created successfully');
       } else if (selectedChallan) {

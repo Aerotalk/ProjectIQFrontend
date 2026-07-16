@@ -4,8 +4,10 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import TicketDrawer from './components/TicketDrawer';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function TicketList() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [tickets, setTickets] = useState<TicketFormValues[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +32,6 @@ export default function TicketList() {
   const fetchTickets = async () => {
     try {
       setIsLoading(true);
-      const companyId = localStorage.getItem('selectedCompanyId');
       if (companyId) {
         const data = await TicketService.getAll(companyId);
         setTickets(data);
@@ -44,10 +45,7 @@ export default function TicketList() {
 
   useEffect(() => {
     fetchTickets();
-    const handleStorageChange = () => fetchTickets();
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [companyId]);
 
   const markAsClosed = async (id: string) => {
     try {
@@ -89,7 +87,7 @@ export default function TicketList() {
 
   const handleSaveTicket = async (data: TicketFormValues) => {
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) throw new Error('No company ID');
       
       if (drawerMode === 'create') {
         const newTicket = await TicketService.create(companyId, data);

@@ -2,31 +2,28 @@ import { useState, useEffect } from 'react';
 import { Building2 } from 'lucide-react';
 import { api } from '../lib/api';
 import CustomSelect from './ui/CustomSelect';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CompanySelector() {
+  const { selectedCompanyId, setSelectedCompanyId } = useAuth();
   const [accounts, setAccounts] = useState<any[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
 
   useEffect(() => {
     api.get(`/admin/companies`)
       .then((res: any) => {
         const data = Array.isArray(res) ? res : (res.content || []);
         setAccounts(data);
-        const storedId = localStorage.getItem('selectedCompanyId');
-        if (storedId && data.some((acc: any) => acc.id === storedId)) {
-          setSelectedAccountId(storedId);
+        if (selectedCompanyId && data.some((acc: any) => acc.id === selectedCompanyId)) {
+          // Keep current
         } else if (data.length > 0) {
-          setSelectedAccountId(data[0].id);
-          localStorage.setItem('selectedCompanyId', data[0].id);
+          setSelectedCompanyId(data[0].id);
         }
       })
       .catch(console.error);
   }, []);
 
   const handleAccountChange = (val: string) => {
-    setSelectedAccountId(val);
-    localStorage.setItem('selectedCompanyId', val);
-    window.dispatchEvent(new Event('storage')); // trigger updates in other components
+    setSelectedCompanyId(val);
   };
 
   if (accounts.length === 0) return null;
@@ -34,7 +31,7 @@ export default function CompanySelector() {
   return (
     <div className="flex items-center w-48 relative z-50">
       <CustomSelect
-        value={selectedAccountId}
+        value={selectedCompanyId || ''}
         onChange={handleAccountChange}
         options={accounts.map(acc => ({ label: acc.companyName, value: acc.id }))}
       />

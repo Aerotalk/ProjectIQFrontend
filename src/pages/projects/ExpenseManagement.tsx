@@ -10,6 +10,7 @@ import ExpenseDrawer from './expense/components/ExpenseDrawer';
 import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { MOCK_PROJECTS } from '../../services/po.service';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../../contexts/AuthContext';
 
 const EXPENSE_CATEGORIES = [
   'Travel',
@@ -22,6 +23,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function ExpenseManagement() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,12 +48,12 @@ export default function ExpenseManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) return;
       const data = await ExpenseService.getAll(companyId);
       setExpenses(data);
     } catch {
@@ -81,7 +83,7 @@ export default function ExpenseManagement() {
   const handleSaveExpense = async (data: ExpenseFormValues) => {
     setIsSubmitting(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) throw new Error('No company ID');
       const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
 
       const payload = {

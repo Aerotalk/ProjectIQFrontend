@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { QuotationService } from '../../services/quotation.service';
 import { ClientService } from '../../services/client.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SalesDashboard() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [quotations, setQuotations] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const companyId = localStorage.getItem('selectedCompanyId');
         if (!companyId) return;
         
         const [quots, clis] = await Promise.all([
@@ -25,7 +26,7 @@ export default function SalesDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const navigate = useNavigate();
   const stats = [

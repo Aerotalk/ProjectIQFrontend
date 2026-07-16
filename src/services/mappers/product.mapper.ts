@@ -2,7 +2,7 @@ import type { Product } from '../../types/product.types';
 
 export interface ProductDto {
   id: string;
-  itemCode: string;
+  itemCode?: string;
   itemName: string;
   description?: string;
   type: string;

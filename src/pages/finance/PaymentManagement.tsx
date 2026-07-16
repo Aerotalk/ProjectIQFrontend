@@ -11,6 +11,7 @@ import PaymentDrawer from './payment/components/PaymentDrawer';
 import type { PaymentFormValues } from './payment/validators/paymentValidation';
 import { MOCK_PROJECTS } from '../../services/po.service';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../../contexts/AuthContext';
 
 const STATUS_STYLES: Record<PaymentRecord['status'], string> = {
   Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
@@ -27,6 +28,7 @@ const STATUS_ICONS: Record<PaymentRecord['status'], React.ReactNode> = {
 };
 
 export default function PaymentManagement() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,12 +53,11 @@ export default function PaymentManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId');
       if (companyId) {
         const data = await PaymentService.getAll(companyId);
         setPayments(data);
@@ -88,7 +89,7 @@ export default function PaymentManagement() {
   const handleSave = async (data: PaymentFormValues) => {
     setIsSubmitting(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) throw new Error('No company ID');
       const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
       const payload = {
         ...data,

@@ -4,6 +4,7 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProductService } from '../../../../../../services/product.service';
 import type { Product } from '../../../../../../types/product.types';
+import { useAuth } from '../../../../../../contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -19,8 +20,9 @@ export default function LineItemsSection({ readOnly }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId');
     if (!companyId) {
       setIsLoadingProducts(false);
       return;
@@ -31,7 +33,7 @@ export default function LineItemsSection({ readOnly }: Props) {
     }).catch(() => {
       setIsLoadingProducts(false);
     });
-  }, []);
+  }, [companyId]);
 
   const handleProductChange = (index: number, productId: string) => {
     const product = products.find(p => p.id === productId);

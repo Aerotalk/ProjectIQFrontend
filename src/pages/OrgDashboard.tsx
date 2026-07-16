@@ -15,16 +15,7 @@ import ClientsList from './sales/ClientsList';
 function DefaultView() {
   const location = useLocation();
   useEffect(() => {
-    // Only fetch for UI side effects if needed. Unused state removed.
-    api.get(`/admin/companies`)
-      .then((res: any) => {
-        const data = Array.isArray(res) ? res : (res.content || []);
-        const storedId = localStorage.getItem('selectedCompanyId');
-        if (!storedId && data.length > 0) {
-          localStorage.setItem('selectedCompanyId', data[0].id);
-        }
-      })
-      .catch(console.error);
+    // Left empty or can be removed completely.
   }, []);
 
   let title = 'Profile Dashboard';

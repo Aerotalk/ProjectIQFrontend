@@ -12,6 +12,7 @@ import type { POFormValues } from './po/validators/poValidation';
 import { VendorService } from '../../services/vendor.service';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../../contexts/AuthContext';
 
 // ---------- Status helpers ----------
 
@@ -43,6 +44,7 @@ const ALL_STATUSES: POStatus[] = [
 // ---------- Component ----------
 
 export default function POManagement() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -71,12 +73,12 @@ export default function POManagement() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [companyId]);
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) return;
       const [poData, vendorData] = await Promise.all([
         POService.getAll(companyId),
         VendorService.getVendors(companyId),
@@ -124,7 +126,7 @@ export default function POManagement() {
       };
 
       if (drawerMode === 'create') {
-        const companyId = localStorage.getItem('selectedCompanyId') || '';
+        if (!companyId) throw new Error('No company ID');
         await POService.create(companyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
         toast.success('Purchase Order created successfully');
       } else if (selectedPO) {

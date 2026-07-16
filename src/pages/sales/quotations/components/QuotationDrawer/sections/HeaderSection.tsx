@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -15,14 +16,15 @@ export default function HeaderSection({ readOnly }: Props) {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId');
     if (!companyId) return;
     ClientService.getClients(companyId).then((data) => {
       setClients(data);
       setIsLoadingClients(false);
     });
-  }, []);
+  }, [companyId]);
 
   return (
     <div className="space-y-4">
