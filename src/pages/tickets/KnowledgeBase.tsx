@@ -1,5 +1,5 @@
 import { Search, Filter, Plus, MoreHorizontal, BookOpen } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
@@ -41,7 +41,6 @@ export default function KnowledgeBase() {
     }
   };
 
-  import { useEffect } from 'react';
   useEffect(() => {
     fetchArticles();
   }, []);

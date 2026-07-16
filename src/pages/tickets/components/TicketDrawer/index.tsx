@@ -22,11 +22,10 @@ export default function TicketDrawer({ isOpen, onClose, onSave, mode, initialDat
   React.useEffect(() => {
     if (isOpen) {
       form.reset({
-        subject: '',
-        client: '',
+        projectId: '',
+        shortDescription: '',
+        state: 'Open',
         priority: 'Low',
-        status: 'Open',
-        assigned: '',
         description: '',
         ...initialData
       });
