@@ -21,6 +21,8 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
+  selectedCompanyId: string | null;
+  setSelectedCompanyId: (id: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,13 +30,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
   const fetchUser = async () => {
     try {
       const userData = await api.get('/auth/me');
       setUser(userData);
+      if (userData.companyId) {
+        setSelectedCompanyId(userData.companyId);
+      }
     } catch (error) {
       setUser(null);
+      setSelectedCompanyId(null);
     }
   };
 
@@ -49,6 +56,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = (userData: User) => {
     setUser(userData);
+    if (userData.companyId) {
+      setSelectedCompanyId(userData.companyId);
+    }
   };
 
   const logout = async () => {
@@ -58,6 +68,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error("Logout failed", error);
     } finally {
       setUser(null);
+      setSelectedCompanyId(null);
       window.location.href = '/login';
     }
   };
@@ -73,7 +84,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isLoading,
       login,
       logout,
-      refetchUser
+      refetchUser,
+      selectedCompanyId,
+      setSelectedCompanyId
     }}>
       {children}
     </AuthContext.Provider>

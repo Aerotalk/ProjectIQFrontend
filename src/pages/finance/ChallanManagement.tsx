@@ -11,6 +11,7 @@ import type { ChallanFormValues } from './challan/validators/challanValidation';
 import { VendorService } from '../../services/vendor.service';
 import { MOCK_PROJECTS } from '../../services/po.service';
 import type { Vendor } from '../../types/vendor.types';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function ChallanManagement() {
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
@@ -185,28 +186,28 @@ export default function ChallanManagement() {
         <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="flex flex-wrap gap-2">
             {/* Project filter */}
-            <select
-              value={filterProject}
-              onChange={e => { setFilterProject(e.target.value); resetPage(); }}
-              className={selectClass}
-            >
-              <option value="">All Projects</option>
-              {MOCK_PROJECTS.map(p => (
-                <option key={p.id} value={p.id}>{p.id}</option>
-              ))}
-            </select>
+            <div className="w-40 shrink-0">
+              <CustomSelect
+                value={filterProject}
+                onChange={val => { setFilterProject(val); resetPage(); }}
+                options={[
+                  { label: 'All Projects', value: '' },
+                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                ]}
+              />
+            </div>
 
             {/* Vendor filter */}
-            <select
-              value={filterVendor}
-              onChange={e => { setFilterVendor(e.target.value); resetPage(); }}
-              className={selectClass}
-            >
-              <option value="">All Vendors</option>
-              {vendors.map(v => (
-                <option key={v.id} value={v.id}>{v.displayName}</option>
-              ))}
-            </select>
+            <div className="w-48 shrink-0">
+              <CustomSelect
+                value={filterVendor}
+                onChange={val => { setFilterVendor(val); resetPage(); }}
+                options={[
+                  { label: 'All Vendors', value: '' },
+                  ...vendors.map(v => ({ label: v.displayName || v.id, value: v.id }))
+                ]}
+              />
+            </div>
           </div>
 
           {/* Search */}

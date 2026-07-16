@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, CheckCircle2, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 
 type ViewState = 'list' | 'add' | 'edit';
@@ -382,14 +383,14 @@ const AccountForm = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Address Type</label>
-                <select 
-                  value={formData.addressType}
-                  onChange={(e) => updateField('addressType', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
-                >
-                  <option value="Registered">Registered</option>
-                  <option value="Corporate">Corporate</option>
-                </select>
+                <CustomSelect
+                  value={formData.addressType || ''}
+                  onChange={(val) => updateField('addressType', val)}
+                  options={[
+                    { label: 'Registered', value: 'Registered' },
+                    { label: 'Corporate', value: 'Corporate' }
+                  ]}
+                />
               </div>
               
               <div className="md:col-span-2">
@@ -406,33 +407,23 @@ const AccountForm = ({
               
               <div className="md:col-span-1 lg:col-span-1 space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">State <span className="text-red-500">*</span></label>
-                <select 
-                  value={formData.state}
-                  onChange={(e) => updateField('state', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
-                >
-                  <option value="">Select State</option>
-                  {statesList.map((s: any) => (
-                    <option key={s.isoCode} value={s.name}>{s.name}</option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={formData.state || ''}
+                  onChange={(val) => updateField('state', val)}
+                  options={statesList.map((s: any) => ({ label: s.name, value: s.name }))}
+                />
               </div>
               
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Country <span className="text-red-500">*</span></label>
-                <select 
-                  value={formData.country}
-                  onChange={(e) => {
-                    updateField('country', e.target.value);
+                <CustomSelect
+                  value={formData.country || ''}
+                  onChange={(val) => {
+                    updateField('country', val);
                     updateField('state', '');
                   }}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
-                >
-                  <option value="">Select Country</option>
-                  {countries.map((c: any) => (
-                    <option key={c.isoCode} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
+                  options={countries.map((c: any) => ({ label: c.name, value: c.name }))}
+                />
               </div>
               <div className="md:col-span-1">
                 <InputField label="Postal Code" required value={formData.postalCode as string || ''} onChange={(val) => updateField('postalCode', val)} />

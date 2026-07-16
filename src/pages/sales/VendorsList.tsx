@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
 import type { Vendor } from '../../types/vendor.types';
 import VendorDrawer from './vendors/components/VendorDrawer';
@@ -8,8 +9,8 @@ import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 
 export default function VendorsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
-  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor } = useVendors({ companyId });
+  const { selectedCompanyId: companyId } = useAuth();
+  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor, archiveVendor } = useVendors({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');

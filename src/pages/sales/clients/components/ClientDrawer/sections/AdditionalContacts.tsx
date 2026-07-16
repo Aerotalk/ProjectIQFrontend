@@ -1,5 +1,6 @@
-import { useFormContext, useFieldArray } from 'react-hook-form';
+import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Props {
   readOnly?: boolean;
@@ -95,16 +96,24 @@ export default function AdditionalContacts({ readOnly }: Props) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Role</label>
-                    <select 
-                      {...register(`additionalContacts.${index}.role`)} 
-                      disabled={readOnly}
-                      className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors"
-                    >
-                      <option value="Billing">Billing</option>
-                      <option value="Purchase">Purchase</option>
-                      <option value="Technical">Technical</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                      <Controller
+                        name={`additionalContacts.${index}.role`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || 'Other'}
+                            onChange={field.onChange}
+                            options={[
+                              { label: 'Billing', value: 'Billing' },
+                              { label: 'Purchase', value: 'Purchase' },
+                              { label: 'Technical', value: 'Technical' },
+                              { label: 'Other', value: 'Other' }
+                            ]}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

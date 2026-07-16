@@ -92,7 +92,7 @@ export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialDat
       {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
         <FormProvider {...form}>
-          <form id="vendor-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form id="vendor-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-48">
             
             <GSTTreatmentSection readOnly={readOnly} />
             

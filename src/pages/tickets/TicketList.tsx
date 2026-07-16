@@ -1,5 +1,6 @@
 import { Search, Filter, Plus, Download, MoreHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 import TicketDrawer from './components/TicketDrawer';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import toast from 'react-hot-toast';
@@ -149,18 +150,18 @@ export default function TicketList() {
               className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
-          <div className="relative shrink-0">
-            <select 
+          <div className="relative shrink-0 w-40">
+            <CustomSelect
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="appearance-none px-4 py-2 pl-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 cursor-pointer outline-none focus:border-[#792359]"
-            >
-              <option value="All">All States</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Closed">Closed</option>
-            </select>
-            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              onChange={setFilterStatus}
+              icon={<Filter size={16} />}
+              options={[
+                { label: 'All States', value: 'All' },
+                { label: 'Open', value: 'Open' },
+                { label: 'In Progress', value: 'In Progress' },
+                { label: 'Closed', value: 'Closed' }
+              ]}
+            />
           </div>
           <button onClick={handleExport} className="shrink-0 px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
             <Download size={16} /> Export

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
@@ -8,8 +9,8 @@ import type { ProductFormValues } from './products/validators/productValidation'
 import { Input } from '@/components/ui/input';
 
 export default function ProductsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
-  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
+  const { selectedCompanyId: companyId } = useAuth();
+  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct, archiveProduct } = useProducts({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');

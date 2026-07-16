@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Eye, Edit, Archive } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useClients } from '../../hooks/useClients';
 import type { Client } from '../../types/client.types';
 import ClientDrawer from './clients/components/ClientDrawer';
@@ -8,7 +9,7 @@ import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 
 export default function ClientsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
+  const { selectedCompanyId: companyId } = useAuth();
   const { clients, isListLoading: isLoading, isSaveLoading, createClient, updateClient, archiveClient } = useClients({ companyId });
   const [searchTerm, setSearchTerm] = useState('');
   

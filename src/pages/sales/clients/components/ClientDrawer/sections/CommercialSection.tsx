@@ -1,11 +1,12 @@
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function CommercialSection({ readOnly }: Props) {
-  const { register } = useFormContext();
+  const { register, control } = useFormContext();
 
   return (
     <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -16,20 +17,27 @@ export default function CommercialSection({ readOnly }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Payment Terms</label>
-          <select 
-            {...register('paymentTerms')} 
-            disabled={readOnly}
-            className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors"
-          >
-            <option value="">Select Terms</option>
-            <option value="Immediate">Immediate</option>
-            <option value="15 Days">15 Days</option>
-            <option value="30 Days">30 Days</option>
-            <option value="45 Days">45 Days</option>
-            <option value="60 Days">60 Days</option>
-            <option value="90 Days">90 Days</option>
-            <option value="Custom">Custom</option>
-          </select>
+          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+            <Controller
+              name="paymentTerms"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: 'Immediate', value: 'Immediate' },
+                    { label: '15 Days', value: '15 Days' },
+                    { label: '30 Days', value: '30 Days' },
+                    { label: '45 Days', value: '45 Days' },
+                    { label: '60 Days', value: '60 Days' },
+                    { label: '90 Days', value: '90 Days' },
+                    { label: 'Custom', value: 'Custom' }
+                  ]}
+                />
+              )}
+            />
+          </div>
         </div>
 
         <div>
@@ -44,21 +52,28 @@ export default function CommercialSection({ readOnly }: Props) {
 
         <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Industry / Segment</label>
-          <select 
-            {...register('industry')} 
-            disabled={readOnly}
-            className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors"
-          >
-            <option value="">Select Industry</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Trading">Trading</option>
-            <option value="IT/ITES">IT / ITES</option>
-            <option value="Construction">Construction</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Education">Education</option>
-            <option value="Retail">Retail</option>
-            <option value="Other">Other</option>
-          </select>
+          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+            <Controller
+              name="industry"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: 'Manufacturing', value: 'Manufacturing' },
+                    { label: 'Trading', value: 'Trading' },
+                    { label: 'IT / ITES', value: 'IT/ITES' },
+                    { label: 'Construction', value: 'Construction' },
+                    { label: 'Healthcare', value: 'Healthcare' },
+                    { label: 'Education', value: 'Education' },
+                    { label: 'Retail', value: 'Retail' },
+                    { label: 'Other', value: 'Other' }
+                  ]}
+                />
+              )}
+            />
+          </div>
         </div>
 
         <div className="md:col-span-2">

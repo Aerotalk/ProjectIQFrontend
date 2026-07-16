@@ -91,6 +91,7 @@ export default function CustomSelect({ value, onChange, options, icon }: CustomS
                 key={`${optValue}-${index}`}
                 onClick={() => {
                   onChange(optValue);
+                  setSearchQuery('');
                   setIsOpen(false);
                 }}
                 className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-2 ${

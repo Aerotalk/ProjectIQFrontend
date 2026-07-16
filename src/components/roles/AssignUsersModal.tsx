@@ -3,6 +3,7 @@ import { type Role, rolesService } from '../../services/roles.service';
 import { X, Users, Save, CheckCircle2, Building2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Props {
   role: Role;
@@ -82,18 +83,15 @@ export default function AssignUsersModal({ role, onClose }: Props) {
           
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Target Company</label>
-            <div className="relative">
-              <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <select 
+            <div className="relative z-50">
+              <CustomSelect
                 value={companyId}
-                onChange={(e) => setCompanyId(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white appearance-none"
-              >
-                <option value="" disabled>Select a company</option>
-                {companies.map(c => (
-                  <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-              </select>
+                onChange={(val) => setCompanyId(val)}
+                options={[
+                  { label: 'Select a company', value: '' },
+                  ...companies.map(c => ({ label: c.companyName, value: c.id }))
+                ]}
+              />
             </div>
           </div>
 

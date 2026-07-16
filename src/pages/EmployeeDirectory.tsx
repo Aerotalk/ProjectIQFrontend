@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Search, Plus, User, Mail, Briefcase, Trash2, Edit2, Loader2, MapPin } from 'lucide-react';
 import AddEmployeeModal from '../components/modals/AddEmployeeModal';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Employee {
   id: string;
@@ -80,14 +81,26 @@ export default function EmployeeDirectory() {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
-           <select className="flex-1 sm:flex-none text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm px-3 py-2 outline-none focus:border-[#792359] text-gray-700 dark:text-gray-300">
-             <option value="">All Departments</option>
-           </select>
-           <select className="flex-1 sm:flex-none text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm px-3 py-2 outline-none focus:border-[#792359] text-gray-700 dark:text-gray-300">
-             <option value="">All Statuses</option>
-             <option value="ACTIVE">Active</option>
-             <option value="INACTIVE">Inactive</option>
-           </select>
+           <div className="w-40 shrink-0">
+             <CustomSelect
+               value=""
+               onChange={() => {}}
+               options={[
+                 { label: 'All Departments', value: '' }
+               ]}
+             />
+           </div>
+           <div className="w-36 shrink-0">
+             <CustomSelect
+               value=""
+               onChange={() => {}}
+               options={[
+                 { label: 'All Statuses', value: '' },
+                 { label: 'Active', value: 'ACTIVE' },
+                 { label: 'Inactive', value: 'INACTIVE' }
+               ]}
+             />
+           </div>
         </div>
       </div>
 

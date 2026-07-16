@@ -5,6 +5,8 @@ import {
 import { 
   Ticket, Clock, CheckCircle, AlertTriangle, UserCheck, ChevronRight 
 } from 'lucide-react';
+import { useState } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 const trendData = [
   { name: 'May 12', created: 40, resolved: 24 },
@@ -31,6 +33,8 @@ const recentTickets = [
 ];
 
 export default function TicketDashboard() {
+  const [trendRange, setTrendRange] = useState('Last 7 Days');
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       {/* Header */}
@@ -69,10 +73,16 @@ export default function TicketDashboard() {
         <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-base font-semibold text-gray-900 dark:text-white">Ticket Trend</h3>
-            <select className="text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md px-3 py-1.5 focus:outline-none focus:border-[#792359] text-gray-700 dark:text-gray-300">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-            </select>
+            <div className="w-40">
+              <CustomSelect
+                value={trendRange}
+                onChange={setTrendRange}
+                options={[
+                  { label: 'Last 7 Days', value: 'Last 7 Days' },
+                  { label: 'Last 30 Days', value: 'Last 30 Days' }
+                ]}
+              />
+            </div>
           </div>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">

@@ -5,6 +5,7 @@ import {
   CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function QuotationDetails() {
   const { id } = useParams();
@@ -469,16 +470,16 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Owner</p>
                   {isEditing ? (
-                    <select 
+                    <CustomSelect 
                       value={quotation.owner} 
-                      onChange={(e) => setQuotation({...quotation, owner: e.target.value})}
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
-                    >
-                      <option value="Arjun Dev">Arjun Dev</option>
-                      <option value="Sneha Iyer">Sneha Iyer</option>
-                      <option value="Rohit Singh">Rohit Singh</option>
-                      <option value="Anita Desai">Anita Desai</option>
-                    </select>
+                      onChange={(val) => setQuotation({...quotation, owner: val})}
+                      options={[
+                        { label: 'Arjun Dev', value: 'Arjun Dev' },
+                        { label: 'Sneha Iyer', value: 'Sneha Iyer' },
+                        { label: 'Rohit Singh', value: 'Rohit Singh' },
+                        { label: 'Anita Desai', value: 'Anita Desai' }
+                      ]}
+                    />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.owner}</p>
                   )}
@@ -494,16 +495,16 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Currency</p>
                   {isEditing ? (
-                    <select 
+                    <CustomSelect 
                       value={quotation.currency} 
-                      onChange={(e) => setQuotation({...quotation, currency: e.target.value})}
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
-                    >
-                      <option value="INR">INR</option>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
-                    </select>
+                      onChange={(val) => setQuotation({...quotation, currency: val})}
+                      options={[
+                        { label: 'INR', value: 'INR' },
+                        { label: 'USD', value: 'USD' },
+                        { label: 'EUR', value: 'EUR' },
+                        { label: 'GBP', value: 'GBP' }
+                      ]}
+                    />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.currency}</p>
                   )}

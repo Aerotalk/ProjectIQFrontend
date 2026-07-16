@@ -11,6 +11,7 @@ import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
 import KnowledgeBase from './tickets/KnowledgeBase';
 import RolesList from './RolesList';
+import CompanyUsersList from './CompanyUsersList';
 import PermissionGate from '../components/PermissionGate';
 import SalesDashboard from './sales/SalesDashboard';
 import ClientsList from './sales/ClientsList';
@@ -121,6 +122,11 @@ export default function CompanyDashboard() {
         <Route path="/roles" element={
           <PermissionGate permission="role.view">
             <RolesList />
+          </PermissionGate>
+        } />
+        <Route path="/users" element={
+          <PermissionGate permission="user.view">
+            <CompanyUsersList />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

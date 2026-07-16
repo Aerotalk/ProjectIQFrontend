@@ -1,5 +1,6 @@
 import { ArrowLeft, Save, RefreshCw, MessageSquare, UserPlus, FileText } from 'lucide-react';
 import { useState } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 const STATES = ['Open', 'In Progress', 'Closed'];
 
@@ -11,6 +12,11 @@ interface ViewTicketProps {
 
 export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps) {
   const [formData, setFormData] = useState(ticket);
+  const [impact, setImpact] = useState('2 - Significant/Large');
+  const [urgency, setUrgency] = useState('2 - High');
+  const [method, setMethod] = useState('Automated Alerting');
+  const [majorState, setMajorState] = useState('-- None --');
+  const [gtoc, setGtoc] = useState('No');
 
   const handleStateChange = (newState: string) => {
     setFormData({ ...formData, status: newState });
@@ -107,19 +113,23 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Impact</label>
-              <select className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                <option>2 - Significant/Large</option>
-                <option>1 - High</option>
-                <option>3 - Moderate/Limited</option>
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={impact}
+                  onChange={setImpact}
+                  options={['2 - Significant/Large', '1 - High', '3 - Moderate/Limited']}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Urgency</label>
-              <select className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                <option>2 - High</option>
-                <option>1 - Critical</option>
-                <option>3 - Medium</option>
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={urgency}
+                  onChange={setUrgency}
+                  options={['2 - High', '1 - Critical', '3 - Medium']}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-gray-600 dark:text-gray-400 font-medium shrink-0">Priority</label>
@@ -134,10 +144,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Method of Awareness</label>
-              <select className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                <option>Automated Alerting</option>
-                <option>User Reported</option>
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={method}
+                  onChange={setMethod}
+                  options={['Automated Alerting', 'User Reported']}
+                />
+              </div>
             </div>
           </div>
 
@@ -145,13 +158,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
           <div className="space-y-5 text-sm">
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-gray-600 dark:text-gray-400 font-medium shrink-0">State</label>
-              <select 
-                value={formData.status} 
-                onChange={(e) => handleStateChange(e.target.value)}
-                className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-green-500 rounded-sm text-gray-900 dark:text-white font-medium focus:ring-1 focus:ring-green-500 focus:outline-none"
-              >
-                {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={formData.status}
+                  onChange={handleStateChange}
+                  options={STATES}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-gray-600 dark:text-gray-400 font-medium shrink-0">Opened</label>
@@ -159,9 +172,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-gray-600 dark:text-gray-400 font-medium shrink-0">Major incident state</label>
-              <select disabled className="flex-1 px-3 py-2 bg-gray-100 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-500 cursor-not-allowed">
-                <option>-- None --</option>
-              </select>
+              <div className="flex-1 opacity-80 pointer-events-none">
+                <CustomSelect
+                  value={majorState}
+                  onChange={setMajorState}
+                  options={['-- None --']}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Assignment group</label>
@@ -179,10 +196,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* GTOC Engaged?</label>
-              <select className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                <option>No</option>
-                <option>Yes</option>
-              </select>
+              <div className="flex-1">
+                <CustomSelect
+                  value={gtoc}
+                  onChange={setGtoc}
+                  options={['No', 'Yes']}
+                />
+              </div>
             </div>
           </div>
         </div>

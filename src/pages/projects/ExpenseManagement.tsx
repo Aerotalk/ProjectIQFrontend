@@ -9,6 +9,7 @@ import type { Expense } from '../../types/expense.types';
 import ExpenseDrawer from './expense/components/ExpenseDrawer';
 import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { MOCK_PROJECTS } from '../../services/po.service';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 const EXPENSE_CATEGORIES = [
   'Travel',
@@ -194,28 +195,28 @@ export default function ExpenseManagement() {
         <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="flex flex-wrap gap-2">
             {/* Project filter */}
-            <select
-              value={filterProject}
-              onChange={e => { setFilterProject(e.target.value); resetPage(); }}
-              className={selectClass}
-            >
-              <option value="">All Projects</option>
-              {MOCK_PROJECTS.map(p => (
-                <option key={p.id} value={p.id}>{p.id}</option>
-              ))}
-            </select>
+            <div className="w-40 shrink-0">
+              <CustomSelect
+                value={filterProject}
+                onChange={val => { setFilterProject(val); resetPage(); }}
+                options={[
+                  { label: 'All Projects', value: '' },
+                  ...MOCK_PROJECTS.map(p => ({ label: p.id, value: p.id }))
+                ]}
+              />
+            </div>
 
             {/* Category filter */}
-            <select
-              value={filterCategory}
-              onChange={e => { setFilterCategory(e.target.value); resetPage(); }}
-              className={selectClass}
-            >
-              <option value="">All Categories</option>
-              {EXPENSE_CATEGORIES.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <div className="w-48 shrink-0">
+              <CustomSelect
+                value={filterCategory}
+                onChange={val => { setFilterCategory(val); resetPage(); }}
+                options={[
+                  { label: 'All Categories', value: '' },
+                  ...EXPENSE_CATEGORIES.map(c => ({ label: c, value: c }))
+                ]}
+              />
+            </div>
           </div>
 
           {/* Search */}

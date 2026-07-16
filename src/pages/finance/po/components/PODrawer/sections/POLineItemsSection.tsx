@@ -1,5 +1,6 @@
-import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
+import { useFormContext, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 const UNIT_OPTIONS = [
   'Pieces', 'Units', 'Nos', 'Sets', 'Boxes', 'Packs',
@@ -120,15 +121,19 @@ export default function POLineItemsSection({ readOnly }: Props) {
 
                   {/* Unit */}
                   <td className="px-3 py-2">
-                    <select
-                      {...register(`lineItems.${index}.unit`)}
-                      disabled={readOnly}
-                      className={`${cellClass} appearance-none ${lineErrors?.unit ? 'border-red-400' : ''}`}
-                    >
-                      {UNIT_OPTIONS.map(u => (
-                        <option key={u} value={u}>{u}</option>
-                      ))}
-                    </select>
+                    <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                      <Controller
+                        name={`lineItems.${index}.unit`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || 'Pieces'}
+                            onChange={field.onChange}
+                            options={UNIT_OPTIONS.map(u => ({ label: u, value: u }))}
+                          />
+                        )}
+                      />
+                    </div>
                   </td>
 
                   {/* Unit Price */}

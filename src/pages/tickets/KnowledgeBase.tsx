@@ -1,5 +1,6 @@
 import { Search, Filter, Plus, MoreHorizontal, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
@@ -123,17 +124,16 @@ export default function KnowledgeBase() {
               className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
-          <div className="relative shrink-0">
-            <select 
+          <div className="relative shrink-0 w-48">
+            <CustomSelect
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="appearance-none px-4 py-2 pl-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 cursor-pointer outline-none focus:border-[#792359]"
-            >
-              {categories.map(c => (
-                <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>
-              ))}
-            </select>
-            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              onChange={setFilterCategory}
+              icon={<Filter size={16} />}
+              options={categories.map(c => ({
+                label: c === 'All' ? 'All Categories' : c,
+                value: c
+              }))}
+            />
           </div>
           <button 
             onClick={handleCreate}

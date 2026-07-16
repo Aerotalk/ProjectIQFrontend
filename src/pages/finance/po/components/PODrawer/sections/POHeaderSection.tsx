@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
 import { MOCK_PROJECTS } from '@/services/po.service';
@@ -15,6 +16,7 @@ export default function POHeaderSection({ readOnly }: Props) {
     formState: { errors },
     watch,
     setValue,
+    control,
   } = useFormContext();
 
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -80,16 +82,19 @@ export default function POHeaderSection({ readOnly }: Props) {
           <label className={labelClass}>
             Project <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <select
-            {...register('projectId')}
-            disabled={readOnly}
-            className={fieldClass(!!errors.projectId)}
-          >
-            <option value="">Select a Project</option>
-            {MOCK_PROJECTS.map(p => (
-              <option key={p.id} value={p.id}>{p.id} – {p.name}</option>
-            ))}
-          </select>
+          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+            <Controller
+              name="projectId"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={MOCK_PROJECTS.map(p => ({ label: `${p.id} - ${p.name}`, value: p.id }))}
+                />
+              )}
+            />
+          </div>
           {errors.projectId && (
             <p className="text-red-500 text-xs mt-1">{errors.projectId.message as string}</p>
           )}
@@ -101,16 +106,19 @@ export default function POHeaderSection({ readOnly }: Props) {
             Vendor <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className="relative">
-            <select
-              {...register('vendorId')}
-              disabled={readOnly || isLoadingVendors}
-              className={fieldClass(!!errors.vendorId)}
-            >
-              <option value="">Select a Vendor</option>
-              {vendors.map(v => (
-                <option key={v.id} value={v.id}>{v.displayName}</option>
-              ))}
-            </select>
+            <div className={readOnly || isLoadingVendors ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="vendorId"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={vendors.map(v => ({ label: v.displayName || v.id, value: v.id }))}
+                  />
+                )}
+              />
+            </div>
             {isLoadingVendors && (
               <Loader2 className="absolute right-3 top-2.5 w-4 h-4 animate-spin text-gray-400" />
             )}
@@ -155,19 +163,22 @@ export default function POHeaderSection({ readOnly }: Props) {
           <label className={labelClass}>
             Status <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <select
-            {...register('status')}
-            disabled={readOnly}
-            className={fieldClass(!!errors.status)}
-          >
-            <option value="Draft">Draft</option>
-            <option value="Pending Approval">Pending Approval</option>
-            <option value="Approved">Approved</option>
-            <option value="Ordered">Ordered</option>
-            <option value="Partially Received">Partially Received</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || 'Draft'}
+                  onChange={field.onChange}
+                  options={[
+                    'Draft', 'Pending Approval', 'Approved', 'Ordered',
+                    'Partially Received', 'Completed', 'Cancelled'
+                  ]}
+                />
+              )}
+            />
+          </div>
           {errors.status && (
             <p className="text-red-500 text-xs mt-1">{errors.status.message as string}</p>
           )}
