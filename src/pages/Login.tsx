@@ -97,7 +97,8 @@ export default function Login() {
                   organizationName: response.organizationName || null,
                   companyId: null, // login response currently doesn't have companyId, adjust if needed
                   companyName: null,
-                  effectivePermissions: response.effectivePermissions || []
+                  effectivePermissions: response.effectivePermissions || [],
+                  profilePhotoId: response.profilePhotoId || null
                 };
 
                 login(userData);
