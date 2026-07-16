@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function HeaderSection({ readOnly }: Props) {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, control, formState: { errors } } = useFormContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId');
     if (!companyId) return;
     ClientService.getClients(companyId).then((data) => {
       setClients(data);
       setIsLoadingClients(false);
     });
-  }, []);
+  }, [companyId]);
 
   return (
     <div className="space-y-4">
@@ -32,18 +35,19 @@ export default function HeaderSection({ readOnly }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Select Client *</label>
-          <div className="relative">
-            <select 
-              {...register('clientId')} 
-              disabled={readOnly || isLoadingClients}
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors appearance-none ${errors.clientId ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
-            >
-              <option value="">Select a Client</option>
-              {clients.map(client => (
-                <option key={client.id} value={client.id}>{client.displayName}</option>
-              ))}
-            </select>
-            {isLoadingClients && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+          <div className={readOnly || isLoadingClients ? 'opacity-80 pointer-events-none relative' : 'relative'}>
+            <Controller
+              name="clientId"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={clients.map(client => ({ label: client.displayName, value: client.id }))}
+                />
+              )}
+            />
+            {isLoadingClients && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
           </div>
           {errors.clientId && <p className="text-red-500 text-xs mt-1">{errors.clientId.message as string}</p>}
         </div>

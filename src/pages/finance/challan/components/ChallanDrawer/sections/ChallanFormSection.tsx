@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
-import { POService, MOCK_PROJECTS } from '@/services/po.service';
+import { POService } from '@/services/po.service';
+import { useProjects } from '@/hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -23,6 +25,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { projects } = useProjects();
 
   // Watch for dependent fields
   const selectedProjectId = useWatch({ control, name: 'projectId' });
@@ -30,8 +33,10 @@ export default function ChallanFormSection({ readOnly }: Props) {
   const selectedPoId = useWatch({ control, name: 'linkedVendorPoId' });
   const attachmentName = useWatch({ control, name: 'attachmentName' });
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId') || '';
+    if (!companyId) return;
     Promise.all([
       VendorService.getVendors(companyId),
       POService.getAll(companyId)
@@ -40,7 +45,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
       setPurchaseOrders(poData);
       setIsLoadingData(false);
     });
-  }, []);
+  }, [companyId]);
 
   // Filter vendors based on selected project
   // Note: Since vendors aren't formally linked to projects in the mock MOCK_PROJECTS array, 
@@ -63,8 +68,8 @@ export default function ChallanFormSection({ readOnly }: Props) {
 
   // Sync display names when selection changes
   useEffect(() => {
-    const project = MOCK_PROJECTS.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.name, { shouldValidate: false });
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
     
     // If project changes, clear dependent fields if they don't match the new filters
     if (selectedProjectId) {
@@ -120,8 +125,8 @@ export default function ChallanFormSection({ readOnly }: Props) {
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
   const PROJECT_OPTIONS = useMemo(() => {
-    return MOCK_PROJECTS.map(p => ({ label: `${p.id} – ${p.name}`, value: p.id }));
-  }, []);
+    return projects.map(p => ({ label: `${p.projectCode} – ${p.projectName}`, value: p.id }));
+  }, [projects]);
 
   const VENDOR_OPTIONS = useMemo(() => {
     return filteredVendors.map(v => ({ label: v.displayName, value: v.id }));

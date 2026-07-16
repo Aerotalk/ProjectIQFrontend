@@ -1,10 +1,13 @@
 import { Search, Filter, Plus, MoreHorizontal, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function KnowledgeBase() {
+  const { selectedCompanyId: companyId } = useAuth();
   const [articles, setArticles] = useState<KBFormValues[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +32,6 @@ export default function KnowledgeBase() {
   const fetchArticles = async () => {
     try {
       setIsLoading(true);
-      const companyId = localStorage.getItem('selectedCompanyId');
       if (companyId) {
         const data = await KBService.getAll(companyId);
         setArticles(data);
@@ -43,7 +45,7 @@ export default function KnowledgeBase() {
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [companyId]);
 
   const handleCreate = () => {
     setDrawerMode('create');
@@ -75,7 +77,7 @@ export default function KnowledgeBase() {
 
   const handleSaveArticle = async (data: KBFormValues) => {
     try {
-      const companyId = localStorage.getItem('selectedCompanyId') || '';
+      if (!companyId) throw new Error('No company ID');
       
       if (drawerMode === 'create') {
         data.author = 'System Admin'; // Hardcoded for now, can be dynamically fetched later
@@ -123,17 +125,16 @@ export default function KnowledgeBase() {
               className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
-          <div className="relative shrink-0">
-            <select 
+          <div className="relative shrink-0 w-48">
+            <CustomSelect
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="appearance-none px-4 py-2 pl-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 cursor-pointer outline-none focus:border-[#792359]"
-            >
-              {categories.map(c => (
-                <option key={c} value={c}>{c === 'All' ? 'All Categories' : c}</option>
-              ))}
-            </select>
-            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              onChange={setFilterCategory}
+              icon={<Filter size={16} />}
+              options={categories.map(c => ({
+                label: c === 'All' ? 'All Categories' : c,
+                value: c
+              }))}
+            />
           </div>
           <button 
             onClick={handleCreate}
@@ -179,7 +180,7 @@ export default function KnowledgeBase() {
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.author || 'System'}</td>
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'Just now'}</td>
-                  <td className="px-6 py-4 text-center relative">
+                  <td className={`px-6 py-4 text-center ${openActionId === a.id ? 'relative z-50' : 'relative z-10'}`}>
                     <button 
                       onClick={(e) => { e.stopPropagation(); if (a.id) setOpenActionId(openActionId === a.id ? null : a.id); }}
                       className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"

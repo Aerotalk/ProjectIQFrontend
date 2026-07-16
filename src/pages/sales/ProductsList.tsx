@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
@@ -8,7 +9,7 @@ import type { ProductFormValues } from './products/validators/productValidation'
 import { Input } from '@/components/ui/input';
 
 export default function ProductsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
+  const { selectedCompanyId: companyId } = useAuth();
   const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -133,7 +134,7 @@ export default function ProductsList() {
                         {product.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center relative">
+                    <td className={`px-6 py-4 text-center ${openDropdownId === product.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
                         onClick={() => setOpenDropdownId(openDropdownId === product.id ? null : product.id)}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"

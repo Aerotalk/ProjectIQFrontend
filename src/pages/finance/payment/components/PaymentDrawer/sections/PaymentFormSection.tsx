@@ -1,6 +1,6 @@
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { MOCK_PROJECTS } from '@/services/po.service';
+import { useProjects } from '@/hooks/useProjects';
 import { useMemo } from 'react';
 
 interface Props {
@@ -23,15 +23,12 @@ const STATUS_OPTIONS = [
 ];
 
 export default function PaymentFormSection({ readOnly }: Props) {
-  const {
-    register,
-    control,
-    formState: { errors }
-  } = useFormContext();
+  const { control, register, formState: { errors } } = useFormContext();
+  const { projects } = useProjects();
 
   const PROJECT_OPTIONS = useMemo(() => {
-    return MOCK_PROJECTS.map(p => ({ label: `${p.id} - ${p.name}`, value: p.id }));
-  }, []);
+    return projects.map(p => ({ label: `${p.projectCode} - ${p.projectName}`, value: p.id }));
+  }, [projects]);
 
   const fieldClass = (hasError: boolean) =>
     `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { POService } from '../../services/po.service';
 import { ExpenseService } from '../../services/expense.service';
 import { ChallanService } from '../../services/challan.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 const KPI_DATA = [
   { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-[#792359]', bgColor: 'bg-purple-50 dark:bg-[#792359]/10', isPositive: true },
@@ -13,16 +14,12 @@ const KPI_DATA = [
   { label: 'Profit (Est.)', value: '₹ 32,50,000', trend: '+22% vs last month', icon: IndianRupee, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10', isPositive: true },
 ];
 
-const PROJECTS = [
-  { id: 'PRJ-001', name: 'Analytics Dashboard', customer: 'ABC Bank', value: '10,00,000', cost: '3,00,000', profit: '7,00,000', profitPercent: '70%', status: 'In Progress', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  { id: 'PRJ-002', name: 'Mobile App Development', customer: 'XYZ Ltd', value: '8,00,000', cost: '2,00,000', profit: '6,00,000', profitPercent: '75%', status: 'In Progress', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  { id: 'PRJ-003', name: 'Cloud Migration', customer: 'PQR Corp', value: '15,00,000', cost: '7,00,000', profit: '8,00,000', profitPercent: '53%', status: 'In Progress', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  { id: 'PRJ-004', name: 'Website Redesign', customer: 'LMN Pvt Ltd', value: '5,00,000', cost: '1,00,000', profit: '4,00,000', profitPercent: '80%', status: 'Completed', statusColor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 'PRJ-005', name: 'Data Integration', customer: 'TechNova Ltd', value: '12,00,000', cost: '4,80,000', profit: '7,20,000', profitPercent: '60%', status: 'In Progress', statusColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-];
+// Mock data is removed, data will be fetched from backend.
 
 export default function FinanceDashboard() {
+  const { selectedCompanyId: companyId } = useAuth();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<any[]>([]);
   const [recentPOs, setRecentPOs] = useState<any[]>([]);
   const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
   const [recentChallans, setRecentChallans] = useState<any[]>([]);
@@ -32,11 +29,12 @@ export default function FinanceDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const companyId = localStorage.getItem('selectedCompanyId') || '';
-        const [pos, expenses, challans] = await Promise.all([
+        if (!companyId) return;
+        const [pos, expenses, challans, projs] = await Promise.all([
           POService.getAll(companyId),
           ExpenseService.getAll(companyId),
-          ChallanService.getAll(companyId)
+          ChallanService.getAll(companyId),
+          import('../../services/project.service').then(m => m.ProjectService.getAll(companyId))
         ]);
 
         const poSum = pos.reduce((acc, po) => acc + (po.grandTotal || 0), 0);
@@ -72,13 +70,32 @@ export default function FinanceDashboard() {
           statusColor: 'bg-green-100 text-green-700'
         }));
         setRecentChallans(formattedChallans);
+        
+        const formattedProjects = projs.slice(0, 5).map(p => {
+          const pPOs = pos.filter(po => po.projectId === p.id);
+          const pExps = expenses.filter(ex => ex.projectId === p.id);
+          const pCost = pPOs.reduce((acc, po) => acc + (po.grandTotal || 0), 0) + pExps.reduce((acc, ex) => acc + (ex.amount || 0), 0);
+          return {
+            id: p.projectCode || p.id,
+            realId: p.id,
+            name: p.projectName,
+            customer: 'N/A', // Client association not stored in Project
+            value: 'N/A', // Project Value not stored
+            cost: `₹ ${pCost.toLocaleString('en-IN')}`,
+            profit: 'N/A',
+            profitPercent: 'N/A',
+            status: p.status || 'Active',
+            statusColor: (p.status === 'Completed' || p.status === 'Closed') ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+          };
+        });
+        setProjects(formattedProjects);
       } catch (err) {
         console.error("Error fetching dashboard data", err);
       }
     };
     
     fetchDashboardData();
-  }, []);
+  }, [companyId]);
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
@@ -105,8 +122,10 @@ export default function FinanceDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {KPI_DATA.map((kpi, i) => {
           let displayValue = kpi.value;
+          if (kpi.label === 'Active Projects') displayValue = projects.length.toString();
           if (kpi.label === 'PO Value') displayValue = `₹ ${poTotal.toLocaleString('en-IN')}`;
           if (kpi.label === 'Expenses') displayValue = `₹ ${expenseTotal.toLocaleString('en-IN')}`;
+          if (kpi.label === 'Profit (Est.)' || kpi.label === 'Project Value') displayValue = 'N/A';
           
           return (
             <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group">
@@ -155,8 +174,8 @@ export default function FinanceDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-              {PROJECTS.map((p, i) => (
-                <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group text-sm">
+              {projects.map((p, i) => (
+                <tr key={p.realId} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group text-sm">
                   <td className="px-6 py-3">
                     <div className="flex items-center gap-2">
                       <div className={`w-1.5 h-1.5 rounded-full ${i % 3 === 0 ? 'bg-blue-500' : i % 3 === 1 ? 'bg-green-500' : i % 3 === 2 ? 'bg-orange-500' : 'bg-purple-500'}`}></div>
@@ -175,12 +194,19 @@ export default function FinanceDashboard() {
                     </span>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <button onClick={() => navigate(`/companydashboard/finance/projects/${p.id}`)} className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
+                    <button onClick={() => navigate(`/companydashboard/finance/projects/${p.realId}`)} className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
                       <Eye size={16} />
                     </button>
                   </td>
                 </tr>
               ))}
+              {projects.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500 text-sm">
+                    No active projects found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

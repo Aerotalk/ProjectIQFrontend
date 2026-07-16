@@ -1,5 +1,6 @@
 import { Search, Info, Paperclip, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface CreateTicketProps {
   onCancel?: () => void;
@@ -10,8 +11,12 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
   const [caller, setCaller] = useState('');
   const [shortDesc, setShortDesc] = useState('');
   const [priority, setPriority] = useState('3 - Low');
+  const [urgency, setUrgency] = useState('3 - Low');
   const [state, setState] = useState('New');
   const [assignedTo, setAssignedTo] = useState('');
+  const [category, setCategory] = useState('-- None --');
+  const [subcategory, setSubcategory] = useState('-- None --');
+  const [contactType, setContactType] = useState('Phone');
 
   const randomId = `INC${Math.floor(Math.random() * 90000) + 10000}`;
 
@@ -95,43 +100,59 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs"><span className="text-red-500 mr-1">*</span>Category</label>
               <div className="flex-1">
-                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
-                  <option>-- None --</option>
-                  <option>Hardware</option>
-                  <option>Software</option>
-                  <option>Network</option>
-                </select>
+                <CustomSelect
+                  value={category}
+                  onChange={setCategory}
+                  options={[
+                    { label: '-- None --', value: '-- None --' },
+                    { label: 'Hardware', value: 'Hardware' },
+                    { label: 'Software', value: 'Software' },
+                    { label: 'Network', value: 'Network' }
+                  ]}
+                />
               </div>
             </div>
 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Subcategory</label>
               <div className="flex-1">
-                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
-                  <option>-- None --</option>
-                </select>
+                <CustomSelect
+                  value={subcategory}
+                  onChange={setSubcategory}
+                  options={[
+                    { label: '-- None --', value: '-- None --' }
+                  ]}
+                />
               </div>
             </div>
 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Impact</label>
               <div className="flex-1">
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
-                  <option value="1 - High">1 - High</option>
-                  <option value="2 - Medium">2 - Medium</option>
-                  <option value="3 - Low">3 - Low</option>
-                </select>
+                <CustomSelect
+                  value={priority}
+                  onChange={setPriority}
+                  options={[
+                    { label: '1 - High', value: '1 - High' },
+                    { label: '2 - Medium', value: '2 - Medium' },
+                    { label: '3 - Low', value: '3 - Low' }
+                  ]}
+                />
               </div>
             </div>
 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Urgency</label>
               <div className="flex-1">
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
-                  <option value="1 - High">1 - High</option>
-                  <option value="2 - Medium">2 - Medium</option>
-                  <option value="3 - Low">3 - Low</option>
-                </select>
+                <CustomSelect
+                  value={urgency}
+                  onChange={setUrgency}
+                  options={[
+                    { label: '1 - High', value: '1 - High' },
+                    { label: '2 - Medium', value: '2 - Medium' },
+                    { label: '3 - Low', value: '3 - Low' }
+                  ]}
+                />
               </div>
             </div>
 
@@ -167,26 +188,34 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Contact type</label>
               <div className="flex-1">
-                <select className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200" defaultValue="Phone">
-                  <option value="Email">Email</option>
-                  <option value="Phone">Phone</option>
-                  <option value="Self-service">Self-service</option>
-                  <option value="Walk-in">Walk-in</option>
-                </select>
+                <CustomSelect
+                  value={contactType}
+                  onChange={setContactType}
+                  options={[
+                    { label: 'Email', value: 'Email' },
+                    { label: 'Phone', value: 'Phone' },
+                    { label: 'Self-service', value: 'Self-service' },
+                    { label: 'Walk-in', value: 'Walk-in' }
+                  ]}
+                />
               </div>
             </div>
 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">State</label>
               <div className="flex-1">
-                <select value={state} onChange={(e) => setState(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm text-gray-800 dark:text-gray-200">
-                  <option value="New">New</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="On Hold">On Hold</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Closed">Closed</option>
-                  <option value="Canceled">Canceled</option>
-                </select>
+                <CustomSelect
+                  value={state}
+                  onChange={setState}
+                  options={[
+                    { label: 'New', value: 'New' },
+                    { label: 'In Progress', value: 'In Progress' },
+                    { label: 'On Hold', value: 'On Hold' },
+                    { label: 'Resolved', value: 'Resolved' },
+                    { label: 'Closed', value: 'Closed' },
+                    { label: 'Canceled', value: 'Canceled' }
+                  ]}
+                />
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Lock, Briefcase } from 'lucide-react';
 import { api } from '../../lib/api';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface AddEmployeeModalProps {
   isOpen: boolean;
@@ -113,7 +114,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
         </div>
 
         {/* Form */}
-        <div className="p-6 overflow-y-auto custom-scrollbar">
+        <div className="p-6 overflow-y-auto custom-scrollbar pb-32">
           {error && (
             <div className="mb-6 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm rounded-md flex items-center gap-2">
               <span className="font-semibold">Error:</span> {error}
@@ -138,11 +139,15 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
-                  <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
+                  <CustomSelect
+                    value={formData.gender}
+                    onChange={(val) => setFormData({ ...formData, gender: val })}
+                    options={[
+                      { label: 'Male', value: 'MALE' },
+                      { label: 'Female', value: 'FEMALE' },
+                      { label: 'Other', value: 'OTHER' }
+                    ]}
+                  />
                 </div>
               </div>
             </div>
@@ -190,17 +195,25 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
-                  <select name="departmentId" value={formData.departmentId} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-                    <option value="">-- Select Department --</option>
-                    {departments.map(d => <option key={d.id} value={d.id}>{d.departmentName}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={formData.departmentId}
+                    onChange={(val) => setFormData({ ...formData, departmentId: val })}
+                    options={[
+                      { label: '-- Select Department --', value: '' },
+                      ...departments.map(d => ({ label: d.departmentName, value: d.id }))
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation</label>
-                  <select name="designationId" value={formData.designationId} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-                    <option value="">-- Select Designation --</option>
-                    {designations.map(d => <option key={d.id} value={d.id}>{d.designationName}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={formData.designationId}
+                    onChange={(val) => setFormData({ ...formData, designationId: val })}
+                    options={[
+                      { label: '-- Select Designation --', value: '' },
+                      ...designations.map(d => ({ label: d.designationName, value: d.id }))
+                    ]}
+                  />
                 </div>
               </div>
             </div>

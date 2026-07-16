@@ -106,17 +106,8 @@ export const mapToClient = (dto: ClientDto): Client => {
 };
 
 export const mapToClientDto = (client: Partial<Client>): Partial<ClientDto> => {
-  // Strip out frontend-only fields that the backend doesn't support to prevent 400 Bad Request
-  const {
-    billingAttention: _billingAttention,
-    billingPhone: _billingPhone,
-    shippingAttention: _shippingAttention,
-    shippingPhone: _shippingPhone,
-    ...restOfClient
-  } = client as any;
-
   const dto: Partial<ClientDto> = {
-    ...restOfClient,
+    ...client,
     additionalContacts: client.additionalContacts?.map((c) => ({
       ...c,
       role: c.role,

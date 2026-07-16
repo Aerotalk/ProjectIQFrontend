@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { shouldShowOverseasFields } from '../../../utils/gstRules';
@@ -7,26 +7,26 @@ interface Props {
   readOnly?: boolean;
 }
 
-const COUNTRIES = [
-  'India', 'United States', 'United Kingdom', 'United Arab Emirates', 'Singapore', 'Australia', 'Other'
-];
+import { Country, State } from 'country-state-city';
 
-const STATES_MAP: Record<string, string[]> = {
-  'India': ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi'],
-  'United States': ['California', 'Texas', 'New York', 'Florida', 'Illinois', 'Pennsylvania', 'Ohio', 'Georgia', 'North Carolina', 'Michigan'],
-  'United Kingdom': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
-  'United Arab Emirates': ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al-Quwain', 'Fujairah', 'Ras Al Khaimah'],
-  'Singapore': ['Central Region', 'East Region', 'North Region', 'North-East Region', 'West Region'],
-  'Australia': ['New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia', 'Tasmania', 'Australian Capital Territory', 'Northern Territory']
+const COUNTRIES = Country.getAllCountries().map(c => ({
+  label: c.name,
+  value: c.name
+}));
+
+const getStatesForCountry = (countryName: string) => {
+  if (!countryName) return [];
+  const country = Country.getAllCountries().find(c => c.name === countryName);
+  if (!country) return [];
+  return State.getStatesOfCountry(country.isoCode).map(s => ({
+    label: s.name,
+    value: s.name
+  }));
 };
 
-const COUNTRY_CODES: Record<string, string> = {
-  'India': '+91 ',
-  'United States': '+1 ',
-  'United Kingdom': '+44 ',
-  'United Arab Emirates': '+971 ',
-  'Singapore': '+65 ',
-  'Australia': '+61 '
+const getPhoneCodeForCountry = (countryName: string) => {
+  const country = Country.getAllCountries().find(c => c.name === countryName);
+  return country ? `+${country.phonecode} ` : '';
 };
 
 export default function AddressSection({ readOnly }: Props) {
@@ -35,52 +35,76 @@ export default function AddressSection({ readOnly }: Props) {
   const isOverseas = shouldShowOverseasFields(treatment);
   const sameAsBilling = watch('sameAsBillingAddress');
 
-  const billingAttention = watch('billingAttention');
-  const billingLine1 = watch('billingAddressLine1');
-  const billingLine2 = watch('billingAddressLine2');
-  const billingCity = watch('billingCity');
-  const billingState = watch('billingState');
-  const billingPinCode = watch('billingPinCode');
-  const billingCountry = watch('billingCountry');
-  const billingPhone = watch('billingPhone');
 
-  // Phone code auto-detection
+  const billingCountry = watch('billingCountry');
+
+  const { getValues } = useFormContext();
+
+  const prevBillingCountry = useRef(billingCountry);
+  const prevShippingCountry = useRef(watch('shippingCountry'));
+
+  const prevBillingCountryCode = useRef(getPhoneCodeForCountry(getValues('billingCountry') || ''));
+  const prevShippingCountryCode = useRef(getPhoneCodeForCountry(getValues('shippingCountry') || ''));
+
+  // Handle billing country change (state reset & phone code update)
   useEffect(() => {
-    if (billingCountry && !readOnly) {
-      const code = COUNTRY_CODES[billingCountry];
-      if (code && (!billingPhone || billingPhone.trim() === '')) {
-        setValue('billingPhone', code, { shouldValidate: true });
+    if (billingCountry && billingCountry !== prevBillingCountry.current) {
+      // 1. Reset state
+      if (prevBillingCountry.current) {
+        setValue('billingState', '', { shouldValidate: true, shouldDirty: true });
+      }
+      prevBillingCountry.current = billingCountry;
+
+      // 2. Update phone code
+      if (!readOnly) {
+        const newCode = getPhoneCodeForCountry(billingCountry);
+        if (newCode) {
+          const currentPhone = getValues('billingPhone') || '';
+          const prevCode = prevBillingCountryCode.current;
+          if (!currentPhone || currentPhone.trim() === '' || currentPhone.trim() === prevCode.trim() || currentPhone.startsWith(prevCode)) {
+            const updatedPhone = currentPhone ? currentPhone.replace(prevCode, newCode) : newCode;
+            setValue('billingPhone', updatedPhone, { shouldValidate: true, shouldDirty: true });
+          } else if (!currentPhone.startsWith('+')) {
+            setValue('billingPhone', newCode + currentPhone, { shouldValidate: true, shouldDirty: true });
+          }
+          prevBillingCountryCode.current = newCode;
+        }
       }
     }
-  }, [billingCountry, setValue, readOnly]);
+  }, [billingCountry, setValue, readOnly, getValues]);
 
   const shippingCountry = watch('shippingCountry');
-  const shippingPhone = watch('shippingPhone');
+
+  
+  // Handle shipping country change
   useEffect(() => {
-    if (shippingCountry && !readOnly) {
-      const code = COUNTRY_CODES[shippingCountry];
-      if (code && (!shippingPhone || shippingPhone.trim() === '')) {
-        setValue('shippingPhone', code, { shouldValidate: true });
+    if (shippingCountry && shippingCountry !== prevShippingCountry.current) {
+      // 1. Reset state
+      if (prevShippingCountry.current) {
+        setValue('shippingState', '', { shouldValidate: true, shouldDirty: true });
+      }
+      prevShippingCountry.current = shippingCountry;
+
+      // 2. Update phone code
+      if (!readOnly) {
+        const newCode = getPhoneCodeForCountry(shippingCountry);
+        if (newCode) {
+          const currentPhone = getValues('shippingPhone') || '';
+          const prevCode = prevShippingCountryCode.current;
+          if (!currentPhone || currentPhone.trim() === '' || currentPhone.trim() === prevCode.trim() || currentPhone.startsWith(prevCode)) {
+            const updatedPhone = currentPhone ? currentPhone.replace(prevCode, newCode) : newCode;
+            setValue('shippingPhone', updatedPhone, { shouldValidate: true, shouldDirty: true });
+          } else if (!currentPhone.startsWith('+')) {
+            setValue('shippingPhone', newCode + currentPhone, { shouldValidate: true, shouldDirty: true });
+          }
+          prevShippingCountryCode.current = newCode;
+        }
       }
     }
-  }, [shippingCountry, setValue, readOnly]);
+  }, [shippingCountry, setValue, readOnly, getValues]);
 
-  // Effect to copy billing to shipping when checkbox is checked
-  useEffect(() => {
-    if (sameAsBilling && !readOnly) {
-      const opts = { shouldValidate: true, shouldDirty: true };
-      setValue('shippingAttention', billingAttention || '', opts);
-      setValue('shippingAddressLine1', billingLine1 || '', opts);
-      setValue('shippingAddressLine2', billingLine2 || '', opts);
-      setValue('shippingCity', billingCity || '', opts);
-      setValue('shippingState', billingState || '', opts);
-      setValue('shippingPinCode', billingPinCode || '', opts);
-      setValue('shippingCountry', billingCountry || '', opts);
-      setValue('shippingPhone', billingPhone || '', opts);
-    }
-  }, [sameAsBilling, billingAttention, billingLine1, billingLine2, billingCity, billingState, billingPinCode, billingCountry, billingPhone, setValue, readOnly]);
-
-  const pointerEventsClass = sameAsBilling && !readOnly ? 'pointer-events-none opacity-60 bg-gray-50 dark:bg-white/5' : '';
+  // Effect removed to prevent continuous sync. Copying is now handled in the checkbox onChange.
+  const pointerEventsClass = '';
 
   return (
     <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -110,10 +134,7 @@ export default function AddressSection({ readOnly }: Props) {
                 render={({ field }) => (
                   <CustomSelect
                     value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val);
-                      setValue('billingState', ''); // reset state when country changes
-                    }}
+                    onChange={field.onChange}
                     options={COUNTRIES}
                   />
                 )}
@@ -159,13 +180,24 @@ export default function AddressSection({ readOnly }: Props) {
               <Controller
                 name="billingState"
                 control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    value={field.value}
-                    onChange={field.onChange}
-                    options={STATES_MAP[billingCountry] || []}
-                  />
-                )}
+                render={({ field }) => {
+                  const states = getStatesForCountry(billingCountry);
+                  return states.length > 0 ? (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => setValue('billingState', val, { shouldValidate: true, shouldDirty: true })}
+                      options={states}
+                    />
+                  ) : (
+                    <input 
+                      type="text" 
+                      {...field}
+                      disabled={readOnly}
+                      placeholder="Enter state manually"
+                      className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.billingState ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                    />
+                  );
+                }}
               />
             </div>
             {errors.billingState && <p className="text-red-500 text-xs mt-1">{errors.billingState.message as string}</p>}
@@ -198,11 +230,33 @@ export default function AddressSection({ readOnly }: Props) {
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200">Shipping Address</h4>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              {...register('sameAsBillingAddress')} 
-              disabled={readOnly}
-              className="text-[#792359] focus:ring-[#792359] rounded-sm" 
+            <Controller
+              name="sameAsBillingAddress"
+              control={control}
+              render={({ field }) => (
+                <input 
+                  type="checkbox" 
+                  checked={field.value}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    field.onChange(isChecked);
+                    if (isChecked && !readOnly) {
+                      const vals = getValues();
+                      const opts = { shouldValidate: true, shouldDirty: true };
+                      setValue('shippingAttention', vals.billingAttention || '', opts);
+                      setValue('shippingAddressLine1', vals.billingAddressLine1 || '', opts);
+                      setValue('shippingAddressLine2', vals.billingAddressLine2 || '', opts);
+                      setValue('shippingCity', vals.billingCity || '', opts);
+                      setValue('shippingCountry', vals.billingCountry || '', opts);
+                      setValue('shippingState', vals.billingState || '', opts);
+                      setValue('shippingPinCode', vals.billingPinCode || '', opts);
+                      setValue('shippingPhone', vals.billingPhone || '', opts);
+                    }
+                  }}
+                  disabled={readOnly}
+                  className="text-[#792359] focus:ring-[#792359] rounded-sm" 
+                />
+              )}
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">Same as Billing Address</span>
           </label>
@@ -228,10 +282,7 @@ export default function AddressSection({ readOnly }: Props) {
                 render={({ field }) => (
                   <CustomSelect
                     value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val);
-                      setValue('shippingState', ''); // reset state when country changes
-                    }}
+                    onChange={field.onChange}
                     options={COUNTRIES}
                   />
                 )}
@@ -275,13 +326,24 @@ export default function AddressSection({ readOnly }: Props) {
               <Controller
                 name="shippingState"
                 control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    value={field.value}
-                    onChange={field.onChange}
-                    options={STATES_MAP[shippingCountry] || []}
-                  />
-                )}
+                render={({ field }) => {
+                  const states = getStatesForCountry(shippingCountry);
+                  return states.length > 0 ? (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={(val) => setValue('shippingState', val, { shouldValidate: true, shouldDirty: true })}
+                      options={states}
+                    />
+                  ) : (
+                    <input 
+                      type="text" 
+                      {...field}
+                      readOnly={readOnly}
+                      placeholder="Enter state manually"
+                      className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass} ${errors.shippingState ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                    />
+                  );
+                }}
               />
             </div>
           </div>

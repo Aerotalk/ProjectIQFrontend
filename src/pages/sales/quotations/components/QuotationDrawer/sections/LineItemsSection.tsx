@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
+import { useFormContext, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { ProductService } from '../../../../../../services/product.service';
 import type { Product } from '../../../../../../types/product.types';
+import { useAuth } from '../../../../../../contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
@@ -18,8 +20,9 @@ export default function LineItemsSection({ readOnly }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
+  const { selectedCompanyId: companyId } = useAuth();
+
   useEffect(() => {
-    const companyId = localStorage.getItem('selectedCompanyId');
     if (!companyId) {
       setIsLoadingProducts(false);
       return;
@@ -30,7 +33,7 @@ export default function LineItemsSection({ readOnly }: Props) {
     }).catch(() => {
       setIsLoadingProducts(false);
     });
-  }, []);
+  }, [companyId]);
 
   const handleProductChange = (index: number, productId: string) => {
     const product = products.find(p => p.id === productId);
@@ -64,7 +67,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         )}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[250px]">
         <table className="w-full text-left min-w-[800px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
@@ -83,23 +86,23 @@ export default function LineItemsSection({ readOnly }: Props) {
               const currentTotal = lineItems?.[index]?.totalAmount || 0;
               return (
                 <tr key={field.id} className="group">
-                  <td className="px-3 py-2">
-                    <div className="relative">
-                      <select
-                        {...register(`lineItems.${index}.productId`)}
-                        onChange={(e) => {
-                          register(`lineItems.${index}.productId`).onChange(e);
-                          handleProductChange(index, e.target.value);
-                        }}
-                        disabled={readOnly || isLoadingProducts}
-                        className="w-full px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm focus:ring-[#792359]/50 appearance-none"
-                      >
-                        <option value="">Select Item</option>
-                        {products.map(p => (
-                          <option key={p.id} value={p.id}>{p.itemName}</option>
-                        ))}
-                      </select>
-                      {isLoadingProducts && <Loader2 className="absolute right-2 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
+                  <td className="px-3 py-2 relative" style={{ zIndex: 100 - index }}>
+                    <div className={readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none' : ''}>
+                      <Controller
+                        name={`lineItems.${index}.productId`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(val) => {
+                              field.onChange(val);
+                              handleProductChange(index, val);
+                            }}
+                            options={products.map(p => ({ label: p.itemName, value: p.id }))}
+                          />
+                        )}
+                      />
+                      {isLoadingProducts && <Loader2 className="absolute right-8 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
                     </div>
                   </td>
                   <td className="px-3 py-2">

@@ -124,16 +124,8 @@ export const mapToVendor = (dto: VendorDto): Vendor => {
 };
 
 export const mapToVendorDto = (vendor: Partial<Vendor>): Partial<VendorDto> => {
-  const {
-    billingAttention: _billingAttention,
-    billingPhone: _billingPhone,
-    shippingAttention: _shippingAttention,
-    shippingPhone: _shippingPhone,
-    ...restOfVendor
-  } = vendor as any;
-
   const dto: Partial<VendorDto> = {
-    ...restOfVendor,
+    ...vendor,
     additionalContacts: vendor.additionalContacts?.map((c) => ({
       ...c,
       role: c.role,

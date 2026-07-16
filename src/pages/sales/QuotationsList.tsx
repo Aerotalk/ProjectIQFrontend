@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useQuotations } from '../../hooks/useQuotations';
 import type { Quotation } from '../../types/quotation.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
@@ -8,7 +9,7 @@ import type { QuotationFormValues } from './quotations/validators/quotationValid
 import { Input } from '@/components/ui/input';
 
 export default function QuotationsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
+  const { selectedCompanyId: companyId } = useAuth();
   const { quotations, isListLoading: isLoading, isSaveLoading: isSubmitting, createQuotation, updateQuotation } = useQuotations({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -139,7 +140,7 @@ export default function QuotationsList() {
                         {quotation.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center relative">
+                    <td className={`px-6 py-4 text-center ${openDropdownId === quotation.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
                         onClick={() => setOpenDropdownId(openDropdownId === quotation.id ? null : quotation.id)}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"

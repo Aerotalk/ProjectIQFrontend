@@ -1,4 +1,5 @@
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext, useWatch, Controller } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { 
   shouldShowGSTIN, 
   shouldShowPAN, 
@@ -21,7 +22,7 @@ interface Props {
 }
 
 export default function GSTSection({ readOnly }: Props) {
-  const { register, formState: { errors }, setValue } = useFormContext();
+  const { register, formState: { errors }, setValue, control } = useFormContext();
   const treatment = useWatch({ name: 'gstTreatment' });
 
   // If consumer and no place of supply needed, or similar. Actually, PDF says consumer shows place of supply.
@@ -110,16 +111,19 @@ export default function GSTSection({ readOnly }: Props) {
         {showPlaceOfSupply && (
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Place of Supply *</label>
-            <select 
-              {...register('placeOfSupply')} 
-              disabled={readOnly}
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.placeOfSupply ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
-            >
-              <option value="">Select State</option>
-              {INDIAN_STATES.map(state => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="placeOfSupply"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={INDIAN_STATES.map(s => ({ label: s, value: s }))}
+                  />
+                )}
+              />
+            </div>
             {errors.placeOfSupply && <p className="text-red-500 text-xs mt-1">{errors.placeOfSupply.message as string}</p>}
           </div>
         )}
@@ -128,36 +132,50 @@ export default function GSTSection({ readOnly }: Props) {
           <>
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Country *</label>
-              <select 
-                {...register('country')} 
-                disabled={readOnly}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.country ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
-              >
-                <option value="">Select Country</option>
-                <option value="United States">United States</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="United Arab Emirates">United Arab Emirates</option>
-                <option value="Singapore">Singapore</option>
-                <option value="Australia">Australia</option>
-                <option value="Other">Other</option>
-              </select>
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={[
+                        { label: 'United States', value: 'United States' },
+                        { label: 'United Kingdom', value: 'United Kingdom' },
+                        { label: 'United Arab Emirates', value: 'United Arab Emirates' },
+                        { label: 'Singapore', value: 'Singapore' },
+                        { label: 'Australia', value: 'Australia' },
+                        { label: 'Other', value: 'Other' }
+                      ]}
+                    />
+                  )}
+                />
+              </div>
               {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country.message as string}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Currency *</label>
-              <select 
-                {...register('currency')} 
-                disabled={readOnly}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.currency ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
-              >
-                <option value="">Select Currency</option>
-                <option value="USD">USD - US Dollar</option>
-                <option value="EUR">EUR - Euro</option>
-                <option value="GBP">GBP - British Pound</option>
-                <option value="AED">AED - UAE Dirham</option>
-                <option value="SGD">SGD - Singapore Dollar</option>
-                <option value="INR">INR - Indian Rupee</option>
-              </select>
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="currency"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={[
+                        { label: 'USD - US Dollar', value: 'USD' },
+                        { label: 'EUR - Euro', value: 'EUR' },
+                        { label: 'GBP - British Pound', value: 'GBP' },
+                        { label: 'AED - UAE Dirham', value: 'AED' },
+                        { label: 'SGD - Singapore Dollar', value: 'SGD' },
+                        { label: 'INR - Indian Rupee', value: 'INR' }
+                      ]}
+                    />
+                  )}
+                />
+              </div>
               {errors.currency && <p className="text-red-500 text-xs mt-1">{errors.currency.message as string}</p>}
             </div>
             <div>

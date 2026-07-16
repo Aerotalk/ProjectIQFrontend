@@ -240,7 +240,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         <CheckCircle2 size={20} />
         <div>
           <span className="block text-sm font-bold">Welcome back!</span>
-          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}.</span>
+          <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in as {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}.</span>
         </div>
       </div>
 
@@ -315,8 +315,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : orgName}>
-                {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee Portal' : orgName}
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee Portal') : orgName}>
+                {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee Portal') : orgName}
               </span>
               <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
             </div>
@@ -393,8 +393,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}>
-                      {role === 'company' ? 'Client Company' : role === 'employee' ? 'Employee' : orgName}
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}>
+                      {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{userEmail}</p>
                   </div>

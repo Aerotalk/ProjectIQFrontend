@@ -11,6 +11,7 @@ import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
 import KnowledgeBase from './tickets/KnowledgeBase';
 import RolesList from './RolesList';
+import CompanyUsersList from './CompanyUsersList';
 import PermissionGate from '../components/PermissionGate';
 import SalesDashboard from './sales/SalesDashboard';
 import ClientsList from './sales/ClientsList';
@@ -24,6 +25,10 @@ import ChallanManagement from './finance/ChallanManagement';
 import PaymentManagement from './finance/PaymentManagement';
 import ExpenseManagement from './projects/ExpenseManagement';
 import ProjectFinanceDetails from './finance/ProjectFinanceDetails';
+import ProjectDashboard from './projects/ProjectDashboard';
+import EmployeeDirectory from './EmployeeDirectory';
+import DepartmentDirectory from './DepartmentDirectory';
+import DesignationDirectory from './DesignationDirectory';
 
 function DefaultView() {
   return (
@@ -106,6 +111,11 @@ export default function CompanyDashboard() {
             <PaymentManagement />
           </PermissionGate>
         } />
+        <Route path="/projects" element={
+          <PermissionGate permission="ticket.projects.view">
+            <ProjectDashboard />
+          </PermissionGate>
+        } />
         <Route path="/projects/expenses" element={
           <PermissionGate permission="finance.expenses.view">
             <ExpenseManagement />
@@ -121,6 +131,26 @@ export default function CompanyDashboard() {
         <Route path="/roles" element={
           <PermissionGate permission="role.view">
             <RolesList />
+          </PermissionGate>
+        } />
+        <Route path="/users" element={
+          <PermissionGate permission="user.view">
+            <CompanyUsersList />
+          </PermissionGate>
+        } />
+        <Route path="/employees" element={
+          <PermissionGate permission="employee.view">
+            <EmployeeDirectory />
+          </PermissionGate>
+        } />
+        <Route path="/departments" element={
+          <PermissionGate permission="department.view">
+            <DepartmentDirectory />
+          </PermissionGate>
+        } />
+        <Route path="/designations" element={
+          <PermissionGate permission="designation.view">
+            <DesignationDirectory />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

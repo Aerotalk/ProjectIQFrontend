@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
 import type { Vendor } from '../../types/vendor.types';
 import VendorDrawer from './vendors/components/VendorDrawer';
@@ -8,7 +9,7 @@ import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 
 export default function VendorsList() {
-  const companyId = localStorage.getItem('selectedCompanyId');
+  const { selectedCompanyId: companyId } = useAuth();
   const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor } = useVendors({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -131,7 +132,7 @@ export default function VendorsList() {
                         {vendor.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center relative">
+                    <td className={`px-6 py-4 text-center ${openDropdownId === vendor.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
                         onClick={() => setOpenDropdownId(openDropdownId === vendor.id ? null : vendor.id)}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
