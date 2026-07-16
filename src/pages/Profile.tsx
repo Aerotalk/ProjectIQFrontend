@@ -3,9 +3,11 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { Camera, Save, Key, User, Mail, Globe, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Profile() {
-  const orgName = localStorage.getItem('organizationName') || '';
+  const { user, refetchUser } = useAuth();
+  const orgName = user?.organizationName || '';
 
   const [profileData, setProfileData] = useState({
     name: orgName,
@@ -79,8 +81,8 @@ export default function Profile() {
         organizationType: profileData.orgType,
         industry: profileData.industry,
       });
-      // Update localStorage so the sidebar reflects new name immediately
-      localStorage.setItem('organizationName', profileData.name);
+      // Refresh auth context so the sidebar reflects new name immediately
+      await refetchUser();
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (err) {

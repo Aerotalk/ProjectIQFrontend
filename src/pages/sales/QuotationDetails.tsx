@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ChevronRight, Edit, Download, Info, 
@@ -6,10 +6,15 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../../contexts/AuthContext';
+import { QuotationService } from '../../services/quotation.service';
+import type { Quotation } from '../../types/quotation.types';
 
 export default function QuotationDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { selectedCompanyId: companyId } = useAuth();
+  const [isApiLoading, setIsApiLoading] = useState(false);
 
   const isNew = id === 'new';
   const [isEditing, setIsEditing] = useState(isNew);
@@ -51,41 +56,45 @@ export default function QuotationDetails() {
     { id: 6, name: 'Converted' },
   ];
 
-  const [quotation, setQuotation] = useState(() => {
-    if (!isNew) {
-      const saved = localStorage.getItem('demo_quotations');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const found = parsed.find((q: any) => q.id === id);
-        if (found) {
-          return {
-            qtnNo: found.qtnNo,
-            client: found.client,
-            project: found.project,
-            amount: found.amount,
-            validTill: found.validTill,
-            owner: found.owner,
-            discount: found.discount || 0,
-            createdOn: '09 May 2025',
+  const [quotation, setQuotation] = useState({
+    qtnNo: isNew ? 'Unassigned' : '',
+    client: isNew ? '' : '',
+    project: isNew ? '' : '',
+    amount: isNew ? '' : '',
+    validTill: isNew ? '' : '',
+    owner: 'Arjun Dev',
+    discount: 0,
+    createdOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    currency: 'INR'
+  });
+
+  // Fetch existing quotation from backend API
+  useEffect(() => {
+    if (!isNew && id) {
+      setIsApiLoading(true);
+      QuotationService.getQuotation(id)
+        .then((data: Quotation) => {
+          setQuotation({
+            qtnNo: data.quotationNo || '',
+            client: data.clientName || '',
+            project: data.subject || '',
+            amount: String(data.grandTotal || ''),
+            validTill: data.validUntil ? data.validUntil.split('T')[0] : '',
+            owner: data.approvedBy || 'Arjun Dev',
+            discount: data.totalDiscount || 0,
+            createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
             lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             currency: 'INR'
-          };
-        }
-      }
+          });
+        })
+        .catch((err: any) => {
+          console.error('Failed to fetch quotation', err);
+          toast.error('Failed to load quotation details');
+        })
+        .finally(() => setIsApiLoading(false));
     }
-    return {
-      qtnNo: isNew ? 'Unassigned' : 'QTN-100245',
-      client: isNew ? '' : 'TechNova Pvt Ltd',
-      project: isNew ? '' : 'Analytics Dashboard',
-      amount: isNew ? '' : '271400',
-      validTill: isNew ? '' : '2025-05-20',
-      owner: isNew ? 'Arjun Dev' : 'Arjun Dev',
-      discount: 0,
-      createdOn: isNew ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '09 May 2025',
-      lastUpdated: isNew ? new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '09 May 2025',
-      currency: 'INR'
-    };
-  });
+  }, [id, isNew]);
 
   // Helper to format date nicely when not editing
   const formatDate = (dateString: string) => {
@@ -115,35 +124,55 @@ export default function QuotationDetails() {
             </div>
             {isNew ? (
               <button 
-                onClick={() => {
+                disabled={isApiLoading}
+                onClick={async () => {
                   if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
                     toast.error('Please fill all mandatory fields before saving draft');
                     return;
                   }
+                  if (!companyId) {
+                    toast.error('No company selected');
+                    return;
+                  }
                   
-                  // Save to localStorage
-                  const saved = localStorage.getItem('demo_quotations');
-                  let allQtns = saved ? JSON.parse(saved) : [];
-                  const newId = String(allQtns.length + 1);
-                  const newQtnNo = `QTN-100${244 + allQtns.length + 1}`;
-                  
-                  const newEntry = {
-                    id: newId,
-                    qtnNo: newQtnNo,
-                    client: quotation.client,
-                    project: quotation.project,
-                    amount: quotation.amount,
-                    discount: quotation.discount,
-                    status: 'Draft',
-                    validTill: quotation.validTill,
-                    owner: quotation.owner || 'Unassigned'
-                  };
-                  
-                  allQtns.unshift(newEntry); // Add to beginning so it shows first
-                  localStorage.setItem('demo_quotations', JSON.stringify(allQtns));
-                  
-                  toast.success('Quotation draft saved successfully'); 
-                  navigate('/companydashboard/sales/quotations'); 
+                  setIsApiLoading(true);
+                  try {
+                    // Save via backend API
+                    const newQuotationData: Omit<Quotation, 'id'> = {
+                      quotationNo: '',
+                      clientId: '',
+                      clientName: quotation.client,
+                      date: new Date().toISOString().split('T')[0],
+                      validUntil: quotation.validTill,
+                      subject: quotation.project,
+                      lineItems: lineItems.map(item => ({
+                        productId: item.id,
+                        itemName: item.name,
+                        quantity: item.qty,
+                        unit: 'Unit',
+                        rate: item.rate,
+                        discount: 0,
+                        gstRate: item.gst,
+                        taxableAmount: item.rate * item.qty,
+                        gstAmount: item.rate * item.qty * item.gst / 100,
+                        totalAmount: item.rate * item.qty * (1 + item.gst / 100)
+                      })),
+                      subTotal: subTotal,
+                      totalDiscount: Number(quotation.discount) || 0,
+                      totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
+                      totalGstAmount: totalGst,
+                      grandTotal: grandTotal,
+                      status: 'Draft'
+                    };
+                    
+                    await QuotationService.createQuotation(companyId, newQuotationData);
+                    toast.success('Quotation draft saved successfully'); 
+                    navigate('/companydashboard/sales/quotations'); 
+                  } catch (err: any) {
+                    toast.error(err?.message || 'Failed to save quotation');
+                  } finally {
+                    setIsApiLoading(false);
+                  }
                 }}
                 className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
               >
@@ -308,28 +337,28 @@ export default function QuotationDetails() {
           )}
           {(currentStage === 1 || currentStage === 4) && (
             <button 
-              onClick={() => {
+              disabled={isApiLoading}
+              onClick={async () => {
                 if (isEditing) {
-                  if (!isNew) {
-                    const saved = localStorage.getItem('demo_quotations');
-                    if (saved) {
-                      let allQtns = JSON.parse(saved);
-                      const index = allQtns.findIndex((q: any) => q.id === id);
-                      if (index !== -1) {
-                        allQtns[index] = {
-                          ...allQtns[index],
-                          client: quotation.client,
-                          project: quotation.project,
-                          amount: quotation.amount,
-                          validTill: quotation.validTill,
-                          owner: quotation.owner,
-                          discount: quotation.discount
-                        };
-                        localStorage.setItem('demo_quotations', JSON.stringify(allQtns));
-                      }
+                  if (!isNew && id) {
+                    setIsApiLoading(true);
+                    try {
+                      await QuotationService.updateQuotation(id, {
+                        clientName: quotation.client,
+                        subject: quotation.project,
+                        grandTotal: Number(quotation.amount) || 0,
+                        validUntil: quotation.validTill,
+                        totalDiscount: Number(quotation.discount) || 0
+                      });
+                      toast.success('Changes saved successfully');
+                    } catch (err: any) {
+                      toast.error(err?.message || 'Failed to save changes');
+                    } finally {
+                      setIsApiLoading(false);
                     }
+                  } else {
+                    toast.success('Changes saved successfully');
                   }
-                  toast.success('Changes saved successfully');
                 }
                 setIsEditing(!isEditing);
               }}
