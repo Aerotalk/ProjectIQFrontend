@@ -55,8 +55,11 @@ export default function PaymentManagement() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const data = await PaymentService.getAll();
-      setPayments(data);
+      const companyId = localStorage.getItem('selectedCompanyId');
+      if (companyId) {
+        const data = await PaymentService.getAll(companyId);
+        setPayments(data);
+      }
     } catch {
       toast.error('Failed to load payments');
     } finally {
@@ -84,6 +87,7 @@ export default function PaymentManagement() {
   const handleSave = async (data: PaymentFormValues) => {
     setIsSubmitting(true);
     try {
+      const companyId = localStorage.getItem('selectedCompanyId') || '';
       const project = MOCK_PROJECTS.find(p => p.id === data.projectId);
       const payload = {
         ...data,
@@ -91,7 +95,7 @@ export default function PaymentManagement() {
       };
 
       if (drawerMode === 'create') {
-        await PaymentService.create(payload as any);
+        await PaymentService.create(companyId, payload as any);
         toast.success('Payment recorded successfully');
       } else if (selectedPayment) {
         await PaymentService.update(selectedPayment.id, payload as any);
