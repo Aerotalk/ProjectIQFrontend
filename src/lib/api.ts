@@ -2,6 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
 interface RequestOptions extends RequestInit {
   data?: any;
+  responseType?: 'text' | 'json' | 'blob' | 'arraybuffer';
 }
 
 export const api = {
@@ -53,6 +54,10 @@ export const api = {
       } catch (err) {
         window.location.href = '/login';
       }
+    }
+
+    if (options.responseType === 'blob') {
+      return await response.blob();
     }
 
     const text = await response.text();

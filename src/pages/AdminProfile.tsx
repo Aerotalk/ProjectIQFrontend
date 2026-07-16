@@ -40,10 +40,27 @@ export default function AdminProfile() {
 
   // Load existing profile photo on mount
   useEffect(() => {
-    if (user?.profilePhotoId) {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-      setAvatarUrl(`${apiBaseUrl}/admin/files/${user.profilePhotoId}`);
-    }
+    let objectUrl: string | null = null;
+    const loadAvatar = async () => {
+      if (user?.profilePhotoId) {
+        try {
+          const response = await api.get(`/admin/files/${user.profilePhotoId}`, {
+            responseType: 'blob'
+          });
+          objectUrl = URL.createObjectURL(response.data);
+          setAvatarUrl(objectUrl);
+        } catch (error) {
+          console.error("Failed to load avatar", error);
+        }
+      }
+    };
+    loadAvatar();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
   }, [user?.profilePhotoId]);
 
   // Keep form in sync with user context
