@@ -98,7 +98,8 @@ export default function Login() {
                   companyId: response.companyId || null,
                   companyName: response.companyName || null,
                   effectivePermissions: response.effectivePermissions || [],
-                  profilePhotoId: response.profilePhotoId || null
+                  profilePhotoId: response.profilePhotoId || null,
+                  companyLogoId: response.companyLogoId || null
                 };
 
                 login(userData);
