@@ -3,6 +3,7 @@ import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Paperclip, X as XIcon } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useProjects } from '@/hooks/useProjects';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
@@ -84,6 +85,23 @@ export default function ExpenseFormSection({ readOnly }: Props) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
+          {/* Expense Number */}
+          <div>
+            <label className={labelClass}>
+              Expense Number <span className="text-red-500 normal-case font-normal">*</span>
+            </label>
+            <AutoNumberInput
+              name="expenseNo"
+              disabled={readOnly}
+              placeholder="e.g. EXP/2026/001"
+              defaultPrefix="EXP/2026/"
+              className={fieldClass(!!errors.expenseNo)}
+            />
+            {errors.expenseNo && (
+              <p className="text-red-500 text-xs mt-1">{errors.expenseNo.message as string}</p>
+            )}
+          </div>
+
           {/* Project */}
           <div>
             <label className={labelClass}>

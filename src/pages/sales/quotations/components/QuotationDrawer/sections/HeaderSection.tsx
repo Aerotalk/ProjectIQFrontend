@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { useAuth } from '@/contexts/AuthContext';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
@@ -46,6 +47,20 @@ export default function HeaderSection({ readOnly }: Props) {
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>
+            Quotation Number <span className="text-red-500 normal-case font-normal">*</span>
+          </label>
+          <AutoNumberInput
+            name="quotationNo"
+            disabled={readOnly}
+            placeholder="e.g. QT/2026/001"
+            defaultPrefix="QT/2026/"
+            className={fieldClass(!!errors.quotationNo)}
+          />
+          {errors.quotationNo && <p className="text-red-500 text-xs mt-1">{errors.quotationNo.message as string}</p>}
+        </div>
+
         <div>
           <label className={labelClass}>
             Select Client <span className="text-red-500 normal-case font-normal">*</span>
