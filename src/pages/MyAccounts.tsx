@@ -87,8 +87,12 @@ const AccountForm = ({
 }: { 
   initialData?: AccountData; 
   onSave: (data: AccountData) => void; 
+  initialData?: AccountData; 
+  onSave: (data: AccountData) => void; 
   onCancel: () => void;
 }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
   const primaryAddress = initialData?.addresses?.[0];
   const mappedBanks = initialData?.bankAccounts?.map((b: any) => ({
     id: b.id || Date.now().toString() + Math.random().toString(),
@@ -341,16 +345,58 @@ const AccountForm = ({
 
               
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Logo</label>
-                <input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+                  <span>Company Logo</span>
+                  {formData.logoFileId && (
+                    <a href={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                      <Eye size={12} /> View Current
+                    </a>
+                  )}
+                </label>
+                <div className="flex flex-col gap-2">
+                  {formData.logoFileId && (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} alt="Logo" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  )}
+                  <input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Invoice Logo</label>
-                <input type="file" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+                  <span>Invoice Logo</span>
+                  {formData.invoiceLogoId && (
+                    <a href={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                      <Eye size={12} /> View Current
+                    </a>
+                  )}
+                </label>
+                <div className="flex flex-col gap-2">
+                  {formData.invoiceLogoId && (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} alt="Invoice Logo" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  )}
+                  <input type="file" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Company Stamp</label>
-                <input type="file" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+                  <span>Company Stamp</span>
+                  {formData.stampFileId && (
+                    <a href={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                      <Eye size={12} /> View Current
+                    </a>
+                  )}
+                </label>
+                <div className="flex flex-col gap-2">
+                  {formData.stampFileId && (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} alt="Stamp" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  )}
+                  <input type="file" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                </div>
               </div>
               
               <div className="space-y-1.5">

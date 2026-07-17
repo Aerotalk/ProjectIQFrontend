@@ -35,8 +35,11 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   const { can } = usePermissions();
   
   const userEmail = user?.email || 'user';
-  const orgName = user?.organizationName || 'My Organization';
+  const orgName = user?.companyName || user?.organizationName || 'My Organization';
   const userInitials = userEmail.substring(0, 2).toUpperCase();
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const companyLogoUrl = user?.companyLogoId ? `${API_BASE_URL}/admin/files/${user.companyLogoId}` : null;
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -306,16 +309,16 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
+              {companyLogoUrl ? (
+                <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
               ) : (
                 role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials
               )}
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={user?.username || orgName}>
-                {user?.username || orgName}
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium text-white truncate w-[130px]" title={orgName}>
+                {orgName}
               </span>
               <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
             </div>

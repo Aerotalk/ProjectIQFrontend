@@ -12,6 +12,7 @@ export interface User {
   companyName: string | null;
   effectivePermissions: string[];
   profilePhotoId: string | null;
+  companyLogoId: string | null;
 }
 
 interface AuthContextType {
