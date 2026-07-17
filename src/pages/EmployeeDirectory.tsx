@@ -3,7 +3,6 @@ import { api } from '../lib/api';
 import { Search, Plus, User, Mail, Briefcase, Trash2, Edit2, Loader2, MapPin } from 'lucide-react';
 import AddEmployeeModal from '../components/modals/AddEmployeeModal';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { useAuth } from '../contexts/AuthContext';
 
 interface Employee {
   id: string;
