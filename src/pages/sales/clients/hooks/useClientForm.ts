@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { getClientSchema, type ClientFormValues } from '../validators/clientValidation';
+// import { zodResolver } from '@hookform/resolvers/zod';
+import { type ClientFormValues } from '../validators/clientValidation';
 import { 
   shouldShowGSTIN, 
   shouldShowPAN, 
@@ -12,10 +12,10 @@ import {
 
 export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
   const form = useForm<ClientFormValues>({
-    resolver: async (data, context, options) => {
-      const dynamicSchema = getClientSchema();
-      return zodResolver(dynamicSchema)(data, context, options);
-    },
+    // resolver: async (data, context, options) => {
+    //   const dynamicSchema = getClientSchema();
+    //   return zodResolver(dynamicSchema)(data, context, options);
+    // },
     defaultValues: {
       customerType: 'Business',
       gstTreatment: 'business_gst',

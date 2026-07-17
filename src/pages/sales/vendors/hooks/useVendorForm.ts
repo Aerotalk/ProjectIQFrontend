@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { getVendorSchema, type VendorFormValues } from '../validators/vendorValidation';
+// import { zodResolver } from '@hookform/resolvers/zod';
+import { type VendorFormValues } from '../validators/vendorValidation';
 import { 
   shouldShowGSTIN, 
   shouldShowPAN, 
@@ -12,10 +12,10 @@ import {
 
 export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
   const form = useForm<VendorFormValues>({
-    resolver: async (data, context, options) => {
-      const dynamicSchema = getVendorSchema();
-      return zodResolver(dynamicSchema)(data, context, options);
-    },
+    // resolver: async (data, context, options) => {
+    //   const dynamicSchema = getVendorSchema();
+    //   return zodResolver(dynamicSchema)(data, context, options);
+    // },
     defaultValues: {
       vendorType: 'Business',
       gstTreatment: 'business_gst',
