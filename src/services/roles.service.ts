@@ -26,7 +26,7 @@ export const rolesService = {
   },
 
   updateRole: async (id: string, data: { roleName: string; description: string }): Promise<Role> => {
-    return api.put(`/admin/roles/${id}`, data);
+    return api.put(`/admin/roles/${id}`, { name: data.roleName, description: data.description });
   },
 
   deleteRole: async (id: string): Promise<void> => {
