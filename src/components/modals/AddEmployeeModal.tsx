@@ -3,6 +3,8 @@ import { X, User, Mail, Phone, Lock, Briefcase } from 'lucide-react';
 import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 interface AddEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,8 +12,15 @@ interface AddEmployeeModalProps {
 }
 
 export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmployeeModalProps) {
+  const { user } = useAuth();
+  const isCompanyScopedUser = !!user?.companyId;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(user?.companyId || '');
+  
   const [departments, setDepartments] = useState<any[]>([]);
   const [designations, setDesignations] = useState<any[]>([]);
 
@@ -28,17 +37,30 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
   });
 
   useEffect(() => {
+    if (isOpen && !isCompanyScopedUser) {
+      api.get('/org/companies')
+        .then((res: any[]) => {
+          setCompanies(res);
+          if (res.length > 0 && !selectedCompanyId) {
+            setSelectedCompanyId(res[0].id);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isOpen, isCompanyScopedUser]);
+
+  useEffect(() => {
     if (isOpen) {
       fetchDropdownData();
     }
-  }, [isOpen]);
-
+  }, [isOpen, selectedCompanyId]);
 
   const fetchDropdownData = async () => {
     try {
+      const query = selectedCompanyId ? `?companyId=${selectedCompanyId}` : '';
       const [deptRes, desigRes] = await Promise.all([
-        api.get(`/admin/departments`),
-        api.get(`/admin/designations`)
+        api.get(`/admin/departments${query}`),
+        api.get(`/admin/designations${query}`)
       ]);
 
       setDepartments(deptRes);
@@ -67,7 +89,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
         mobile: formData.mobile,
         password: formData.password,
         status: 'ACTIVE',
-        role: 'ROLE_EMPLOYEE'
+        role: 'ROLE_EMPLOYEE',
+        companyId: selectedCompanyId || null
       };
 
       const userRes = await api.post('/admin/users', userPayload);
@@ -193,6 +216,26 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 <Briefcase size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Employment Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {!isCompanyScopedUser && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company (For Department & Designation)</label>
+                    <select
+                      value={selectedCompanyId}
+                      onChange={(e) => {
+                        setSelectedCompanyId(e.target.value);
+                        setFormData({ ...formData, departmentId: '', designationId: '' });
+                      }}
+                      className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white"
+                    >
+                      <option value="">Select Company</option>
+                      {companies.map((c) => (
+                        <option key={c.id} value={c.id}>{c.companyName}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
                   <CustomSelect

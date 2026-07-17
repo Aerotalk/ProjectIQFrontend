@@ -12,7 +12,6 @@ export default function AdminProfile() {
     email: user?.email || '',
   });
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +38,7 @@ export default function AdminProfile() {
   const [toastMessage, setToastMessage] = useState('Profile updated successfully!');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fetchedAvatarUrl = useAvatarUrl(user?.profilePhotoId);
 
   useEffect(() => {

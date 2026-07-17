@@ -29,6 +29,7 @@ export default function EmployeeDirectory() {
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+
   useEffect(() => {
     fetchEmployees();
   }, []);

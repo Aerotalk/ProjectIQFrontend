@@ -3,14 +3,20 @@ import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Eye, Edit, Archi
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useClients } from '../../hooks/useClients';
+import { api } from '../../lib/api';
 import type { Client } from '../../types/client.types';
 import ClientDrawer from './clients/components/ClientDrawer';
 import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 
 export default function ClientsList() {
-  const { selectedCompanyId: companyId } = useAuth();
-  const { clients, isListLoading: isLoading, isSaveLoading, createClient, updateClient, archiveClient } = useClients({ companyId });
+  const { user } = useAuth();
+  const isCompanyScopedUser = !!user?.companyId;
+
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [localCompanyId, setLocalCompanyId] = useState<string>(user?.companyId || '');
+
+  const { clients, isListLoading: isLoading, isSaveLoading, createClient, updateClient, archiveClient } = useClients({ companyId: localCompanyId });
   const [searchTerm, setSearchTerm] = useState('');
   
   // Drawer state
@@ -24,7 +30,18 @@ export default function ClientsList() {
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  // Removed duplicate fetchClients state because hook handles it
+  useEffect(() => {
+    if (!isCompanyScopedUser) {
+      api.get('/org/companies')
+        .then((res: any[]) => {
+          setCompanies(res);
+          if (res.length > 0 && !localCompanyId) {
+            setLocalCompanyId(res[0].id);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isCompanyScopedUser]);
 
   const handleSaveClient = async (data: ClientFormValues) => {
     try {
@@ -96,15 +113,29 @@ export default function ClientsList() {
 
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm flex flex-col">
         <div className="p-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <Input 
-              type="text" 
-              placeholder="Search clients..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors"
-            />
+          <div className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl">
+            {!isCompanyScopedUser && (
+              <select
+                value={localCompanyId}
+                onChange={(e) => setLocalCompanyId(e.target.value)}
+                className="w-full sm:w-64 px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors"
+              >
+                <option value="">Select Company</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>{c.companyName}</option>
+                ))}
+              </select>
+            )}
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Input 
+                type="text" 
+                placeholder="Search clients..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors"
+              />
+            </div>
           </div>
         </div>
 

@@ -20,7 +20,6 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import CompanySelector from '../CompanySelector';
 import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
@@ -349,11 +348,6 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3 relative shrink-0">
-            {role === 'org' && (
-              <div className="hidden sm:block mr-2">
-                <CompanySelector />
-              </div>
-            )}
             <div className="relative mr-2 hidden lg:block">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
