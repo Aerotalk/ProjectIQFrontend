@@ -57,6 +57,19 @@ export const api = {
     }
 
     if (options.responseType === 'blob') {
+      if (!response.ok) {
+        let errData;
+        try {
+          const text = await response.text();
+          errData = text ? JSON.parse(text) : {};
+        } catch (err) {
+          errData = {};
+        }
+        throw {
+          status: response.status,
+          message: typeof errData === 'string' ? errData : (errData?.message || errData?.error || 'An error occurred fetching blob'),
+        };
+      }
       return await response.blob();
     }
 

@@ -40,7 +40,6 @@ export default function AdminProfile() {
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   const fetchedAvatarUrl = useAvatarUrl(user?.profilePhotoId);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // If the hook fetched a new avatar, update our local state
