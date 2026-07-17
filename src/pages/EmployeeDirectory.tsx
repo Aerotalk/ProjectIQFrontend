@@ -29,7 +29,7 @@ export default function EmployeeDirectory() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const { selectedCompanyId } = useAuth();
+
 
   useEffect(() => {
     fetchEmployees();

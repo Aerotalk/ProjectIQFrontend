@@ -38,6 +38,7 @@ export default function AdminProfile() {
   const [toastMessage, setToastMessage] = useState('Profile updated successfully!');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fetchedAvatarUrl = useAvatarUrl(user?.profilePhotoId);
 
   useEffect(() => {
