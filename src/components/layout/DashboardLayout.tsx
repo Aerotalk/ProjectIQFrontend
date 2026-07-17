@@ -386,11 +386,20 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
-                  <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}>
-                      {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{userEmail}</p>
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}>
+                        {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate" title={userEmail}>{userEmail}</p>
+                    </div>
                   </div>
                   <div className="py-1">
                     <Link to={`${basePath}/profile`} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5" onClick={() => setIsProfileOpen(false)}>
