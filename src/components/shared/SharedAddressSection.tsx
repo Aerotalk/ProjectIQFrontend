@@ -26,12 +26,14 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
   useEffect(() => {
     if (countryCode && countryCode !== prevCountryCode.current) {
       if (prevCountryCode.current) {
-        const states = State.getStatesOfCountry(countryCode);
-        setValue(`${prefix}State`, states.length > 0 ? '' : 'N/A', { shouldValidate: true, shouldDirty: true });
+        if (!disabledState && !readOnly) {
+          const states = State.getStatesOfCountry(countryCode);
+          setValue(`${prefix}State`, states.length > 0 ? '' : 'N/A', { shouldValidate: true, shouldDirty: true });
+        }
       }
       prevCountryCode.current = countryCode;
     }
-  }, [countryCode, prefix, setValue]);
+  }, [countryCode, prefix, setValue, disabledState, readOnly]);
 
   const pointerEventsClass = (readOnly || disabledState) ? 'opacity-80 pointer-events-none' : '';
 
@@ -44,7 +46,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
           <input 
             type="text" 
             {...register(`${prefix}Attention`)} 
-            disabled={readOnly || disabledState}
+            readOnly={readOnly || disabledState}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
           />
         </div>
@@ -71,7 +73,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
           <input 
             type="text" 
             {...register(`${prefix}AddressLine1`)} 
-            disabled={readOnly || disabledState}
+            readOnly={readOnly || disabledState}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}AddressLine1`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
           />
           {(errors as any)[`${prefix}AddressLine1`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}AddressLine1`].message}</p>}
@@ -82,7 +84,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
           <input 
             type="text" 
             {...register(`${prefix}AddressLine2`)} 
-            disabled={readOnly || disabledState}
+            readOnly={readOnly || disabledState}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
           />
         </div>
@@ -92,7 +94,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
           <input 
             type="text" 
             {...register(`${prefix}City`)} 
-            disabled={readOnly || disabledState}
+            readOnly={readOnly || disabledState}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}City`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
           />
           {(errors as any)[`${prefix}City`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}City`].message}</p>}
@@ -131,7 +133,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
           <input 
             type="text" 
             {...register(`${prefix}PinCode`)} 
-            disabled={readOnly || disabledState}
+            readOnly={readOnly || disabledState}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}PinCode`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
           />
           {(errors as any)[`${prefix}PinCode`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}PinCode`].message}</p>}
@@ -172,6 +174,33 @@ export default function SharedAddressSection({
   const isOverseas = treatment ? ['OVERSEAS', 'SEZ', 'DEEMED_EXPORT'].includes(treatment) : false;
   
   const isSameAsBilling = watch('sameAsBillingAddress');
+
+  const sourceAttention = watch(`${sourcePrefix}Attention`);
+  const sourceAddressLine1 = watch(`${sourcePrefix}AddressLine1`);
+  const sourceAddressLine2 = watch(`${sourcePrefix}AddressLine2`);
+  const sourceCity = watch(`${sourcePrefix}City`);
+  const sourceCountry = watch(`${sourcePrefix}Country`);
+  const sourceState = watch(`${sourcePrefix}State`);
+  const sourcePinCode = watch(`${sourcePrefix}PinCode`);
+  const sourcePhone = watch(`${sourcePrefix}Phone`);
+
+  useEffect(() => {
+    if (isSameAsBilling && !readOnly && !singlePrefix) {
+      const opts = { shouldValidate: true, shouldDirty: true };
+      setValue(`${targetPrefix}Attention`, sourceAttention || '', opts);
+      setValue(`${targetPrefix}AddressLine1`, sourceAddressLine1 || '', opts);
+      setValue(`${targetPrefix}AddressLine2`, sourceAddressLine2 || '', opts);
+      setValue(`${targetPrefix}City`, sourceCity || '', opts);
+      setValue(`${targetPrefix}Country`, sourceCountry || '', opts);
+      setValue(`${targetPrefix}State`, sourceState || '', opts);
+      setValue(`${targetPrefix}PinCode`, sourcePinCode || '', opts);
+      setValue(`${targetPrefix}Phone`, sourcePhone || '', opts);
+    }
+  }, [
+    isSameAsBilling, readOnly, setValue, targetPrefix, singlePrefix,
+    sourceAttention, sourceAddressLine1, sourceAddressLine2,
+    sourceCity, sourceCountry, sourceState, sourcePinCode, sourcePhone
+  ]);
 
   if (singlePrefix) {
     return (
