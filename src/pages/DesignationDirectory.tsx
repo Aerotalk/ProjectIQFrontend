@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Search, Plus, Trash2, Edit2, Loader2, Award } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Loader2, Award, Building2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Designation {
   id: string;
@@ -11,7 +12,21 @@ interface Designation {
   createdAt: string;
 }
 
+interface Company {
+  id: string;
+  companyName: string;
+}
+
 export default function DesignationDirectory() {
+  const { user } = useAuth();
+  
+  const isCompanyScopedUser = !!user?.companyId;
+
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
+    user?.companyId || ''
+  );
+
   const [designations, setDesignations] = useState<Designation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,13 +41,32 @@ export default function DesignationDirectory() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchDesignations();
-  }, []);
+    if (!isCompanyScopedUser) {
+      api.get('/org/companies')
+        .then((res: Company[]) => {
+          setCompanies(res);
+          if (res.length > 0 && !selectedCompanyId) {
+            setSelectedCompanyId(res[0].id);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [isCompanyScopedUser]);
+
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchDesignations();
+    }
+  }, [selectedCompanyId]);
 
   const fetchDesignations = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/admin/designations`);
+      setError(null);
+      const url = selectedCompanyId 
+        ? `/admin/designations?companyId=${selectedCompanyId}`
+        : '/admin/designations';
+      const response = await api.get(url);
       setDesignations(response);
     } catch (err: any) {
       setError(err.message || 'Failed to load designations');
@@ -49,7 +83,8 @@ export default function DesignationDirectory() {
         designationCode: newDesigCode,
         designationName: newDesigName,
         description: newDesigDesc,
-        hierarchyLevel: newHierarchyLevel
+        hierarchyLevel: newHierarchyLevel,
+        companyId: selectedCompanyId || undefined,
       });
       setIsAddModalOpen(false);
       setNewDesigCode('');
@@ -97,7 +132,27 @@ export default function DesignationDirectory() {
       </div>
 
       <div className="bg-white dark:bg-[#181a1f] p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="relative w-full sm:w-96">
+        {!isCompanyScopedUser && (
+          <div className="relative w-full sm:w-64">
+            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <select
+              value={selectedCompanyId}
+              onChange={(e) => setSelectedCompanyId(e.target.value)}
+              className="w-full pl-10 pr-8 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] transition-all outline-none text-gray-800 dark:text-gray-200 appearance-none cursor-pointer"
+            >
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.companyName}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        )}
+
+        <div className={`relative w-full ${!isCompanyScopedUser ? 'sm:w-80' : 'sm:w-96'}`}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text" 

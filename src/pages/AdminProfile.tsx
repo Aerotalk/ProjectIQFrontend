@@ -12,7 +12,6 @@ export default function AdminProfile() {
     email: user?.email || '',
   });
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
