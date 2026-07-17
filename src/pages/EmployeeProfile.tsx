@@ -4,6 +4,7 @@ import { Camera, Save, Key, User, Mail, Phone, Bell, Loader2, CheckCircle2, Eye,
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
 import PermissionGate from '../components/PermissionGate';
+import SharedPhoneInput from '../components/shared/SharedPhoneInput';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function EmployeeProfile() {
@@ -215,10 +216,11 @@ export default function EmployeeProfile() {
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Phone Number</label>
-                    <div className="relative">
-                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="tel" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                    </div>
+                    <SharedPhoneInput
+                      value={profileData.phone}
+                      onChange={(val) => setProfileData({...profileData, phone: val})}
+                      defaultCountry="IN"
+                    />
                   </div>
 
                   <div className="space-y-1.5">

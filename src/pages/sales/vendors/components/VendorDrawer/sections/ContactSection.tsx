@@ -1,4 +1,5 @@
 import { useFormContext } from 'react-hook-form';
+import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 
 interface Props {
   readOnly?: boolean;
@@ -49,22 +50,21 @@ export default function ContactSection({ readOnly }: Props) {
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Phone *</label>
-          <input 
-            type="text" 
-            {...register('phone')} 
+          <SharedPhoneInput
+            name="phone"
             disabled={readOnly}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+            defaultCountry="IN"
+            className={errors.phone ? '[&>input]:border-red-500' : ''}
           />
           {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message as string}</p>}
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Alternate Phone</label>
-          <input 
-            type="text" 
-            {...register('alternatePhone')} 
+          <SharedPhoneInput
+            name="alternatePhone"
             disabled={readOnly}
-            className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+            defaultCountry="IN"
           />
         </div>
       </div>

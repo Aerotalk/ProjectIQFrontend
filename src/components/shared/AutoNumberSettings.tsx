@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Settings, X } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 
@@ -12,7 +12,7 @@ interface AutoNumberInputProps {
 
 export function AutoNumberInput({ name, disabled, placeholder, className, defaultPrefix = '' }: AutoNumberInputProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { register, setValue } = useFormContext();
+  const { register, setValue, watch, formState } = useFormContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [settings, setSettings] = useState({
@@ -22,15 +22,26 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
     nextNumber: 1
   });
 
-  const generatePreview = () => {
+  const generatePreview = useCallback(() => {
     const numStr = String(settings.nextNumber).padStart(settings.padding, '0');
     return `${settings.prefix}${numStr}${settings.suffix}`;
-  };
+  }, [settings]);
 
   const applySettings = () => {
     setValue(name, generatePreview(), { shouldValidate: true, shouldDirty: true });
     setIsOpen(false);
   };
+
+  const currentValue = watch(name);
+  const isDirty = formState.dirtyFields[name];
+
+  // Auto-fill when the value is explicitly cleared (e.g., via form.reset during drawer open)
+  // or when mounted and empty.
+  useEffect(() => {
+    if (!disabled && !currentValue && !isDirty) {
+      setValue(name, generatePreview(), { shouldValidate: false });
+    }
+  }, [currentValue, disabled, isDirty, name, setValue, generatePreview]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

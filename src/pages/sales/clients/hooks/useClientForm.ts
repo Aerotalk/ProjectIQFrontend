@@ -8,7 +8,6 @@ import {
   shouldShowPlaceOfSupply, 
   shouldShowSEZFields,
   shouldShowOverseasFields,
-  shouldShowRegisteredGstAddress
 } from '../utils/gstRules';
 
 export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
@@ -42,7 +41,6 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
     if (!shouldShowGSTIN(gstTreatment)) setValue('gstin', '');
     if (!shouldShowPAN(gstTreatment)) setValue('panNumber', '');
     if (!shouldShowPlaceOfSupply(gstTreatment)) setValue('placeOfSupply', '');
-    if (!shouldShowRegisteredGstAddress(gstTreatment)) setValue('registeredGstAddress', '');
     if (!shouldShowSEZFields(gstTreatment)) {
       setValue('sezUnitName', '');
       setValue('lutBondNo', '');

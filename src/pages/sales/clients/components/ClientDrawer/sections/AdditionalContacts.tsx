@@ -1,6 +1,7 @@
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 
 interface Props {
   readOnly?: boolean;
@@ -86,11 +87,11 @@ export default function AdditionalContacts({ readOnly }: Props) {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Phone *</label>
-                    <input 
-                      type="text" 
-                      {...register(`additionalContacts.${index}.phone`)} 
+                    <SharedPhoneInput
+                      name={`additionalContacts.${index}.phone`}
                       disabled={readOnly}
-                      className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${fieldErrors?.phone ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                      defaultCountry="IN"
+                      className={fieldErrors?.phone ? '[&>input]:border-red-500' : ''}
                     />
                     {fieldErrors?.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone.message}</p>}
                   </div>
