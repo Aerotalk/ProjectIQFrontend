@@ -1,6 +1,5 @@
 import SharedAddressSection from '@/components/shared/SharedAddressSection';
 import { useFormContext } from 'react-hook-form';
-import { shouldShowOverseasFields } from '../../../utils/gstRules';
 
 interface Props {
   readOnly?: boolean;

@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function LineItemsSection({ readOnly }: Props) {
-  const { control, register, setValue, formState: { errors } } = useFormContext();
+  const { control, register, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'lineItems'

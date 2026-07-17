@@ -18,7 +18,7 @@ const COUNTRIES = Country.getAllCountries().map(c => ({
 }));
 
 export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabledState }: AddressSectionProps) {
-  const { register, formState: { errors }, setValue, control, getValues } = useFormContext();
+  const { register, formState: { errors }, setValue, control } = useFormContext();
 
   const countryCode = useWatch({ name: `${prefix}Country`, control });
   const prevCountryCode = useRef(countryCode);
