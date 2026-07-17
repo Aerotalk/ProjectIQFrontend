@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Lock, Briefcase } from 'lucide-react';
+import { X, User, Mail, Lock, Briefcase } from 'lucide-react';
 import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
 import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
