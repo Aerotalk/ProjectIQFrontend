@@ -23,7 +23,8 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
       sameAsBillingAddress: false,
       status: 'Active',
       displayName: '',
-      billingCountry: 'India',
+      billingCountry: 'IN',
+      shippingCountry: 'IN',
       ...defaultValues
     },
     mode: 'onChange'
@@ -50,7 +51,7 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
       setValue('country', '');
       setValue('currency', '');
       setValue('foreignTaxId', '');
-      setValue('billingCountry', 'India');
+      setValue('billingCountry', 'IN');
     } else {
       setValue('billingState', '');
       setValue('billingPinCode', '');

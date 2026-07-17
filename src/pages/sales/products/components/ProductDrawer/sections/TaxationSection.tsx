@@ -1,5 +1,6 @@
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { HSN_SAC_CODES } from '@/data/hsnCodes';
 
 interface Props {
   readOnly?: boolean;
@@ -7,29 +8,6 @@ interface Props {
 
 export default function TaxationSection({ readOnly }: Props) {
   const { register, control, formState: { errors } } = useFormContext();
-
-  const HSN_SAC_CODES = [
-    { label: '9983 - Professional, technical and business services', value: '9983' },
-    { label: '9982 - Legal and accounting services', value: '9982' },
-    { label: '8517 - Telephone sets, including smartphones', value: '8517' },
-    { label: '8544 - Insulated wire, cable', value: '8544' },
-    { label: '8471 - Automatic data processing machines', value: '8471' },
-    { label: '9985 - Support services', value: '9985' },
-    { label: '9987 - Maintenance, repair and installation', value: '9987' },
-    { label: '9981 - Research and development services', value: '9981' },
-    { label: '9954 - Construction services', value: '9954' },
-    { label: '9964 - Passenger transport services', value: '9964' },
-    { label: '9965 - Goods transport services', value: '9965' },
-    { label: '9972 - Real estate services', value: '9972' },
-    { label: '9973 - Leasing or rental services', value: '9973' },
-    { label: '9984 - Telecommunications, broadcasting', value: '9984' },
-    { label: '9988 - Manufacturing services on physical inputs', value: '9988' },
-    { label: '9989 - Other manufacturing services', value: '9989' },
-    { label: '9991 - Public administration and other services', value: '9991' },
-    { label: '9992 - Education services', value: '9992' },
-    { label: '9993 - Human health and social care services', value: '9993' },
-    { label: '0000 - Other / General', value: '0000' }
-  ];
 
   const GST_RATES = ['0%', '0.1%', '0.25%', '3%', '5%', '12%', '18%', '28%'];
 

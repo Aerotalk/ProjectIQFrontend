@@ -88,12 +88,14 @@ export default function PaymentFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Payment Date <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <input
-              type="date"
-              {...register('paymentDate')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.paymentDate)}
-            />
+            <div className="relative">
+              <input
+                type="date"
+                {...register('paymentDate')}
+                disabled={readOnly}
+                className={fieldClass(!!errors.paymentDate) + " [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-datetime-edit]:pr-8 [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"}
+              />
+            </div>
             {errors.paymentDate && (
               <p className="text-red-500 text-xs mt-1">{errors.paymentDate.message as string}</p>
             )}

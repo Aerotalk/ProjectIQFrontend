@@ -49,7 +49,7 @@ const defaultEmptyClient: Partial<ClientFormValues> = {
   billingCity: '',
   billingState: '',
   billingPinCode: '',
-  billingCountry: 'India',
+  billingCountry: 'IN',
   billingPhone: '',
   shippingAttention: '',
   shippingAddressLine1: '',

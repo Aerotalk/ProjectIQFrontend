@@ -4,8 +4,10 @@ import { Camera, Save, Key, User, Mail, Phone, Bell, Loader2, CheckCircle2, Eye,
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
 import PermissionGate from '../components/PermissionGate';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function EmployeeProfile() {
+  const { refetchUser } = useAuth();
   const [profileData, setProfileData] = useState({
     firstName: 'Test',
     lastName: 'User',
@@ -70,20 +72,28 @@ export default function EmployeeProfile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     
-    // Mock API call delay
-    setTimeout(() => {
-      setIsSaving(false);
-      setShowToast(true);
+    try {
+      // In a real app, this would be an API call:
+      // await api.put('/admin/employees/me', profileData);
       
-      // Hide toast after 3 seconds
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      await refetchUser();
+      
+      setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
       }, 3000);
-    }, 1200);
+    } catch (err) {
+      console.error('Failed to save profile', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {

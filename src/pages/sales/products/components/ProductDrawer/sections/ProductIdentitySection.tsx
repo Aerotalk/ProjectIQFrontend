@@ -1,5 +1,6 @@
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
@@ -35,12 +36,12 @@ export default function ProductIdentitySection({ readOnly }: Props) {
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
             Item Code <span className="text-[10px] text-gray-400 normal-case font-normal">(optional)</span>
           </label>
-          <Input 
-            type="text" 
-            {...register('itemCode')} 
+          <AutoNumberInput 
+            name="itemCode"
             disabled={readOnly}
             placeholder="e.g. ITEM-001"
-            className={`${errors.itemCode ? 'border-red-500' : ''}`} 
+            defaultPrefix="ITEM-"
+            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.itemCode ? 'border-red-500' : ''}`} 
           />
           {errors.itemCode && <p className="text-red-500 text-xs mt-1">{errors.itemCode.message as string}</p>}
         </div>

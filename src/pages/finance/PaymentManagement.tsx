@@ -221,7 +221,7 @@ export default function PaymentManagement() {
           </div>
         </div>
 
-        <div className="overflow-x-auto min-h-[320px] pb-32">
+        <div className="overflow-x-auto min-h-[320px]">
           {isLoading ? (
             <div className="flex items-center justify-center h-full py-24">
               <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />

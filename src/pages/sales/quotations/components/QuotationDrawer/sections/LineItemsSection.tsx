@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function LineItemsSection({ readOnly }: Props) {
-  const { control, register, setValue } = useFormContext();
+  const { control, register, setValue, formState: { errors } } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'lineItems'
@@ -50,6 +50,8 @@ export default function LineItemsSection({ readOnly }: Props) {
 
   const lineItems = useWatch({ control, name: 'lineItems' });
 
+  const cellClass = `px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors w-full disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-white/[0.02]`;
+
   return (
     <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
       <div className="flex justify-between items-center mb-2 border-b border-gray-200 dark:border-white/10 pb-2">
@@ -67,26 +69,26 @@ export default function LineItemsSection({ readOnly }: Props) {
         )}
       </div>
 
-      <div className="overflow-x-auto min-h-[250px]">
+      <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10 min-h-[250px]">
         <table className="w-full text-left min-w-[800px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-1/4">Product/Service</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-24">Qty</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-24">Unit</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-32">Rate (₹)</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-24">Disc (₹)</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-24">GST (%)</th>
-              <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-32 text-right">Amount (₹)</th>
-              {!readOnly && <th className="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 w-10"></th>}
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[25%]">Product/Service</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Disc (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
+              {!readOnly && <th className="px-3 py-2.5 w-10"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
             {fields.map((field, index) => {
               const currentTotal = lineItems?.[index]?.totalAmount || 0;
               return (
-                <tr key={field.id} className="group">
-                  <td className="px-3 py-2 relative" style={{ zIndex: 100 - index }}>
+                <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
+                  <td className="px-3 py-2">
                     <div className={readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none' : ''}>
                       <Controller
                         name={`lineItems.${index}.productId`}
@@ -106,27 +108,29 @@ export default function LineItemsSection({ readOnly }: Props) {
                     </div>
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className="w-full px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm focus:ring-[#792359]/50" />
+                    <input type="number" step="0.01" {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className="w-full px-2 py-1.5 bg-gray-50 dark:bg-white/[0.02] border border-gray-300 dark:border-white/10 rounded-sm text-sm" readOnly />
+                    <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className="w-full px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm focus:ring-[#792359]/50" />
+                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} disabled={readOnly} className="w-full px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm focus:ring-[#792359]/50" />
+                    <input type="number" step="0.01" {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className="w-full px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm focus:ring-[#792359]/50" />
+                    <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
-                  <td className="px-3 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
-                    {currentTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <td className="px-3 py-2 text-right">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {currentTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
                   </td>
                   {!readOnly && (
                     <td className="px-3 py-2 text-center">
-                      <button type="button" onClick={() => remove(index)} className="text-gray-400 hover:text-red-500 transition-colors">
-                        <Trash2 size={16} />
+                      <button type="button" onClick={() => remove(index)} className="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" title="Remove item">
+                        <Trash2 size={15} />
                       </button>
                     </td>
                   )}

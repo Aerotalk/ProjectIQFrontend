@@ -4,6 +4,7 @@ import { Plus, Building2, MapPin, CreditCard, Save, Trash2, CheckCircle2, Loader
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '../contexts/AuthContext';
 
 interface BankData {
   id: string;
@@ -76,6 +77,7 @@ const InputField = ({
 );
 
 export default function CompanyProfile() {
+  const { refetchUser } = useAuth();
   const [formData, setFormData] = useState<Partial<AccountData>>({});
   const [banks, setBanks] = useState<BankData[]>([]);
 
@@ -240,6 +242,8 @@ export default function CompanyProfile() {
       };
       
       await api.put('/admin/company/profile', payload);
+      await refetchUser();
+      
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (err) {

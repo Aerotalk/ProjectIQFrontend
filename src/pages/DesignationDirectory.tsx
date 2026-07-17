@@ -40,6 +40,14 @@ export default function DesignationDirectory() {
   const [newHierarchyLevel, setNewHierarchyLevel] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
 
+  // Edit modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingDesigId, setEditingDesigId] = useState<string | null>(null);
+  const [editDesigCode, setEditDesigCode] = useState('');
+  const [editDesigName, setEditDesigName] = useState('');
+  const [editDesigDesc, setEditDesigDesc] = useState('');
+  const [editHierarchyLevel, setEditHierarchyLevel] = useState<number>(0);
+
   useEffect(() => {
     if (!isCompanyScopedUser) {
       api.get('/org/companies')
@@ -94,6 +102,36 @@ export default function DesignationDirectory() {
       fetchDesignations();
     } catch (err: any) {
       alert(err.message || 'Failed to add designation');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEditClick = (desig: Designation) => {
+    setEditingDesigId(desig.id);
+    setEditDesigCode(desig.designationCode);
+    setEditDesigName(desig.designationName);
+    setEditDesigDesc(desig.description || '');
+    setEditHierarchyLevel(desig.hierarchyLevel || 0);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateDesignation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDesigId) return;
+    try {
+      setSubmitting(true);
+      await api.put(`/admin/designations/${editingDesigId}`, {
+        designationCode: editDesigCode,
+        designationName: editDesigName,
+        description: editDesigDesc,
+        hierarchyLevel: editHierarchyLevel,
+      });
+      setIsEditModalOpen(false);
+      setEditingDesigId(null);
+      fetchDesignations();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update designation');
     } finally {
       setSubmitting(false);
     }
@@ -226,7 +264,9 @@ export default function DesignationDirectory() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-sm transition-colors" title="Edit">
+                        <button
+                          onClick={() => handleEditClick(desig)}
+                          className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-sm transition-colors" title="Edit">
                           <Edit2 size={16} />
                         </button>
                         <button 
@@ -319,6 +359,84 @@ export default function DesignationDirectory() {
                 >
                   {submitting && <Loader2 size={14} className="animate-spin" />}
                   Save Designation
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Designation Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1f2229] rounded-xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-white/10 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Edit Designation</h3>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleUpdateDesignation} className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Code *</label>
+                  <input
+                    required
+                    type="text"
+                    value={editDesigCode}
+                    onChange={(e) => setEditDesigCode(e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Name *</label>
+                  <input
+                    required
+                    type="text"
+                    value={editDesigName}
+                    onChange={(e) => setEditDesigName(e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hierarchy Level *</label>
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={editHierarchyLevel || ''}
+                    onChange={(e) => setEditHierarchyLevel(parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <textarea
+                    value={editDesigDesc}
+                    onChange={(e) => setEditDesigDesc(e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-sm hover:bg-[#5d1944] transition-colors disabled:opacity-70 flex items-center gap-2"
+                >
+                  {submitting && <Loader2 size={14} className="animate-spin" />}
+                  Update Designation
                 </button>
               </div>
             </form>
