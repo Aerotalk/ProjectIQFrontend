@@ -214,7 +214,7 @@ export default function SharedAddressSection({
     <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
       <div>
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-          Address Details
+          Part D - Address Details
         </h3>
         
         <AddressFormGroup 

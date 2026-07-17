@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const expenseSchema = z.object({
+  expenseNo: z.string().optional(),
   projectId: z.string().min(1, 'Project is required'),
   projectName: z.string().optional(),
   expenseDate: z.string().min(1, 'Expense Date is required').refine(dateStr => {

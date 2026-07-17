@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Lock, Briefcase } from 'lucide-react';
+import { X, User, Mail, Lock, Briefcase } from 'lucide-react';
 import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
+import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -192,10 +193,11 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 </div>
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mobile Number</label>
-                  <div className="relative">
-                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="text" name="mobile" value={formData.mobile} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white" />
-                  </div>
+                  <SharedPhoneInput
+                    value={formData.mobile}
+                    onChange={(val) => setFormData({ ...formData, mobile: val })}
+                    defaultCountry="IN"
+                  />
                 </div>
                 <div className="relative md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password *</label>

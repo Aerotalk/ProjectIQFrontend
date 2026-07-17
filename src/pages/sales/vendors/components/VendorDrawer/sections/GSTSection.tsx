@@ -5,7 +5,8 @@ import {
   shouldShowPAN, 
   shouldShowPlaceOfSupply, 
   shouldShowSEZFields,
-  shouldShowOverseasFields 
+  shouldShowOverseasFields,
+  getStateFromGSTIN
 } from '../../../../clients/utils/gstRules';
 
 // Common Indian States list
@@ -58,6 +59,11 @@ export default function GSTSection({ readOnly }: Props) {
                 // Auto-extract PAN (chars 3-12) if 15 chars
                 if (val.length >= 12) {
                   setValue('panNumber', val.substring(2, 12));
+                }
+                // Auto-detect Place of Supply from GSTIN state code
+                const stateName = getStateFromGSTIN(val);
+                if (stateName) {
+                  setValue('placeOfSupply', stateName, { shouldValidate: true, shouldDirty: true });
                 }
               }}
               placeholder="15-character GSTIN"

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const paymentSchema = z.object({
+  paymentNo: z.string().optional(),
   projectId: z.string().optional(),
   projectName: z.string().optional(),
   linkedInvoiceId: z.string().optional(),

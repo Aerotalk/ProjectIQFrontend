@@ -2,6 +2,7 @@ import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useProjects } from '@/hooks/useProjects';
 import { useMemo } from 'react';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
@@ -46,6 +47,24 @@ export default function PaymentFormSection({ readOnly }: Props) {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Payment Number */}
+          <div>
+            <label className={labelClass}>
+              Payment Number <span className="text-red-500 normal-case font-normal">*</span>
+            </label>
+            <AutoNumberInput
+              name="paymentNo"
+              disabled={readOnly}
+              placeholder="e.g. PAY/2026/001"
+              defaultPrefix="PAY/2026/"
+              className={fieldClass(!!errors.paymentNo)}
+            />
+            {errors.paymentNo && (
+              <p className="text-red-500 text-xs mt-1">{errors.paymentNo.message as string}</p>
+            )}
+          </div>
+
           {/* Project */}
           <div>
             <label className={labelClass}>
