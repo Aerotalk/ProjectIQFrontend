@@ -8,9 +8,10 @@ interface CustomSelectProps {
   onChange: (val: string) => void;
   options: SelectOption[];
   icon?: React.ReactNode;
+  disabled?: boolean;
 }
 
-export default function CustomSelect({ value, onChange, options, icon }: CustomSelectProps) {
+export default function CustomSelect({ value, onChange, options, icon, disabled }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -54,8 +55,10 @@ export default function CustomSelect({ value, onChange, options, icon }: CustomS
         </div>
       )}
       <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all cursor-pointer flex items-center justify-between shadow-sm`}
+        onClick={() => {
+          if (!disabled) setIsOpen(!isOpen);
+        }}
+        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} flex items-center justify-between shadow-sm`}
       >
         <span className="truncate pr-4">{displayLabel}</span>
         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />

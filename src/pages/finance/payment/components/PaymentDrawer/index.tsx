@@ -63,11 +63,9 @@ export default function PaymentDrawer({
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-40 transition-opacity"
-        onClick={onClose}
-      />
-      
-      <div className="fixed inset-y-0 right-0 w-[500px] bg-white dark:bg-[#181a1f] shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
+        className="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-[#181a1f] shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-in-out border-l border-gray-200 dark:border-white/10"
+        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02]">

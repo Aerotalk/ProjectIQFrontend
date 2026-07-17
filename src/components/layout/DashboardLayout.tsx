@@ -314,8 +314,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee Portal') : orgName}>
-                {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee Portal') : orgName}
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={user?.username || orgName}>
+                {user?.username || orgName}
               </span>
               <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
             </div>
@@ -395,8 +395,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                       )}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}>
-                        {role === 'company' ? (user?.username || 'Client Company') : role === 'employee' ? (user?.username || 'Employee') : orgName}
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={user?.username || orgName}>
+                        {user?.username || orgName}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate" title={userEmail}>{userEmail}</p>
                     </div>

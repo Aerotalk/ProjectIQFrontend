@@ -31,10 +31,11 @@ export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialDat
       form.reset({
         vendorType: 'Business',
         gstTreatment: 'business_gst',
-        sameAsBillingAddress: true,
+        sameAsBillingAddress: false,
         status: 'Active',
         displayName: '',
-        billingCountry: 'India',
+        billingCountry: 'IN',
+        shippingCountry: 'IN',
         reverseCharge: false,
         ...initialData
       });

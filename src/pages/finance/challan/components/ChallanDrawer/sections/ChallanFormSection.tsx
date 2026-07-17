@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 import { VendorService } from '@/services/vendor.service';
 import { POService } from '@/services/po.service';
 import { useProjects } from '@/hooks/useProjects';
@@ -152,11 +153,11 @@ export default function ChallanFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Challan Number <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <input
-              type="text"
-              {...register('challanNumber')}
+            <AutoNumberInput
+              name="challanNumber"
               disabled={readOnly}
               placeholder="e.g. DC/2026/001"
+              defaultPrefix="DC/2026/"
               className={fieldClass(!!errors.challanNumber)}
             />
             {errors.challanNumber && (
@@ -183,7 +184,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
           {/* Project */}
           <div>
             <label className={labelClass}>
-              Project <span className="text-red-500 normal-case font-normal">*</span>
+              Project / Reference # <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
               <Controller
@@ -299,7 +300,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
                 }
               >
                 <Paperclip size={14} />
-                <span>Upload physical challan scan</span>
+                <span>Upload Additional Attachments</span>
               </button>
             ) : (
               <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50 dark:bg-white/[0.02]">

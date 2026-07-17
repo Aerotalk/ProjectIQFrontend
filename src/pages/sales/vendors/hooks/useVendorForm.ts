@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getVendorSchema, type VendorFormValues } from '../validators/vendorValidation';
@@ -19,10 +19,11 @@ export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
     defaultValues: {
       vendorType: 'Business',
       gstTreatment: 'business_gst',
-      sameAsBillingAddress: true,
+      sameAsBillingAddress: false,
       status: 'Active',
       displayName: '',
-      billingCountry: 'India',
+      billingCountry: 'IN',
+      shippingCountry: 'IN',
       ...defaultValues
     },
     mode: 'onChange'
@@ -48,7 +49,7 @@ export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
       setValue('country', undefined);
       setValue('currency', undefined);
       setValue('foreignTaxId', undefined);
-      setValue('billingCountry', 'India');
+      setValue('billingCountry', 'IN');
     } else {
       setValue('billingState', undefined);
       setValue('billingPinCode', undefined);
@@ -67,6 +68,29 @@ export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
     }
     clearErrors();
   }, [vendorType, setValue, clearErrors]);
+
+  const companyName = watch('companyName');
+  const firstName = watch('firstName');
+  const lastName = watch('lastName');
+  const displayName = watch('displayName');
+  const lastGeneratedDisplayName = useRef<string>('');
+
+  // Handle Display Name auto-fill
+  useEffect(() => {
+    let newGenerated = '';
+    if (vendorType === 'Business' && companyName) {
+      newGenerated = companyName;
+    } else if (vendorType === 'Individual') {
+      newGenerated = [firstName, lastName].filter(Boolean).join(' ');
+    }
+    
+    if (newGenerated) {
+      if (!displayName || displayName === lastGeneratedDisplayName.current) {
+        setValue('displayName', newGenerated, { shouldValidate: true });
+        lastGeneratedDisplayName.current = newGenerated;
+      }
+    }
+  }, [companyName, firstName, lastName, vendorType, displayName, setValue]);
 
   return form;
 };

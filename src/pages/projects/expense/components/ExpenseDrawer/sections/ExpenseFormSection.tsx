@@ -112,12 +112,14 @@ export default function ExpenseFormSection({ readOnly }: Props) {
             <label className={labelClass}>
               Expense Date <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <input
-              type="date"
-              {...register('expenseDate')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.expenseDate)}
-            />
+            <div className="relative">
+              <input
+                type="date"
+                {...register('expenseDate')}
+                disabled={readOnly}
+                className={fieldClass(!!errors.expenseDate) + " [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-datetime-edit]:pr-8 [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"}
+              />
+            </div>
             {errors.expenseDate && (
               <p className="text-red-500 text-xs mt-1">{errors.expenseDate.message as string}</p>
             )}
@@ -192,8 +194,10 @@ export default function ExpenseFormSection({ readOnly }: Props) {
             )}
           </div>
 
-          <div className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50/50 dark:bg-white/[0.02]">
-            {/* GST Applicable Toggle */}
+          <div>
+            <label className={labelClass}>&nbsp;</label>
+            <div className="flex flex-col gap-4 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50/50 dark:bg-white/[0.02]">
+              {/* GST Applicable Toggle */}
             <label className="flex items-center gap-3 cursor-pointer">
               <div className="relative">
                 <input
@@ -246,6 +250,7 @@ export default function ExpenseFormSection({ readOnly }: Props) {
                 </label>
               </div>
             )}
+            </div>
           </div>
 
         </div>
