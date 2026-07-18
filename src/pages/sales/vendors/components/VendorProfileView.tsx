@@ -124,12 +124,10 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                   <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Billing Address
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                  {vendor.billingAttention && <div>Attn: {vendor.billingAttention}</div>}
                   <div>{vendor.billingAddressLine1}</div>
                   {vendor.billingAddressLine2 && <div>{vendor.billingAddressLine2}</div>}
                   <div>{vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}</div>
                   <div>{vendor.billingCountry}</div>
-                  {vendor.billingPhone && <div>Phone: {vendor.billingPhone}</div>}
                 </div>
               </div>
 
