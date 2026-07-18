@@ -138,22 +138,11 @@ export default function FinanceDashboard() {
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
-      {/* Header & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-[#181a1f] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-[#181a1f] p-6 rounded-sm shadow-sm border border-gray-100 dark:border-white/5">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Finance Dashboard</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Overview of financial health and active projects</p>
-        </div>
-        <div className="flex flex-wrap gap-2 sm:gap-3 shrink-0">
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 transition-colors">
-            Create PO
-          </button>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 transition-colors">
-            Add Expense
-          </button>
-          <button className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors shadow-sm flex items-center gap-2">
-            <Plus size={16} /> New Project
-          </button>
         </div>
       </div>
 
