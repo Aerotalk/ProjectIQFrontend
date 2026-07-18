@@ -1,3 +1,4 @@
+"use no memo";
 import { useEffect, useState } from 'react';
 import { useFormContext, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { Plus, Trash2, Loader2 } from 'lucide-react';

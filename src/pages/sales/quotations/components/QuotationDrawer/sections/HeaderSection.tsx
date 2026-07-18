@@ -1,3 +1,4 @@
+"use no memo";
 import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';

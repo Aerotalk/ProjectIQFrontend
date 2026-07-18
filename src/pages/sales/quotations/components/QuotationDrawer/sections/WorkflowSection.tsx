@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, useWatch } from 'react-hook-form';
 import { CheckCircle2, XCircle, UploadCloud, Clock } from 'lucide-react';
 import type { QuotationStatus } from '../../../../../../types/quotation.types';
