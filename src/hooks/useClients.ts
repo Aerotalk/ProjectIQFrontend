@@ -20,7 +20,13 @@ export const useClients = ({ companyId }: UseClientsOptions) => {
     setError(null);
     try {
       const data = await ClientService.getClients(companyId);
-      setClients(data);
+      const sortedData = data.sort((a, b) => {
+        const idA = a.clientNo || a.displayName || a.id;
+        const idB = b.clientNo || b.displayName || b.id;
+        // Descending order so newest is on top if it's clientNo
+        return idB.localeCompare(idA);
+      });
+      setClients(sortedData);
     } catch (err: any) {
       const message = err?.message || 'Failed to fetch clients';
       setError(message);

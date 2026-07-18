@@ -75,7 +75,11 @@ export const getVendorSchema = () => {
 
     // Commercial
     paymentTerms: z.string().optional(),
-    creditLimit: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
+    creditLimit: z.preprocess((val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return Number.isNaN(num) ? undefined : num;
+    }, z.number().optional().nullable()),
     notes: z.string().optional(),
 
     // Bank Details
@@ -86,7 +90,11 @@ export const getVendorSchema = () => {
     }, vendorBankDetailsSchema.optional()),
 
     // Taxation
-    tdsPercentage: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
+    tdsPercentage: z.preprocess((val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return Number.isNaN(num) ? undefined : num;
+    }, z.number().optional().nullable()),
     reverseCharge: z.boolean().optional(),
 
     status: z.enum(['Active', 'Inactive'])

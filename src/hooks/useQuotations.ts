@@ -19,7 +19,12 @@ export const useQuotations = ({ companyId }: UseQuotationsOptions) => {
     setError(null);
     try {
       const data = await QuotationService.getQuotations(companyId);
-      setQuotations(data);
+      const sortedData = data.sort((a, b) => {
+        const idA = a.quotationNo || a.id;
+        const idB = b.quotationNo || b.id;
+        return idB.localeCompare(idA); // Descending
+      });
+      setQuotations(sortedData);
     } catch (err: any) {
       const message = err?.message || 'Failed to fetch quotations';
       setError(message);

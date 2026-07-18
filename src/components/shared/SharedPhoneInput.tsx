@@ -16,6 +16,10 @@ export default function SharedPhoneInput({ name, value, onChange, disabled, defa
   
   const phoneInputClasses = `flex w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus-within:ring-2 focus-within:ring-[#792359]/50 transition-colors [&>input]:bg-transparent [&>input]:focus:outline-none [&>input]:w-full ${className}`;
 
+  const safeDefaultCountry = (typeof defaultCountry === 'string' && /^[A-Z]{2}$/.test(defaultCountry))
+    ? defaultCountry
+    : undefined;
+
   if (formContext && name) {
     return (
       <Controller
@@ -24,8 +28,8 @@ export default function SharedPhoneInput({ name, value, onChange, disabled, defa
         render={({ field: { ref, ...fieldProps } }) => (
           <PhoneInput
             {...fieldProps}
-            key={defaultCountry}
-            defaultCountry={defaultCountry}
+            key={safeDefaultCountry || 'default'}
+            defaultCountry={safeDefaultCountry}
             disabled={disabled}
             international
             className={phoneInputClasses}
@@ -39,8 +43,8 @@ export default function SharedPhoneInput({ name, value, onChange, disabled, defa
     <PhoneInput
       value={value}
       onChange={onChange as any}
-      key={defaultCountry}
-      defaultCountry={defaultCountry}
+      key={safeDefaultCountry || 'default'}
+      defaultCountry={safeDefaultCountry as any}
       disabled={disabled}
       international
       className={phoneInputClasses}

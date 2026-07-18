@@ -170,7 +170,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                     </div>
                   </div>
 
-                  {!client.sameAsBillingAddress && (client.shippingAddressLine1 || client.shippingCity) && (
+                  {(client.shippingAddressLine1 || client.shippingCity) && (
                     <div>
                       <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                         Shipping Address
@@ -185,11 +185,6 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                         </div>
                         {client.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2"><Phone size={14} className="text-gray-400"/> {client.shippingPhone}</div>}
                       </div>
-                    </div>
-                  )}
-                  {client.sameAsBillingAddress && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                      Shipping address is same as billing address.
                     </div>
                   )}
                 </div>

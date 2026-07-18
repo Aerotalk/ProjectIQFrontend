@@ -155,7 +155,7 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                     </div>
                   </div>
 
-                  {!vendor.sameAsBillingAddress && (vendor.shippingAddressLine1 || vendor.shippingCity) && (
+                  {(vendor.shippingAddressLine1 || vendor.shippingCity) && (
                     <div>
                       <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                         Shipping Address
@@ -168,11 +168,6 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                           {vendor.shippingCountry}
                         </div>
                       </div>
-                    </div>
-                  )}
-                  {vendor.sameAsBillingAddress && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                      Shipping address is same as billing address.
                     </div>
                   )}
                 </div>

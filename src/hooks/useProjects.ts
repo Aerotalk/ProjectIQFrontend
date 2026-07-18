@@ -19,7 +19,12 @@ export function useProjects() {
       try {
         setLoading(true);
         const data = await ProjectService.getAll(selectedCompanyId);
-        setProjects(data);
+        const sortedData = data.sort((a, b) => {
+          const idA = a.projectCode || a.name || a.id;
+          const idB = b.projectCode || b.name || b.id;
+          return idB.localeCompare(idA); // Descending
+        });
+        setProjects(sortedData);
       } catch (err: any) {
         setError(err);
       } finally {

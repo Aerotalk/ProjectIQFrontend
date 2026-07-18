@@ -19,7 +19,12 @@ export const useVendors = ({ companyId }: UseVendorsOptions) => {
     setError(null);
     try {
       const data = await VendorService.getVendors(companyId);
-      setVendors(data);
+      const sortedData = data.sort((a, b) => {
+        const idA = a.displayName || a.id;
+        const idB = b.displayName || b.id;
+        return idB.localeCompare(idA);
+      });
+      setVendors(sortedData);
     } catch (err: any) {
       const message = err?.message || 'Failed to fetch vendors';
       setError(message);

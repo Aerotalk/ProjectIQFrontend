@@ -19,7 +19,12 @@ export const useProducts = ({ companyId }: UseProductsOptions) => {
     setError(null);
     try {
       const data = await ProductService.getProducts(companyId);
-      setProducts(data);
+      const sortedData = data.sort((a, b) => {
+        const idA = a.itemCode || a.name || a.id;
+        const idB = b.itemCode || b.name || b.id;
+        return idB.localeCompare(idA);
+      });
+      setProducts(sortedData);
     } catch (err: any) {
       const message = err?.message || 'Failed to fetch products';
       setError(message);
