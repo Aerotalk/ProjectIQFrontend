@@ -20,8 +20,8 @@ export function useProjects() {
         setLoading(true);
         const data = await ProjectService.getAll(selectedCompanyId);
         const sortedData = data.sort((a, b) => {
-          const idA = a.projectCode || a.name || a.id;
-          const idB = b.projectCode || b.name || b.id;
+          const idA = a.projectCode || a.projectName || a.id;
+          const idB = b.projectCode || b.projectName || b.id;
           return idB.localeCompare(idA); // Descending
         });
         setProjects(sortedData);

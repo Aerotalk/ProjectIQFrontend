@@ -20,8 +20,8 @@ export const useProducts = ({ companyId }: UseProductsOptions) => {
     try {
       const data = await ProductService.getProducts(companyId);
       const sortedData = data.sort((a, b) => {
-        const idA = a.itemCode || a.name || a.id;
-        const idB = b.itemCode || b.name || b.id;
+        const idA = a.itemCode || a.itemName || a.id;
+        const idB = b.itemCode || b.itemName || b.id;
         return idB.localeCompare(idA);
       });
       setProducts(sortedData);
