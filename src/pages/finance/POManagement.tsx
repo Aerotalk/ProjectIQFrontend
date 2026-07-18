@@ -197,9 +197,24 @@ export default function POManagement() {
 
   // ---------- Render ----------
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <PODrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSavePO}
+          mode={drawerMode}
+          initialData={selectedPO || undefined}
+          poNumber={selectedPO?.poNumber}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -492,16 +507,6 @@ export default function POManagement() {
         </div>
       )}
 
-      {/* ── PO Drawer ── */}
-      <PODrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSavePO}
-        mode={drawerMode}
-        initialData={selectedPO || undefined}
-        poNumber={selectedPO?.poNumber}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

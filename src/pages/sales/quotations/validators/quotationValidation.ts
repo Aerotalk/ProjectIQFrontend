@@ -24,6 +24,7 @@ export const quotationSchema = z.object({
   validUntil: z.string().min(1, 'Valid Until is required'),
   subject: z.string().optional(),
   reference: z.string().optional(),
+  salesperson: z.string().optional(),
 
   lineItems: z.array(quotationLineItemSchema).min(1, 'At least one line item is required'),
 

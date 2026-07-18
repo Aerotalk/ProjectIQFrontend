@@ -68,11 +68,10 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
     ? 'Record an inbound delivery from a vendor.'
     : `Challan Number: ${challanNumber || initialData?.challanNumber || '—'}`;
 
+  if (!isOpen) return null;
+
   return (
-    <div
-      className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white dark:bg-[#181a1f] shadow-2xl z-50 flex flex-col border-l border-gray-200 dark:border-white/10 transition-transform duration-300 ease-in-out"
-      style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
-    >
+    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
       {/* Drawer Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
         <div>

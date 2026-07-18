@@ -9,6 +9,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
 import type { Quotation } from '../../types/quotation.types';
+import { formatQuotationId } from '../../lib/utils';
 
 export default function QuotationDetails() {
   const { id } = useParams();
@@ -69,24 +70,68 @@ export default function QuotationDetails() {
     currency: 'INR'
   });
 
+  const getStageFromStatus = (status?: string) => {
+    switch (status) {
+      case 'Draft': return 1;
+      case 'Pending Approval': return 2;
+      case 'Sent for Approval': return 2;
+      case 'Approved': return 3;
+      case 'Sent to Client': return 3;
+      case 'Changes Requested': return 4;
+      case 'Under Negotiation': return 4;
+      case 'Rejected': return 1;
+      case 'Accepted': return 5;
+      case 'Converted': return 6;
+      default: return 1;
+    }
+  };
+
+  const handleStatusUpdate = async (newStatus: string, successMessage: string, newStage: number) => {
+    if (!id || isNew) return;
+    setIsApiLoading(true);
+    try {
+      await QuotationService.updateQuotation(id, { status: newStatus });
+      setCurrentStage(newStage);
+      toast.success(successMessage);
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update quotation status');
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
+
   // Fetch existing quotation from backend API
   useEffect(() => {
     if (!isNew && id) {
       setIsApiLoading(true);
       QuotationService.getQuotation(id)
         .then((data: Quotation) => {
+          setCurrentStage(getStageFromStatus(data.status));
           setQuotation({
-            qtnNo: data.quotationNo || '',
+            qtnNo: formatQuotationId(data.quotationNo || data.id),
             client: data.clientName || '',
             project: data.subject || '',
             amount: String(data.grandTotal || ''),
             validTill: data.validUntil ? data.validUntil.split('T')[0] : '',
-            owner: data.approvedBy || 'Arjun Dev',
+            owner: data.salesperson || data.approvedBy || 'Unassigned',
             discount: data.totalDiscount || 0,
             createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
             lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             currency: 'INR'
           });
+          if (data.lineItems && data.lineItems.length > 0) {
+            setLineItems(data.lineItems.map(item => ({
+              id: item.id || item.productId || Math.random().toString(),
+              name: item.itemName || 'Unknown Item',
+              category: 'Service', // Fallback for UI
+              qty: item.quantity || 1,
+              rate: item.rate || 0,
+              gst: item.gstRate || 0,
+              amount: item.totalAmount || 0
+            })));
+          } else {
+            setLineItems([]); // Clear dummy data if no items
+          }
         })
         .catch((err: any) => {
           console.error('Failed to fetch quotation', err);
@@ -180,15 +225,15 @@ export default function QuotationDetails() {
               </button>
             ) : (
               <button 
+                disabled={isApiLoading}
                 onClick={() => {
                   if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
                     toast.error('Please fill all mandatory fields before sending for approval');
                     return;
                   }
-                  setCurrentStage(2); 
-                  toast.success('Sent for approval'); 
+                  handleStatusUpdate('Pending Approval', 'Sent for approval', 2);
                 }}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
                 Send for approval
               </button>
@@ -204,16 +249,18 @@ export default function QuotationDetails() {
             </div>
             <div className="flex gap-2">
               <button 
-                onClick={() => { setCurrentStage(1); toast.error('Quotation rejected internally'); }}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                disabled={isApiLoading}
+                onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
-                Reject (Demo)
+                Reject
               </button>
               <button 
-                onClick={() => { setCurrentStage(3); toast.success('Approved internally'); }}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+                disabled={isApiLoading}
+                onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
+                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
               >
-                Approve (Demo)
+                Approve
               </button>
             </div>
           </div>
@@ -227,16 +274,18 @@ export default function QuotationDetails() {
             </div>
             <div className="flex gap-2">
               <button 
-                onClick={() => { setCurrentStage(4); toast.success('Marked as Under Negotiation'); }}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                disabled={isApiLoading}
+                onClick={() => handleStatusUpdate('Changes Requested', 'Marked as Under Negotiation', 4)}
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
                 Client Requested Changes
               </button>
               <button 
-                onClick={() => { setCurrentStage(5); toast.success('Client Accepted Quotation!'); }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm font-medium rounded-sm transition-colors"
+                disabled={isApiLoading}
+                onClick={() => handleStatusUpdate('Accepted', 'Client Accepted Quotation!', 5)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm font-medium rounded-sm transition-colors disabled:opacity-50"
               >
-                Simulate Client Acceptance
+                Client Accepted
               </button>
             </div>
           </div>
@@ -249,8 +298,9 @@ export default function QuotationDetails() {
               <p className="text-sm text-purple-800 dark:text-purple-200">Client has requested changes. Edit the quotation to create a revision, then send it back for internal approval.</p>
             </div>
             <button 
-              onClick={() => { setCurrentStage(2); toast.success('Revision sent for internal approval.'); }}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+              disabled={isApiLoading}
+              onClick={() => handleStatusUpdate('Pending Approval', 'Revision sent for internal approval.', 2)}
+              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
             >
               Send Revision for Approval
             </button>
@@ -264,8 +314,9 @@ export default function QuotationDetails() {
               <p className="text-sm text-emerald-800 dark:text-emerald-200">Great! The quotation is accepted by the client. Please upload the WO/PO to convert.</p>
             </div>
             <button 
-              onClick={() => { setCurrentStage(6); toast.success('Quotation converted to project!'); }}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+              disabled={isApiLoading}
+              onClick={() => handleStatusUpdate('Converted', 'Quotation converted to project!', 6)}
+              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
             >
               Upload WO / PO
             </button>
@@ -753,11 +804,7 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Status Since</p>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {currentStage === 1 ? '09 May 2025' : 
-                     currentStage === 2 ? '10 May 2025' : 
-                     currentStage === 3 ? '12 May 2025' :
-                     currentStage === 4 ? '16 May 2025' :
-                     currentStage === 5 ? '18 May 2025' : '19 May 2025'}
+                    {quotation.lastUpdated || quotation.createdOn || 'N/A'}
                   </p>
                 </div>
                 <div>

@@ -53,6 +53,22 @@ export default function ProductsList() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <ProductDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={() => setIsDrawerOpen(false)} 
+          onSave={handleSaveProduct}
+          mode={drawerMode}
+          initialData={selectedProduct as Partial<ProductFormValues>}
+          productId={selectedProduct?.id}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -201,15 +217,6 @@ export default function ProductsList() {
         </div>
       </div>
 
-      <ProductDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
-        onSave={handleSaveProduct}
-        mode={drawerMode}
-        initialData={selectedProduct as Partial<ProductFormValues>}
-        productId={selectedProduct?.id}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

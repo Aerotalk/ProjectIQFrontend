@@ -1,5 +1,6 @@
 import { Briefcase, IndianRupee, ShoppingCart, CreditCard, ArrowUpRight, ArrowDownRight, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useState, useEffect } from 'react';
 import { POService } from '../../services/po.service';
 import { ExpenseService } from '../../services/expense.service';
@@ -10,7 +11,7 @@ const KPI_DATA = [
   { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-[#792359]', bgColor: 'bg-purple-50 dark:bg-[#792359]/10', isPositive: true },
   { label: 'Project Value', value: '₹ 1,20,00,000', trend: '+18% vs last month', icon: IndianRupee, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10', isPositive: true },
   { label: 'PO Value', value: '₹ 45,00,000', trend: '+8% vs last month', icon: ShoppingCart, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-500/10', isPositive: true },
-  { label: 'Expenses', value: '₹ 12,50,000', trend: '-5% vs last month', icon: CreditCard, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-500/10', isPositive: false },
+  { label: 'Expenses', value: '₹ 12,50,000', trend: '-5% vs last month', icon: CreditCard, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-500/10', isPositive: false },
   { label: 'Profit (Est.)', value: '₹ 32,50,000', trend: '+22% vs last month', icon: IndianRupee, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10', isPositive: true },
 ];
 
@@ -25,6 +26,10 @@ export default function FinanceDashboard() {
   const [recentChallans, setRecentChallans] = useState<any[]>([]);
   const [poTotal, setPoTotal] = useState(0);
   const [expenseTotal, setExpenseTotal] = useState(0);
+  const [allPOs, setAllPOs] = useState<any[]>([]);
+  const [allExpenses, setAllExpenses] = useState<any[]>([]);
+  const [trendYear, setTrendYear] = useState<number>(new Date().getFullYear());
+  const [trendQuarter, setTrendQuarter] = useState<string>('All');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -36,6 +41,9 @@ export default function FinanceDashboard() {
           ChallanService.getAll(companyId),
           import('../../services/project.service').then(m => m.ProjectService.getAll(companyId))
         ]);
+
+        setAllPOs(pos);
+        setAllExpenses(expenses);
 
         const poSum = pos.reduce((acc, po) => acc + (po.grandTotal || 0), 0);
         setPoTotal(poSum);
@@ -97,6 +105,37 @@ export default function FinanceDashboard() {
     fetchDashboardData();
   }, [companyId]);
 
+  // Generate trend data based on year and quarter
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let monthsToInclude = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  if (trendQuarter === 'Q1') monthsToInclude = [0, 1, 2];
+  else if (trendQuarter === 'Q2') monthsToInclude = [3, 4, 5];
+  else if (trendQuarter === 'Q3') monthsToInclude = [6, 7, 8];
+  else if (trendQuarter === 'Q4') monthsToInclude = [9, 10, 11];
+
+  const trendData = monthsToInclude.map(month => {
+    const monthYear = `${monthNames[month]} ${trendYear}`;
+    
+    const monthPOs = allPOs.filter(po => {
+      const dateStr = po.poDate || po.createdAt;
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === month && d.getFullYear() === trendYear;
+    });
+    
+    const monthExps = allExpenses.filter(ex => {
+      const dateStr = ex.expenseDate || ex.createdAt;
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === month && d.getFullYear() === trendYear;
+    });
+
+    const poAmount = monthPOs.reduce((acc, po) => acc + (po.grandTotal || 0), 0);
+    const expAmount = monthExps.reduce((acc, ex) => acc + (ex.amount || 0), 0);
+    
+    return { name: monthNames[month], fullLabel: monthYear, PO: poAmount, Expense: expAmount };
+  });
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
       {/* Header & Quick Actions */}
@@ -145,6 +184,73 @@ export default function FinanceDashboard() {
             </div>
           );
         })}
+      </div>
+
+      {/* Financial Trend Chart */}
+      <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/5 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Financial Trend (POs vs Expenses)</h2>
+          <div className="flex items-center gap-2">
+            <select 
+              value={trendQuarter}
+              onChange={(e) => setTrendQuarter(e.target.value)}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
+            >
+              <option value="All">Full Year</option>
+              <option value="Q1">Q1 (Jan-Mar)</option>
+              <option value="Q2">Q2 (Apr-Jun)</option>
+              <option value="Q3">Q3 (Jul-Sep)</option>
+              <option value="Q4">Q4 (Oct-Dec)</option>
+            </select>
+            <select
+              value={trendYear}
+              onChange={(e) => setTrendYear(Number(e.target.value))}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
+            >
+              <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+              <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
+              <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
+            </select>
+          </div>
+        </div>
+        <div className="h-[280px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <defs>
+                <linearGradient id="colorPO" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:opacity-10" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                dy={10}
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(0)}k` : val}
+              />
+              <Tooltip 
+                cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '3 3' }}
+                contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
+                formatter={(value: number, name: string) => [`₹ ${value.toLocaleString('en-IN')}`, name]}
+              />
+              <Legend iconType="rect" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+              <Area type="monotone" dataKey="PO" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPO)" />
+              <Area type="monotone" dataKey="Expense" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Main Section: Projects Table */}
@@ -246,8 +352,8 @@ export default function FinanceDashboard() {
         <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col min-w-0">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-red-50 dark:bg-red-500/10 rounded-sm">
-                <CreditCard size={14} className="text-red-500 dark:text-red-400" />
+              <div className="p-1.5 bg-amber-50 dark:bg-amber-500/10 rounded-sm">
+                <CreditCard size={14} className="text-amber-500 dark:text-amber-400" />
               </div>
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">Recent Expenses</h2>
             </div>

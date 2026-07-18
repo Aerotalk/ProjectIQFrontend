@@ -103,15 +103,10 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <>
-      {/* Drawer Overlay (Hidden/Transparent as requested by user constraints to not use backdrop blur or dark modal overlay? Wait, user said "no floating modals, no dialogs, no backdrop blur". We will just use a transparent block to catch clicks or we can just let it sit on top.)
-      Actually, standard right side drawer usually has a very light overlay or none. I will use none, just sliding in from right. */}
-      
-      <div 
-        className="fixed inset-y-0 right-0 w-full max-w-2xl lg:max-w-3xl bg-white dark:bg-[#181a1f] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-gray-200 dark:border-white/10 flex flex-col"
-        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
-      >
+    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
           <div>
@@ -185,6 +180,5 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
           )}
         </div>
       </div>
-    </>
   );
 }

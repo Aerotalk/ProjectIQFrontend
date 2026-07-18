@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,9 +8,11 @@ import type { Quotation } from '../../types/quotation.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
+import { formatQuotationId } from '../../lib/utils';
 
 export default function QuotationsList() {
   const { selectedCompanyId: companyId } = useAuth();
+  const navigate = useNavigate();
   const { quotations, isListLoading: isLoading, isSaveLoading: isSubmitting, createQuotation, updateQuotation } = useQuotations({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -53,6 +56,22 @@ export default function QuotationsList() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredQuotations.slice(indexOfFirstItem, indexOfLastItem);
+
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <QuotationDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={() => setIsDrawerOpen(false)} 
+          onSave={handleSaveQuotation}
+          mode={drawerMode}
+          initialData={selectedQuotation as Partial<QuotationFormValues>}
+          quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
@@ -103,9 +122,11 @@ export default function QuotationsList() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date & Details</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Quotation No</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Valid Until</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client Name</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Subject</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider max-w-[150px]">Salesperson</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-right">Amount (₹)</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
@@ -113,16 +134,27 @@ export default function QuotationsList() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                 {currentItems.map((quotation) => (
-                  <tr key={quotation.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                  <tr 
+                    key={quotation.id} 
+                    className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                    onClick={() => navigate(`/companydashboard/sales/quotations/${quotation.id}`)}
+                  >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{new Date(quotation.date).toLocaleDateString('en-GB')}</div>
-                      <div className="text-xs text-gray-500 font-normal mt-0.5">{quotation.quotationNo || quotation.id}</div>
+                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890]">{formatQuotationId(quotation.quotationNo || quotation.id)}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(quotation.date).toLocaleDateString('en-GB')}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        {quotation.validUntil ? new Date(quotation.validUntil).toLocaleDateString('en-GB') : '-'}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{quotation.clientName || 'Unknown Client'}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[200px]">{quotation.subject || '-'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[150px]" title={quotation.salesperson}>{quotation.salesperson || '-'}</div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white text-right">
                       {quotation.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -142,7 +174,7 @@ export default function QuotationsList() {
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === quotation.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
-                        onClick={() => setOpenDropdownId(openDropdownId === quotation.id ? null : quotation.id)}
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === quotation.id ? null : quotation.id); }}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
                         <MoreVertical size={16} />
@@ -150,13 +182,13 @@ export default function QuotationsList() {
                       {openDropdownId === quotation.id && (
                         <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
                           <button 
-                            onClick={() => openDrawer('view', quotation)}
+                            onClick={(e) => { e.stopPropagation(); openDrawer('view', quotation); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             View
                           </button>
                           <button 
-                            onClick={() => openDrawer('edit', quotation)}
+                            onClick={(e) => { e.stopPropagation(); openDrawer('edit', quotation); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             Edit
@@ -207,15 +239,6 @@ export default function QuotationsList() {
         </div>
       </div>
 
-      <QuotationDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
-        onSave={handleSaveQuotation}
-        mode={drawerMode}
-        initialData={selectedQuotation as Partial<QuotationFormValues>}
-        quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

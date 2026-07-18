@@ -152,9 +152,24 @@ export default function ChallanManagement() {
     }
   };
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <ChallanDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveChallan}
+          mode={drawerMode}
+          initialData={selectedChallan || undefined}
+          challanNumber={selectedChallan?.challanNumber}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -401,16 +416,6 @@ export default function ChallanManagement() {
         </div>
       )}
 
-      {/* ── Challan Drawer ── */}
-      <ChallanDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveChallan}
-        mode={drawerMode}
-        initialData={selectedChallan || undefined}
-        challanNumber={selectedChallan?.challanNumber}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

@@ -90,6 +90,22 @@ export default function ClientsList() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredClients.slice(indexOfFirstItem, indexOfLastItem);
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <ClientDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={() => setIsDrawerOpen(false)}
+          mode={drawerMode}
+          initialData={selectedClient as Partial<ClientFormValues>}
+          clientId={selectedClient?.clientNo || selectedClient?.id}
+          onSave={handleSaveClient}
+          isSubmitting={isSaveLoading}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       {/* Breadcrumb & Header */}
@@ -260,15 +276,6 @@ export default function ClientsList() {
         </div>
       </div>
 
-      <ClientDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedClient as Partial<ClientFormValues>}
-        clientId={selectedClient?.clientNo || selectedClient?.id}
-        onSave={handleSaveClient}
-        isSubmitting={isSaveLoading}
-      />
     </div>
   );
 }

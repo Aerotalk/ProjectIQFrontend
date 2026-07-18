@@ -1,14 +1,20 @@
 import { FileText, Edit, UserCheck, CheckCircle2, Send, Trophy, ChevronDown, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useState, useEffect } from 'react';
 import { QuotationService } from '../../services/quotation.service';
 import { ClientService } from '../../services/client.service';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatQuotationId } from '../../lib/utils';
 
 export default function SalesDashboard() {
   const { selectedCompanyId: companyId } = useAuth();
   const [quotations, setQuotations] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
+  const [trendYear, setTrendYear] = useState<number>(new Date().getFullYear());
+  const [trendQuarter, setTrendQuarter] = useState<string>('All');
+  const [pipelineYear, setPipelineYear] = useState<number>(new Date().getFullYear());
+  const [pipelineQuarter, setPipelineQuarter] = useState<string>('All');
   
   useEffect(() => {
     const fetchData = async () => {
@@ -31,26 +37,51 @@ export default function SalesDashboard() {
   const navigate = useNavigate();
 
   const pipelineStages = [
-    { label: 'Draft', count: quotations.filter(q => q.status === 'Draft').length, amount: `₹ ${quotations.filter(q => q.status === 'Draft').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-blue-100/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' },
-    { label: 'Sent for Approval', count: quotations.filter(q => q.status === 'Pending Approval' || q.status === 'Sent for Approval').length, amount: `₹ ${quotations.filter(q => q.status === 'Pending Approval' || q.status === 'Sent for Approval').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-purple-100/50 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200' },
-    { label: 'Approved', count: quotations.filter(q => q.status === 'Approved').length, amount: `₹ ${quotations.filter(q => q.status === 'Approved').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-orange-100/50 text-orange-800 dark:bg-orange-900/20 dark:text-orange-200' },
-    { label: 'Sent to Client', count: quotations.filter(q => q.status === 'Sent to Client').length, amount: `₹ ${quotations.filter(q => q.status === 'Sent to Client').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-emerald-100/50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200' },
-    { label: 'Client Asked for Changes', count: quotations.filter(q => q.status === 'Rejected' || q.status === 'Changes Requested').length, amount: `₹ ${quotations.filter(q => q.status === 'Rejected' || q.status === 'Changes Requested').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-fuchsia-100/50 text-fuchsia-800 dark:bg-fuchsia-900/20 dark:text-fuchsia-200' },
-    { label: 'Converted', count: quotations.filter(q => q.status === 'Accepted').length, amount: `₹ ${quotations.filter(q => q.status === 'Accepted').reduce((acc, q) => acc + (q.grandTotal || 0), 0).toLocaleString('en-IN')}`, color: 'bg-green-100/50 text-green-800 dark:bg-green-900/20 dark:text-green-200' },
-  ];
+    { label: 'Draft', statusMatches: ['Draft'], icon: Edit },
+    { label: 'Sent for Approval', statusMatches: ['Pending Approval', 'Sent for Approval'], icon: UserCheck },
+    { label: 'Approved', statusMatches: ['Approved'], icon: CheckCircle2 },
+    { label: 'Sent to Client', statusMatches: ['Sent to Client'], icon: Send },
+    { label: 'Revisions Requested', statusMatches: ['Rejected', 'Changes Requested'], icon: FileText },
+    { label: 'Converted', statusMatches: ['Accepted'], icon: Trophy },
+  ].map(stage => {
+    const stageQuots = quotations.filter(q => {
+      if (!stage.statusMatches.includes(q.status)) return false;
+      const dateStr = q.date || q.createdAt;
+      if (!dateStr) return pipelineQuarter === 'All';
+      
+      const qDate = new Date(dateStr);
+      if (qDate.getFullYear() !== pipelineYear) return false;
+      
+      if (pipelineQuarter === 'All') return true;
+      const m = qDate.getMonth();
+      if (pipelineQuarter === 'Q1') return m >= 0 && m <= 2;
+      if (pipelineQuarter === 'Q2') return m >= 3 && m <= 5;
+      if (pipelineQuarter === 'Q3') return m >= 6 && m <= 8;
+      if (pipelineQuarter === 'Q4') return m >= 9 && m <= 11;
+      return true;
+    });
+    const rawValue = stageQuots.reduce((acc, q) => acc + (q.grandTotal || 0), 0);
+    return {
+      label: stage.label,
+      count: stageQuots.length,
+      rawValue,
+      amount: `₹ ${rawValue.toLocaleString('en-IN')}`,
+      icon: stage.icon
+    };
+  });
 
   const stats = [
-    { label: 'Total Quotations', value: quotations.length.toString(), trend: 'N/A', icon: FileText, color: 'text-[#b8458f]', bgColor: 'bg-pink-50 dark:bg-[#b8458f]/10' },
-    { label: 'Draft', value: pipelineStages[0].count.toString(), trend: 'N/A', icon: Edit, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10' },
-    { label: 'Sent for Approval', value: pipelineStages[1].count.toString(), trend: 'N/A', icon: UserCheck, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-500/10' },
-    { label: 'Approved', value: pipelineStages[2].count.toString(), trend: 'N/A', icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-50 dark:bg-green-500/10' },
-    { label: 'Sent to Client', value: pipelineStages[3].count.toString(), trend: 'N/A', icon: Send, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10' },
-    { label: 'Converted', value: pipelineStages[5].count.toString(), trend: 'N/A', icon: Trophy, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-500/10' },
+    { label: 'Total Quotations', value: quotations.length.toString(), trend: 'N/A', icon: FileText, color: 'text-[#792359]' },
+    { label: 'Draft', value: pipelineStages[0].count.toString(), trend: 'N/A', icon: Edit, color: 'text-gray-500' },
+    { label: 'Sent for Approval', value: pipelineStages[1].count.toString(), trend: 'N/A', icon: UserCheck, color: 'text-blue-500' },
+    { label: 'Approved', value: pipelineStages[2].count.toString(), trend: 'N/A', icon: CheckCircle2, color: 'text-emerald-500' },
+    { label: 'Sent to Client', value: pipelineStages[3].count.toString(), trend: 'N/A', icon: Send, color: 'text-purple-500' },
+    { label: 'Converted', value: pipelineStages[5].count.toString(), trend: 'N/A', icon: Trophy, color: 'text-amber-500' },
   ];
 
   const recentQuotations = quotations.slice(0, 5).map(q => ({
     id: q.id,
-    no: q.quotationNo,
+    no: formatQuotationId(q.quotationNo || q.id),
     client: q.clientName,
     project: q.subject,
     amount: `₹ ${(q.grandTotal || 0).toLocaleString('en-IN')}`,
@@ -73,6 +104,29 @@ export default function SalesDashboard() {
     return amountB - amountA;
   }).slice(0, 5).map((c, i) => ({ ...c, rank: i + 1 }));
 
+  // Generate trend data based on year and quarter
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  let monthsToInclude = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  if (trendQuarter === 'Q1') monthsToInclude = [0, 1, 2];
+  else if (trendQuarter === 'Q2') monthsToInclude = [3, 4, 5];
+  else if (trendQuarter === 'Q3') monthsToInclude = [6, 7, 8];
+  else if (trendQuarter === 'Q4') monthsToInclude = [9, 10, 11];
+
+  const trendData = monthsToInclude.map(month => {
+    const monthYear = `${monthNames[month]} ${trendYear}`;
+    
+    const monthQuotations = quotations.filter(q => {
+      const dateStr = q.date || q.createdAt;
+      if (!dateStr) return false;
+      const qDate = new Date(dateStr);
+      return qDate.getMonth() === month && qDate.getFullYear() === trendYear;
+    });
+
+    const amount = monthQuotations.reduce((acc, q) => acc + (q.grandTotal || 0), 0);
+    return { name: monthNames[month], fullLabel: monthYear, amount };
+  });
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -84,7 +138,7 @@ export default function SalesDashboard() {
         {stats.map((stat, i) => (
           <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-sm border ${stat.bgColor} border-transparent`}>
+              <div className={`p-2 rounded-sm bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10`}>
                 <stat.icon size={16} className={stat.color} strokeWidth={2} />
               </div>
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{stat.label}</span>
@@ -102,28 +156,119 @@ export default function SalesDashboard() {
         ))}
       </div>
 
-      {/* Quotation Pipeline */}
+      {/* Pipeline Value Chart */}
       <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/5 shadow-sm">
-        <h2 className="text-[15px] font-bold text-gray-900 dark:text-white mb-6">Quotation Pipeline</h2>
-        <div className="flex w-full h-[100px] relative isolate overflow-hidden rounded-sm">
-          {pipelineStages.map((stage, i) => (
-            <div 
-              key={i} 
-              className={`flex-1 flex flex-col items-center justify-center relative ${stage.color} border-r-2 border-white dark:border-[#181a1f] last:border-r-0 hover:brightness-95 transition-all cursor-pointer`}
-              style={{
-                clipPath: i === pipelineStages.length - 1 
-                  ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 15px 50%)' 
-                  : i === 0 
-                    ? 'polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%)'
-                    : 'polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%)',
-                marginLeft: i > 0 ? '-10px' : '0'
-              }}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Pipeline Value (₹)</h2>
+          <div className="flex items-center gap-2">
+            <select 
+              value={pipelineQuarter}
+              onChange={(e) => setPipelineQuarter(e.target.value)}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
             >
-              <div className="text-xs font-semibold mb-1 truncate px-6">{stage.label}</div>
-              <div className="text-lg font-bold mb-0.5">{stage.count}</div>
-              <div className="text-xs font-medium opacity-80">{stage.amount}</div>
-            </div>
-          ))}
+              <option value="All">Full Year</option>
+              <option value="Q1">Q1 (Jan-Mar)</option>
+              <option value="Q2">Q2 (Apr-Jun)</option>
+              <option value="Q3">Q3 (Jul-Sep)</option>
+              <option value="Q4">Q4 (Oct-Dec)</option>
+            </select>
+            <select
+              value={pipelineYear}
+              onChange={(e) => setPipelineYear(Number(e.target.value))}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
+            >
+              <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+              <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
+              <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
+            </select>
+          </div>
+        </div>
+        <div className="h-[280px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={pipelineStages} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:opacity-10" />
+              <XAxis 
+                dataKey="label" 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                dy={10}
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(0)}k` : val}
+              />
+              <Tooltip 
+                cursor={{ fill: '#f3f4f6', opacity: 0.5 }}
+                contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
+                formatter={(value: number) => [`₹ ${value.toLocaleString('en-IN')}`, 'Amount']}
+              />
+              <Bar dataKey="rawValue" fill="#792359" radius={[4, 4, 0, 0]} barSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Trend Chart */}
+      <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/5 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Quotations Trend</h2>
+          <div className="flex items-center gap-2">
+            <select 
+              value={trendQuarter}
+              onChange={(e) => setTrendQuarter(e.target.value)}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
+            >
+              <option value="All">Full Year</option>
+              <option value="Q1">Q1 (Jan-Mar)</option>
+              <option value="Q2">Q2 (Apr-Jun)</option>
+              <option value="Q3">Q3 (Jul-Sep)</option>
+              <option value="Q4">Q4 (Oct-Dec)</option>
+            </select>
+            <select
+              value={trendYear}
+              onChange={(e) => setTrendYear(Number(e.target.value))}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
+            >
+              <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
+              <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
+              <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
+            </select>
+          </div>
+        </div>
+        <div className="h-[280px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+              <defs>
+                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#792359" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#792359" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" className="dark:opacity-10" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                dy={10}
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: '#6b7280' }} 
+                axisLine={false} 
+                tickLine={false} 
+                tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(0)}k` : val}
+              />
+              <Tooltip 
+                cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '3 3' }}
+                contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
+                formatter={(value: number) => [`₹ ${value.toLocaleString('en-IN')}`, 'Amount']}
+              />
+              <Area type="monotone" dataKey="amount" stroke="#792359" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

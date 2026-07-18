@@ -26,6 +26,7 @@ export interface Quotation {
   validUntil: string;
   subject?: string;
   reference?: string;
+  salesperson?: string;
 
   lineItems: QuotationLineItem[];
 

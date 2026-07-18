@@ -55,6 +55,22 @@ export default function VendorsList() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredVendors.slice(indexOfFirstItem, indexOfLastItem);
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <VendorDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={() => setIsDrawerOpen(false)} 
+          onSave={handleSaveVendor}
+          mode={drawerMode}
+          initialData={selectedVendor as Partial<VendorFormValues>}
+          vendorId={selectedVendor?.id}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -199,15 +215,6 @@ export default function VendorsList() {
         </div>
       </div>
 
-      <VendorDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
-        onSave={handleSaveVendor}
-        mode={drawerMode}
-        initialData={selectedVendor as Partial<VendorFormValues>}
-        vendorId={selectedVendor?.id}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }
