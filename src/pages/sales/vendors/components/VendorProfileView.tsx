@@ -1,5 +1,7 @@
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Edit, User, MapPin, FileText, Shield } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
+import { VendorService } from '../../../../services/vendor.service';
 
 interface Props {
   vendor: Vendor;
@@ -7,7 +9,17 @@ interface Props {
   onEdit: () => void;
 }
 
-export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
+export default function VendorProfileView({ vendor: initialVendor, onClose, onEdit }: Props) {
+  const [vendor, setVendor] = useState<Vendor>(initialVendor);
+
+  useEffect(() => {
+    if (initialVendor.id) {
+      VendorService.getVendor(initialVendor.id)
+        .then(data => setVendor(data))
+        .catch(console.error);
+    }
+  }, [initialVendor.id]);
+
   return (
     <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
       {/* Header */}

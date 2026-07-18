@@ -9,6 +9,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
 import { ClientService } from '../../services/client.service';
+import { ProductService } from '../../services/product.service';
 import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
@@ -34,6 +35,27 @@ export default function QuotationDetails() {
   const [activeTab, setActiveTab] = useState('Products & Services');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
+
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!companyId) return;
+    ClientService.getClients(companyId).then(data => setClients(data));
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    });
+    ProductService.getProducts(companyId).then(data => {
+      setProducts(data.map(p => ({
+        id: p.id,
+        name: p.itemName,
+        category: p.type || 'Product',
+        rate: p.standardRate || 0,
+        gst: Number(p.gstRate?.replace('%', '')) || 18
+      })));
+    });
+  }, [companyId]);
+
+
   interface LineItem {
     id: string;
     name: string;
@@ -49,7 +71,7 @@ export default function QuotationDetails() {
     { id: '2', name: 'Data Integration Service', category: 'Integration', qty: 1, rate: 60000, gst: 18, amount: 60000 }
   ]);
 
-  const availableProducts = [
+  const availableProducts = products.length > 0 ? products : [
     { id: '1', name: 'Web Application Development', category: 'Development', rate: 150000, gst: 18 },
     { id: '2', name: 'Mobile App Development', category: 'Development', rate: 200000, gst: 18 },
     { id: '3', name: 'Data Integration Service', category: 'Integration', rate: 60000, gst: 18 },
@@ -585,7 +607,7 @@ export default function QuotationDetails() {
                         const client = clients.find(c => c.id === val);
                         setQuotation({ ...quotation, clientId: val, client: client ? (client.displayName || client.companyName || '') : '' });
                       }}
-                      options={clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))}
+                      options={[{label: 'Select Client', value: ''}, ...clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))]}
                     />
                   ) : (
                     <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
@@ -640,7 +662,7 @@ export default function QuotationDetails() {
                     <CustomSelect
                       value={quotation.owner}
                       onChange={(val) => setQuotation({ ...quotation, owner: val })}
-                      options={users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))}
+                      options={[{label: 'Select Owner', value: ''}, ...users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))]}
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.owner}</p>

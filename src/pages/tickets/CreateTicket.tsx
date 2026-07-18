@@ -1,6 +1,10 @@
 import { Search, Info, Paperclip, MoreHorizontal, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '@/contexts/AuthContext';
+import { ClientService } from '@/services/client.service';
+import type { Client } from '@/types/client.types';
+import { api } from '@/lib/api';
 
 interface CreateTicketProps {
   onCancel?: () => void;
@@ -8,6 +12,22 @@ interface CreateTicketProps {
 }
 
 export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) {
+  const { selectedCompanyId } = useAuth();
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!selectedCompanyId) return;
+    ClientService.getClients(selectedCompanyId).then(data => setClients(data));
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    });
+  }, [selectedCompanyId]);
+
+  const CLIENT_OPTIONS = [{ label: '-- Select Caller --', value: '' }, ...clients.map(c => ({ label: c.displayName, value: c.id }))];
+  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...users.map(u => ({ label: u.username || u.email, value: u.id }))];
+
   const [caller, setCaller] = useState('');
   const [shortDesc, setShortDesc] = useState('');
   const [priority, setPriority] = useState('3 - Low');
@@ -22,13 +42,16 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
 
   const handleSubmit = () => {
     if (onSubmit) {
+      const clientName = clients.find(c => c.id === caller)?.displayName || 'Unknown Client';
+      const assignedName = users.find(u => u.id === assignedTo)?.username || users.find(u => u.id === assignedTo)?.email || 'Unassigned';
+
       onSubmit({
         id: randomId,
         subject: shortDesc || 'New Incident without description',
-        client: caller || 'Unknown Client',
+        client: clientName,
         priority: priority.includes('1') ? 'High' : priority.includes('2') ? 'Medium' : 'Low',
         status: state,
-        assigned: assignedTo || 'Unassigned',
+        assigned: assignedName,
         updated: 'Just now'
       });
     }
@@ -84,8 +107,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Caller</label>
               <div className="flex-1 relative flex">
-                <input type="text" value={caller} onChange={(e) => setCaller(e.target.value)} className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
-                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+                <CustomSelect value={caller} onChange={setCaller} options={CLIENT_OPTIONS} />
               </div>
             </div>
 
@@ -230,8 +252,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assigned to</label>
               <div className="flex-1 flex">
-                <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
-                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+                <CustomSelect value={assignedTo} onChange={setAssignedTo} options={USER_OPTIONS} />
               </div>
             </div>
 
