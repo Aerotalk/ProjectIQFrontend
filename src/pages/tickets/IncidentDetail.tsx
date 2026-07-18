@@ -85,7 +85,7 @@ export default function IncidentDetail() {
   const currentStageIndex = STAGES.indexOf(ticket.state || 'New');
   const isCancelled = ticket.state === 'Cancelled';
 
-  const getPriorityBadge = (priority?: string) => {
+  const getPriorityBadge = (priority?: string | null) => {
     switch (priority) {
       case 'Critical': return <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-sm text-red-700 bg-red-50 border border-red-200">Critical</span>;
       case 'High': return <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-sm text-orange-700 bg-orange-50 border border-orange-200">High</span>;

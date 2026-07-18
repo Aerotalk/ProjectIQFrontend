@@ -64,7 +64,7 @@ export default function TicketList() {
     toast.success('Incidents exported successfully');
   };
 
-  const getStatusBadge = (status?: string) => {
+  const getStatusBadge = (status?: string | null) => {
     switch (status) {
       case 'New':
         return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-blue-700 bg-blue-50 border border-blue-200">New</span>;
@@ -85,7 +85,7 @@ export default function TicketList() {
     }
   };
 
-  const getPriorityBadge = (priority?: string) => {
+  const getPriorityBadge = (priority?: string | null) => {
     switch (priority) {
       case 'Critical':
         return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-red-700 bg-red-50 border border-red-200">Critical</span>;

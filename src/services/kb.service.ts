@@ -2,14 +2,14 @@ import { z } from 'zod';
 import { api } from '../lib/api';
 
 export const kbSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().nullable().optional(),
   title: z.string().min(1, 'Title is required'),
   category: z.string().min(1, 'Category is required'),
   content: z.string().min(1, 'Content is required'),
-  author: z.string().optional(),
+  author: z.string().nullable().optional(),
   status: z.enum(['Draft', 'Published']),
-  tags: z.array(z.string()).optional(),
-  updatedAt: z.string().optional()
+  tags: z.array(z.string()).nullable().optional(),
+  updatedAt: z.string().nullable().optional()
 });
 
 export type KBFormValues = z.infer<typeof kbSchema>;

@@ -14,9 +14,9 @@ export const poLineItemSchema = z.object({
 
 export const poSchema = z.object({
   projectId: z.string().min(1, 'Project is required'),
-  projectName: z.string().optional(),
+  projectName: z.string().nullable().optional(),
   vendorId: z.string().min(1, 'Vendor is required'),
-  vendorName: z.string().optional(),
+  vendorName: z.string().nullable().optional(),
   poDate: z.string().min(1, 'PO Date is required'),
   // TechSpec §4.2: Description is Required ("What is being procured. Clear description required.")
   description: z.string().min(1, 'Description is required — specify what is being procured'),
@@ -24,10 +24,10 @@ export const poSchema = z.object({
   discountPercentage: z.number().min(0).max(100).optional(),
   grandTotal: z.number().min(0),
   status: z.enum(['Draft', 'Pending Approval', 'Approved', 'Ordered', 'Partially Received', 'Completed', 'Cancelled']),
-  internalNotes: z.string().optional(),
+  internalNotes: z.string().nullable().optional(),
   // TechSpec §4.2: Optional fields
-  expectedDelivery: z.string().optional(),
-  attachmentName: z.string().optional(),
+  expectedDelivery: z.string().nullable().optional(),
+  attachmentName: z.string().nullable().optional(),
 });
 
 export type POFormValues = z.infer<typeof poSchema>;
