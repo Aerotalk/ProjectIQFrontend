@@ -55,7 +55,11 @@ export const getClientSchema = () => {
     billingCountry: z.string().optional(),
     billingPhone: z.string().optional(),
 
-    sameAsBillingAddress: z.boolean(),
+    sameAsBillingAddress: z.preprocess((val) => {
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      return val;
+    }, z.boolean()),
     shippingAttention: z.string().optional(),
     shippingAddressLine1: z.string().optional(),
     shippingAddressLine2: z.string().optional(),

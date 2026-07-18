@@ -63,7 +63,11 @@ export const getVendorSchema = () => {
     billingCountry: z.string().optional(),
     billingPhone: z.string().optional(),
 
-    sameAsBillingAddress: z.boolean(),
+    sameAsBillingAddress: z.preprocess((val) => {
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      return val;
+    }, z.boolean()),
     shippingAttention: z.string().optional(),
     shippingAddressLine1: z.string().optional(),
     shippingAddressLine2: z.string().optional(),
@@ -95,7 +99,11 @@ export const getVendorSchema = () => {
       const num = Number(val);
       return Number.isNaN(num) ? undefined : num;
     }, z.number().optional().nullable()),
-    reverseCharge: z.boolean().optional(),
+    reverseCharge: z.preprocess((val) => {
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      return val;
+    }, z.boolean().optional()),
 
     status: z.enum(['Active', 'Inactive'])
   }).superRefine((data, ctx) => {
