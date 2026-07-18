@@ -2,11 +2,14 @@ export type POStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Ordered' | '
 
 export interface POLineItem {
   id?: string;
+  productId?: string;
   description: string;
   quantity: number;
   unit: string;
   unitPrice: number;
-  totalAmount: number; // quantity * unitPrice
+  gstRate?: number;
+  gstAmount?: number;
+  totalAmount: number; // calculated total
 }
 
 export interface PurchaseOrder {
@@ -22,7 +25,8 @@ export interface PurchaseOrder {
   lineItems: POLineItem[];
 
   // Totals
-  grandTotal: number;     // sum of all line item totals
+  discountPercentage?: number; // Global discount %
+  grandTotal: number;     // sum of all line item totals after discount
 
   status: POStatus;
   internalNotes?: string;

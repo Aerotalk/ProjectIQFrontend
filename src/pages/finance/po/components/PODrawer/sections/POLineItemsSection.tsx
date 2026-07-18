@@ -2,6 +2,8 @@
 import { useFormContext, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProducts } from '@/hooks/useProducts';
 
 const UNIT_OPTIONS = [
   'Pieces', 'Units', 'Nos', 'Sets', 'Boxes', 'Packs',
@@ -16,7 +18,10 @@ interface Props {
 }
 
 export default function POLineItemsSection({ readOnly }: Props) {
-  const { control, register, formState: { errors } } = useFormContext();
+  const { control, register, formState: { errors }, setValue } = useFormContext();
+  const { selectedCompanyId } = useAuth();
+  const { products } = useProducts({ companyId: selectedCompanyId });
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'lineItems',
@@ -31,10 +36,13 @@ export default function POLineItemsSection({ readOnly }: Props) {
   const addNewItem = () => {
     append({
       id: undefined,
+      productId: undefined,
       description: '',
       quantity: 1,
       unit: 'Pieces',
       unitPrice: 0,
+      gstRate: 0,
+      gstAmount: 0,
       totalAmount: 0,
     });
   };
@@ -61,26 +69,29 @@ export default function POLineItemsSection({ readOnly }: Props) {
       )}
 
       <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10 min-h-[250px]">
-        <table className="w-full text-left min-w-[700px]">
+        <table className="w-full text-left min-w-[900px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[35%]">
-                Description
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[24%]">
+                Product / Item
               </th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">
                 Qty
               </th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[16%]">
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[15%]">
                 Unit
               </th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[18%]">
-                Unit Price (₹)
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[15%]">
+                Price (₹)
               </th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[16%]">
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">
+                GST %
+              </th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[18%]">
                 Total (₹)
               </th>
               {!readOnly && (
-                <th className="px-3 py-2.5 w-10"></th>
+                <th className="px-3 py-2.5 w-[6%]"></th>
               )}
             </tr>
           </thead>
@@ -91,15 +102,32 @@ export default function POLineItemsSection({ readOnly }: Props) {
 
               return (
                 <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
-                  {/* Description */}
-                  <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      {...register(`lineItems.${index}.description`)}
-                      disabled={readOnly}
-                      placeholder="Item description"
-                      className={`${cellClass} ${lineErrors?.description ? 'border-red-400' : ''}`}
-                    />
+                  {/* Product */}
+                  <td className="px-3 py-2 relative" style={{ zIndex: 100 - index }}>
+                    <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                      <Controller
+                        name={`lineItems.${index}.productId`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(val) => {
+                              field.onChange(val);
+                              const prod = products.find(p => p.id === val);
+                              if (prod) {
+                                setValue(`lineItems.${index}.description`, prod.itemName);
+                                setValue(`lineItems.${index}.unit`, prod.unit || 'Pieces');
+                                setValue(`lineItems.${index}.unitPrice`, prod.standardRate || 0);
+                                setValue(`lineItems.${index}.gstRate`, parseFloat(prod.gstRate) || 0);
+                              }
+                            }}
+                            options={products.map(p => ({ label: p.itemName, value: p.id }))}
+                          />
+                        )}
+                      />
+                      {/* Hidden input to ensure description is validated/submitted */}
+                      <input type="hidden" {...register(`lineItems.${index}.description`)} />
+                    </div>
                     {lineErrors?.description && (
                       <p className="text-red-500 text-[10px] mt-0.5">{lineErrors.description.message}</p>
                     )}
@@ -152,6 +180,19 @@ export default function POLineItemsSection({ readOnly }: Props) {
                     )}
                   </td>
 
+                  {/* GST */}
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })}
+                      disabled={readOnly}
+                      className={`${cellClass} ${lineErrors?.gstRate ? 'border-red-400' : ''}`}
+                      placeholder="0"
+                    />
+                  </td>
+
                   {/* Total (read-only, auto-calculated) */}
                   <td className="px-3 py-2 text-right">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -182,7 +223,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
             {fields.length === 0 && (
               <tr>
                 <td
-                  colSpan={readOnly ? 5 : 6}
+                  colSpan={readOnly ? 6 : 7}
                   className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500"
                 >
                   {readOnly ? 'No line items.' : (
@@ -206,4 +247,3 @@ export default function POLineItemsSection({ readOnly }: Props) {
     </div>
   );
 }
-
