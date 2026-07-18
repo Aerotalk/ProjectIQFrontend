@@ -43,11 +43,18 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Attention</label>
-          <input 
-            type="text" 
-            {...register(`${prefix}Attention`)} 
-            readOnly={readOnly || disabledState}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+          <Controller
+            name={`${prefix}Attention`}
+            control={control}
+            render={({ field }) => (
+              <input 
+                type="text" 
+                {...field}
+                value={field.value || ''}
+                readOnly={readOnly || disabledState}
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+              />
+            )}
           />
         </div>
 
@@ -70,32 +77,53 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 1 *</label>
-          <input 
-            type="text" 
-            {...register(`${prefix}AddressLine1`)} 
-            readOnly={readOnly || disabledState}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}AddressLine1`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+          <Controller
+            name={`${prefix}AddressLine1`}
+            control={control}
+            render={({ field }) => (
+              <input 
+                type="text" 
+                {...field}
+                value={field.value || ''}
+                readOnly={readOnly || disabledState}
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}AddressLine1`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+              />
+            )}
           />
           {(errors as any)[`${prefix}AddressLine1`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}AddressLine1`].message}</p>}
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 2 (Area/Locality)</label>
-          <input 
-            type="text" 
-            {...register(`${prefix}AddressLine2`)} 
-            readOnly={readOnly || disabledState}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+          <Controller
+            name={`${prefix}AddressLine2`}
+            control={control}
+            render={({ field }) => (
+              <input 
+                type="text" 
+                {...field}
+                value={field.value || ''}
+                readOnly={readOnly || disabledState}
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+              />
+            )}
           />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">City *</label>
-          <input 
-            type="text" 
-            {...register(`${prefix}City`)} 
-            readOnly={readOnly || disabledState}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}City`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+          <Controller
+            name={`${prefix}City`}
+            control={control}
+            render={({ field }) => (
+              <input 
+                type="text" 
+                {...field}
+                value={field.value || ''}
+                readOnly={readOnly || disabledState}
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}City`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+              />
+            )}
           />
           {(errors as any)[`${prefix}City`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}City`].message}</p>}
         </div>
@@ -130,11 +158,18 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">PIN / Postal Code {!isOverseas && '*'}</label>
-          <input 
-            type="text" 
-            {...register(`${prefix}PinCode`)} 
-            readOnly={readOnly || disabledState}
-            className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}PinCode`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+          <Controller
+            name={`${prefix}PinCode`}
+            control={control}
+            render={({ field }) => (
+              <input 
+                type="text" 
+                {...field}
+                value={field.value || ''}
+                readOnly={readOnly || disabledState}
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}PinCode`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+              />
+            )}
           />
           {(errors as any)[`${prefix}PinCode`] && <p className="text-red-500 text-xs mt-1">{(errors as any)[`${prefix}PinCode`].message}</p>}
         </div>
