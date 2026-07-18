@@ -352,12 +352,16 @@ const AccountForm = ({
                   )}
                 </label>
                 <div className="flex flex-col gap-2">
-                  {formData.logoFileId && (
+                  {logoFile ? (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  ) : formData.logoFileId && (
                     <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
                       <img src={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} alt="Logo" className="max-h-full max-w-full object-contain" />
                     </div>
                   )}
-                  <input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                  <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -370,12 +374,16 @@ const AccountForm = ({
                   )}
                 </label>
                 <div className="flex flex-col gap-2">
-                  {formData.invoiceLogoId && (
+                  {invoiceLogoFile ? (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={URL.createObjectURL(invoiceLogoFile)} alt="Invoice Logo Preview" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  ) : formData.invoiceLogoId && (
                     <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
                       <img src={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} alt="Invoice Logo" className="max-h-full max-w-full object-contain" />
                     </div>
                   )}
-                  <input type="file" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                  <input type="file" accept="image/*" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -388,12 +396,16 @@ const AccountForm = ({
                   )}
                 </label>
                 <div className="flex flex-col gap-2">
-                  {formData.stampFileId && (
+                  {stampFile ? (
+                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+                      <img src={URL.createObjectURL(stampFile)} alt="Stamp Preview" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  ) : formData.stampFileId && (
                     <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
                       <img src={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} alt="Stamp" className="max-h-full max-w-full object-contain" />
                     </div>
                   )}
-                  <input type="file" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
+                  <input type="file" accept="image/*" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
               </div>
               
