@@ -25,7 +25,7 @@ export default function QuotationsList() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
   const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
