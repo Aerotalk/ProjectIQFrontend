@@ -243,7 +243,7 @@ export default function FinanceDashboard() {
               <Tooltip 
                 cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '3 3' }}
                 contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
-                formatter={(value: any, name: string) => [`₹ ${Number(value).toLocaleString('en-IN')}`, name]}
+                formatter={(value: any, name: any) => [`₹ ${Number(value).toLocaleString('en-IN')}`, name]}
               />
               <Legend iconType="rect" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
               <Area type="monotone" dataKey="PO" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPO)" />

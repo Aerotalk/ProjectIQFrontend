@@ -1,4 +1,4 @@
-export type QuotationStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Sent to Client' | 'Confirmed Lead';
+export type QuotationStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Sent to Client' | 'Confirmed Lead' | 'Rejected' | 'Changes Requested' | 'Accepted' | 'Converted' | 'Sent for Approval' | 'Under Negotiation';
 
 export interface QuotationLineItem {
   id?: string;
