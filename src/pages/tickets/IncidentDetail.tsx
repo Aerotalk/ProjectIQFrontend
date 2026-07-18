@@ -4,9 +4,9 @@ import { TicketService, type TicketFormValues } from '../../services/ticket.serv
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { 
-  ArrowLeft, CheckCircle2, UserCircle, Paperclip, 
-  Clock, AlertTriangle, Building2, User, Info, 
-  Send, History, IndianRupee, Briefcase, Plus,
+  ArrowLeft, CheckCircle2, Paperclip, 
+  Clock, User, Info, 
+  Send, Briefcase, Plus,
   FileText
 } from 'lucide-react';
 
@@ -21,7 +21,7 @@ export default function IncidentDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
   const [activeTab, setActiveTab] = useState<'notes' | 'closure'>('notes');
-  const [timeline, setTimeline] = useState([
+  const [timeline, setTimeline] = useState<any[]>([
     {
       id: 1,
       user: 'Rahul Sharma',
@@ -133,8 +133,6 @@ export default function IncidentDetail() {
       // @ts-ignore
       await TicketService.update(ticket.id, { ...ticket, state: newStage });
       toast.success(`Incident moved to ${newStage}`, { id: 'stageUpdate' });
-      // Also add a mock timeline note
-      const mockNote = `System changed state to ${newStage}`;
     } catch (err) {
       setTicket({ ...ticket, state: previousState });
       toast.error('Failed to update stage', { id: 'stageUpdate' });

@@ -221,7 +221,7 @@ export default function CreateIncident() {
                           { label: 'Medium', value: 'Medium' },
                           { label: 'High', value: 'High' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                       />
                     )}
@@ -240,7 +240,7 @@ export default function CreateIncident() {
                           { label: 'High', value: 'High' },
                           { label: 'Critical', value: 'Critical' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                       />
                     )}
@@ -290,7 +290,7 @@ export default function CreateIncident() {
                           { label: 'Development', value: 'Development' },
                           { label: 'Database Admin', value: 'Database Admin' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                         placeholder="Select Group"
                       />
@@ -308,7 +308,7 @@ export default function CreateIncident() {
                           { label: 'Rahul Sharma (Support)', value: 'Rahul Sharma' },
                           { label: 'Priya Patel (Dev)', value: 'Priya Patel' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                         placeholder="Select Engineer"
                       />
