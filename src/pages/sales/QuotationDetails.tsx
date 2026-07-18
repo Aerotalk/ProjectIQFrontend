@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
-import type { Quotation } from '../../types/quotation.types';
+import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import { formatQuotationId } from '../../lib/utils';
 
 export default function QuotationDetails() {
@@ -86,7 +86,7 @@ export default function QuotationDetails() {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string, successMessage: string, newStage: number) => {
+  const handleStatusUpdate = async (newStatus: QuotationStatus, successMessage: string, newStage: number) => {
     if (!id || isNew) return;
     setIsApiLoading(true);
     try {

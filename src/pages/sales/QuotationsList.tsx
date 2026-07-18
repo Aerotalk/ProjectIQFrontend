@@ -9,6 +9,7 @@ import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
 import { formatQuotationId } from '../../lib/utils';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function QuotationsList() {
   const { selectedCompanyId: companyId } = useAuth();

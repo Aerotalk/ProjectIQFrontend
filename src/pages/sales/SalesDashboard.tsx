@@ -203,7 +203,7 @@ export default function SalesDashboard() {
               <Tooltip 
                 cursor={{ fill: '#f3f4f6', opacity: 0.5 }}
                 contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
-                formatter={(value: number) => [`₹ ${value.toLocaleString('en-IN')}`, 'Amount']}
+                formatter={(value: any) => [`₹ ${Number(value).toLocaleString('en-IN')}`, 'Amount']}
               />
               <Bar dataKey="rawValue" fill="#792359" radius={[4, 4, 0, 0]} barSize={40} />
             </BarChart>
@@ -264,7 +264,7 @@ export default function SalesDashboard() {
               <Tooltip 
                 cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '3 3' }}
                 contentStyle={{ borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px', backgroundColor: '#fff', color: '#111827' }}
-                formatter={(value: number) => [`₹ ${value.toLocaleString('en-IN')}`, 'Amount']}
+                formatter={(value: any) => [`₹ ${Number(value).toLocaleString('en-IN')}`, 'Amount']}
               />
               <Area type="monotone" dataKey="amount" stroke="#792359" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
             </AreaChart>
