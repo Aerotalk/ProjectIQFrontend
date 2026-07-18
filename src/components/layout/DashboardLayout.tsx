@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from '../../assets/BumbleERPLogo.png';
 import {
   User,
@@ -192,6 +192,46 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     .filter(item => item.subItems.length > 0 || !item.subItems);
 
   console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
+
+  // Determine active breadcrumb based on current path for sidebar highlighting
+  let activeModuleName = '';
+  let activePageName = '';
+
+  // Pass 1: exact match
+  for (const item of navItems) {
+    for (const sub of item.subItems) {
+      if (sub.path && location.pathname === sub.path) {
+        activeModuleName = item.name;
+        activePageName = sub.name;
+        break;
+      }
+    }
+    if (activeModuleName) break;
+  }
+
+  // Pass 2: prefix match if no exact match
+  if (!activeModuleName) {
+    let longestMatchLen = 0;
+    for (const item of navItems) {
+      for (const sub of item.subItems) {
+        if (sub.path && sub.path !== basePath && location.pathname.startsWith(sub.path)) {
+          if (sub.path.length > longestMatchLen) {
+            longestMatchLen = sub.path.length;
+            activeModuleName = item.name;
+            activePageName = sub.name;
+          }
+        }
+      }
+    }
+  }
+
+  // Handle special routes not in sidebar
+  if (!activeModuleName) {
+    if (location.pathname.includes('/profile')) {
+      activeModuleName = 'Profile';
+      activePageName = 'Profile Settings';
+    }
+  }
 
   const avatarUrl = useAvatarUrl(user?.profilePhotoId);
   const { breadcrumbs } = useBreadcrumbContext();

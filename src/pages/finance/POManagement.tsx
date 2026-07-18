@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import { POService } from '../../services/po.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
-import type { Project } from '../../types/project.types';
 import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';

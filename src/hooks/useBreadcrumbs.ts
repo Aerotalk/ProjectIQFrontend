@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useBreadcrumbContext, BreadcrumbItem } from '../contexts/BreadcrumbContext';
+import { useBreadcrumbContext, type BreadcrumbItem } from '../contexts/BreadcrumbContext';
 
 export function useBreadcrumbs(items: BreadcrumbItem[]) {
   const { setBreadcrumbs } = useBreadcrumbContext();
