@@ -190,8 +190,6 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
 
       </div>
     </div>
-      </div >
-    </div >
   );
 }
 
