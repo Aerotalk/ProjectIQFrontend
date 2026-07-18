@@ -1,21 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-// import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { type VendorFormValues } from '../validators/vendorValidation';
-import { 
-  shouldShowGSTIN, 
-  shouldShowPAN, 
-  shouldShowPlaceOfSupply, 
+import {
+  shouldShowGSTIN,
+  shouldShowPAN,
+  shouldShowPlaceOfSupply,
   shouldShowSEZFields,
-  shouldShowOverseasFields 
+  shouldShowOverseasFields
 } from '../../clients/utils/gstRules';
 
 export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
   const form = useForm<VendorFormValues>({
-    // resolver: async (data, context, options) => {
-    //   const dynamicSchema = getVendorSchema();
-    //   return zodResolver(dynamicSchema)(data, context, options);
-    // },
+    resolver: async (data, context, options) => {
+      const { getVendorSchema } = await import('../validators/vendorValidation');
+      const dynamicSchema = getVendorSchema();
+      const resolver = zodResolver(dynamicSchema) as any;
+      return resolver(data, context, options);
+    },
     defaultValues: {
       vendorType: 'Business',
       gstTreatment: 'business_gst',

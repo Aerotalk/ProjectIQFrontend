@@ -17,10 +17,10 @@ export const vendorContactSchema = z.object({
 });
 
 export const vendorBankDetailsSchema = z.object({
-  accountName: z.string().min(1, 'Account Name is required'),
-  accountNumber: z.string().min(1, 'Account Number is required'),
-  ifscCode: z.string().min(1, 'IFSC Code is required'),
-  bankName: z.string().min(1, 'Bank Name is required'),
+  accountName: z.string().optional(),
+  accountNumber: z.string().optional(),
+  ifscCode: z.string().optional(),
+  bankName: z.string().optional(),
   branchName: z.string().optional(),
   swiftCode: z.string().optional(),
 });
@@ -75,14 +75,18 @@ export const getVendorSchema = () => {
 
     // Commercial
     paymentTerms: z.string().optional(),
-    creditLimit: z.number().optional().nullable(),
+    creditLimit: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
     notes: z.string().optional(),
 
     // Bank Details
-    bankDetails: vendorBankDetailsSchema.optional(),
+    bankDetails: z.preprocess((val: any) => {
+      if (!val || typeof val !== 'object') return undefined;
+      const isEmpty = Object.values(val).every(v => !v || v === '');
+      return isEmpty ? undefined : val;
+    }, vendorBankDetailsSchema.optional()),
 
     // Taxation
-    tdsPercentage: z.number().optional().nullable(),
+    tdsPercentage: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
     reverseCharge: z.boolean().optional(),
 
     status: z.enum(['Active', 'Inactive'])

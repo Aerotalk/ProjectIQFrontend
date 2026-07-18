@@ -14,9 +14,10 @@ interface Props {
   initialData?: Partial<DeliveryChallan>;
   challanNumber?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
-export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialData, challanNumber, isSubmitting }: Props) {
+export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialData, challanNumber, isSubmitting, nextNumber }: Props) {
   const form = useChallanForm();
 
   React.useEffect(() => {
@@ -95,7 +96,7 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
       <div className="flex-1 overflow-y-auto p-6">
         <FormProvider {...form}>
           <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <ChallanFormSection readOnly={readOnly} />
+            <ChallanFormSection readOnly={readOnly} nextNumber={nextNumber} />
           </form>
         </FormProvider>
       </div>

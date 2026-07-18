@@ -7,11 +7,12 @@ import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function ProductsList() {
   const { selectedCompanyId: companyId } = useAuth();
   const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
-  
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -43,11 +44,11 @@ export default function ProductsList() {
     setOpenDropdownId(null);
   };
 
-  const filteredProducts = products.filter(p => 
+  const filteredProducts = products.filter(p =>
     p.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -56,9 +57,9 @@ export default function ProductsList() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto">
-        <ProductDrawer 
-          isOpen={isDrawerOpen} 
-          onClose={() => setIsDrawerOpen(false)} 
+        <ProductDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
           onSave={handleSaveProduct}
           mode={drawerMode}
           initialData={selectedProduct as Partial<ProductFormValues>}
@@ -80,7 +81,7 @@ export default function ProductsList() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Products & Services</h1>
         </div>
-        <button 
+        <button
           onClick={() => openDrawer('create')}
           className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
         >
@@ -93,9 +94,9 @@ export default function ProductsList() {
         <div className="p-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <Input 
-              type="text" 
-              placeholder="Search items..." 
+            <Input
+              type="text"
+              placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -144,14 +145,14 @@ export default function ProductsList() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium border
-                        ${product.status === 'Active' 
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+                        ${product.status === 'Active'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
                           : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
                         {product.status}
                       </span>
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === product.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button 
+                      <button
                         onClick={() => setOpenDropdownId(openDropdownId === product.id ? null : product.id)}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
@@ -159,13 +160,13 @@ export default function ProductsList() {
                       </button>
                       {openDropdownId === product.id && (
                         <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
-                          <button 
+                          <button
                             onClick={() => openDrawer('view', product)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             View
                           </button>
-                          <button 
+                          <button
                             onClick={() => openDrawer('edit', product)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
@@ -186,7 +187,7 @@ export default function ProductsList() {
             Showing {filteredProducts.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length} entries
           </div>
           <div className="flex items-center gap-1">
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -194,19 +195,18 @@ export default function ProductsList() {
               <ChevronLeft size={16} />
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button 
+              <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                  currentPage === page 
-                    ? 'bg-[#792359] text-white shadow-sm' 
+                className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
+                    ? 'bg-[#792359] text-white shadow-sm'
                     : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-                }`}
+                  }`}
               >
                 {page}
               </button>
             ))}
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
               className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -217,6 +217,16 @@ export default function ProductsList() {
         </div>
       </div>
 
+      <ProductDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveProduct}
+        mode={drawerMode}
+        initialData={selectedProduct as Partial<ProductFormValues>}
+        productId={selectedProduct?.id}
+        isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(products, 'itemCode')}
+      />
     </div>
   );
 }

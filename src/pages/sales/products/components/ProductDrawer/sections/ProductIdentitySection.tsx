@@ -1,12 +1,14 @@
+"use no memo";
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
-export default function ProductIdentitySection({ readOnly }: Props) {
+export default function ProductIdentitySection({ readOnly, nextNumber }: Props) {
   const { register, formState: { errors } } = useFormContext();
 
   return (
@@ -41,6 +43,7 @@ export default function ProductIdentitySection({ readOnly }: Props) {
             disabled={readOnly}
             placeholder="e.g. ITEM-001"
             defaultPrefix="ITEM-"
+            nextNumber={nextNumber}
             className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.itemCode ? 'border-red-500' : ''}`} 
           />
           {errors.itemCode && <p className="text-red-500 text-xs mt-1">{errors.itemCode.message as string}</p>}

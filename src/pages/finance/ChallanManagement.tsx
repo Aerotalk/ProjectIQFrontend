@@ -13,6 +13,7 @@ import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function ChallanManagement() {
   const { selectedCompanyId } = useAuth();
@@ -196,7 +197,7 @@ export default function ChallanManagement() {
 
       {/* ── Table Card ── */}
       <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
-        
+
         {/* Filters row */}
         <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="flex flex-wrap gap-2">
@@ -369,11 +370,10 @@ export default function ChallanManagement() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                    currentPage === page
+                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
                       ? 'bg-[#792359] text-white shadow-sm'
                       : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
@@ -389,7 +389,7 @@ export default function ChallanManagement() {
           </div>
         )}
       </div>
-      
+
       {/* ── Statistics row ── */}
       {!isLoading && challans.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -416,6 +416,17 @@ export default function ChallanManagement() {
         </div>
       )}
 
+      {/* ── Challan Drawer ── */}
+      <ChallanDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveChallan}
+        mode={drawerMode}
+        initialData={selectedChallan || undefined}
+        challanNumber={selectedChallan?.challanNumber}
+        isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(challans, 'challanNumber')}
+      />
     </div>
   );
 }

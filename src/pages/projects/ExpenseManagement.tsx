@@ -11,6 +11,7 @@ import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 const EXPENSE_CATEGORIES = [
   'Travel',
@@ -205,7 +206,7 @@ export default function ExpenseManagement() {
 
       {/* ── Table Card ── */}
       <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
-        
+
         {/* Filters row */}
         <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="flex flex-wrap gap-2">
@@ -388,11 +389,10 @@ export default function ExpenseManagement() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                    currentPage === page
+                  className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
                       ? 'bg-[#792359] text-white shadow-sm'
                       : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
@@ -408,7 +408,7 @@ export default function ExpenseManagement() {
           </div>
         )}
       </div>
-      
+
       {/* ── Statistics row ── */}
       {!isLoading && expenses.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -437,6 +437,17 @@ export default function ExpenseManagement() {
         </div>
       )}
 
+      {/* ── Expense Drawer ── */}
+      <ExpenseDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveExpense}
+        mode={drawerMode}
+        initialData={selectedExpense || undefined}
+        expenseId={selectedExpense?.id}
+        isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(expenses, 'id')}
+      />
     </div>
   );
 }

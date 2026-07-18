@@ -1,3 +1,4 @@
+"use no memo";
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Settings, X } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
@@ -8,9 +9,10 @@ interface AutoNumberInputProps {
   placeholder?: string;
   className?: string;
   defaultPrefix?: string;
+  nextNumber?: number;
 }
 
-export function AutoNumberInput({ name, disabled, placeholder, className, defaultPrefix = '' }: AutoNumberInputProps) {
+export function AutoNumberInput({ name, disabled, placeholder, className, defaultPrefix = '', nextNumber = 1 }: AutoNumberInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { register, setValue, watch, formState } = useFormContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -19,8 +21,12 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
     prefix: defaultPrefix,
     suffix: '',
     padding: 4,
-    nextNumber: 1
+    nextNumber: nextNumber
   });
+
+  useEffect(() => {
+    setSettings(prev => ({ ...prev, nextNumber }));
+  }, [nextNumber]);
 
   const generatePreview = useCallback(() => {
     const numStr = String(settings.nextNumber).padStart(settings.padding, '0');
@@ -113,3 +119,4 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';

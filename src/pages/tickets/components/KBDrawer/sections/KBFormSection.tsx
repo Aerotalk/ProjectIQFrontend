@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -83,3 +84,4 @@ export default function KBFormSection({ readOnly }: Props) {
     </div>
   );
 }
+

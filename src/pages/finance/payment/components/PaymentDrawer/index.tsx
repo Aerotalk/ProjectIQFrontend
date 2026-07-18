@@ -14,6 +14,7 @@ interface Props {
   initialData?: PaymentRecord;
   paymentId?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
 export default function PaymentDrawer({
@@ -23,7 +24,8 @@ export default function PaymentDrawer({
   mode,
   initialData,
   paymentId,
-  isSubmitting
+  isSubmitting,
+  nextNumber
 }: Props) {
   const form = usePaymentForm();
   const { reset, handleSubmit } = form;
@@ -87,7 +89,7 @@ export default function PaymentDrawer({
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
           <FormProvider {...form}>
             <form id="payment-form" onSubmit={handleSubmit(onSave)}>
-              <PaymentFormSection readOnly={mode === 'view'} />
+              <PaymentFormSection readOnly={mode === 'view'} nextNumber={nextNumber} />
             </form>
           </FormProvider>
         </div>

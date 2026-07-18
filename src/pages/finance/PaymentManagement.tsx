@@ -12,6 +12,7 @@ import type { PaymentFormValues } from './payment/validators/paymentValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 const STATUS_STYLES: Record<PaymentRecord['status'], string> = {
   Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
@@ -313,7 +314,7 @@ export default function PaymentManagement() {
             </table>
           )}
         </div>
-        
+
         {/* Pagination */}
         {!isLoading && filtered.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
@@ -336,7 +337,17 @@ export default function PaymentManagement() {
           </div>
         )}
       </div>
-      
+
+      <PaymentDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSave}
+        mode={drawerMode}
+        initialData={selectedPayment || undefined}
+        paymentId={selectedPayment?.paymentId}
+        isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(payments, 'paymentId')}
+      />
     </div>
   );
 }

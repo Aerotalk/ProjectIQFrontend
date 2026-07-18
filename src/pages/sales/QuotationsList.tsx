@@ -14,7 +14,7 @@ export default function QuotationsList() {
   const { selectedCompanyId: companyId } = useAuth();
   const navigate = useNavigate();
   const { quotations, isListLoading: isLoading, isSaveLoading: isSubmitting, createQuotation, updateQuotation } = useQuotations({ companyId });
-  
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
@@ -46,12 +46,12 @@ export default function QuotationsList() {
     setOpenDropdownId(null);
   };
 
-  const filteredQuotations = quotations.filter(q => 
+  const filteredQuotations = quotations.filter(q =>
     q.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.quotationNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.subject?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const totalPages = Math.ceil(filteredQuotations.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -60,9 +60,9 @@ export default function QuotationsList() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto">
-        <QuotationDrawer 
-          isOpen={isDrawerOpen} 
-          onClose={() => setIsDrawerOpen(false)} 
+        <QuotationDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
           onSave={handleSaveQuotation}
           mode={drawerMode}
           initialData={selectedQuotation as Partial<QuotationFormValues>}
@@ -84,7 +84,7 @@ export default function QuotationsList() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Quotations</h1>
         </div>
-        <button 
+        <button
           onClick={() => openDrawer('create')}
           className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
         >
@@ -97,9 +97,9 @@ export default function QuotationsList() {
         <div className="p-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <Input 
-              type="text" 
-              placeholder="Search quotations..." 
+            <Input
+              type="text"
+              placeholder="Search quotations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -134,8 +134,8 @@ export default function QuotationsList() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                 {currentItems.map((quotation) => (
-                  <tr 
-                    key={quotation.id} 
+                  <tr
+                    key={quotation.id}
                     className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
                     onClick={() => navigate(`/companydashboard/sales/quotations/${quotation.id}`)}
                   >
@@ -173,7 +173,7 @@ export default function QuotationsList() {
                       </span>
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === quotation.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === quotation.id ? null : quotation.id); }}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
@@ -181,13 +181,13 @@ export default function QuotationsList() {
                       </button>
                       {openDropdownId === quotation.id && (
                         <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); openDrawer('view', quotation); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             View
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); openDrawer('edit', quotation); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
@@ -208,7 +208,7 @@ export default function QuotationsList() {
             Showing {filteredQuotations.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredQuotations.length)} of {filteredQuotations.length} entries
           </div>
           <div className="flex items-center gap-1">
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -216,19 +216,18 @@ export default function QuotationsList() {
               <ChevronLeft size={16} />
             </button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button 
+              <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
-                  currentPage === page 
-                    ? 'bg-[#792359] text-white shadow-sm' 
+                className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
+                    ? 'bg-[#792359] text-white shadow-sm'
                     : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-                }`}
+                  }`}
               >
                 {page}
               </button>
             ))}
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages || totalPages === 0}
               className="w-8 h-8 flex items-center justify-center rounded-sm border border-gray-300 dark:border-white/10 text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -239,6 +238,16 @@ export default function QuotationsList() {
         </div>
       </div>
 
+      <QuotationDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveQuotation}
+        mode={drawerMode}
+        initialData={selectedQuotation as Partial<QuotationFormValues>}
+        quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
+        isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(quotations, 'quotationNo')}
+      />
     </div>
   );
 }

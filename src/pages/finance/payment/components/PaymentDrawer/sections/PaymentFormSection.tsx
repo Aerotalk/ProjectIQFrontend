@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useProjects } from '@/hooks/useProjects';
@@ -6,6 +7,7 @@ import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
 const PAYMENT_METHODS = [
@@ -23,7 +25,7 @@ const STATUS_OPTIONS = [
   { label: 'Refunded', value: 'Refunded' }
 ];
 
-export default function PaymentFormSection({ readOnly }: Props) {
+export default function PaymentFormSection({ readOnly, nextNumber }: Props) {
   const { control, register, formState: { errors } } = useFormContext();
   const { projects } = useProjects();
 
@@ -58,6 +60,7 @@ export default function PaymentFormSection({ readOnly }: Props) {
               disabled={readOnly}
               placeholder="e.g. PAY/2026/001"
               defaultPrefix="PAY/2026/"
+              nextNumber={nextNumber}
               className={fieldClass(!!errors.paymentNo)}
             />
             {errors.paymentNo && (
@@ -212,3 +215,4 @@ export default function PaymentFormSection({ readOnly }: Props) {
     </div>
   );
 }
+

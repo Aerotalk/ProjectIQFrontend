@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { HSN_SAC_CODES } from '@/data/hsnCodes';

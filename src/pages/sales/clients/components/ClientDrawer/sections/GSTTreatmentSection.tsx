@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, Controller } from 'react-hook-form';
 import { GST_TREATMENTS } from '../../../constants/gstTreatments';
 import { Card } from '../../../../../../components/ui/card';
@@ -58,3 +59,4 @@ export default function GSTTreatmentSection({ readOnly }: Props) {
     </div>
   );
 }
+

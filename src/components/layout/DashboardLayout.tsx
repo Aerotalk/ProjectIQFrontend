@@ -250,8 +250,14 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
-          <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
-          <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
+          {companyLogoUrl && role === 'company' ? (
+            <img src={companyLogoUrl} alt={`${orgName} Logo`} className="h-10 w-auto mr-3 rounded-sm shadow-sm object-contain" />
+          ) : (
+            <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
+          )}
+          <span className="font-bold text-lg tracking-wide text-white truncate max-w-[140px]" title={role === 'company' ? orgName : 'BumbleERP'}>
+            {role === 'company' ? orgName : 'BumbleERP'}
+          </span>
         </div>
 
         {/* Navigation */}
@@ -313,7 +319,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {companyLogoUrl ? (
                 <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
               ) : (
-                role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials
+                orgName ? orgName.substring(0, 2).toUpperCase() : (role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials)
               )}
             </div>
             <div className="flex flex-col min-w-0">
@@ -380,8 +386,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm overflow-hidden">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : companyLogoUrl && role === 'company' ? (
+                    <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
                   ) : (
-                    userInitials
+                    orgName ? orgName.substring(0, 2).toUpperCase() : userInitials
                   )}
                 </div>
                 <ChevronDown size={14} className="text-gray-400" />
@@ -393,8 +401,10 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                     <div className="w-10 h-10 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                      ) : companyLogoUrl && role === 'company' ? (
+                        <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
                       ) : (
-                        userInitials
+                        orgName ? orgName.substring(0, 2).toUpperCase() : userInitials
                       )}
                     </div>
                     <div className="flex flex-col min-w-0">

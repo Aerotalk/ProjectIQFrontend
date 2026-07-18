@@ -15,9 +15,10 @@ interface Props {
   initialData?: Partial<ProductFormValues>;
   productId?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
-export default function ProductDrawer({ isOpen, onClose, onSave, mode, initialData, productId, isSubmitting }: Props) {
+export default function ProductDrawer({ isOpen, onClose, onSave, mode, initialData, productId, isSubmitting, nextNumber }: Props) {
   const form = useProductForm(initialData);
 
   // Reset form when drawer opens/closes or initialData changes
@@ -85,7 +86,7 @@ export default function ProductDrawer({ isOpen, onClose, onSave, mode, initialDa
         <FormProvider {...form}>
           <form id="product-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
-            <ProductIdentitySection readOnly={readOnly} />
+            <ProductIdentitySection readOnly={readOnly} nextNumber={nextNumber} />
             
             <PricingSection readOnly={readOnly} />
             

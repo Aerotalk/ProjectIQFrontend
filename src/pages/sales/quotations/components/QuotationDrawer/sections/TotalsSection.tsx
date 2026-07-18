@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, useWatch } from 'react-hook-form';
 
 interface Props {
