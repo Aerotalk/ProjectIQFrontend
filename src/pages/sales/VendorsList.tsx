@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
 import type { Vendor } from '../../types/vendor.types';
 import VendorDrawer from './vendors/components/VendorDrawer';
+import VendorProfileView from './vendors/components/VendorProfileView';
 import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 
@@ -58,15 +59,23 @@ export default function VendorsList() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto">
-        <VendorDrawer 
-          isOpen={isDrawerOpen} 
-          onClose={() => setIsDrawerOpen(false)} 
-          onSave={handleSaveVendor}
-          mode={drawerMode}
-          initialData={selectedVendor as Partial<VendorFormValues>}
-          vendorId={selectedVendor?.id}
-          isSubmitting={isSubmitting}
-        />
+        {drawerMode === 'view' ? (
+          <VendorProfileView 
+            vendor={selectedVendor!} 
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => setDrawerMode('edit')}
+          />
+        ) : (
+          <VendorDrawer 
+            isOpen={isDrawerOpen} 
+            onClose={() => setIsDrawerOpen(false)}
+            mode={drawerMode}
+            initialData={selectedVendor as Partial<Vendor>}
+            vendorId={selectedVendor?.id}
+            onSave={handleSaveVendor}
+            isSubmitting={isSubmitting}
+          />
+        )}
       </div>
     );
   }
@@ -158,13 +167,19 @@ export default function VendorsList() {
                       {openDropdownId === vendor.id && (
                         <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
                           <button 
-                            onClick={() => openDrawer('view', vendor)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDrawer('view', vendor);
+                            }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             View
                           </button>
                           <button 
-                            onClick={() => openDrawer('edit', vendor)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDrawer('edit', vendor);
+                            }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             Edit

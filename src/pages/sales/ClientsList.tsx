@@ -6,6 +6,7 @@ import { useClients } from '../../hooks/useClients';
 import { api } from '../../lib/api';
 import type { Client } from '../../types/client.types';
 import ClientDrawer from './clients/components/ClientDrawer';
+import ClientProfileView from './clients/components/ClientProfileView';
 import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 
@@ -99,15 +100,23 @@ export default function ClientsList() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto">
-        <ClientDrawer 
-          isOpen={isDrawerOpen} 
-          onClose={() => setIsDrawerOpen(false)}
-          mode={drawerMode}
-          initialData={selectedClient as Partial<ClientFormValues>}
-          clientId={selectedClient?.clientNo || selectedClient?.id}
-          onSave={handleSaveClient}
-          isSubmitting={isSaveLoading}
-        />
+        {drawerMode === 'view' ? (
+          <ClientProfileView 
+            client={selectedClient!} 
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => setDrawerMode('edit')}
+          />
+        ) : (
+          <ClientDrawer 
+            isOpen={isDrawerOpen} 
+            onClose={() => setIsDrawerOpen(false)}
+            mode={drawerMode}
+            initialData={selectedClient as Partial<ClientFormValues>}
+            clientId={selectedClient?.clientNo || selectedClient?.id}
+            onSave={handleSaveClient}
+            isSubmitting={isSaveLoading}
+          />
+        )}
       </div>
     );
   }
@@ -217,13 +226,19 @@ export default function ClientsList() {
                       {openDropdownId === client.id && (
                         <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
                           <button 
-                            onClick={() => handleOpenDrawer('view', client)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDrawer('view', client);
+                            }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             <Eye size={14} /> View
                           </button>
                           <button 
-                            onClick={() => handleOpenDrawer('edit', client)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDrawer('edit', client);
+                            }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
                             <Edit size={14} /> Edit
