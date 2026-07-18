@@ -178,7 +178,7 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
               ) : (
                 <>
                   <Save size={16} />
-                  Save Client
+                  {mode === 'edit' ? 'Update Client' : 'Save Client'}
                 </>
               )}
             </button>
