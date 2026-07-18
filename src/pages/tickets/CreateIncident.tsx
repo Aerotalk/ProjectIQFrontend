@@ -133,7 +133,6 @@ export default function CreateIncident() {
                     options={projectOptions}
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="Select a project to link this incident..."
                   />
                 )}
               />
@@ -161,9 +160,8 @@ export default function CreateIncident() {
                           { label: 'Network', value: 'Network' },
                           { label: 'Database', value: 'Database' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
-                        placeholder="Select Category"
                       />
                     )}
                   />
@@ -181,9 +179,8 @@ export default function CreateIncident() {
                           { label: 'Bug/Error', value: 'Bug/Error' },
                           { label: 'Feature Request', value: 'Feature Request' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
-                        placeholder="Select Subcategory"
                       />
                     )}
                   />
@@ -203,7 +200,7 @@ export default function CreateIncident() {
                           { label: 'Medium', value: 'Medium' },
                           { label: 'High', value: 'High' }
                         ]}
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                       />
                     )}
@@ -292,7 +289,6 @@ export default function CreateIncident() {
                         ]}
                         value={field.value || ''}
                         onChange={field.onChange}
-                        placeholder="Select Group"
                       />
                     )}
                   />
@@ -310,7 +306,6 @@ export default function CreateIncident() {
                         ]}
                         value={field.value || ''}
                         onChange={field.onChange}
-                        placeholder="Select Engineer"
                       />
                     )}
                   />
