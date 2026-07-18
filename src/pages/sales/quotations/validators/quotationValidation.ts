@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const quotationLineItemSchema = z.object({
-  id: z.string().optional(),
+  id: z.string().nullable().optional(),
   productId: z.string().min(1, 'Product is required'),
   itemName: z.string().min(1, 'Item Name is required'),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   quantity: z.number().min(1, 'Quantity must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
   rate: z.number().min(0, 'Rate must be positive'),
@@ -16,15 +16,15 @@ export const quotationLineItemSchema = z.object({
 });
 
 export const quotationSchema = z.object({
-  id: z.string().optional(),
-  quotationNo: z.string().optional(),
+  id: z.string().nullable().optional(),
+  quotationNo: z.string().nullable().optional(),
   clientId: z.string().min(1, 'Client is required'),
-  clientName: z.string().optional(),
+  clientName: z.string().nullable().optional(),
   date: z.string().min(1, 'Date is required'),
   validUntil: z.string().min(1, 'Valid Until is required'),
-  subject: z.string().optional(),
-  reference: z.string().optional(),
-  salesperson: z.string().optional(),
+  subject: z.string().nullable().optional(),
+  reference: z.string().nullable().optional(),
+  salesperson: z.string().nullable().optional(),
 
   lineItems: z.array(quotationLineItemSchema).min(1, 'At least one line item is required'),
 
@@ -32,17 +32,17 @@ export const quotationSchema = z.object({
   totalDiscount: z.number().min(0),
   totalTaxableAmount: z.number().min(0),
   totalGstAmount: z.number().min(0),
-  deliveryCost: z.number().min(0).optional(),
+  deliveryCost: z.number().min(0).nullable().optional(),
   grandTotal: z.number().min(0),
 
-  notes: z.string().optional(),
-  termsAndConditions: z.string().optional(),
+  notes: z.string().nullable().optional(),
+  termsAndConditions: z.string().nullable().optional(),
 
   status: z.enum(['Draft', 'Pending Approval', 'Approved', 'Sent to Client', 'Confirmed Lead']),
 
-  approvedBy: z.string().optional(),
-  approvalDate: z.string().optional(),
-  woPoDocumentUrl: z.string().optional()
+  approvedBy: z.string().nullable().optional(),
+  approvalDate: z.string().nullable().optional(),
+  woPoDocumentUrl: z.string().nullable().optional()
 });
 
 export type QuotationFormValues = z.infer<typeof quotationSchema>;
