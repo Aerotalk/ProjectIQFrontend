@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, Shield, CreditCard, DollarSign } from 'lucide-react';
+import { X, Edit, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
 import type { Client } from '../../../../types/client.types';
 import { ClientService } from '../../../../services/client.service';
 
@@ -11,15 +11,12 @@ interface Props {
 
 export default function ClientProfileView({ client: initialClient, onClose, onEdit }: Props) {
   const [client, setClient] = useState<Client>(initialClient);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (initialClient.id) {
-      setIsLoading(true);
       ClientService.getClient(initialClient.id)
         .then(data => setClient(data))
-        .catch(console.error)
-        .finally(() => setIsLoading(false));
+        .catch(console.error);
     }
   }, [initialClient.id]);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Edit, Download, Info,
@@ -47,10 +47,10 @@ export default function QuotationDetails() {
     ProductService.getProducts(companyId).then(data => {
       setProducts(data.map(p => ({
         id: p.id,
-        name: p.name,
-        category: p.category || 'Product',
-        rate: p.rate || 0,
-        gst: p.taxRate || 18
+        name: p.itemName,
+        category: p.type || 'Product',
+        rate: p.standardRate || 0,
+        gst: Number(p.gstRate?.replace('%', '')) || 18
       })));
     });
   }, [companyId]);

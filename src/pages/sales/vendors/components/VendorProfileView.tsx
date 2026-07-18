@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, Shield, CreditCard, DollarSign, Landmark } from 'lucide-react';
+import { X, Edit, User, MapPin, FileText, Shield } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
 import { VendorService } from '../../../../services/vendor.service';
 
@@ -11,15 +11,12 @@ interface Props {
 
 export default function VendorProfileView({ vendor: initialVendor, onClose, onEdit }: Props) {
   const [vendor, setVendor] = useState<Vendor>(initialVendor);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (initialVendor.id) {
-      setIsLoading(true);
       VendorService.getVendor(initialVendor.id)
         .then(data => setVendor(data))
-        .catch(console.error)
-        .finally(() => setIsLoading(false));
+        .catch(console.error);
     }
   }, [initialVendor.id]);
 
