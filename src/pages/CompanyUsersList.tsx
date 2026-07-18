@@ -61,6 +61,19 @@ export default function CompanyUsersList() {
     (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto animate-in fade-in zoom-in-95 duration-300">
+        <UserDrawer 
+          isOpen={isDrawerOpen} 
+          onClose={handleDrawerClose} 
+          user={selectedUser} 
+          onSuccess={handleSaveSuccess} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -164,12 +177,6 @@ export default function CompanyUsersList() {
         </div>
       )}
 
-      <UserDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={handleDrawerClose} 
-        user={selectedUser} 
-        onSuccess={handleSaveSuccess} 
-      />
     </div>
   );
 }

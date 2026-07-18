@@ -130,6 +130,20 @@ export default function TicketList() {
     toast.success('Tickets exported successfully');
   };
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <TicketDrawer 
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveTicket}
+          mode={drawerMode}
+          initialData={selectedTicket}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -282,13 +296,6 @@ export default function TicketList() {
       </div>
       )}
 
-      <TicketDrawer 
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveTicket}
-        mode={drawerMode}
-        initialData={selectedTicket}
-      />
     </div>
   );
 }

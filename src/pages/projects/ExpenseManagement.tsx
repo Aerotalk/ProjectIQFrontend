@@ -161,9 +161,24 @@ export default function ExpenseManagement() {
     }).format(amount);
   };
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <ExpenseDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveExpense}
+          mode={drawerMode}
+          initialData={selectedExpense || undefined}
+          expenseId={selectedExpense?.id}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -422,16 +437,6 @@ export default function ExpenseManagement() {
         </div>
       )}
 
-      {/* ── Expense Drawer ── */}
-      <ExpenseDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveExpense}
-        mode={drawerMode}
-        initialData={selectedExpense || undefined}
-        expenseId={selectedExpense?.id}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

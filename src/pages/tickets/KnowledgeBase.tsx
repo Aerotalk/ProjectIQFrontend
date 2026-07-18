@@ -104,6 +104,20 @@ export default function KnowledgeBase() {
     return matchesSearch && matchesFilter;
   });
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <KBDrawer 
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveArticle}
+          mode={drawerMode}
+          initialData={selectedArticle}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -214,13 +228,6 @@ export default function KnowledgeBase() {
       </div>
       )}
 
-      <KBDrawer 
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveArticle}
-        mode={drawerMode}
-        initialData={selectedArticle}
-      />
     </div>
   );
 }

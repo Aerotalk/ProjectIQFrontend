@@ -52,11 +52,10 @@ export default function TicketDrawer({ isOpen, onClose, onSave, mode, initialDat
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div 
-      className="fixed inset-y-0 right-0 w-full max-w-2xl lg:max-w-3xl bg-white dark:bg-[#181a1f] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-gray-200 dark:border-white/10 flex flex-col"
-      style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
-    >
+    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
         <div>
