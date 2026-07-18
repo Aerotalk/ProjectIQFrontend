@@ -53,7 +53,9 @@ export const ticketSchema = z.object({
   configurationItem: z.string().optional(),
   isMajorIncident: z.boolean().optional(),
   createdAt: z.string().optional(),
-  updatedAt: z.string().optional()
+  updatedAt: z.string().optional(),
+  attachments: z.array(z.any()).optional(),
+  workNotesHistory: z.array(z.any()).optional(),
 });
 
 export type TicketFormValues = z.infer<typeof ticketSchema>;

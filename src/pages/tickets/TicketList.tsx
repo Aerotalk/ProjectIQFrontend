@@ -1,40 +1,30 @@
-import { Search, Filter, Plus, Download, MoreHorizontal } from 'lucide-react';
+import { Search, Filter, Plus, Download, ChevronRight, Calendar, User as UserIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomSelect from '@/components/ui/CustomSelect';
-import TicketDrawer from './components/TicketDrawer';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function TicketList() {
+  const navigate = useNavigate();
   const { selectedCompanyId: companyId } = useAuth();
   const [tickets, setTickets] = useState<TicketFormValues[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterPriority, setFilterPriority] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
-  const [openActionId, setOpenActionId] = useState<string | null>(null);
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
-
-  // Click outside to close action menu
-  if (typeof window !== 'undefined') {
-    window.onclick = (e: any) => {
-      if (!e.target.closest('.action-menu-btn') && !e.target.closest('.action-menu-dropdown')) {
-        setOpenActionId(null);
-      }
-    };
-  }
-
-  // Fetch tickets from backend
   const fetchTickets = async () => {
     try {
       setIsLoading(true);
       if (companyId) {
         const data = await TicketService.getAll(companyId);
-        setTickets(data);
+        // Sort descending by ID or creation time
+        const sortedData = data.sort((a, b) => (b.ticketNo || b.id || '').localeCompare(a.ticketNo || a.id || ''));
+        setTickets(sortedData);
       }
     } catch (err) {
       toast.error('Failed to load tickets');
@@ -47,75 +37,19 @@ export default function TicketList() {
     fetchTickets();
   }, [companyId]);
 
-  const markAsClosed = async (id: string) => {
-    try {
-      await TicketService.update(id, { state: 'Closed' } as any); // Minimal update
-      setTickets(tickets.map(t => t.id === id ? { ...t, state: 'Closed' } : t));
-      toast.success('Ticket marked as closed');
-    } catch (err) {
-      toast.error('Failed to close ticket');
-    }
-  };
-
-  const reopenTicket = async (id: string) => {
-    try {
-      await TicketService.update(id, { state: 'Open' } as any);
-      setTickets(tickets.map(t => t.id === id ? { ...t, state: 'Open' } : t));
-      toast.success('Ticket reopened');
-    } catch (err) {
-      toast.error('Failed to reopen ticket');
-    }
-  };
-
-  const handleCreate = () => {
-    setDrawerMode('create');
-    setSelectedTicket(null);
-    setIsDrawerOpen(true);
-  };
-
-  const handleEdit = (ticket: any) => {
-    setDrawerMode('edit');
-    setSelectedTicket(ticket);
-    setIsDrawerOpen(true);
-  };
-
-  const handleView = (ticket: any) => {
-    setDrawerMode('view');
-    setSelectedTicket(ticket);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSaveTicket = async (data: TicketFormValues) => {
-    try {
-      if (!companyId) throw new Error('No company ID');
-      
-      if (drawerMode === 'create') {
-        const newTicket = await TicketService.create(companyId, data);
-        setTickets([newTicket, ...tickets]);
-        toast.success('Ticket created successfully');
-      } else {
-        const updated = await TicketService.update(selectedTicket.id, data);
-        setTickets(tickets.map(t => t.id === selectedTicket.id ? updated : t));
-        toast.success('Ticket updated successfully');
-      }
-      setIsDrawerOpen(false);
-    } catch (err) {
-      toast.error('Failed to save ticket');
-    }
-  };
-
   const filteredTickets = tickets.filter(t => {
-    const searchTarget = (t.shortDescription || '') + (t.id || '') + (t.customerCompany || '');
+    const searchTarget = (t.shortDescription || '') + (t.ticketNo || t.id || '') + (t.customerCompany || '');
     const matchesSearch = searchTarget.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'All' || t.state === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesStatus = filterStatus === 'All' || t.state === filterStatus;
+    const matchesPriority = filterPriority === 'All' || t.priority === filterPriority;
+    return matchesSearch && matchesStatus && matchesPriority;
   });
 
   const handleExport = () => {
-    const headers = ['Ticket ID', 'Short Description', 'Client', 'Priority', 'State', 'Assigned To', 'Updated At'];
+    const headers = ['Incident Number', 'Subject', 'Client', 'Priority', 'Status', 'Assigned To', 'Updated At'];
     const csvContent = [
       headers.join(','),
-      ...filteredTickets.map(t => `"${t.id}","${t.shortDescription}","${t.customerCompany}","${t.priority}","${t.state}","${t.assignedTo}","${t.updatedAt}"`)
+      ...filteredTickets.map(t => `"${t.ticketNo || t.id}","${t.shortDescription}","${t.customerCompany}","${t.priority}","${t.state}","${t.assignedTo}","${t.updatedAt}"`)
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -127,175 +61,199 @@ export default function TicketList() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('Tickets exported successfully');
+    toast.success('Incidents exported successfully');
   };
 
-  if (isDrawerOpen) {
-    return (
-      <div className="max-w-[1400px] mx-auto">
-        <TicketDrawer 
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSaveTicket}
-          mode={drawerMode}
-          initialData={selectedTicket}
-        />
-      </div>
-    );
-  }
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'New':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-blue-700 bg-blue-50 border border-blue-200">New</span>;
+      case 'Assigned':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-indigo-700 bg-indigo-50 border border-indigo-200">Assigned</span>;
+      case 'In Progress':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-purple-700 bg-purple-50 border border-purple-200">In Progress</span>;
+      case 'Waiting for Client':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-yellow-700 bg-yellow-50 border border-yellow-200">Waiting for Client</span>;
+      case 'Resolved':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-emerald-700 bg-emerald-50 border border-emerald-200">Resolved</span>;
+      case 'Closed':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-gray-700 bg-gray-100 border border-gray-300">Closed</span>;
+      case 'Cancelled':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-red-700 bg-red-50 border border-red-200">Cancelled</span>;
+      default:
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-gray-700 bg-gray-50 border border-gray-200">{status || 'Unknown'}</span>;
+    }
+  };
+
+  const getPriorityBadge = (priority?: string) => {
+    switch (priority) {
+      case 'Critical':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-red-700 bg-red-50 border border-red-200">Critical</span>;
+      case 'High':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-orange-700 bg-orange-50 border border-orange-200">High</span>;
+      case 'Medium':
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-yellow-700 bg-yellow-50 border border-yellow-200">Medium</span>;
+      case 'Low':
+      default:
+        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-gray-700 bg-gray-50 border border-gray-200">Low</span>;
+    }
+  };
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="max-w-[1400px] mx-auto space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Tickets</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all customer support tickets.</p>
+          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-1">
+            <span>Support</span>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-900">All Tickets</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Incidents</h1>
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none sm:w-56 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search tickets..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
+          <button 
+            onClick={handleExport} 
+            className="shrink-0 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2 shadow-sm transition-colors"
+          >
+            <Download size={14} /> Export
+          </button>
+          <button 
+            onClick={() => navigate('create')}
+            className="shrink-0 px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+          >
+            <Plus size={14} /> New Incident
+          </button>
+        </div>
+      </div>
+
+      {/* Filters Toolbar */}
+      <div className="bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col sm:flex-row items-center gap-4 p-4">
+        <div className="relative flex-1 min-w-[250px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+          <input 
+            type="text" 
+            placeholder="Search incident number, subject, or client..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] focus:bg-white text-gray-900 transition-colors" 
+          />
+        </div>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-40">
+            <CustomSelect
+              value={filterPriority}
+              onChange={setFilterPriority}
+              options={[
+                { label: 'All Priorities', value: 'All' },
+                { label: 'Critical', value: 'Critical' },
+                { label: 'High', value: 'High' },
+                { label: 'Medium', value: 'Medium' },
+                { label: 'Low', value: 'Low' }
+              ]}
             />
           </div>
-          <div className="relative shrink-0 w-40">
+          <div className="w-48">
             <CustomSelect
               value={filterStatus}
               onChange={setFilterStatus}
-              icon={<Filter size={16} />}
+              icon={<Filter size={14} />}
               options={[
-                { label: 'All States', value: 'All' },
-                { label: 'Open', value: 'Open' },
+                { label: 'All Statuses', value: 'All' },
+                { label: 'New', value: 'New' },
+                { label: 'Assigned', value: 'Assigned' },
                 { label: 'In Progress', value: 'In Progress' },
+                { label: 'Waiting for Client', value: 'Waiting for Client' },
+                { label: 'Resolved', value: 'Resolved' },
                 { label: 'Closed', value: 'Closed' }
               ]}
             />
           </div>
-          <button onClick={handleExport} className="shrink-0 px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
-            <Download size={16} /> Export
-          </button>
-          <button 
-            onClick={handleCreate}
-            className="shrink-0 px-3 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
-          >
-            <Plus size={16} /> Create Incident
-          </button>
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-20 text-gray-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 dark:bg-black/20 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
-              <tr>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 cursor-pointer hover:text-gray-700">Ticket ID</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Short Description</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 cursor-pointer hover:text-gray-700">Client</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 cursor-pointer hover:text-gray-700">Priority</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 cursor-pointer hover:text-gray-700">State</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Assigned To</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 cursor-pointer hover:text-gray-700">Updated At</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-              {filteredTickets.map((t) => (
-                <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
-                  <td onClick={() => handleView(t)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{t.ticketNo || t.id?.substring(0,8)}</td>
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.shortDescription || 'No description'}</td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.customerCompany || 'N/A'}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                      t.priority === 'Critical' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
-                      t.priority === 'High' ? 'text-orange-700 bg-orange-50 dark:bg-orange-500/10' :
-                      t.priority === 'Medium' ? 'text-yellow-700 bg-yellow-50 dark:bg-yellow-500/10' :
-                      'text-green-700 bg-green-50 dark:bg-green-500/10'
-                    }`}>
-                      {t.priority || 'Low'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                      t.state === 'Open' ? 'text-blue-700 bg-blue-50 dark:bg-blue-500/10' :
-                      t.state === 'In Progress' ? 'text-purple-700 bg-purple-50 dark:bg-purple-500/10' :
-                      'text-green-700 bg-green-50 dark:bg-green-500/10'
-                    }`}>
-                      {t.state || 'New'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
-                      {t.assignedTo ? t.assignedTo.split(' ').map((n: string) => n[0]).join('') : 'U'}
-                    </div>
-                    {t.assignedTo || 'Unassigned'}
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'}</td>
-                  <td className={`px-6 py-4 text-center ${openActionId === t.id ? 'relative z-50' : 'relative z-10'}`}>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); if (t.id) setOpenActionId(openActionId === t.id ? null : t.id); }}
-                      className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                    {openActionId === t.id && (
-                      <div className="action-menu-dropdown absolute right-12 top-10 w-40 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm">
-                        <button onClick={(e) => { e.stopPropagation(); handleView(t); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
-                          View Details
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleEdit(t); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
-                          Edit Ticket
-                        </button>
-                        {t.state !== 'Closed' && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); if (t.id) markAsClosed(t.id); setOpenActionId(null); }}
-                            className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5"
-                          >
-                            Mark as Closed
-                          </button>
-                        )}
-                        {t.state === 'Closed' && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); if (t.id) reopenTicket(t.id); setOpenActionId(null); }}
-                            className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5"
-                          >
-                            Reopen Incident
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </td>
+      {/* Table */}
+      <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="flex justify-center py-20 text-gray-400">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto min-h-[400px]">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-[#F8F9FC] border-b border-gray-200 text-gray-600 font-semibold text-[12px] uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Incident Number</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Subject</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Project / Client</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Priority</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Status</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Assigned To</th>
+                  <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Updated</th>
+                  <th className="px-6 py-3 text-center"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredTickets.length === 0 && (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              No tickets found matching your search.
-            </div>
-          )}
-        </div>
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-sm text-gray-500">
-          <span>Showing 1 to {filteredTickets.length} of {filteredTickets.length} tickets</span>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredTickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-16 text-center text-gray-500">
+                      No incidents found matching your criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTickets.map((t) => (
+                    <tr 
+                      key={t.id} 
+                      onClick={() => navigate(t.id || '')}
+                      className="hover:bg-gray-50 cursor-pointer transition-colors group"
+                    >
+                      <td className="px-6 py-3.5 font-medium text-[#792359]">
+                        {t.ticketNo || t.id?.substring(0,10).toUpperCase()}
+                      </td>
+                      <td className="px-6 py-3.5 text-gray-900 font-medium truncate max-w-[200px]">
+                        {t.shortDescription || 'No description provided'}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        <div className="text-gray-900 font-medium">{t.projectId?.substring(0,8) || 'Unknown Project'}</div>
+                        <div className="text-gray-500 text-[11px] mt-0.5">{t.customerCompany || 'N/A'}</div>
+                      </td>
+                      <td className="px-6 py-3.5">
+                        {getPriorityBadge(t.priority)}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        {getStatusBadge(t.state)}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
+                            {t.assignedTo ? t.assignedTo.substring(0, 1).toUpperCase() : <UserIcon size={12} />}
+                          </div>
+                          <span className="text-gray-600 text-[13px]">{t.assignedTo || 'Unassigned'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3.5 text-gray-500 text-[13px] flex items-center gap-1.5 mt-1.5">
+                        <Calendar size={13} className="text-gray-400" />
+                        {t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'}
+                      </td>
+                      <td className="px-6 py-3.5 text-right text-gray-400 group-hover:text-[#792359]">
+                        <ChevronRight size={16} />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        
+        {/* Pagination Footer */}
+        <div className="px-6 py-3 border-t border-gray-200 bg-[#F8F9FC] flex items-center justify-between text-[13px] text-gray-600">
+          <span>Showing {filteredTickets.length > 0 ? 1 : 0} to {filteredTickets.length} of {filteredTickets.length} incidents</span>
           <div className="flex gap-1">
-            <button className="px-3 py-1 rounded-md bg-[#792359] text-white font-medium">1</button>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/5">2</button>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/5">3</button>
-            <span className="px-2 py-1">...</span>
-            <button className="px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/5">10</button>
+            <button className="px-2.5 py-1 rounded-sm bg-[#792359] text-white font-medium shadow-sm">1</button>
           </div>
         </div>
       </div>
-      )}
-
     </div>
   );
 }

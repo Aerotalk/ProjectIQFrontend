@@ -5,8 +5,8 @@ import CompanyProfile from './CompanyProfile';
 import AdminProfile from './AdminProfile';
 import TicketDashboard from './tickets/TicketDashboard';
 import TicketList from './tickets/TicketList';
-import CreateTicket from './tickets/CreateTicket';
-import TicketDetails from './tickets/TicketDetails';
+import CreateIncident from './tickets/CreateIncident';
+import IncidentDetail from './tickets/IncidentDetail';
 import TicketReport from './tickets/TicketReport';
 import TicketAdmin from './tickets/TicketAdmin';
 import KnowledgeBase from './tickets/KnowledgeBase';
@@ -57,8 +57,8 @@ export default function CompanyDashboard() {
         <Route path="/" element={<TicketDashboard />} />
         <Route path="/tickets" element={<TicketList />} />
         <Route path="/tickets/kb" element={<KnowledgeBase />} />
-        <Route path="/tickets/create" element={<CreateTicket />} />
-        <Route path="/tickets/:id" element={<TicketDetails />} />
+        <Route path="/tickets/create" element={<CreateIncident />} />
+        <Route path="/tickets/:id" element={<IncidentDetail />} />
         <Route path="/tickets/:id/report" element={<TicketReport />} />
         <Route path="/admin" element={<TicketAdmin />} />
         <Route path="/sales" element={
