@@ -75,14 +75,18 @@ export const getVendorSchema = () => {
 
     // Commercial
     paymentTerms: z.string().optional(),
-    creditLimit: z.number().optional().nullable(),
+    creditLimit: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
     notes: z.string().optional(),
 
     // Bank Details
-    bankDetails: vendorBankDetailsSchema.optional(),
+    bankDetails: z.preprocess((val: any) => {
+      if (!val || typeof val !== 'object') return undefined;
+      const isEmpty = Object.values(val).every(v => !v || v === '');
+      return isEmpty ? undefined : val;
+    }, vendorBankDetailsSchema.optional()),
 
     // Taxation
-    tdsPercentage: z.number().optional().nullable(),
+    tdsPercentage: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
     reverseCharge: z.boolean().optional(),
 
     status: z.enum(['Active', 'Inactive'])

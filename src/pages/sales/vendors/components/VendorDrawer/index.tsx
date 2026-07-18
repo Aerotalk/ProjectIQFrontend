@@ -140,7 +140,7 @@ export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialDat
             ) : (
               <>
                 <Save size={16} />
-                Save Vendor
+                {mode === 'edit' ? 'Update Vendor' : 'Save Vendor'}
               </>
             )}
           </button>

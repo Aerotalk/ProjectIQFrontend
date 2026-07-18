@@ -67,7 +67,7 @@ export const getClientSchema = () => {
 
     // Commercial
     paymentTerms: z.string().optional(),
-    creditLimit: z.number().optional().nullable(),
+    creditLimit: z.preprocess((val) => Number.isNaN(val) ? undefined : val, z.number().optional().nullable()),
     industry: z.string().optional(),
     notes: z.string().optional(),
     status: z.enum(['Active', 'Inactive'])

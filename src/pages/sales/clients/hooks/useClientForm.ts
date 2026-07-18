@@ -15,7 +15,8 @@ export const useClientForm = (defaultValues?: Partial<ClientFormValues>) => {
     resolver: async (data, context, options) => {
       const { getClientSchema } = await import('../validators/clientValidation');
       const dynamicSchema = getClientSchema();
-      return zodResolver(dynamicSchema)(data, context, options);
+      const resolver = zodResolver(dynamicSchema) as any;
+      return resolver(data, context, options);
     },
     defaultValues: {
       customerType: 'Business',

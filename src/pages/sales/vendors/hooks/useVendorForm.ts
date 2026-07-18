@@ -15,7 +15,8 @@ export const useVendorForm = (defaultValues?: Partial<VendorFormValues>) => {
     resolver: async (data, context, options) => {
       const { getVendorSchema } = await import('../validators/vendorValidation');
       const dynamicSchema = getVendorSchema();
-      return zodResolver(dynamicSchema)(data, context, options);
+      const resolver = zodResolver(dynamicSchema) as any;
+      return resolver(data, context, options);
     },
     defaultValues: {
       vendorType: 'Business',
