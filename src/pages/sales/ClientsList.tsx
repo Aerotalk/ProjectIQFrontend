@@ -16,6 +16,12 @@ export default function ClientsList() {
   const [companies, setCompanies] = useState<any[]>([]);
   const [localCompanyId, setLocalCompanyId] = useState<string>(user?.companyId || '');
 
+  useEffect(() => {
+    if (user?.companyId && !localCompanyId) {
+      setLocalCompanyId(user.companyId);
+    }
+  }, [user?.companyId, localCompanyId]);
+
   const { clients, isListLoading: isLoading, isSaveLoading, createClient, updateClient, archiveClient } = useClients({ companyId: localCompanyId });
   const [searchTerm, setSearchTerm] = useState('');
   
