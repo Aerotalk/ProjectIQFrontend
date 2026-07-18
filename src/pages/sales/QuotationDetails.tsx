@@ -1,21 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ChevronRight, Edit, Download, Info, 
+import {
+  ChevronRight, Edit, Download, Info,
   CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
+import { ClientService } from '../../services/client.service';
+import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
+import type { Client } from '../../types/client.types';
 import { formatQuotationId } from '../../lib/utils';
+
+interface UserData {
+  id: string;
+  username: string;
+  email: string;
+}
 
 export default function QuotationDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId: companyId, user } = useAuth();
   const [isApiLoading, setIsApiLoading] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
 
   const isNew = id === 'new';
   const [isEditing, setIsEditing] = useState(isNew);
@@ -59,16 +70,27 @@ export default function QuotationDetails() {
 
   const [quotation, setQuotation] = useState({
     qtnNo: isNew ? 'Unassigned' : '',
+    clientId: isNew ? '' : '',
     client: isNew ? '' : '',
     project: isNew ? '' : '',
     amount: isNew ? '' : '',
     validTill: isNew ? '' : '',
-    owner: 'Arjun Dev',
+    owner: user?.username || user?.email || 'Unassigned',
     discount: 0,
+    deliveryCost: 0,
     createdOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     currency: 'INR'
   });
+
+  useEffect(() => {
+    if (companyId) {
+      ClientService.getClients(companyId).then(setClients).catch(console.error);
+      api.get('/admin/users').then((res: any) => {
+        setUsers(Array.isArray(res) ? res : (res.content || []));
+      }).catch(console.error);
+    }
+  }, [companyId]);
 
   const getStageFromStatus = (status?: string) => {
     switch (status) {
@@ -102,19 +124,33 @@ export default function QuotationDetails() {
 
   // Fetch existing quotation from backend API
   useEffect(() => {
-    if (!isNew && id) {
+    if (!isNew && id && clients.length > 0 && users.length > 0) {
       setIsApiLoading(true);
       QuotationService.getQuotation(id)
         .then((data: Quotation) => {
           setCurrentStage(getStageFromStatus(data.status));
+
+          let clientName = data.clientName || '';
+          if (!clientName && data.clientId) {
+            const foundClient = clients.find(c => c.id === data.clientId);
+            if (foundClient) clientName = foundClient.displayName || foundClient.companyName || '';
+          }
+
+          let ownerName = data.salesperson || data.approvedBy;
+          if (!ownerName) {
+            ownerName = user?.username || user?.email || 'Unassigned';
+          }
+
           setQuotation({
             qtnNo: formatQuotationId(data.quotationNo || data.id),
-            client: data.clientName || '',
+            clientId: data.clientId || '',
+            client: clientName,
             project: data.subject || '',
             amount: String(data.grandTotal || ''),
             validTill: data.validUntil ? data.validUntil.split('T')[0] : '',
-            owner: data.salesperson || data.approvedBy || 'Unassigned',
+            owner: ownerName,
             discount: data.totalDiscount || 0,
+            deliveryCost: data.deliveryCost || 0,
             createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
             lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             currency: 'INR'
@@ -139,7 +175,7 @@ export default function QuotationDetails() {
         })
         .finally(() => setIsApiLoading(false));
     }
-  }, [id, isNew]);
+  }, [id, isNew, clients.length, users.length]);
 
   // Helper to format date nicely when not editing
   const formatDate = (dateString: string) => {
@@ -154,7 +190,7 @@ export default function QuotationDetails() {
 
   const subTotal = lineItems.reduce((sum, item) => sum + (item.rate * item.qty), 0);
   const totalGst = lineItems.reduce((sum, item) => sum + (item.rate * item.qty * item.gst / 100), 0);
-  const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0);
+  const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
 
   const renderBanner = () => {
     switch (currentStage) {
@@ -168,7 +204,7 @@ export default function QuotationDetails() {
               </p>
             </div>
             {isNew ? (
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={async () => {
                   if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
@@ -179,7 +215,7 @@ export default function QuotationDetails() {
                     toast.error('No company selected');
                     return;
                   }
-                  
+
                   setIsApiLoading(true);
                   try {
                     // Save via backend API
@@ -204,15 +240,16 @@ export default function QuotationDetails() {
                       })),
                       subTotal: subTotal,
                       totalDiscount: Number(quotation.discount) || 0,
+                      deliveryCost: Number(quotation.deliveryCost) || 0,
                       totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
                       totalGstAmount: totalGst,
                       grandTotal: grandTotal,
                       status: 'Draft'
                     };
-                    
+
                     await QuotationService.createQuotation(companyId, newQuotationData);
-                    toast.success('Quotation draft saved successfully'); 
-                    navigate('/companydashboard/sales/quotations'); 
+                    toast.success('Quotation draft saved successfully');
+                    navigate('/companydashboard/sales/quotations');
                   } catch (err: any) {
                     toast.error(err?.message || 'Failed to save quotation');
                   } finally {
@@ -224,7 +261,7 @@ export default function QuotationDetails() {
                 Save Draft
               </button>
             ) : (
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={() => {
                   if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
@@ -248,14 +285,14 @@ export default function QuotationDetails() {
               <p className="text-sm text-yellow-800 dark:text-yellow-200">Quotation is sent for internal approval. You will be notified once it is approved or rejected.</p>
             </div>
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
                 className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
                 Reject
               </button>
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
                 className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
@@ -273,14 +310,14 @@ export default function QuotationDetails() {
               <p className="text-sm text-blue-800 dark:text-blue-200">Quotation has been sent to the client. You can track client view and follow-up.</p>
             </div>
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Changes Requested', 'Marked as Under Negotiation', 4)}
                 className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
                 Client Requested Changes
               </button>
-              <button 
+              <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Accepted', 'Client Accepted Quotation!', 5)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm font-medium rounded-sm transition-colors disabled:opacity-50"
@@ -297,7 +334,7 @@ export default function QuotationDetails() {
               <Info className="text-purple-600 dark:text-purple-400" size={20} />
               <p className="text-sm text-purple-800 dark:text-purple-200">Client has requested changes. Edit the quotation to create a revision, then send it back for internal approval.</p>
             </div>
-            <button 
+            <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Pending Approval', 'Revision sent for internal approval.', 2)}
               className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
@@ -313,7 +350,7 @@ export default function QuotationDetails() {
               <CheckCircle2 className="text-emerald-600 dark:text-emerald-500" size={20} />
               <p className="text-sm text-emerald-800 dark:text-emerald-200">Great! The quotation is accepted by the client. Please upload the WO/PO to convert.</p>
             </div>
-            <button 
+            <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Converted', 'Quotation converted to project!', 6)}
               className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
@@ -347,7 +384,7 @@ export default function QuotationDetails() {
       case 2: return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20';
       case 3: return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
       case 4: return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20';
-      case 5: 
+      case 5:
       case 6: return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20';
       default: return '';
     }
@@ -379,7 +416,7 @@ export default function QuotationDetails() {
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {currentStage === 6 && (
             <button className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2">
@@ -387,7 +424,7 @@ export default function QuotationDetails() {
             </button>
           )}
           {(currentStage === 1 || currentStage === 4) && (
-            <button 
+            <button
               disabled={isApiLoading}
               onClick={async () => {
                 if (isEditing) {
@@ -395,11 +432,14 @@ export default function QuotationDetails() {
                     setIsApiLoading(true);
                     try {
                       await QuotationService.updateQuotation(id, {
+                        clientId: quotation.clientId,
                         clientName: quotation.client,
                         subject: quotation.project,
+                        salesperson: quotation.owner,
                         grandTotal: Number(quotation.amount) || 0,
                         validUntil: quotation.validTill,
-                        totalDiscount: Number(quotation.discount) || 0
+                        totalDiscount: Number(quotation.discount) || 0,
+                        deliveryCost: Number(quotation.deliveryCost) || 0
                       });
                       toast.success('Changes saved successfully');
                     } catch (err: any) {
@@ -413,21 +453,67 @@ export default function QuotationDetails() {
                 }
                 setIsEditing(!isEditing);
               }}
-              className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${
-                isEditing 
-                  ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm' 
+              className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${isEditing
+                  ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
                   : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-              }`}
+                }`}
             >
               {isEditing ? 'Save Changes' : <><Edit size={16} /> Edit</>}
+            </button>
+          )}
+          {isEditing && (
+            <button
+              onClick={() => {
+                setIsEditing(false);
+                if (!isNew && id) {
+                  setIsApiLoading(true);
+                  QuotationService.getQuotation(id).then((data) => {
+                    let clientName = data.clientName || '';
+                    if (!clientName && data.clientId) {
+                      const foundClient = clients.find(c => c.id === data.clientId);
+                      if (foundClient) clientName = foundClient.displayName || foundClient.companyName || '';
+                    }
+                    let ownerName = data.salesperson || data.approvedBy;
+                    if (!ownerName) {
+                      ownerName = user?.username || user?.email || 'Unassigned';
+                    }
+                    setQuotation({
+                      qtnNo: formatQuotationId(data.quotationNo || data.id),
+                      clientId: data.clientId || '',
+                      client: clientName,
+                      project: data.subject || '',
+                      amount: String(data.grandTotal || ''),
+                      validTill: data.validUntil ? data.validUntil.split('T')[0] : '',
+                      owner: ownerName,
+                      discount: data.totalDiscount || 0,
+                      deliveryCost: data.deliveryCost || 0,
+                      createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
+                      lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                      currency: 'INR'
+                    });
+                    if (data.lineItems && data.lineItems.length > 0) {
+                      setLineItems(data.lineItems.map(item => ({
+                        id: item.id || item.productId || Math.random().toString(),
+                        name: item.itemName || 'Unknown Item',
+                        category: 'Service',
+                        qty: item.quantity || 1,
+                        rate: item.rate || 0,
+                        gst: item.gstRate || 0,
+                        amount: item.totalAmount || 0
+                      })));
+                    }
+                  }).finally(() => setIsApiLoading(false));
+                }
+              }}
+              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+            >
+              Cancel
             </button>
           )}
           <button className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2">
             <Download size={16} /> Download PDF
           </button>
-          <button className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 p-2 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 text-sm font-medium">
-            More <ChevronRight size={16} className="rotate-90" />
-          </button>
+
         </div>
       </div>
 
@@ -437,9 +523,9 @@ export default function QuotationDetails() {
           <div className="relative flex justify-between">
             {/* Background Line */}
             <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 dark:bg-white/10 -translate-y-1/2 z-0"></div>
-            
+
             {/* Progress Line */}
-            <div 
+            <div
               className="absolute top-1/2 left-0 h-[2px] bg-[#792359] dark:bg-[#e6a8d0] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
               style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
             ></div>
@@ -451,10 +537,10 @@ export default function QuotationDetails() {
 
               return (
                 <div key={stage.id} className="relative z-10 flex flex-col items-center gap-3 bg-gray-50/50 dark:bg-transparent px-2">
-                  <div 
+                  <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 border-2
-                      ${isPast || isActive 
-                        ? 'bg-[#792359] border-[#792359] text-white' 
+                      ${isPast || isActive
+                        ? 'bg-[#792359] border-[#792359] text-white'
                         : 'bg-white dark:bg-[#181a1f] border-gray-300 dark:border-gray-600 text-gray-400'
                       }
                       ${isConverted ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
@@ -463,10 +549,10 @@ export default function QuotationDetails() {
                     {(isPast || isConverted) ? <CheckCircle2 size={16} /> : stage.id}
                   </div>
                   <span className={`text-xs font-semibold uppercase tracking-wider
-                    ${isActive 
-                      ? 'text-[#792359] dark:text-[#e6a8d0]' 
-                      : isPast || isConverted 
-                        ? 'text-gray-900 dark:text-gray-300' 
+                    ${isActive
+                      ? 'text-[#792359] dark:text-[#e6a8d0]'
+                      : isPast || isConverted
+                        ? 'text-gray-900 dark:text-gray-300'
                         : 'text-gray-400'
                     }
                   `}>
@@ -493,12 +579,13 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Client</p>
                   {isEditing ? (
-                    <input 
-                      type="text" 
-                      value={quotation.client} 
-                      onChange={(e) => setQuotation({...quotation, client: e.target.value})} 
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]" 
-                      placeholder="Enter Client Name"
+                    <CustomSelect
+                      value={quotation.clientId}
+                      onChange={(val) => {
+                        const client = clients.find(c => c.id === val);
+                        setQuotation({ ...quotation, clientId: val, client: client ? (client.displayName || client.companyName || '') : '' });
+                      }}
+                      options={clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))}
                     />
                   ) : (
                     <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
@@ -507,11 +594,11 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Project / Opportunity</p>
                   {isEditing ? (
-                    <input 
-                      type="text" 
-                      value={quotation.project} 
-                      onChange={(e) => setQuotation({...quotation, project: e.target.value})} 
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]" 
+                    <input
+                      type="text"
+                      value={quotation.project}
+                      onChange={(e) => setQuotation({ ...quotation, project: e.target.value })}
+                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
                       placeholder="Enter Project Name"
                     />
                   ) : (
@@ -521,11 +608,11 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Quotation Value</p>
                   {isEditing ? (
-                    <input 
-                      type="number" 
-                      value={quotation.amount} 
-                      onChange={(e) => setQuotation({...quotation, amount: e.target.value})} 
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]" 
+                    <input
+                      type="number"
+                      value={quotation.amount}
+                      onChange={(e) => setQuotation({ ...quotation, amount: e.target.value })}
+                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
                       placeholder="e.g. 100000"
                     />
                   ) : (
@@ -537,11 +624,11 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valid Till</p>
                   {isEditing ? (
-                    <input 
-                      type="date" 
-                      value={quotation.validTill} 
-                      onChange={(e) => setQuotation({...quotation, validTill: e.target.value})} 
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]" 
+                    <input
+                      type="date"
+                      value={quotation.validTill}
+                      onChange={(e) => setQuotation({ ...quotation, validTill: e.target.value })}
+                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{formatDate(quotation.validTill)}</p>
@@ -550,15 +637,10 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Owner</p>
                   {isEditing ? (
-                    <CustomSelect 
-                      value={quotation.owner} 
-                      onChange={(val) => setQuotation({...quotation, owner: val})}
-                      options={[
-                        { label: 'Arjun Dev', value: 'Arjun Dev' },
-                        { label: 'Sneha Iyer', value: 'Sneha Iyer' },
-                        { label: 'Rohit Singh', value: 'Rohit Singh' },
-                        { label: 'Anita Desai', value: 'Anita Desai' }
-                      ]}
+                    <CustomSelect
+                      value={quotation.owner}
+                      onChange={(val) => setQuotation({ ...quotation, owner: val })}
+                      options={users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))}
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.owner}</p>
@@ -575,9 +657,9 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Currency</p>
                   {isEditing ? (
-                    <CustomSelect 
-                      value={quotation.currency} 
-                      onChange={(val) => setQuotation({...quotation, currency: val})}
+                    <CustomSelect
+                      value={quotation.currency}
+                      onChange={(val) => setQuotation({ ...quotation, currency: val })}
                       options={[
                         { label: 'INR', value: 'INR' },
                         { label: 'USD', value: 'USD' },
@@ -599,11 +681,10 @@ export default function QuotationDetails() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === tab 
-                        ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]' 
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
+                        ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]'
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                    }`}
+                      }`}
                   >
                     {tab}
                   </button>
@@ -643,7 +724,7 @@ export default function QuotationDetails() {
 
                   <div className="flex justify-between items-start">
                     {isEditing || currentStage === 1 ? (
-                      <button 
+                      <button
                         onClick={() => setIsProductModalOpen(true)}
                         className="flex items-center gap-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium border border-[#792359]/20 px-3 py-1.5 rounded-sm hover:bg-[#792359]/5 transition-colors"
                       >
@@ -665,15 +746,29 @@ export default function QuotationDetails() {
                       <div className="flex justify-between text-sm items-center">
                         <span className="text-gray-500">Discount</span>
                         {isEditing ? (
-                          <input 
+                          <input
                             type="number"
                             value={quotation.discount}
-                            onChange={(e) => setQuotation({...quotation, discount: Number(e.target.value)})}
+                            onChange={(e) => setQuotation({ ...quotation, discount: Number(e.target.value) })}
                             className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
                             min="0"
                           />
                         ) : (
                           <span className="font-medium text-gray-900 dark:text-white text-red-500">-{Number(quotation.discount || 0).toLocaleString('en-IN')}</span>
+                        )}
+                      </div>
+                      <div className="flex justify-between text-sm items-center">
+                        <span className="text-gray-500">Delivery Cost</span>
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            value={quotation.deliveryCost}
+                            onChange={(e) => setQuotation({ ...quotation, deliveryCost: Number(e.target.value) })}
+                            className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                            min="0"
+                          />
+                        ) : (
+                          <span className="font-medium text-gray-900 dark:text-white">{Number(quotation.deliveryCost || 0).toLocaleString('en-IN')}</span>
                         )}
                       </div>
                       <div className="border-t border-gray-200 dark:border-white/10 pt-2 flex justify-between">
@@ -684,7 +779,7 @@ export default function QuotationDetails() {
                   </div>
                 </div>
               )}
-              
+
               {activeTab !== 'Products & Services' && (
                 <div className="py-12 flex flex-col items-center justify-center text-gray-400 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-sm border-dashed">
                   <FileText size={32} className="mb-3 opacity-50" />
@@ -761,7 +856,7 @@ export default function QuotationDetails() {
                 )}
                 <div className="mt-4 relative">
                   <input type="text" placeholder="Add communication note..." className="w-full pl-3 pr-10 py-2 border border-gray-200 dark:border-white/10 rounded-sm text-sm bg-gray-50 dark:bg-[#0f1115]" />
-                  <button 
+                  <button
                     onClick={() => toast.success('Note added successfully')}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#792359] transition-colors"
                   >
@@ -810,11 +905,11 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Next Step</p>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {currentStage === 1 ? 'Send for approval' : 
-                     currentStage === 2 ? 'Awaiting approval' : 
-                     currentStage === 3 ? 'Awaiting client response' :
-                     currentStage === 4 ? 'Share revised quotation' :
-                     currentStage === 5 ? 'Upload WO / PO' : 'Project & Finance created'}
+                    {currentStage === 1 ? 'Send for approval' :
+                      currentStage === 2 ? 'Awaiting approval' :
+                        currentStage === 3 ? 'Awaiting client response' :
+                          currentStage === 4 ? 'Share revised quotation' :
+                            currentStage === 5 ? 'Upload WO / PO' : 'Project & Finance created'}
                   </p>
                 </div>
               </div>
@@ -911,7 +1006,7 @@ export default function QuotationDetails() {
           <div className="bg-white dark:bg-[#181a1f] w-full max-w-2xl rounded-sm shadow-xl flex flex-col max-h-[80vh]">
             <div className="p-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Select Product / Service</h2>
-              <button 
+              <button
                 onClick={() => setIsProductModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               >
@@ -926,7 +1021,7 @@ export default function QuotationDetails() {
                       <p className="font-semibold text-gray-900 dark:text-white text-sm">{product.name}</p>
                       <p className="text-xs text-gray-500">{product.category} • Rate: ₹ {product.rate.toLocaleString('en-IN')} (GST: {product.gst}%)</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
                         setLineItems([...lineItems, { ...product, id: Math.random().toString(36).substr(2, 9), qty: 1, amount: product.rate }]);
                         setIsProductModalOpen(false);

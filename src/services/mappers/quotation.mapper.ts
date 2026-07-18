@@ -24,6 +24,7 @@ export interface QuotationDto {
   validUntil: string;
   subject?: string;
   reference?: string;
+  salesperson?: string;
 
   lineItems: QuotationLineItemDto[];
 
@@ -48,6 +49,7 @@ export const mapToQuotation = (dto: QuotationDto): Quotation => {
   return {
     ...dto,
     status: dto.status as any,
+    salesperson: dto.salesperson,
     lineItems: dto.lineItems.map(item => ({
       ...item
     }))
@@ -75,6 +77,7 @@ export const mapToQuotationDto = (quotation: Partial<Quotation>): Partial<Quotat
     date: formatDateTime(date),
     validUntil: formatDateTime(validUntil),
     approvalDate: formatDateTime(approvalDate),
+    salesperson: restOfQuotation.salesperson,
     lineItems: quotation.lineItems?.map(item => ({
       ...item
     }))

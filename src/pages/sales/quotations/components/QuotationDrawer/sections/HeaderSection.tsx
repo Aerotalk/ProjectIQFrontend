@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function HeaderSection({ readOnly, nextNumber }: Props) {
-  const { register, control, formState: { errors }, setValue, getValues } = useFormContext();
+  const { register, control, formState: { errors }, setValue, getValues, watch } = useFormContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
 
@@ -41,6 +41,9 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
     (hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10');
 
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
+
+  const selectedClientId = watch('clientId');
+  const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
     <div className="space-y-4">
@@ -86,6 +89,61 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
           </div>
           {errors.clientId && <p className="text-red-500 text-xs mt-1">{errors.clientId.message as string}</p>}
         </div>
+
+        {selectedClient && (
+          <div className="md:col-span-2 mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
+                <div className="text-gray-800 dark:text-gray-200">
+                  <div className="font-medium">{selectedClient.companyName || selectedClient.displayName}</div>
+                  <div>{selectedClient.billingAddressLine1}</div>
+                  {selectedClient.billingAddressLine2 && <div>{selectedClient.billingAddressLine2}</div>}
+                  <div>{selectedClient.billingCity}, {selectedClient.billingState} {selectedClient.billingPinCode}</div>
+                  <div>{selectedClient.billingCountry}</div>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Shipping Address</h4>
+                <div className="text-gray-800 dark:text-gray-200">
+                  <div className="font-medium">{selectedClient.companyName || selectedClient.displayName}</div>
+                  {selectedClient.sameAsBillingAddress ? (
+                    <>
+                      <div>{selectedClient.billingAddressLine1}</div>
+                      {selectedClient.billingAddressLine2 && <div>{selectedClient.billingAddressLine2}</div>}
+                      <div>{selectedClient.billingCity}, {selectedClient.billingState} {selectedClient.billingPinCode}</div>
+                      <div>{selectedClient.billingCountry}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div>{selectedClient.shippingAddressLine1 || '-'}</div>
+                      {selectedClient.shippingAddressLine2 && <div>{selectedClient.shippingAddressLine2}</div>}
+                      <div>{selectedClient.shippingCity || '-'}, {selectedClient.shippingState || '-'} {selectedClient.shippingPinCode || '-'}</div>
+                      <div>{selectedClient.shippingCountry || '-'}</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-x-8 gap-y-2 pt-3 border-t border-gray-200 dark:border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400">GST Treatment:</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {selectedClient.gstTreatment === 'business_gst' ? 'Registered Business' : 
+                   selectedClient.gstTreatment === 'business_none' ? 'Unregistered Business' : 
+                   selectedClient.gstTreatment === 'consumer' ? 'Consumer' : 
+                   selectedClient.gstTreatment === 'sez' ? 'SEZ' : 'Overseas'}
+                </span>
+              </div>
+              {selectedClient.gstin && (
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 dark:text-gray-400">GSTIN:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedClient.gstin}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div>
           <label className={labelClass}>
@@ -133,8 +191,8 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
           <input 
             type="text" 
             {...register('salesperson')} 
-            disabled={true}
-            className={fieldClass(!!errors.salesperson)}
+            readOnly={true}
+            className={`${fieldClass(!!errors.salesperson)} bg-gray-50 dark:bg-white/5 text-gray-500 cursor-not-allowed`}
           />
           {errors.salesperson && <p className="text-red-500 text-xs mt-1">{errors.salesperson.message as string}</p>}
         </div>
