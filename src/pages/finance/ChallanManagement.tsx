@@ -14,8 +14,14 @@ import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNextSequenceNumber } from '../../utils/sequence';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 export default function ChallanManagement() {
+  useBreadcrumbs([
+    { label: 'Finance', path: '/companydashboard/finance' },
+    { label: 'Delivery Challans' }
+  ]);
+
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
@@ -174,11 +180,6 @@ export default function ChallanManagement() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Finance</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Delivery Challans</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             Delivery Challans
           </h1>

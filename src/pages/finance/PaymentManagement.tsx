@@ -13,6 +13,7 @@ import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNextSequenceNumber } from '../../utils/sequence';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 const STATUS_STYLES: Record<PaymentRecord['status'], string> = {
   Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
@@ -33,6 +34,11 @@ export default function PaymentManagement() {
   const { projects } = useProjects();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useBreadcrumbs([
+    { label: 'Finance', path: '/companydashboard/finance' },
+    { label: 'Payments' }
+  ]);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -181,11 +187,6 @@ export default function PaymentManagement() {
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Finance</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Payments</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             Payments
           </h1>

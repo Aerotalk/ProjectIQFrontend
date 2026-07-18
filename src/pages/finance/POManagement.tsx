@@ -8,8 +8,10 @@ import toast from 'react-hot-toast';
 import { POService } from '../../services/po.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
+import type { Project } from '../../types/project.types';
 import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { VendorService } from '../../services/vendor.service';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -48,14 +50,19 @@ export default function POManagement() {
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+
+  useBreadcrumbs([
+    { label: 'Finance', path: '/companydashboard/finance' },
+    { label: 'Purchase Orders' }
+  ]);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
@@ -218,11 +225,6 @@ export default function POManagement() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Finance</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Purchase Orders</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             Purchase Orders
           </h1>

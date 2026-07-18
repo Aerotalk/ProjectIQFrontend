@@ -11,6 +11,7 @@ import type { Client } from '../../types/client.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { formatQuotationId } from '../../lib/utils';
 import { getNextSequenceNumber } from '../../utils/sequence';
 
@@ -27,6 +28,11 @@ export default function QuotationsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [clients, setClients] = useState<Client[]>([]);
+
+  useBreadcrumbs([
+    { label: 'Sales', path: '/companydashboard/sales' },
+    { label: 'Quotations' }
+  ]);
 
   useEffect(() => {
     if (companyId) {
@@ -88,11 +94,6 @@ export default function QuotationsList() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Sales</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Quotations</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Quotations</h1>
         </div>
         <button

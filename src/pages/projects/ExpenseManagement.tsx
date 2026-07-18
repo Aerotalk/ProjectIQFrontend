@@ -11,6 +11,7 @@ import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { getNextSequenceNumber } from '../../utils/sequence';
 
 const EXPENSE_CATEGORIES = [
@@ -28,6 +29,11 @@ export default function ExpenseManagement() {
   const { projects } = useProjects();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useBreadcrumbs([
+    { label: 'Projects', path: '/companydashboard/projects' },
+    { label: 'Expenses' }
+  ]);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -183,11 +189,6 @@ export default function ExpenseManagement() {
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Projects</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Expenses</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             Expenses
           </h1>

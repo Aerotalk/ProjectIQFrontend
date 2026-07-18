@@ -9,6 +9,7 @@ import ClientDrawer from './clients/components/ClientDrawer';
 import ClientProfileView from './clients/components/ClientProfileView';
 import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 export default function ClientsList() {
   const { user } = useAuth();
@@ -36,6 +37,11 @@ export default function ClientsList() {
   const itemsPerPage = 6;
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  useBreadcrumbs([
+    { label: 'Sales', path: '/companydashboard/sales' },
+    { label: 'Clients' }
+  ]);
 
   useEffect(() => {
     if (!isCompanyScopedUser) {
@@ -126,11 +132,6 @@ export default function ClientsList() {
       {/* Breadcrumb & Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Sales</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Clients</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Clients</h1>
         </div>
         <button 

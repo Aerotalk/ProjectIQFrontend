@@ -21,6 +21,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAvatarUrl } from '../../hooks/useAvatarUrl';
+import { useBreadcrumbContext } from '../../contexts/BreadcrumbContext';
 
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -192,47 +193,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
 
-  // Determine active breadcrumb based on current path
-  let activeModuleName = '';
-  let activePageName = '';
-
-  // Pass 1: exact match
-  for (const item of navItems) {
-    for (const sub of item.subItems) {
-      if (sub.path && location.pathname === sub.path) {
-        activeModuleName = item.name;
-        activePageName = sub.name;
-        break;
-      }
-    }
-    if (activeModuleName) break;
-  }
-
-  // Pass 2: prefix match if no exact match
-  if (!activeModuleName) {
-    let longestMatchLen = 0;
-    for (const item of navItems) {
-      for (const sub of item.subItems) {
-        if (sub.path && sub.path !== basePath && location.pathname.startsWith(sub.path)) {
-          if (sub.path.length > longestMatchLen) {
-            longestMatchLen = sub.path.length;
-            activeModuleName = item.name;
-            activePageName = sub.name;
-          }
-        }
-      }
-    }
-  }
-
-  // Handle special routes not in sidebar
-  if (!activeModuleName) {
-    if (location.pathname.includes('/profile')) {
-      activeModuleName = 'Profile';
-      activePageName = 'Profile Settings';
-    }
-  }
-
   const avatarUrl = useAvatarUrl(user?.profilePhotoId);
+  const { breadcrumbs } = useBreadcrumbContext();
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-[#0f1115] flex transition-colors duration-200 font-sans">
@@ -340,19 +302,34 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
             <Link to={basePath} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</Link>
-            {(activeModuleName || expandedMenu) && (
-              <>
-                <ChevronRight size={14} className="mx-2 shrink-0" />
-                <span className={activePageName ? "hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0" : "text-[#792359] dark:text-[#e6a8d0] truncate"}>
-                  {activeModuleName || expandedMenu || 'Overview'}
-                </span>
-              </>
-            )}
-            {activePageName && (
-              <>
-                <ChevronRight size={14} className="mx-2 shrink-0" />
-                <span className="text-[#792359] dark:text-[#e6a8d0] truncate">{activePageName}</span>
-              </>
+            
+            {breadcrumbs.length > 0 ? (
+              breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                return (
+                  <React.Fragment key={index}>
+                    <ChevronRight size={14} className="mx-2 shrink-0" />
+                    {crumb.path && !isLast ? (
+                      <Link to={crumb.path} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className={isLast ? "text-[#792359] dark:text-[#e6a8d0] truncate" : "truncate"}>
+                        {crumb.label}
+                      </span>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              expandedMenu && (
+                <>
+                  <ChevronRight size={14} className="mx-2 shrink-0" />
+                  <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                    {expandedMenu}
+                  </span>
+                </>
+              )
             )}
           </div>
 

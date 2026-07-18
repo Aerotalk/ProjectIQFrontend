@@ -6,6 +6,7 @@ import { ticketSchema, type TicketFormValues, TicketService } from '../../servic
 import { ProjectService } from '../../services/project.service';
 import type { Project } from '../../types/project.types';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Building2, UserCircle, Briefcase, FileText, IndianRupee } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -13,6 +14,11 @@ import CustomSelect from '@/components/ui/CustomSelect';
 export default function CreateIncident() {
   const navigate = useNavigate();
   const { selectedCompanyId: companyId } = useAuth();
+  
+  useBreadcrumbs([
+    { label: 'Support', path: '/companydashboard/tickets' },
+    { label: 'New Incident' }
+  ]);
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectData, setSelectedProjectData] = useState<Project | null>(null);
@@ -84,13 +90,6 @@ export default function CreateIncident() {
             <ArrowLeft size={16} />
           </button>
           <div>
-            <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-0.5">
-              <span>Support</span>
-              <span className="text-gray-300">/</span>
-              <span>All Tickets</span>
-              <span className="text-gray-300">/</span>
-              <span className="text-gray-900">New Incident</span>
-            </div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Create Incident</h1>
           </div>
         </div>

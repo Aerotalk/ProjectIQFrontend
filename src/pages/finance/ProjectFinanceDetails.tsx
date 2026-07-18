@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, IndianRupee, FileText, FileDown, TrendingUp } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 const TABS = ['Overview', 'Purchase Orders', 'Delivery Challans', 'Expenses'];
 
@@ -29,18 +30,18 @@ export default function ProjectFinanceDetails() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Overview');
 
+  useBreadcrumbs([
+    { label: 'Projects', path: '/companydashboard/projects' },
+    { label: id || 'PRJ-001' }
+  ]);
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
-      {/* Top Breadcrumb */}
+      {/* Top Header Buttons */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/5 rounded-sm transition-colors group">
           <ArrowLeft size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
         </button>
-        <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400">
-          <span>Projects</span>
-          <span className="text-gray-300 dark:text-gray-600">/</span>
-          <span className="text-gray-900 dark:text-gray-200">{id || 'PRJ-001'}</span>
-        </div>
       </div>
 
       {/* Project Header Card */}

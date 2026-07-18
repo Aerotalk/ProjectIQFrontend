@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 export default function TicketAdmin() {
   const [activeTab, setActiveTab] = useState('Projects');
 
   const tabs = ['Projects', 'Categories', 'Teams', 'Roles', 'SLAs', 'Escalation Rules', 'Custom Fields', 'Email Templates'];
+
+  useBreadcrumbs([
+    { label: 'Support', path: '/companydashboard/tickets' },
+    { label: 'Admin Settings' }
+  ]);
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 pb-12">

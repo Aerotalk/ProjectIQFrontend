@@ -3,6 +3,7 @@ import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 }
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import type { Vendor } from '../../types/vendor.types';
 import VendorDrawer from './vendors/components/VendorDrawer';
 import VendorProfileView from './vendors/components/VendorProfileView';
@@ -21,6 +22,11 @@ export default function VendorsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  useBreadcrumbs([
+    { label: 'Sales', path: '/companydashboard/sales' },
+    { label: 'Vendors' }
+  ]);
 
   const handleSaveVendor = async (data: VendorFormValues) => {
     try {
@@ -84,11 +90,6 @@ export default function VendorsList() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Sales</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Vendors</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Vendors</h1>
         </div>
         <button 

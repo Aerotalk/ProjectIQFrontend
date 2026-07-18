@@ -7,6 +7,7 @@ import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function ProductsList() {
@@ -19,8 +20,13 @@ export default function ProductsList() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  useBreadcrumbs([
+    { label: 'Sales', path: '/companydashboard/sales' },
+    { label: 'Products' }
+  ]);
 
   const handleSaveProduct = async (data: ProductFormValues) => {
     try {
@@ -74,11 +80,6 @@ export default function ProductsList() {
     <div className="max-w-[1400px] mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-1">
-            <span>Sales</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-900 dark:text-gray-200">Products</span>
-          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Products & Services</h1>
         </div>
         <button

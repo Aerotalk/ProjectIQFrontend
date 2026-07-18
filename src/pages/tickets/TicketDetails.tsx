@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { Paperclip, FileText, Download, CheckCircle, Circle } from 'lucide-react';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 export default function TicketDetails() {
   const [activeTab, setActiveTab] = useState('Overview');
+
+  useBreadcrumbs([
+    { label: 'Tickets', path: '/companydashboard/tickets' },
+    { label: 'TK-100245' }
+  ]);
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
@@ -10,11 +16,6 @@ export default function TicketDetails() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-gray-500 dark:text-gray-400 font-medium text-sm">Tickets</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-[#792359] dark:text-[#e6a8d0] font-medium text-sm">TK-100245</span>
-          </div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Unable to access analytics dashboard</h1>
             <span className="px-2.5 py-1 text-xs font-semibold rounded-md text-red-700 bg-red-50 border border-red-100 dark:bg-red-500/10 dark:border-red-500/20">High</span>

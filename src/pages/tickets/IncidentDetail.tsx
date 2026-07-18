@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import toast from 'react-hot-toast';
 import { 
   ArrowLeft, CheckCircle2, Paperclip, 
@@ -46,6 +47,11 @@ export default function IncidentDetail() {
       time: 'Today at 09:10 AM',
       color: 'bg-gray-300'
     }
+  ]);
+
+  useBreadcrumbs([
+    { label: 'Support', path: '/companydashboard/tickets' },
+    { label: ticket ? (ticket.ticketNo || ticket.id?.substring(0,8).toUpperCase()) as string : 'Ticket Detail' }
   ]);
 
   useEffect(() => {
@@ -151,13 +157,6 @@ export default function IncidentDetail() {
             <ArrowLeft size={16} />
           </button>
           <div>
-            <div className="flex items-center gap-2 text-[13px] font-medium text-gray-500 mb-0.5">
-              <span>Support</span>
-              <span className="text-gray-300">/</span>
-              <span>Tickets</span>
-              <span className="text-gray-300">/</span>
-              <span className="text-[#792359]">{ticket.ticketNo || ticket.id?.substring(0,8).toUpperCase()}</span>
-            </div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{ticket.shortDescription || 'Untitled Incident'}</h1>
               {getPriorityBadge(ticket.priority)}

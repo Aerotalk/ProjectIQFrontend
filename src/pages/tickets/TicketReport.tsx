@@ -1,21 +1,20 @@
-
 import { Download, FileText, Activity, Zap, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 
 export default function TicketReport() {
+  useBreadcrumbs([
+    { label: 'Tickets', path: '/companydashboard/tickets' },
+    { label: 'TK-100245', path: '/companydashboard/tickets/tk-100245' },
+    { label: 'Final Report' }
+  ]);
+
   return (
     <div className="max-w-[1100px] mx-auto space-y-6 pb-12">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-gray-200 dark:border-white/10 pb-6">
+      <div className="flex justify-between items-start border-b border-gray-200 dark:border-white/10 pb-6 mb-6">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-gray-500 dark:text-gray-400 font-medium text-sm">Tickets</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-gray-500 dark:text-gray-400 font-medium text-sm">TK-100245</span>
-            <span className="text-gray-300 dark:text-gray-600">/</span>
-            <span className="text-[#792359] dark:text-[#e6a8d0] font-medium text-sm">Final Report</span>
-          </div>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Final Report - TK-100245</h1>
             <span className="px-2.5 py-1 text-xs font-semibold rounded-md text-green-700 bg-green-50 border border-green-100 dark:bg-green-500/10 dark:border-green-500/20">Resolved</span>
           </div>

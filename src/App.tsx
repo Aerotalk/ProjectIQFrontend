@@ -15,12 +15,15 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import { Toaster } from 'react-hot-toast';
 
+import { BreadcrumbProvider } from './contexts/BreadcrumbContext';
+
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Toaster position="top-right" />
-        <ErrorBoundary>
+      <BreadcrumbProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" />
+          <ErrorBoundary>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/superadmin" element={
@@ -64,6 +67,7 @@ function App() {
           </Routes>
         </ErrorBoundary>
       </BrowserRouter>
+      </BreadcrumbProvider>
     </AuthProvider>
   );
 }
