@@ -104,9 +104,17 @@ export default function ClientDrawer({ isOpen, onClose, onSave, mode, initialDat
   };
 
   const onError = (errors: any) => {
-    const firstError = Object.values(errors)[0] as any;
+    console.error("Form validation errors:", errors);
+    const firstKey = Object.keys(errors)[0];
+    const firstError = errors[firstKey] as any;
+    let msg = firstError?.message;
+    if (!msg && firstError) {
+       // if it's a nested object like bankDetails
+       const subKey = Object.keys(firstError)[0];
+       msg = firstError[subKey]?.message || 'Invalid input';
+    }
     import('react-hot-toast').then(({ default: toast }) => {
-      toast.error(firstError?.message || 'Please fix the validation errors.');
+      toast.error(`${firstKey}: ${msg || 'Please fix the validation errors.'}`);
     });
   };
 
