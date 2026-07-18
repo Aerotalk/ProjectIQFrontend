@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Search, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useQuotations } from '../../hooks/useQuotations';
