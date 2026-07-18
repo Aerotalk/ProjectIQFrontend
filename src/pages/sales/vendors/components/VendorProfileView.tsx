@@ -1,5 +1,7 @@
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, CreditCard, DollarSign, Landmark } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, Shield, CreditCard, DollarSign, Landmark } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
+import { VendorService } from '../../../../services/vendor.service';
 
 interface Props {
   vendor: Vendor;
@@ -7,30 +9,51 @@ interface Props {
   onEdit: () => void;
 }
 
-export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
+export default function VendorProfileView({ vendor: initialVendor, onClose, onEdit }: Props) {
+  const [vendor, setVendor] = useState<Vendor>(initialVendor);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialVendor.id) {
+      setIsLoading(true);
+      VendorService.getVendor(initialVendor.id)
+        .then(data => setVendor(data))
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
+    }
+  }, [initialVendor.id]);
+
   return (
     <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 flex items-center justify-center rounded-sm">
-            {vendor.vendorType === 'Business' ? <Building2 size={24} /> : <User size={24} />}
+      <div className="px-8 py-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] flex items-center justify-center rounded-sm border border-[#792359]/10 dark:border-[#e6a8d0]/10 text-3xl font-bold">
+            {(vendor.displayName || vendor.companyName || vendor.firstName || 'V').charAt(0).toUpperCase()}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
               {vendor.displayName}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {vendor.vendorNo || vendor.id} • {vendor.vendorType} • <span className={vendor.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>{vendor.status}</span>
-            </p>
+            <div className="flex items-center gap-3 mt-2">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-white border border-gray-200 text-gray-800 dark:bg-transparent dark:text-gray-300 dark:border-white/20 shadow-sm">
+                {vendor.id}
+              </span>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] border border-[#792359]/20 dark:border-[#e6a8d0]/20 shadow-sm">
+                {vendor.vendorType}
+              </span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium border shadow-sm ${vendor.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+                {vendor.status}
+              </span>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <button 
             onClick={onEdit}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 dark:bg-transparent dark:border-white/20 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm"
           >
-            <Edit size={16} /> Edit Profile
+            <Edit size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Edit Profile
           </button>
           <button 
             onClick={onClose}
@@ -42,233 +65,135 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          {/* Left Column */}
-          <div className="space-y-8">
-            {/* Identity & Contact Section */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Identity Details</h3>
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div className="text-gray-500 dark:text-gray-400">Vendor Type</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.vendorType}</div>
-                
-                {vendor.vendorType === 'Business' && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">Company Name</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.companyName || '-'}</div>
-                  </>
-                )}
-                {vendor.vendorType === 'Individual' && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">First Name</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.firstName || '-'}</div>
-                    <div className="text-gray-500 dark:text-gray-400">Last Name</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.lastName || '-'}</div>
-                  </>
-                )}
-                
-                {vendor.country && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">Country</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.country}</div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Primary Contact */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Primary Contact</h3>
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><User size={14}/> Contact Person</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.primaryContactPerson || '-'}</div>
-                
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Briefcase size={14}/> Designation</div>
-                <div className="text-gray-900 dark:text-gray-100">{vendor.designation || '-'}</div>
-                
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Mail size={14}/> Email</div>
-                <div className="text-gray-900 dark:text-gray-100 break-all">{vendor.email || '-'}</div>
-                
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14}/> Phone</div>
-                <div className="text-gray-900 dark:text-gray-100">{vendor.phone || '-'}</div>
-                
-                {vendor.alternatePhone && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14}/> Alt Phone</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.alternatePhone}</div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Address */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
-              
-              <div className="mb-4">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Billing Address
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                  {vendor.billingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {vendor.billingAttention}</div>}
-                  <div>{vendor.billingAddressLine1}</div>
-                  {vendor.billingAddressLine2 && <div>{vendor.billingAddressLine2}</div>}
-                  <div>{vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}</div>
-                  <div>{vendor.billingCountry}</div>
-                  {vendor.billingPhone && <div className="mt-1">Phone: {vendor.billingPhone}</div>}
-                </div>
-              </div>
-
-              {!vendor.sameAsBillingAddress && vendor.shippingAddressLine1 && (
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                    <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Shipping Address
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                    {vendor.shippingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {vendor.shippingAttention}</div>}
-                    <div>{vendor.shippingAddressLine1}</div>
-                    {vendor.shippingAddressLine2 && <div>{vendor.shippingAddressLine2}</div>}
-                    <div>{vendor.shippingCity}, {vendor.shippingState} {vendor.shippingPinCode}</div>
-                    <div>{vendor.shippingCountry}</div>
-                    {vendor.shippingPhone && <div className="mt-1">Phone: {vendor.shippingPhone}</div>}
-                  </div>
-                </div>
-              )}
-              {vendor.sameAsBillingAddress && (
-                <div className="text-xs text-gray-500 italic mt-2">Shipping address is same as billing address.</div>
-              )}
-            </div>
+      <div className="flex-1 overflow-y-auto p-8">
+        <div className="max-w-5xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12">
             
-            {/* Notes */}
-            {vendor.notes && (
+            {/* Left Column */}
+            <div className="space-y-12">
+              {/* Identity Details */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Notes</h3>
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10 whitespace-pre-wrap">
-                  {vendor.notes}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Tax & Compliance Section */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Tax & Compliance</h3>
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div className="text-gray-500 dark:text-gray-400">GST Treatment</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">
-                  {vendor.gstTreatment === 'business_gst' ? 'Registered Business' :
-                   vendor.gstTreatment === 'business_none' ? 'Unregistered Business' :
-                   vendor.gstTreatment === 'consumer' ? 'Consumer' :
-                   vendor.gstTreatment === 'sez' ? 'SEZ' : 'Overseas'}
-                </div>
-                
-                {vendor.gstin && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">GSTIN</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.gstin}</div>
-                  </>
-                )}
-                {vendor.panNumber && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">PAN Number</div>
-                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.panNumber}</div>
-                  </>
-                )}
-                {vendor.placeOfSupply && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">Place of Supply</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.placeOfSupply}</div>
-                  </>
-                )}
-                {vendor.sezUnitName && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">SEZ Unit Name</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.sezUnitName}</div>
-                  </>
-                )}
-                {vendor.lutBondNo && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">LUT/Bond No</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.lutBondNo}</div>
-                  </>
-                )}
-                {vendor.foreignTaxId && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">Foreign Tax ID</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.foreignTaxId}</div>
-                  </>
-                )}
-                {vendor.tdsPercentage != null && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">TDS %</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.tdsPercentage}%</div>
-                  </>
-                )}
-                {vendor.reverseCharge != null && (
-                  <>
-                    <div className="text-gray-500 dark:text-gray-400">Reverse Charge</div>
-                    <div className="text-gray-900 dark:text-gray-100">{vendor.reverseCharge ? 'Yes' : 'No'}</div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Commercial & Financial */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Commercial Details</h3>
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><DollarSign size={14}/> Currency</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.currency || 'INR'}</div>
-
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><FileText size={14}/> Payment Terms</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.paymentTerms || '-'}</div>
-
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><CreditCard size={14}/> Credit Limit</div>
-                <div className="text-gray-900 dark:text-gray-100 font-medium">
-                  {vendor.creditLimit ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: vendor.currency || 'INR' }).format(vendor.creditLimit) : '-'}
-                </div>
-              </div>
-            </div>
-
-            {/* Bank Details */}
-            {vendor.bankDetails && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">
-                  <div className="flex items-center gap-2"><Landmark size={16}/> Bank Details</div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
+                  <FileText size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Identity Details
                 </h3>
-                <div className="grid grid-cols-2 gap-y-4 text-sm bg-gray-50 dark:bg-white/5 p-4 rounded-sm border border-gray-100 dark:border-white/10">
-                  <div className="text-gray-500 dark:text-gray-400">Account Name</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.bankDetails.accountName}</div>
-
-                  <div className="text-gray-500 dark:text-gray-400">Account Number</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.bankDetails.accountNumber}</div>
-
-                  <div className="text-gray-500 dark:text-gray-400">IFSC Code</div>
-                  <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.ifscCode}</div>
-
-                  <div className="text-gray-500 dark:text-gray-400">Bank Name</div>
-                  <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.bankName}</div>
-
-                  {vendor.bankDetails.branchName && (
+                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
+                  <div className="text-gray-500 dark:text-gray-400">Vendor Type</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.vendorType}</div>
+                  
+                  {vendor.vendorType === 'Business' && (
                     <>
-                      <div className="text-gray-500 dark:text-gray-400">Branch Name</div>
-                      <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.branchName}</div>
+                      <div className="text-gray-500 dark:text-gray-400">Company Name</div>
+                      <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.companyName || '-'}</div>
                     </>
                   )}
-                  {vendor.bankDetails.swiftCode && (
+                  {vendor.vendorType === 'Individual' && (
                     <>
-                      <div className="text-gray-500 dark:text-gray-400">SWIFT Code</div>
-                      <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.swiftCode}</div>
+                      <div className="text-gray-500 dark:text-gray-400">First Name</div>
+                      <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.firstName || '-'}</div>
+                      <div className="text-gray-500 dark:text-gray-400">Last Name</div>
+                      <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.lastName || '-'}</div>
                     </>
                   )}
                 </div>
               </div>
-            )}
-            
+
+              {/* Primary Contact */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
+                  <User size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Primary Contact
+                </h3>
+                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
+                  <div className="text-gray-500 dark:text-gray-400">Person</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.primaryContactPerson || '-'}</div>
+                  
+                  <div className="text-gray-500 dark:text-gray-400">Designation</div>
+                  <div className="text-gray-900 dark:text-gray-100">{vendor.designation || '-'}</div>
+                  
+                  <div className="text-gray-500 dark:text-gray-400">Email</div>
+                  <div className="text-gray-900 dark:text-gray-100">{vendor.email || '-'}</div>
+                  
+                  <div className="text-gray-500 dark:text-gray-400">Phone</div>
+                  <div className="text-gray-900 dark:text-gray-100">{vendor.phone || '-'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-12">
+              {/* Tax & Compliance */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
+                  <Shield size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Tax & Compliance
+                </h3>
+                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
+                  <div className="text-gray-500 dark:text-gray-400">GST Treatment</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium">
+                    {vendor.gstTreatment === 'business_gst' ? 'Registered Business' :
+                     vendor.gstTreatment === 'business_none' ? 'Unregistered Business' :
+                     vendor.gstTreatment === 'consumer' ? 'Consumer' :
+                     vendor.gstTreatment === 'sez' ? 'SEZ' : 'Overseas'}
+                  </div>
+                  
+                  {vendor.gstin && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">GSTIN</div>
+                      <div className="text-gray-900 dark:text-gray-100 font-medium tracking-wide">{vendor.gstin}</div>
+                    </>
+                  )}
+                  {vendor.panNumber && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">PAN Number</div>
+                      <div className="text-gray-900 dark:text-gray-100 font-medium tracking-wide">{vendor.panNumber}</div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
+                  <MapPin size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Address Details
+                </h3>
+                <div className="space-y-6">
+                  
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                      Billing Address
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10">
+                      <div className="leading-relaxed">
+                        {vendor.billingAddressLine1}<br/>
+                        {vendor.billingAddressLine2 && <>{vendor.billingAddressLine2}<br/></>}
+                        {vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}<br/>
+                        {vendor.billingCountry}
+                      </div>
+                    </div>
+                  </div>
+
+                  {!vendor.sameAsBillingAddress && (vendor.shippingAddressLine1 || vendor.shippingCity) && (
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                        Shipping Address
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10">
+                        <div className="leading-relaxed">
+                          {vendor.shippingAddressLine1}<br/>
+                          {vendor.shippingAddressLine2 && <>{vendor.shippingAddressLine2}<br/></>}
+                          {vendor.shippingCity}, {vendor.shippingState} {vendor.shippingPinCode}<br/>
+                          {vendor.shippingCountry}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {vendor.sameAsBillingAddress && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                      Shipping address is same as billing address.
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+            </div>
           </div>
         </div>
       </div>

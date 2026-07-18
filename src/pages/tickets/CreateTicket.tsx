@@ -42,13 +42,16 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
 
   const handleSubmit = () => {
     if (onSubmit) {
+      const clientName = clients.find(c => c.id === caller)?.displayName || 'Unknown Client';
+      const assignedName = users.find(u => u.id === assignedTo)?.username || users.find(u => u.id === assignedTo)?.email || 'Unassigned';
+
       onSubmit({
         id: randomId,
         subject: shortDesc || 'New Incident without description',
-        client: caller || 'Unknown Client',
+        client: clientName,
         priority: priority.includes('1') ? 'High' : priority.includes('2') ? 'Medium' : 'Low',
         status: state,
-        assigned: assignedTo || 'Unassigned',
+        assigned: assignedName,
         updated: 'Just now'
       });
     }

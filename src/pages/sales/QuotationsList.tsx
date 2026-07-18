@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Search, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useQuotations } from '../../hooks/useQuotations';
+import { ClientService } from '../../services/client.service';
+import { useEffect } from 'react';
 import type { Quotation } from '../../types/quotation.types';
+import type { Client } from '../../types/client.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
@@ -22,8 +25,14 @@ export default function QuotationsList() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const itemsPerPage = 6;
+  const [clients, setClients] = useState<Client[]>([]);
+
+  useEffect(() => {
+    if (companyId) {
+      ClientService.getClients(companyId).then(setClients).catch(console.error);
+    }
+  }, [companyId]);
 
   const handleSaveQuotation = async (data: QuotationFormValues) => {
     try {
@@ -44,14 +53,15 @@ export default function QuotationsList() {
     setDrawerMode(mode);
     setSelectedQuotation(quotation || null);
     setIsDrawerOpen(true);
-    setOpenDropdownId(null);
   };
 
-  const filteredQuotations = quotations.filter(q =>
-    q.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredQuotations = quotations.filter(q => {
+    const fallbackClientName = clients.find(c => c.id === q.clientId)?.displayName || clients.find(c => c.id === q.clientId)?.companyName || 'Unknown Client';
+    const cName = q.clientName || fallbackClientName;
+    return cName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.quotationNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    q.subject?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    q.subject?.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const totalPages = Math.ceil(filteredQuotations.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -127,10 +137,9 @@ export default function QuotationsList() {
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Valid Until</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client Name</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider max-w-[150px]">Salesperson</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider max-w-[150px]">Owner</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-right">Amount (₹)</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-white/5">
@@ -152,10 +161,14 @@ export default function QuotationsList() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{quotation.clientName || 'Unknown Client'}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {quotation.clientName || clients.find(c => c.id === quotation.clientId)?.displayName || clients.find(c => c.id === quotation.clientId)?.companyName || 'Unknown Client'}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[150px]" title={quotation.salesperson}>{quotation.salesperson || '-'}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[150px]" title={quotation.salesperson || quotation.approvedBy}>
+                        {quotation.salesperson || quotation.approvedBy || '-'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white text-right">
                       {quotation.grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -163,39 +176,17 @@ export default function QuotationsList() {
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-xs font-medium border
                         ${quotation.status === 'Draft' ? 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20' : ''}
-                        ${quotation.status === 'Pending Approval' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' : ''}
+                        ${quotation.status === 'Pending Approval' || quotation.status === 'Sent for Approval' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20' : ''}
                         ${quotation.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : ''}
                         ${quotation.status === 'Sent to Client' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' : ''}
-                        ${quotation.status === 'Confirmed Lead' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20' : ''}
+                        ${quotation.status === 'Changes Requested' || quotation.status === 'Under Negotiation' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20' : ''}
+                        ${quotation.status === 'Accepted' || quotation.status === 'Converted' ? 'bg-[#792359]/5 text-[#792359] border-[#792359]/20 dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] dark:border-[#e6a8d0]/20' : ''}
+                        ${quotation.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' : ''}
                       `}>
-                        {quotation.status === 'Pending Approval' && <Clock size={12} />}
                         {quotation.status === 'Approved' && <CheckCircle2 size={12} />}
+                        {quotation.status === 'Pending Approval' && <Clock size={12} />}
                         {quotation.status}
                       </span>
-                    </td>
-                    <td className={`px-6 py-4 text-center ${openDropdownId === quotation.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === quotation.id ? null : quotation.id); }}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                      {openDropdownId === quotation.id && (
-                        <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); openDrawer('view', quotation); }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); openDrawer('edit', quotation); }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                          >
-                            Edit
-                          </button>
-                        </div>
-                      )}
                     </td>
                   </tr>
                 ))}
