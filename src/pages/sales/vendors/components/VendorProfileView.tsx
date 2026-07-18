@@ -1,4 +1,4 @@
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
+import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, CreditCard, DollarSign, Landmark } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
 
 interface Props {
@@ -21,7 +21,7 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
               {vendor.displayName}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {vendor.id} • {vendor.vendorType} • <span className={vendor.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>{vendor.status}</span>
+              {vendor.vendorNo || vendor.id} • {vendor.vendorType} • <span className={vendor.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>{vendor.status}</span>
             </p>
           </div>
         </div>
@@ -45,8 +45,9 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Identity & Contact Section */}
-          <div className="space-y-6">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Identity & Contact Section */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Identity Details</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -67,9 +68,17 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                     <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.lastName || '-'}</div>
                   </>
                 )}
+                
+                {vendor.country && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Country</div>
+                    <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.country}</div>
+                  </>
+                )}
               </div>
             </div>
 
+            {/* Primary Contact */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Primary Contact</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -80,16 +89,72 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                 <div className="text-gray-900 dark:text-gray-100">{vendor.designation || '-'}</div>
                 
                 <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Mail size={14}/> Email</div>
-                <div className="text-gray-900 dark:text-gray-100">{vendor.email || '-'}</div>
+                <div className="text-gray-900 dark:text-gray-100 break-all">{vendor.email || '-'}</div>
                 
                 <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14}/> Phone</div>
                 <div className="text-gray-900 dark:text-gray-100">{vendor.phone || '-'}</div>
+                
+                {vendor.alternatePhone && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14}/> Alt Phone</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.alternatePhone}</div>
+                  </>
+                )}
               </div>
             </div>
+
+            {/* Address */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
+              
+              <div className="mb-4">
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                  <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Billing Address
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
+                  {vendor.billingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {vendor.billingAttention}</div>}
+                  <div>{vendor.billingAddressLine1}</div>
+                  {vendor.billingAddressLine2 && <div>{vendor.billingAddressLine2}</div>}
+                  <div>{vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}</div>
+                  <div>{vendor.billingCountry}</div>
+                  {vendor.billingPhone && <div className="mt-1">Phone: {vendor.billingPhone}</div>}
+                </div>
+              </div>
+
+              {!vendor.sameAsBillingAddress && vendor.shippingAddressLine1 && (
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                    <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Shipping Address
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
+                    {vendor.shippingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {vendor.shippingAttention}</div>}
+                    <div>{vendor.shippingAddressLine1}</div>
+                    {vendor.shippingAddressLine2 && <div>{vendor.shippingAddressLine2}</div>}
+                    <div>{vendor.shippingCity}, {vendor.shippingState} {vendor.shippingPinCode}</div>
+                    <div>{vendor.shippingCountry}</div>
+                    {vendor.shippingPhone && <div className="mt-1">Phone: {vendor.shippingPhone}</div>}
+                  </div>
+                </div>
+              )}
+              {vendor.sameAsBillingAddress && (
+                <div className="text-xs text-gray-500 italic mt-2">Shipping address is same as billing address.</div>
+              )}
+            </div>
+            
+            {/* Notes */}
+            {vendor.notes && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Notes</h3>
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10 whitespace-pre-wrap">
+                  {vendor.notes}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Tax & Address Section */}
-          <div className="space-y-6">
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Tax & Compliance Section */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Tax & Compliance</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -113,25 +178,96 @@ export default function VendorProfileView({ vendor, onClose, onEdit }: Props) {
                     <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.panNumber}</div>
                   </>
                 )}
+                {vendor.placeOfSupply && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Place of Supply</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.placeOfSupply}</div>
+                  </>
+                )}
+                {vendor.sezUnitName && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">SEZ Unit Name</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.sezUnitName}</div>
+                  </>
+                )}
+                {vendor.lutBondNo && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">LUT/Bond No</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.lutBondNo}</div>
+                  </>
+                )}
+                {vendor.foreignTaxId && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Foreign Tax ID</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.foreignTaxId}</div>
+                  </>
+                )}
+                {vendor.tdsPercentage != null && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">TDS %</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.tdsPercentage}%</div>
+                  </>
+                )}
+                {vendor.reverseCharge != null && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Reverse Charge</div>
+                    <div className="text-gray-900 dark:text-gray-100">{vendor.reverseCharge ? 'Yes' : 'No'}</div>
+                  </>
+                )}
               </div>
             </div>
 
+            {/* Commercial & Financial */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
-              
-              <div className="mb-4">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <MapPin size={14} className="text-indigo-600 dark:text-indigo-400" /> Billing Address
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                  <div>{vendor.billingAddressLine1}</div>
-                  {vendor.billingAddressLine2 && <div>{vendor.billingAddressLine2}</div>}
-                  <div>{vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}</div>
-                  <div>{vendor.billingCountry}</div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Commercial Details</h3>
+              <div className="grid grid-cols-2 gap-y-4 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><DollarSign size={14}/> Currency</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.currency || 'INR'}</div>
+
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><FileText size={14}/> Payment Terms</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.paymentTerms || '-'}</div>
+
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><CreditCard size={14}/> Credit Limit</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">
+                  {vendor.creditLimit ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: vendor.currency || 'INR' }).format(vendor.creditLimit) : '-'}
                 </div>
               </div>
-
             </div>
+
+            {/* Bank Details */}
+            {vendor.bankDetails && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">
+                  <div className="flex items-center gap-2"><Landmark size={16}/> Bank Details</div>
+                </h3>
+                <div className="grid grid-cols-2 gap-y-4 text-sm bg-gray-50 dark:bg-white/5 p-4 rounded-sm border border-gray-100 dark:border-white/10">
+                  <div className="text-gray-500 dark:text-gray-400">Account Name</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.bankDetails.accountName}</div>
+
+                  <div className="text-gray-500 dark:text-gray-400">Account Number</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium">{vendor.bankDetails.accountNumber}</div>
+
+                  <div className="text-gray-500 dark:text-gray-400">IFSC Code</div>
+                  <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.ifscCode}</div>
+
+                  <div className="text-gray-500 dark:text-gray-400">Bank Name</div>
+                  <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.bankName}</div>
+
+                  {vendor.bankDetails.branchName && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Branch Name</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.branchName}</div>
+                    </>
+                  )}
+                  {vendor.bankDetails.swiftCode && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">SWIFT Code</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.bankDetails.swiftCode}</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
             
           </div>
         </div>

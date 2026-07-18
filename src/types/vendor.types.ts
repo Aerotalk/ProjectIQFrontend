@@ -48,20 +48,24 @@ export interface Vendor {
   additionalContacts?: VendorAdditionalContact[];
 
   // Address Details
+  billingAttention?: string;
   billingAddressLine1: string;
   billingAddressLine2?: string;
   billingCity: string;
   billingState?: string;
   billingPinCode?: string;
   billingCountry?: string; // prefilled 'India' or selected
+  billingPhone?: string;
 
   sameAsBillingAddress: boolean;
+  shippingAttention?: string;
   shippingAddressLine1?: string;
   shippingAddressLine2?: string;
   shippingCity?: string;
   shippingState?: string;
   shippingPinCode?: string;
   shippingCountry?: string;
+  shippingPhone?: string;
 
   // Commercial Settings
   paymentTerms?: string;

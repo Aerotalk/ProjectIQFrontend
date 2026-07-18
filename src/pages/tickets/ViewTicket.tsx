@@ -1,6 +1,10 @@
 import { ArrowLeft, Save, RefreshCw, MessageSquare, UserPlus, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useAuth } from '@/contexts/AuthContext';
+import { ClientService } from '@/services/client.service';
+import type { Client } from '@/types/client.types';
+import { api } from '@/lib/api';
 
 const STATES = ['Open', 'In Progress', 'Closed'];
 
@@ -17,6 +21,21 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
   const [method, setMethod] = useState('Automated Alerting');
   const [majorState, setMajorState] = useState('-- None --');
   const [gtoc, setGtoc] = useState('No');
+
+  const { selectedCompanyId } = useAuth();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!selectedCompanyId) return;
+    ClientService.getClients(selectedCompanyId).then(data => setClients(data));
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    });
+  }, [selectedCompanyId]);
+
+  const CLIENT_OPTIONS = [{ label: '-- Select Requester --', value: '' }, ...clients.map(c => ({ label: c.displayName, value: c.displayName }))];
+  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))];
 
   const handleStateChange = (newState: string) => {
     setFormData({ ...formData, status: newState });
@@ -138,8 +157,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Requester</label>
               <div className="flex-1 flex gap-2">
-                <input type="text" value={formData.client} onChange={(e) => setFormData({...formData, client: e.target.value})} className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]" />
-                <button className="px-3 py-2 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-200 dark:hover:bg-white/20">🔍</button>
+                <div className="flex-1">
+                  <CustomSelect
+                    value={formData.client}
+                    onChange={(val) => setFormData({...formData, client: val})}
+                    options={CLIENT_OPTIONS}
+                  />
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -190,8 +214,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Assigned to</label>
               <div className="flex-1 flex gap-2">
-                <input type="text" value={formData.assigned} onChange={(e) => setFormData({...formData, assigned: e.target.value})} className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]" />
-                <button className="px-3 py-2 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-200 dark:hover:bg-white/20">🔍</button>
+                <div className="flex-1">
+                  <CustomSelect
+                    value={formData.assigned}
+                    onChange={(val) => setFormData({...formData, assigned: val})}
+                    options={USER_OPTIONS}
+                  />
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ChevronRight, Edit, Download, Info, 
@@ -8,6 +8,9 @@ import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
+import { ClientService } from '../../services/client.service';
+import { ProductService } from '../../services/product.service';
+import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import { formatQuotationId } from '../../lib/utils';
 
@@ -22,6 +25,30 @@ export default function QuotationDetails() {
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+
+  const [clients, setClients] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!companyId) return;
+    ClientService.getClients(companyId).then(data => setClients(data));
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    });
+    ProductService.getProducts(companyId).then(data => {
+      setProducts(data.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category || 'Product',
+        rate: p.rate || 0,
+        gst: p.taxRate || 18
+      })));
+    });
+  }, [companyId]);
+
+  const CLIENT_OPTIONS = useMemo(() => clients.map(c => ({ label: c.displayName, value: c.displayName })), [clients]);
+  const USER_OPTIONS = useMemo(() => users.map(u => ({ label: u.username || u.email, value: u.username || u.email })), [users]);
 
   interface LineItem {
     id: string;
@@ -38,7 +65,7 @@ export default function QuotationDetails() {
     { id: '2', name: 'Data Integration Service', category: 'Integration', qty: 1, rate: 60000, gst: 18, amount: 60000 }
   ]);
 
-  const availableProducts = [
+  const availableProducts = products.length > 0 ? products : [
     { id: '1', name: 'Web Application Development', category: 'Development', rate: 150000, gst: 18 },
     { id: '2', name: 'Mobile App Development', category: 'Development', rate: 200000, gst: 18 },
     { id: '3', name: 'Data Integration Service', category: 'Integration', rate: 60000, gst: 18 },
@@ -493,12 +520,10 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Client</p>
                   {isEditing ? (
-                    <input 
-                      type="text" 
+                    <CustomSelect 
                       value={quotation.client} 
-                      onChange={(e) => setQuotation({...quotation, client: e.target.value})} 
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]" 
-                      placeholder="Enter Client Name"
+                      onChange={(val) => setQuotation({...quotation, client: val})} 
+                      options={[{label: 'Select Client', value: ''}, ...CLIENT_OPTIONS]}
                     />
                   ) : (
                     <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
@@ -553,12 +578,7 @@ export default function QuotationDetails() {
                     <CustomSelect 
                       value={quotation.owner} 
                       onChange={(val) => setQuotation({...quotation, owner: val})}
-                      options={[
-                        { label: 'Arjun Dev', value: 'Arjun Dev' },
-                        { label: 'Sneha Iyer', value: 'Sneha Iyer' },
-                        { label: 'Rohit Singh', value: 'Rohit Singh' },
-                        { label: 'Anita Desai', value: 'Anita Desai' }
-                      ]}
+                      options={[{label: 'Select Owner', value: ''}, ...USER_OPTIONS]}
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.owner}</p>

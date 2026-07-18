@@ -1,8 +1,13 @@
 "use no memo";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { useProjects } from '@/hooks/useProjects';
+import { useAuth } from '@/contexts/AuthContext';
+import { ClientService } from '@/services/client.service';
+import type { Client } from '@/types/client.types';
+import { api } from '@/lib/api';
 
 interface Props {
   readOnly?: boolean;
@@ -12,11 +17,23 @@ export default function TicketFormSection({ readOnly }: Props) {
   const { register, formState: { errors }, control } = useFormContext();
   const [activeTab, setActiveTab] = useState('General');
 
-  const PROJECT_OPTIONS = [
-    { label: 'Analytics Dashboard (PRJ-001)', value: 'PRJ-001' },
-    { label: 'Mobile App Relaunch (PRJ-002)', value: 'PRJ-002' },
-    { label: 'ERP Integration (PRJ-003)', value: 'PRJ-003' }
-  ];
+  const { projects } = useProjects();
+  const { selectedCompanyId } = useAuth();
+  
+  const [clients, setClients] = useState<Client[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!selectedCompanyId) return;
+    ClientService.getClients(selectedCompanyId).then(data => setClients(data));
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    });
+  }, [selectedCompanyId]);
+
+  const PROJECT_OPTIONS = projects.map(p => ({ label: `${p.projectCode} - ${p.projectName}`, value: p.id }));
+  const CLIENT_OPTIONS = clients.map(c => ({ label: c.displayName, value: c.id }));
+  const USER_OPTIONS = users.map(u => ({ label: u.username || u.email, value: u.id }));
 
   const tabs = ['General', 'Categorization', 'Resolution', 'System Info'];
 
@@ -80,7 +97,15 @@ export default function TicketFormSection({ readOnly }: Props) {
 
             <div>
               <label className={labelClass}>Reported By</label>
-              <Input type="text" {...register('reportedBy')} disabled={readOnly} />
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="reportedBy"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect value={field.value || ''} onChange={field.onChange} options={[{label: 'Select User', value: ''}, ...USER_OPTIONS]} />
+                  )}
+                />
+              </div>
             </div>
 
             <div>
@@ -95,7 +120,15 @@ export default function TicketFormSection({ readOnly }: Props) {
 
             <div>
               <label className={labelClass}>Customer Company</label>
-              <Input type="text" {...register('customerCompany')} disabled={readOnly} />
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="customerCompany"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect value={field.value || ''} onChange={field.onChange} options={[{label: 'Select Client', value: ''}, ...CLIENT_OPTIONS]} />
+                  )}
+                />
+              </div>
             </div>
 
             <div className="md:col-span-2">
@@ -111,7 +144,18 @@ export default function TicketFormSection({ readOnly }: Props) {
             <div><label className={labelClass}>Category</label><Input type="text" {...register('category')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Sub Category</label><Input type="text" {...register('subCategory')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Assignment Group</label><Input type="text" {...register('assignmentGroup')} disabled={readOnly} /></div>
-            <div><label className={labelClass}>Assigned To</label><Input type="text" {...register('assignedTo')} disabled={readOnly} /></div>
+            <div>
+              <label className={labelClass}>Assigned To</label>
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="assignedTo"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect value={field.value || ''} onChange={field.onChange} options={[{label: 'Unassigned', value: ''}, ...USER_OPTIONS]} />
+                  )}
+                />
+              </div>
+            </div>
             <div><label className={labelClass}>Impact</label><Input type="text" {...register('impact')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Urgency</label><Input type="text" {...register('urgency')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Priority</label><Input type="text" {...register('priority')} disabled={readOnly} /></div>

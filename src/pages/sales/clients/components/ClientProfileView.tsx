@@ -1,4 +1,4 @@
-import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
+import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase, FileText, CreditCard, DollarSign } from 'lucide-react';
 import type { Client } from '../../../../types/client.types';
 
 interface Props {
@@ -45,8 +45,9 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* Identity & Contact Section */}
-          <div className="space-y-6">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Identity & Contact Section */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Identity Details</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -67,9 +68,24 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                     <div className="text-gray-900 dark:text-gray-100 font-medium">{client.lastName || '-'}</div>
                   </>
                 )}
+                
+                {client.industry && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Industry</div>
+                    <div className="text-gray-900 dark:text-gray-100 font-medium">{client.industry}</div>
+                  </>
+                )}
+                
+                {client.country && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Country</div>
+                    <div className="text-gray-900 dark:text-gray-100 font-medium">{client.country}</div>
+                  </>
+                )}
               </div>
             </div>
 
+            {/* Primary Contact */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Primary Contact</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -80,7 +96,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                 <div className="text-gray-900 dark:text-gray-100">{client.designation || '-'}</div>
                 
                 <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Mail size={14}/> Email</div>
-                <div className="text-gray-900 dark:text-gray-100">{client.email || '-'}</div>
+                <div className="text-gray-900 dark:text-gray-100 break-all">{client.email || '-'}</div>
                 
                 <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14}/> Phone</div>
                 <div className="text-gray-900 dark:text-gray-100">{client.phone || '-'}</div>
@@ -93,10 +109,49 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                 )}
               </div>
             </div>
+
+            {/* Address */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
+              
+              <div className="mb-4">
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                  <MapPin size={14} className="text-[#792359]" /> Billing Address
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
+                  {client.billingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {client.billingAttention}</div>}
+                  <div>{client.billingAddressLine1}</div>
+                  {client.billingAddressLine2 && <div>{client.billingAddressLine2}</div>}
+                  <div>{client.billingCity}, {client.billingState} {client.billingPinCode}</div>
+                  <div>{client.billingCountry}</div>
+                  {client.billingPhone && <div className="mt-1">Phone: {client.billingPhone}</div>}
+                </div>
+              </div>
+
+              {!client.sameAsBillingAddress && client.shippingAddressLine1 && (
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                    <MapPin size={14} className="text-[#792359]" /> Shipping Address
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
+                    {client.shippingAttention && <div className="font-medium text-gray-800 dark:text-gray-200">Attn: {client.shippingAttention}</div>}
+                    <div>{client.shippingAddressLine1}</div>
+                    {client.shippingAddressLine2 && <div>{client.shippingAddressLine2}</div>}
+                    <div>{client.shippingCity}, {client.shippingState} {client.shippingPinCode}</div>
+                    <div>{client.shippingCountry}</div>
+                    {client.shippingPhone && <div className="mt-1">Phone: {client.shippingPhone}</div>}
+                  </div>
+                </div>
+              )}
+              {client.sameAsBillingAddress && (
+                <div className="text-xs text-gray-500 italic mt-2">Shipping address is same as billing address.</div>
+              )}
+            </div>
           </div>
 
-          {/* Tax & Commercial Section */}
-          <div className="space-y-6">
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Tax & Compliance Section */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Tax & Compliance</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
@@ -126,45 +181,53 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                     <div className="text-gray-900 dark:text-gray-100">{client.placeOfSupply}</div>
                   </>
                 )}
+                {client.sezUnitName && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">SEZ Unit Name</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.sezUnitName}</div>
+                  </>
+                )}
+                {client.lutBondNo && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">LUT/Bond No</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.lutBondNo}</div>
+                  </>
+                )}
+                {client.foreignTaxId && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Foreign Tax ID</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.foreignTaxId}</div>
+                  </>
+                )}
               </div>
             </div>
 
+            {/* Commercial & Financial */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
-              
-              <div className="mb-4">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <MapPin size={14} className="text-[#792359]" /> Billing Address
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                  {client.billingAttention && <div>Attn: {client.billingAttention}</div>}
-                  <div>{client.billingAddressLine1}</div>
-                  {client.billingAddressLine2 && <div>{client.billingAddressLine2}</div>}
-                  <div>{client.billingCity}, {client.billingState} {client.billingPinCode}</div>
-                  <div>{client.billingCountry}</div>
-                  {client.billingPhone && <div>Phone: {client.billingPhone}</div>}
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Commercial Details</h3>
+              <div className="grid grid-cols-2 gap-y-4 text-sm">
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><DollarSign size={14}/> Currency</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">{client.currency || 'INR'}</div>
+
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><FileText size={14}/> Payment Terms</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">{client.paymentTerms || '-'}</div>
+
+                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><CreditCard size={14}/> Credit Limit</div>
+                <div className="text-gray-900 dark:text-gray-100 font-medium">
+                  {client.creditLimit ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: client.currency || 'INR' }).format(client.creditLimit) : '-'}
                 </div>
               </div>
-
-              {!client.sameAsBillingAddress && client.shippingAddressLine1 && (
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                    <MapPin size={14} className="text-[#792359]" /> Shipping Address
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                    {client.shippingAttention && <div>Attn: {client.shippingAttention}</div>}
-                    <div>{client.shippingAddressLine1}</div>
-                    {client.shippingAddressLine2 && <div>{client.shippingAddressLine2}</div>}
-                    <div>{client.shippingCity}, {client.shippingState} {client.shippingPinCode}</div>
-                    <div>{client.shippingCountry}</div>
-                    {client.shippingPhone && <div>Phone: {client.shippingPhone}</div>}
-                  </div>
-                </div>
-              )}
-              {client.sameAsBillingAddress && (
-                <div className="text-xs text-gray-500 italic mt-2">Shipping address is same as billing address.</div>
-              )}
             </div>
+
+            {/* Notes */}
+            {client.notes && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Notes</h3>
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10 whitespace-pre-wrap">
+                  {client.notes}
+                </div>
+              </div>
+            )}
             
           </div>
         </div>
