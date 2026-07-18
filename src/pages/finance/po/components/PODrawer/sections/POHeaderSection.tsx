@@ -1,3 +1,4 @@
+"use no memo";
 import { useEffect, useRef, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -269,3 +270,4 @@ export default function POHeaderSection({ readOnly }: Props) {
     </div>
   );
 }
+

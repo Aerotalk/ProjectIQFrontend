@@ -11,6 +11,7 @@ import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 const EXPENSE_CATEGORIES = [
   'Travel',
@@ -431,6 +432,7 @@ export default function ExpenseManagement() {
         initialData={selectedExpense || undefined}
         expenseId={selectedExpense?.id}
         isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(expenses, 'id')}
       />
     </div>
   );

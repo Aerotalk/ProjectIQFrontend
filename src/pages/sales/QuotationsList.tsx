@@ -7,6 +7,7 @@ import type { Quotation } from '../../types/quotation.types';
 import QuotationDrawer from './quotations/components/QuotationDrawer';
 import type { QuotationFormValues } from './quotations/validators/quotationValidation';
 import { Input } from '@/components/ui/input';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function QuotationsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -215,6 +216,7 @@ export default function QuotationsList() {
         initialData={selectedQuotation as Partial<QuotationFormValues>}
         quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
         isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(quotations, 'quotationNo')}
       />
     </div>
   );

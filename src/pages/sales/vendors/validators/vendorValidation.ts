@@ -17,10 +17,10 @@ export const vendorContactSchema = z.object({
 });
 
 export const vendorBankDetailsSchema = z.object({
-  accountName: z.string().min(1, 'Account Name is required'),
-  accountNumber: z.string().min(1, 'Account Number is required'),
-  ifscCode: z.string().min(1, 'IFSC Code is required'),
-  bankName: z.string().min(1, 'Bank Name is required'),
+  accountName: z.string().optional(),
+  accountNumber: z.string().optional(),
+  ifscCode: z.string().optional(),
+  bankName: z.string().optional(),
   branchName: z.string().optional(),
   swiftCode: z.string().optional(),
 });

@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, useWatch } from 'react-hook-form';
 
 interface Props {
@@ -43,3 +44,4 @@ export default function POTotalsSection({ readOnly }: Props) {
     </div>
   );
 }
+

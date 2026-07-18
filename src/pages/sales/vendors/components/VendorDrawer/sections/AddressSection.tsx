@@ -1,3 +1,4 @@
+"use no memo";
 import SharedAddressSection from '@/components/shared/SharedAddressSection';
 import { useFormContext } from 'react-hook-form';
 
@@ -16,3 +17,4 @@ export default function AddressSection({ readOnly }: Props) {
     />
   );
 }
+

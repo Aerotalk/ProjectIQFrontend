@@ -16,9 +16,10 @@ interface Props {
   initialData?: Partial<QuotationFormValues>;
   quotationNo?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
-export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initialData, quotationNo, isSubmitting }: Props) {
+export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initialData, quotationNo, isSubmitting, nextNumber }: Props) {
   const form = useQuotationForm(initialData);
 
   // Reset form when drawer opens/closes or initialData changes
@@ -91,7 +92,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         <FormProvider {...form}>
           <form id="quotation-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
-            <HeaderSection readOnly={readOnly} />
+            <HeaderSection readOnly={readOnly} nextNumber={nextNumber} />
             
             <LineItemsSection readOnly={readOnly} />
             

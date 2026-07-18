@@ -1,3 +1,4 @@
+"use no memo";
 import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Paperclip, X as XIcon } from 'lucide-react';
@@ -7,6 +8,7 @@ import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
 const EXPENSE_CATEGORIES = [
@@ -19,7 +21,7 @@ const EXPENSE_CATEGORIES = [
   'Miscellaneous'
 ];
 
-export default function ExpenseFormSection({ readOnly }: Props) {
+export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
   const {
     register,
     formState: { errors },
@@ -95,6 +97,7 @@ export default function ExpenseFormSection({ readOnly }: Props) {
               disabled={readOnly}
               placeholder="e.g. EXP/2026/001"
               defaultPrefix="EXP/2026/"
+              nextNumber={nextNumber}
               className={fieldClass(!!errors.expenseNo)}
             />
             {errors.expenseNo && (
@@ -360,3 +363,4 @@ export default function ExpenseFormSection({ readOnly }: Props) {
     </div>
   );
 }
+

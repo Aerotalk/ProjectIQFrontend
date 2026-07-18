@@ -7,6 +7,7 @@ import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function ProductsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -209,6 +210,7 @@ export default function ProductsList() {
         initialData={selectedProduct as Partial<ProductFormValues>}
         productId={selectedProduct?.id}
         isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(products, 'itemCode')}
       />
     </div>
   );

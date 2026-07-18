@@ -13,6 +13,7 @@ import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 export default function ChallanManagement() {
   const { selectedCompanyId } = useAuth();
@@ -410,6 +411,7 @@ export default function ChallanManagement() {
         initialData={selectedChallan || undefined}
         challanNumber={selectedChallan?.challanNumber}
         isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(challans, 'challanNumber')}
       />
     </div>
   );

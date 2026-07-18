@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -205,3 +206,4 @@ export default function POLineItemsSection({ readOnly }: Props) {
     </div>
   );
 }
+

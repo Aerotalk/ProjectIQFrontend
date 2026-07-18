@@ -1,3 +1,4 @@
+"use no memo";
 import { useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
@@ -166,3 +167,4 @@ export default function TicketFormSection({ readOnly }: Props) {
     </div>
   );
 }
+

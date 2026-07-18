@@ -14,9 +14,10 @@ interface Props {
   initialData?: Partial<Expense>;
   expenseId?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
-export default function ExpenseDrawer({ isOpen, onClose, onSave, mode, initialData, expenseId, isSubmitting }: Props) {
+export default function ExpenseDrawer({ isOpen, onClose, onSave, mode, initialData, expenseId, isSubmitting, nextNumber }: Props) {
   const form = useExpenseForm();
 
   React.useEffect(() => {
@@ -97,7 +98,7 @@ export default function ExpenseDrawer({ isOpen, onClose, onSave, mode, initialDa
       <div className="flex-1 overflow-y-auto p-6">
         <FormProvider {...form}>
           <form id="expense-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <ExpenseFormSection readOnly={readOnly} />
+            <ExpenseFormSection readOnly={readOnly} nextNumber={nextNumber} />
           </form>
         </FormProvider>
       </div>

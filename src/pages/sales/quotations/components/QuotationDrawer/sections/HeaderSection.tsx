@@ -10,9 +10,10 @@ import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
-export default function HeaderSection({ readOnly }: Props) {
+export default function HeaderSection({ readOnly, nextNumber }: Props) {
   const { register, control, formState: { errors }, setValue, getValues } = useFormContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
@@ -57,6 +58,7 @@ export default function HeaderSection({ readOnly }: Props) {
             disabled={readOnly}
             placeholder="e.g. QT/2026/001"
             defaultPrefix="QT/2026/"
+            nextNumber={nextNumber}
             className={fieldClass(!!errors.quotationNo)}
           />
           {errors.quotationNo && <p className="text-red-500 text-xs mt-1">{errors.quotationNo.message as string}</p>}

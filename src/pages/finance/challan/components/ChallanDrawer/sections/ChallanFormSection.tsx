@@ -1,3 +1,4 @@
+"use no memo";
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
@@ -12,9 +13,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
-export default function ChallanFormSection({ readOnly }: Props) {
+export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   const {
     register,
     formState: { errors },
@@ -158,6 +160,7 @@ export default function ChallanFormSection({ readOnly }: Props) {
               disabled={readOnly}
               placeholder="e.g. DC/2026/001"
               defaultPrefix="DC/2026/"
+              nextNumber={nextNumber}
               className={fieldClass(!!errors.challanNumber)}
             />
             {errors.challanNumber && (
@@ -374,3 +377,4 @@ export default function ChallanFormSection({ readOnly }: Props) {
     </div>
   );
 }
+

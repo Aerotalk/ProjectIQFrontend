@@ -12,6 +12,7 @@ import type { PaymentFormValues } from './payment/validators/paymentValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 const STATUS_STYLES: Record<PaymentRecord['status'], string> = {
   Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
@@ -329,6 +330,7 @@ export default function PaymentManagement() {
         initialData={selectedPayment || undefined}
         paymentId={selectedPayment?.paymentId}
         isSubmitting={isSubmitting}
+        nextNumber={getNextSequenceNumber(payments, 'paymentId')}
       />
     </div>
   );
