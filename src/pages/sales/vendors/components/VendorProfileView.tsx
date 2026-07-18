@@ -1,6 +1,5 @@
-import React from 'react';
 import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
-import type { Vendor } from '../../../types/vendor.types';
+import type { Vendor } from '../../../../types/vendor.types';
 
 interface Props {
   vendor: Vendor;

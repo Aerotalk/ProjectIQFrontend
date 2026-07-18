@@ -1,6 +1,5 @@
-import React from 'react';
-import { X, Edit, Building2, User, Phone, Mail, MapPin, FileText, CreditCard, Briefcase } from 'lucide-react';
-import type { Client } from '../../../types/client.types';
+import { X, Edit, Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
+import type { Client } from '../../../../types/client.types';
 
 interface Props {
   client: Client;
