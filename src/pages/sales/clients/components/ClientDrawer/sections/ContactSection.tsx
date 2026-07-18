@@ -1,3 +1,4 @@
+"use no memo";
 import { useFormContext } from 'react-hook-form';
 import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 
