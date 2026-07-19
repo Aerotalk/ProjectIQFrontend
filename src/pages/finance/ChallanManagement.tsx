@@ -12,8 +12,25 @@ import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
-import { getNextSequenceNumber } from '../../utils/sequence';
 import { useNavigate } from 'react-router-dom';
+import { FileText, CheckCircle2 } from 'lucide-react';
+import type { ReactNode } from 'react';
+
+const STATUS_STYLES: Record<string, string> = {
+  'Draft': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-white/5 dark:text-gray-300 dark:border-white/10',
+  'Issued': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
+  'Dispatched': 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
+  'Delivered': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+};
+
+const STATUS_ICONS: Record<string, ReactNode> = {
+  'Draft': <FileText size={12} />,
+  'Issued': <Package size={12} />,
+  'Dispatched': <Truck size={12} />,
+  'Delivered': <CheckCircle2 size={12} />,
+};
+
+const ALL_STATUSES = ['Draft', 'Issued', 'Dispatched', 'Delivered'];
 
 export default function ChallanManagement() {
   const navigate = useNavigate();
@@ -33,6 +50,7 @@ export default function ChallanManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProject, setFilterProject] = useState('');
   const [filterVendor, setFilterVendor] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,18 +107,13 @@ export default function ChallanManagement() {
 
 
   const filtered = challans.filter(ch => {
-    const term = searchTerm.toLowerCase();
-    const matchSearch =
-      !term ||
-      ch.challanNumber.toLowerCase().includes(term) ||
-      (ch.vendorName || '').toLowerCase().includes(term) ||
-      (ch.projectName || '').toLowerCase().includes(term) ||
-      (ch.description || '').toLowerCase().includes(term);
-
-    const matchProject = !filterProject || ch.projectId === filterProject;
-    const matchVendor = !filterVendor || ch.vendorId === filterVendor;
-
-    return matchSearch && matchProject && matchVendor;
+    const searchMatch = (ch.challanNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                        (ch.vendorName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                        (ch.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    const projectMatch = filterProject ? ch.projectId === filterProject : true;
+    const vendorMatch = filterVendor ? ch.vendorId === filterVendor : true;
+    const statusMatch = filterStatus ? (ch.status || 'Draft') === filterStatus : true;
+    return searchMatch && projectMatch && vendorMatch && statusMatch;
   });
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -173,6 +186,18 @@ export default function ChallanManagement() {
                 ]}
               />
             </div>
+
+            {/* Status filter */}
+            <div className="w-48 shrink-0">
+              <CustomSelect
+                value={filterStatus}
+                onChange={val => { setFilterStatus(val); resetPage(); }}
+                options={[
+                  { label: 'All Statuses', value: '' },
+                  ...ALL_STATUSES.map(s => ({ label: s, value: s }))
+                ]}
+              />
+            </div>
           </div>
 
           {/* Search */}
@@ -199,13 +224,13 @@ export default function ChallanManagement() {
               <Truck size={48} className="mb-4 opacity-20" />
               <p className="text-base font-medium text-gray-900 dark:text-white">No Delivery Challans found</p>
               <p className="text-sm mt-1">
-                {searchTerm || filterProject || filterVendor
+                {searchTerm || filterProject || filterVendor || filterStatus
                   ? 'Try adjusting your filters or search term.'
                   : 'Add your first challan by clicking "Add Challan".'}
               </p>
-              {(searchTerm || filterProject || filterVendor) && (
+              {(searchTerm || filterProject || filterVendor || filterStatus) && (
                 <button
-                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); }}
+                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); setFilterStatus(''); }}
                   className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
                 >
                   Clear all filters
@@ -220,6 +245,7 @@ export default function ChallanManagement() {
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Date</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
@@ -260,6 +286,14 @@ export default function ChallanManagement() {
                     {/* Date */}
                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                       {formatDate(ch.challanDate)}
+                    </td>
+
+                    {/* Status badge */}
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-semibold border ${STATUS_STYLES[ch.status || 'Draft']}`}>
+                        {STATUS_ICONS[ch.status || 'Draft']}
+                        {ch.status || 'Draft'}
+                      </span>
                     </td>
 
                     {/* Actions dropdown */}

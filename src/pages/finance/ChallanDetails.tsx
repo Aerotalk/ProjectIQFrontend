@@ -286,7 +286,7 @@ export default function ChallanDetails() {
           <div className="lg:col-span-4 space-y-8">
             <div>
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Challan Overview</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vendor</p>
                   {isEditing ? (
@@ -318,19 +318,21 @@ export default function ChallanDetails() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Date</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Challan Date</p>
                   {isEditing ? (
                     <input type="date" value={challan.challanDate} onChange={e => setChallan({...challan, challanDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.challanDate}</p>
                   )}
                 </div>
-                <div className="col-span-2 md:col-span-4">
+              </div>
+              <div className="grid grid-cols-1 gap-6 mt-4">
+                <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Description / Items</p>
                   {isEditing ? (
                     <textarea value={challan.description} onChange={e => setChallan({...challan, description: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" rows={3} />
                   ) : (
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.description}</p>
+                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{challan.description || 'No description provided'}</p>
                   )}
                 </div>
               </div>
@@ -350,8 +352,15 @@ export default function ChallanDetails() {
               </div>
 
               {activeTab === 'Overview' && (
-                <div className="space-y-4">
-                    <p className="text-sm text-gray-500">Remarks: {challan.remarks || 'None'}</p>
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Remarks</p>
+                    {isEditing ? (
+                      <textarea value={challan.remarks} onChange={e => setChallan({...challan, remarks: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" rows={3} />
+                    ) : (
+                      <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{challan.remarks || 'No remarks provided'}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

@@ -419,7 +419,7 @@ export default function PODetails() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Date</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">PO Date</p>
                   {isEditing ? (
                     <input type="date" value={po.poDate} onChange={e => setPo({...po, poDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
@@ -427,8 +427,30 @@ export default function PODetails() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Amount</p>
-                  <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">₹ {isEditing ? calculatedGrandTotal.toLocaleString('en-IN') : (po.grandTotal || 0).toLocaleString('en-IN')}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Delivery</p>
+                  {isEditing ? (
+                    <input type="date" value={po.expectedDelivery ? po.expectedDelivery.split('T')[0] : ''} onChange={e => setPo({...po, expectedDelivery: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{po.expectedDelivery ? new Date(po.expectedDelivery).toLocaleDateString() : 'N/A'}</p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Description</p>
+                  {isEditing ? (
+                    <textarea value={po.description} onChange={e => setPo({...po, description: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" rows={2} />
+                  ) : (
+                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{po.description || 'No description'}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Internal Notes</p>
+                  {isEditing ? (
+                    <textarea value={po.internalNotes} onChange={e => setPo({...po, internalNotes: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" rows={2} />
+                  ) : (
+                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{po.internalNotes || 'No notes'}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -495,6 +517,46 @@ export default function PODetails() {
                   {isEditing && (
                     <button onClick={() => setLineItems([...lineItems, { id: Math.random().toString(), description: '', qty: 1, unit: 'PCS', unitPrice: 0, amount: 0 }])} className="text-[#792359] text-sm font-medium hover:underline">+ Add Item</button>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'Commercials' && (
+                <div className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-sm border border-gray-200 dark:border-white/10 w-full sm:w-1/2 ml-auto">
+                    <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-white/10">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        ₹ {lineItems.reduce((acc, curr) => acc + (curr.qty * curr.unitPrice), 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-white/10">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Discount (₹)</span>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={po.discount}
+                          onChange={e => setPo({...po, discount: Number(e.target.value)})}
+                          className="w-32 px-2 py-1 text-sm text-right bg-white border rounded-sm dark:bg-[#0f1115] dark:border-white/10"
+                        />
+                      ) : (
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          ₹ {(po.discount || 0).toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-base font-bold text-gray-900 dark:text-white">Grand Total</span>
+                      <span className="text-lg font-bold text-[#792359] dark:text-[#e6a8d0]">
+                        ₹ {isEditing ? calculatedGrandTotal.toLocaleString('en-IN') : (po.grandTotal || 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'History' && (
+                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-center text-sm text-gray-500">
+                  History timeline will be available here soon.
                 </div>
               )}
             </div>
