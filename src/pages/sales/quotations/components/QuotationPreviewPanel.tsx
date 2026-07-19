@@ -29,6 +29,17 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     }
   }, [isOpen, templateContent, data]);
 
+  useEffect(() => {
+    if (iframeRef.current && compiledHtml) {
+      const doc = iframeRef.current.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(compiledHtml);
+        doc.close();
+      }
+    }
+  }, [compiledHtml, isOpen]);
+
   if (!isOpen) return null;
 
   const handleDownload = async () => {
@@ -52,41 +63,19 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     document.head.appendChild(style);
 
     try {
-      const doc = iframeRef.current.contentDocument;
-      
-      // Create a generic wrapper DIV instead of passing the BODY tag.
-      // This prevents Tailwind's 'body' selector from applying oklch background-color.
-      const wrapper = document.createElement('div');
-      
-      // Copy all styles from the template's <head>
-      const styles = doc.head.querySelectorAll('style, link[rel="stylesheet"]');
-      styles.forEach(s => wrapper.appendChild(s.cloneNode(true)));
-      
-      // Copy all content from the template's <body>
-      Array.from(doc.body.childNodes).forEach(node => {
-        wrapper.appendChild(node.cloneNode(true));
-      });
-      
-      // Copy inline styles from body (like --primary-color)
-      wrapper.style.cssText = doc.body.style.cssText;
-      wrapper.style.backgroundColor = '#ffffff'; // Ensure valid background
-      wrapper.style.color = '#1e293b';
-
+      const element = iframeRef.current.contentDocument.body;
       const opt = {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
-      await html2pdf().set(opt).from(wrapper).save();
+      await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
       setIsGeneratingPdf(false);
-      if (style.parentNode) {
-        document.head.removeChild(style);
-      }
     }
   };
 
@@ -119,12 +108,11 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/20 p-8 flex justify-center">
-          <div className="bg-white shadow-md overflow-hidden" style={{ width: '210mm', minHeight: '297mm' }}>
+          <div className="bg-white shadow-md" style={{ width: '210mm', minHeight: '297mm' }}>
             <iframe 
               ref={iframeRef}
-              srcDoc={compiledHtml}
-              className="w-full h-full border-none pointer-events-none"
               title="Quotation Preview"
+              className="w-full h-full border-none"
             />
           </div>
         </div>

@@ -101,17 +101,18 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
       let logoBase64 = '';
       if (company?.logoUrl) {
         try {
-          let endpoint = company.logoUrl;
-          if (endpoint.startsWith('http://localhost:8080/api')) {
-            endpoint = endpoint.replace('http://localhost:8080/api', '');
-          } else if (endpoint.startsWith('http')) {
-            const urlObj = new URL(endpoint);
-            endpoint = urlObj.pathname;
+          const endpoint = company.logoUrl;
+          const isInternal = endpoint.startsWith('http://localhost:8080') || endpoint.startsWith('/api');
+          
+          let blob;
+          if (isInternal) {
+            const path = endpoint.replace('http://localhost:8080/api', '').replace('/api', '');
+            blob = await api.get(path, { responseType: 'blob' });
+          } else {
+            const res = await fetch(endpoint);
+            blob = await res.blob();
           }
-          if (!endpoint.startsWith('/')) {
-            endpoint = '/' + endpoint;
-          }
-          const blob = await api.get(endpoint, { responseType: 'blob' });
+
           if (blob) {
             logoBase64 = await new Promise((resolve) => {
               const reader = new FileReader();
