@@ -30,11 +30,12 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
     });
     
     import('@/lib/api').then(({ api }) => {
-      api.get('/admin/templates?type=quotation').then(res => {
-        setTemplates(res.data);
+      api.get('/admin/templates?type=quotation').then((res: any) => {
+        const templatesData = Array.isArray(res) ? res : (res.data || []);
+        setTemplates(templatesData);
         setIsLoadingTemplates(false);
-        if (res.data.length > 0 && !getValues('templateName')) {
-          setValue('templateName', res.data[0]);
+        if (templatesData.length > 0 && !getValues('templateName')) {
+          setValue('templateName', templatesData[0]);
         }
       }).catch(() => setIsLoadingTemplates(false));
     });
