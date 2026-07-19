@@ -34,7 +34,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
             </h2>
             <div className="flex items-center gap-3 mt-2">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-white border border-gray-200 text-gray-800 dark:bg-transparent dark:text-gray-300 dark:border-white/20 shadow-sm">
-                {vendor.displayName || 'Vendor'}
+                {vendor.vendorNo || vendor.id}
               </span>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] border border-[#792359]/20 dark:border-[#e6a8d0]/20 shadow-sm">
                 {vendor.vendorType}
