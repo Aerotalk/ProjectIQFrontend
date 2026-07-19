@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, Package, DollarSign, Shield } from 'lucide-react';
+import { X, Edit } from 'lucide-react';
 import type { Product } from '../../../../types/product.types';
 import { ProductService } from '../../../../services/product.service';
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, User, MapPin, FileText, Shield } from 'lucide-react';
+import { X, Edit } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
 import { VendorService } from '../../../../services/vendor.service';
 
@@ -218,7 +218,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                         {vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}<br/>
                         {vendor.billingCountry}
                       </div>
-                      {vendor.billingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs"><MapPin size={14} className="text-transparent" /> Phone: {vendor.billingPhone}</div>}
+                      {vendor.billingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 text-xs">Phone: {vendor.billingPhone}</div>}
                     </div>
                   </div>
 
@@ -235,7 +235,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                           {vendor.shippingCity}, {vendor.shippingState} {vendor.shippingPinCode}<br/>
                           {vendor.shippingCountry}
                         </div>
-                        {vendor.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs"><MapPin size={14} className="text-transparent" /> Phone: {vendor.shippingPhone}</div>}
+                        {vendor.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 text-xs">Phone: {vendor.shippingPhone}</div>}
                       </div>
                     </div>
                   )}

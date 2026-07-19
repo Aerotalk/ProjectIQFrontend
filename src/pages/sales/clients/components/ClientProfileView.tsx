@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react';
+import { X, Edit } from 'lucide-react';
 import type { Client } from '../../../../types/client.types';
 import { ClientService } from '../../../../services/client.service';
 
