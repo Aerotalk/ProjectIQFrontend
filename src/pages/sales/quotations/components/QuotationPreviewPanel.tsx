@@ -46,29 +46,32 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     if (!iframeRef.current || !iframeRef.current.contentDocument) return;
     setIsGeneratingPdf(true);
     
-    // Inject style to fix html2canvas oklch crash from Tailwind v4 without breaking template CSS
-    const style = document.createElement('style');
-    style.innerHTML = `
-      :where(.html2pdf__container *) {
-        border-color: transparent;
-        outline-color: transparent;
-        text-decoration-color: transparent;
-        background-color: transparent;
-      }
-      .html2pdf__container {
-        background-color: #ffffff;
-        color: #000000;
-      }
-    `;
-    document.head.appendChild(style);
-
     try {
-      const element = iframeRef.current.contentDocument.body;
+      const element = iframeRef.current.contentDocument.documentElement;
       const opt = {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          onclone: (documentClone: Document) => {
+            // Remove parent application's Tailwind CSS which causes html2canvas to crash on oklch()
+            const styles = documentClone.querySelectorAll('style');
+            styles.forEach(style => {
+              if (style.innerHTML.includes('oklch') || style.innerHTML.includes('tailwind')) {
+                style.remove();
+              }
+            });
+            const links = documentClone.querySelectorAll('link[rel="stylesheet"]');
+            links.forEach(link => {
+              const href = (link as HTMLLinkElement).href || '';
+              if (href.includes('index-') || href.includes('index.css') || href.includes('assets/')) {
+                link.remove();
+              }
+            });
+          }
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
       await html2pdf().set(opt).from(element).save();
