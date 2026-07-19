@@ -89,7 +89,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
       let company = null;
       if (companyId) {
         const companyRes = await api.get(`/admin/companies/${companyId}`);
-        company = companyRes.data;
+        company = companyRes;
       }
       
       let client = null;
@@ -98,48 +98,117 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         client = clients.find(c => c.id === data.clientId);
       }
 
+      let logoBase64 = '';
+      if (company?.logoUrl) {
+        try {
+            let endpoint = company.logoUrl;
+            if (endpoint.startsWith('http://localhost:8080/api')) {
+                endpoint = endpoint.replace('http://localhost:8080/api', '');
+            } else if (endpoint.startsWith('http')) {
+                const urlObj = new URL(endpoint);
+                endpoint = urlObj.pathname;
+            }
+            if (!endpoint.startsWith('/')) {
+                endpoint = '/' + endpoint;
+            }
+            const blob = await api.get(endpoint, { responseType: 'blob' });
+            if (blob) {
+                logoBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+            }
+        } catch (e) {
+            console.error('Failed to pre-fetch logo', e);
+        }
+      }
+
+      const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
+      const clientState = client?.billingState?.trim().toLowerCase() || '';
+      const isSameState = companyState && clientState && companyState === clientState;
+
+      const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
+      data.lineItems?.forEach((item: any) => {
+        if (item.gstRate > 0) {
+          if (!taxGroups[item.gstRate]) taxGroups[item.gstRate] = { taxable: 0, taxAmount: 0 };
+          taxGroups[item.gstRate].taxable += (item.rate * item.quantity);
+          taxGroups[item.gstRate].taxAmount += (item.gstAmount);
+        }
+      });
+
+      const taxBreakdown: any[] = [];
+      Object.keys(taxGroups).forEach(rateStr => {
+        const rate = Number(rateStr);
+        const group = taxGroups[rate];
+        if (isSameState) {
+          const halfRate = rate / 2;
+          const halfAmount = (group.taxAmount / 2).toFixed(2);
+          taxBreakdown.push({
+            tax_type: 'CGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+          taxBreakdown.push({
+            tax_type: 'SGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+        } else {
+          taxBreakdown.push({
+            tax_type: 'IGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: rate,
+            tax_amount: group.taxAmount.toFixed(2)
+          });
+        }
+      });
+
       const previewPayload = {
         primary_color_hex: '#792359',
-        company_name: company?.name || 'Company Name',
-        company_logo_url: company?.logoUrl || '',
-        company_address_line1: company?.addressLine1 || '',
-        company_address_line2: company?.addressLine2 || '',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
         company_phone: company?.phone || '',
         company_email: company?.email || '',
-        company_gstin: company?.gstin || '',
-        company_pan: company?.pan || '',
-        client_name: client?.companyName || client?.displayName || 'Client Name',
-        client_address_line1: data.billingAddress ? data.billingAddress.split('\n')[0] : (client?.billingAddressLine1 || ''),
-        client_address_line2: data.billingAddress ? data.billingAddress.split('\n').slice(1).join(', ') : (client?.billingAddressLine2 || ''),
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        client_name: client?.displayName || data.clientName || 'Client Name',
+        client_address_line1: client?.billingAddressLine1 || '',
+        client_address_line2: client?.billingCity || '',
         client_phone: client?.phone || '',
         client_state: client?.billingState || '',
         client_email: client?.email || '',
-        estimate_number: data.quotationNo,
-        estimate_date: data.date,
-        place_of_supply: data.shippingAddress ? data.shippingAddress.split('\n').join(', ') : (client?.shippingState || client?.billingState || ''),
-        items: data.lineItems.map((item, idx) => ({
+        estimate_number: data.quotationNo || data.id,
+        estimate_date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+        place_of_supply: client?.billingState || '',
+        items: data.lineItems?.map((item: any, idx: number) => ({
           item_index: idx + 1,
           item_name: item.itemName,
-          item_description: item.description,
+          item_description: item.description || '',
+          item_hsn: '',
           item_quantity: item.quantity,
-          item_unit: item.unit,
+          item_unit: item.unit || 'Unit',
           item_price: item.rate.toFixed(2),
           item_amount: item.totalAmount.toFixed(2)
-        })),
+        })) || [],
         sub_total: data.subTotal.toFixed(2),
         total_tax: data.totalGstAmount.toFixed(2),
         grand_total: data.grandTotal.toFixed(2),
         amount_in_words: 'Amount in words not calculated',
-        terms_and_conditions: data.termsAndConditions,
-        bank_name: company?.bankName || '',
-        bank_account_no: company?.bankAccountNumber || '',
-        bank_ifsc: company?.bankIfscCode || '',
-        bank_account_holder: company?.bankAccountName || '',
+        terms_and_conditions: data.termsAndConditions || 'Terms and conditions apply',
+        bank_name: company?.bankAccounts?.[0]?.bankName || '',
+        bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
+        bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: data.totalGstAmount > 0,
-        taxes: data.totalGstAmount > 0 ? [{ tax_type: 'GST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: data.totalGstAmount.toFixed(2) }] : []
+        taxes: taxBreakdown
       };
 
-      setPreviewTemplate(templateRes.data);
+      setPreviewTemplate(templateRes);
       setPreviewData(previewPayload);
       setIsPreviewOpen(true);
     } catch (err: any) {

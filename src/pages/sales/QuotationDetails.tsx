@@ -31,6 +31,7 @@ export default function QuotationDetails() {
   const [users, setUsers] = useState<UserData[]>([]);
 
   const isNew = id === 'new';
+  const isAdmin = user?.roles?.some(r => ['ROLE_ADMIN', 'ROLE_MANAGER', 'quotation.approve'].includes(r)) || false;
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
@@ -42,9 +43,11 @@ export default function QuotationDetails() {
 
 
   const [products, setProducts] = useState<any[]>([]);
+  const [company, setCompany] = useState<any>(null);
 
   useEffect(() => {
     if (!companyId) return;
+    api.get(`/admin/companies/${companyId}`).then(res => setCompany(res.data)).catch(console.error);
     ClientService.getClients(companyId).then(data => setClients(data));
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
@@ -287,6 +290,34 @@ export default function QuotationDetails() {
   const totalGst = lineItems.reduce((sum, item) => sum + (item.rate * item.qty * item.gst / 100), 0);
   const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
 
+  const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
+  const selectedClient = clients.find(c => c.id === quotation.clientId);
+  const clientState = selectedClient?.billingState?.trim().toLowerCase() || '';
+  const isSameState = companyState && clientState && companyState === clientState;
+
+  const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
+  lineItems.forEach(item => {
+    if (item.gst > 0) {
+      if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
+      taxGroups[item.gst].taxable += (item.rate * item.qty);
+      taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
+    }
+  });
+
+  const uiTaxBreakdown: { type: string, rate: number, amount: number }[] = [];
+  Object.keys(taxGroups).forEach(rateStr => {
+    const rate = Number(rateStr);
+    const group = taxGroups[rate];
+    if (isSameState) {
+      const halfRate = rate / 2;
+      const halfAmount = (group.taxAmount / 2);
+      uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: halfAmount });
+      uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: halfAmount });
+    } else {
+      uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: group.taxAmount });
+    }
+  });
+
   const handlePreview = async () => {
     try {
       setIsLoadingPreview(true);
@@ -297,7 +328,7 @@ export default function QuotationDetails() {
       let company = null;
       if (companyId) {
         const companyRes = await api.get(`/admin/companies/${companyId}`);
-        company = companyRes.data;
+        company = companyRes;
       }
       
       let client = null;
@@ -306,29 +337,98 @@ export default function QuotationDetails() {
         client = clientsList.find(c => c.id === data.clientId);
       }
 
+      let logoBase64 = '';
+      if (company?.logoUrl) {
+        try {
+            let endpoint = company.logoUrl;
+            if (endpoint.startsWith('http://localhost:8080/api')) {
+                endpoint = endpoint.replace('http://localhost:8080/api', '');
+            } else if (endpoint.startsWith('http')) {
+                const urlObj = new URL(endpoint);
+                endpoint = urlObj.pathname;
+            }
+            if (!endpoint.startsWith('/')) {
+                endpoint = '/' + endpoint;
+            }
+            const blob = await api.get(endpoint, { responseType: 'blob' });
+            if (blob) {
+                logoBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.readAsDataURL(blob);
+                });
+            }
+        } catch (e) {
+            console.error('Failed to pre-fetch logo', e);
+        }
+      }
+
+      const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
+      const clientState = client?.billingState?.trim().toLowerCase() || '';
+      const isSameState = companyState && clientState && companyState === clientState;
+
+      const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
+      lineItems.forEach(item => {
+        if (item.gst > 0) {
+          if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
+          taxGroups[item.gst].taxable += (item.rate * item.qty);
+          taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
+        }
+      });
+
+      const taxBreakdown: any[] = [];
+      Object.keys(taxGroups).forEach(rateStr => {
+        const rate = Number(rateStr);
+        const group = taxGroups[rate];
+        if (isSameState) {
+          const halfRate = rate / 2;
+          const halfAmount = (group.taxAmount / 2).toFixed(2);
+          taxBreakdown.push({
+            tax_type: 'CGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+          taxBreakdown.push({
+            tax_type: 'SGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+        } else {
+          taxBreakdown.push({
+            tax_type: 'IGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: rate,
+            tax_amount: group.taxAmount.toFixed(2)
+          });
+        }
+      });
+
       const previewPayload = {
         primary_color_hex: '#792359',
-        company_name: company?.name || 'Company Name',
-        company_logo_url: company?.logoUrl || '',
-        company_address_line1: company?.addressLine1 || '',
-        company_address_line2: company?.addressLine2 || '',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
         company_phone: company?.phone || '',
         company_email: company?.email || '',
-        company_gstin: company?.gstin || '',
-        company_pan: company?.pan || '',
-        client_name: client?.companyName || client?.displayName || data.client || 'Client Name',
-        client_address_line1: (data as any).billingAddress ? (data as any).billingAddress.split('\n')[0] : (client?.billingAddressLine1 || ''),
-        client_address_line2: (data as any).billingAddress ? (data as any).billingAddress.split('\n').slice(1).join(', ') : (client?.billingAddressLine2 || ''),
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        client_name: client?.displayName || quotation.client || 'Client Name',
+        client_address_line1: client?.billingAddressLine1 || '',
+        client_address_line2: client?.billingCity || '',
         client_phone: client?.phone || '',
         client_state: client?.billingState || '',
         client_email: client?.email || '',
-        estimate_number: data.qtnNo,
-        estimate_date: data.createdOn,
-        place_of_supply: (data as any).shippingAddress ? (data as any).shippingAddress.split('\n').join(', ') : (client?.shippingState || client?.billingState || ''),
-        items: lineItems.map((item, idx) => ({
-          item_index: idx + 1,
+        estimate_number: quotation.qtnNo || 'Draft',
+        estimate_date: quotation.createdOn || new Date().toLocaleDateString('en-GB'),
+        place_of_supply: client?.billingState || '',
+        items: lineItems.map((item, index) => ({
+          item_index: index + 1,
           item_name: item.name,
-          item_description: item.name,
+          item_description: '',
+          item_hsn: '',
           item_quantity: item.qty,
           item_unit: 'Unit',
           item_price: item.rate.toFixed(2),
@@ -339,15 +439,15 @@ export default function QuotationDetails() {
         grand_total: grandTotal.toFixed(2),
         amount_in_words: 'Amount in words not calculated',
         terms_and_conditions: 'Terms and conditions apply',
-        bank_name: company?.bankName || '',
-        bank_account_no: company?.bankAccountNumber || '',
-        bank_ifsc: company?.bankIfscCode || '',
-        bank_account_holder: company?.bankAccountName || '',
+        bank_name: company?.bankAccounts?.[0]?.bankName || '',
+        bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
+        bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: totalGst > 0,
-        taxes: totalGst > 0 ? [{ tax_type: 'GST', taxable_amount: subTotal.toFixed(2), tax_rate: 'VARIOUS', tax_amount: totalGst.toFixed(2) }] : []
+        taxes: taxBreakdown
       };
 
-      setPreviewTemplate(templateRes.data);
+      setPreviewTemplate(templateRes);
       setPreviewData(previewPayload);
       setIsPreviewOpen(true);
     } catch (err: any) {
@@ -449,22 +549,24 @@ export default function QuotationDetails() {
               <Info className="text-yellow-600 dark:text-yellow-500" size={20} />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">Quotation is sent for internal approval. You will be notified once it is approved or rejected.</p>
             </div>
-            <div className="flex gap-2">
-              <button
-                disabled={isApiLoading}
-                onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
-              >
-                Reject
-              </button>
-              <button
-                disabled={isApiLoading}
-                onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
-              >
-                Approve
-              </button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <button
+                  disabled={isApiLoading}
+                  onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
+                  className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                >
+                  Reject
+                </button>
+                <button
+                  disabled={isApiLoading}
+                  onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
+                  className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+                >
+                  Approve
+                </button>
+              </div>
+            )}
           </div>
         );
       case 3:
@@ -944,12 +1046,23 @@ export default function QuotationDetails() {
                     <div className="w-64 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Sub Total</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{subTotal.toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">GST (18%)</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{totalGst.toLocaleString('en-IN')}</span>
-                      </div>
+                      
+                      {uiTaxBreakdown.length > 0 ? (
+                        uiTaxBreakdown.map((tax, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="text-gray-500">{tax.type} ({tax.rate}%)</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{tax.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">GST</span>
+                          <span className="font-medium text-gray-900 dark:text-white">0.00</span>
+                        </div>
+                      )}
+
                       <div className="flex justify-between text-sm items-center">
                         <span className="text-gray-500">Discount</span>
                         {isEditing ? (
