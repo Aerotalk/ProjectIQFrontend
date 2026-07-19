@@ -66,8 +66,10 @@ export default function QuotationDetails() {
 
   interface LineItem {
     id: string;
+    productId?: string;
     name: string;
     category: string;
+    hsn?: string;
     qty: number;
     rate: number;
     gst: number;
@@ -258,8 +260,10 @@ export default function QuotationDetails() {
           if (data.lineItems && data.lineItems.length > 0) {
             setLineItems(data.lineItems.map(item => ({
               id: item.id || item.productId || Math.random().toString(),
+              productId: item.productId,
               name: item.itemName || 'Unknown Item',
               category: 'Service', // Fallback for UI
+              hsn: item.hsnSac || '',
               qty: item.quantity || 1,
               rate: item.rate || 0,
               gst: item.gstRate || 0,
@@ -415,16 +419,19 @@ export default function QuotationDetails() {
         estimate_number: quotation.qtnNo || 'Draft',
         estimate_date: quotation.createdOn || new Date().toLocaleDateString('en-GB'),
         place_of_supply: client?.billingState || '',
-        items: lineItems.map((item, index) => ({
-          item_index: index + 1,
-          item_name: item.name,
-          item_description: '',
-          item_hsn: '',
-          item_quantity: item.qty,
-          item_unit: 'Unit',
-          item_price: item.rate.toFixed(2),
-          item_amount: item.amount.toFixed(2)
-        })),
+        items: lineItems.map((item, index) => {
+          const product = products.find(p => p.id === item.productId || p.id === item.id);
+          return {
+            item_index: index + 1,
+            item_name: item.name,
+            item_description: '',
+            item_hsn: item.hsn || product?.hsn || '',
+            item_quantity: item.qty,
+            item_unit: 'Unit',
+            item_price: item.rate.toFixed(2),
+            item_amount: item.amount.toFixed(2)
+          };
+        }),
         sub_total: subTotal.toFixed(2),
         total_tax: totalGst.toFixed(2),
         grand_total: grandTotal.toFixed(2),
@@ -756,8 +763,10 @@ export default function QuotationDetails() {
                     if (data.lineItems && data.lineItems.length > 0) {
                       setLineItems(data.lineItems.map(item => ({
                         id: item.id || item.productId || Math.random().toString(),
+                        productId: item.productId,
                         name: item.itemName || 'Unknown Item',
                         category: 'Service',
+                        hsn: item.hsnSac || '',
                         qty: item.quantity || 1,
                         rate: item.rate || 0,
                         gst: item.gstRate || 0,
@@ -1286,7 +1295,13 @@ export default function QuotationDetails() {
                     </div>
                     <button
                       onClick={() => {
-                        setLineItems([...lineItems, { ...product, id: Math.random().toString(36).substr(2, 9), qty: 1, amount: product.rate }]);
+                        setLineItems([...lineItems, { 
+                          ...product, 
+                          id: Math.random().toString(36).substr(2, 9), 
+                          productId: product.id,
+                          qty: 1, 
+                          amount: product.rate 
+                        }]);
                         setIsProductModalOpen(false);
                         toast.success('Product added successfully');
                       }}

@@ -40,6 +40,7 @@ export default function LineItemsSection({ readOnly }: Props) {
     const product = products.find(p => p.id === productId);
     if (product) {
       setValue(`lineItems.${index}.itemName`, product.itemName);
+      setValue(`lineItems.${index}.hsnSac`, product.hsnSac || '');
       setValue(`lineItems.${index}.description`, product.description || '');
       setValue(`lineItems.${index}.unit`, product.unit);
       setValue(`lineItems.${index}.rate`, product.standardRate);
@@ -62,7 +63,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         {!readOnly && (
           <button 
             type="button" 
-            onClick={() => append({ productId: '', itemName: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
+            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
             className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3]"
           >
             <Plus size={14} /> Add Item

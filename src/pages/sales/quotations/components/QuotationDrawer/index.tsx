@@ -178,7 +178,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           item_index: idx + 1,
           item_name: item.itemName,
           item_description: item.description || '',
-          item_hsn: '',
+          item_hsn: item.hsnSac || '',
           item_quantity: item.quantity,
           item_unit: item.unit || 'Unit',
           item_price: item.rate.toFixed(2),

@@ -4,6 +4,7 @@ export const quotationLineItemSchema = z.object({
   id: z.string().nullable().optional(),
   productId: z.string().min(1, 'Product is required'),
   itemName: z.string().min(1, 'Item Name is required'),
+  hsnSac: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   quantity: z.number().min(1, 'Quantity must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
