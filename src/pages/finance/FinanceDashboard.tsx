@@ -286,7 +286,7 @@ export default function FinanceDashboard() {
                       <span className="font-medium text-gray-900 dark:text-white">{p.id}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{p.name}</td>
+                  <td className="px-6 py-3 text-black dark:text-white">{p.name}</td>
                   <td className="px-6 py-3 text-gray-600 dark:text-gray-300">{p.customer}</td>
                   <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{p.value}</td>
                   <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{p.cost}</td>

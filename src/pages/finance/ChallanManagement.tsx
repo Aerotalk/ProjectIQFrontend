@@ -333,7 +333,7 @@ export default function ChallanManagement() {
                     <td className="px-6 py-4">
                       
                       {ch.projectName && (
-                        <p className="text-sm dark:text-white">{ch.projectName}</p>
+                        <p className="text-sm text-black dark:text-white">{ch.projectName}</p>
                       )}
                     </td>
 

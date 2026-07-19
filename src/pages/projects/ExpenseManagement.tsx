@@ -277,7 +277,7 @@ export default function ExpenseManagement() {
             <table className="w-full text-left whitespace-nowrap">
               <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5">
                 <tr>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Expense ID</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Expense No</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Category</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
@@ -291,13 +291,13 @@ export default function ExpenseManagement() {
                     key={ex.id}
                     className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"
                   >
-                    {/* Expense ID */}
+                    {/* Expense No */}
                     <td className="px-6 py-4">
                       <button
                         onClick={() => openDrawer('view', ex)}
                         className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
                       >
-                        {ex.id}
+                        {`EXP-${ex.id.substring(0, 6).toUpperCase()}`}
                       </button>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 max-w-[150px] truncate" title={ex.description}>
                         {ex.description}
@@ -308,7 +308,7 @@ export default function ExpenseManagement() {
                     <td className="px-6 py-4">
                       
                       {ex.projectName && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500">{ex.projectName}</p>
+                        <p className="text-black dark:text-white">{ex.projectName}</p>
                       )}
                     </td>
 
