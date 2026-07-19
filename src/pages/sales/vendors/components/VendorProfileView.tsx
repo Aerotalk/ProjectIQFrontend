@@ -143,8 +143,61 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                       <div className="text-gray-900 dark:text-gray-100 font-medium tracking-wide">{vendor.panNumber}</div>
                     </>
                   )}
+                  {vendor.placeOfSupply && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Place of Supply</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.placeOfSupply}</div>
+                    </>
+                  )}
+                  {vendor.sezUnitName && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">SEZ Unit</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.sezUnitName}</div>
+                    </>
+                  )}
+                  {vendor.lutBondNo && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">LUT/Bond No</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.lutBondNo}</div>
+                    </>
+                  )}
+                  {vendor.foreignTaxId && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Foreign Tax ID</div>
+                      <div className="text-gray-900 dark:text-gray-100">{vendor.foreignTaxId}</div>
+                    </>
+                  )}
                 </div>
               </div>
+
+              {/* Commercial Details */}
+              {(vendor.paymentTerms || vendor.creditLimit || vendor.notes) && (
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
+                    <FileText size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Commercial
+                  </h3>
+                  <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
+                    {vendor.paymentTerms && (
+                      <>
+                        <div className="text-gray-500 dark:text-gray-400">Payment Terms</div>
+                        <div className="text-gray-900 dark:text-gray-100">{vendor.paymentTerms}</div>
+                      </>
+                    )}
+                    {vendor.creditLimit !== undefined && (
+                      <>
+                        <div className="text-gray-500 dark:text-gray-400">Credit Limit</div>
+                        <div className="text-gray-900 dark:text-gray-100">{vendor.creditLimit}</div>
+                      </>
+                    )}
+                    {vendor.notes && (
+                      <>
+                        <div className="text-gray-500 dark:text-gray-400">Notes</div>
+                        <div className="text-gray-900 dark:text-gray-100">{vendor.notes}</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Address */}
               <div>
@@ -159,11 +212,13 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10">
                       <div className="leading-relaxed">
+                        {vendor.billingAttention && <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">Attn: {vendor.billingAttention}</div>}
                         {vendor.billingAddressLine1}<br/>
                         {vendor.billingAddressLine2 && <>{vendor.billingAddressLine2}<br/></>}
                         {vendor.billingCity}, {vendor.billingState} {vendor.billingPinCode}<br/>
                         {vendor.billingCountry}
                       </div>
+                      {vendor.billingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs"><MapPin size={14} className="text-transparent" /> Phone: {vendor.billingPhone}</div>}
                     </div>
                   </div>
 
@@ -174,11 +229,13 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10">
                         <div className="leading-relaxed">
+                          {vendor.shippingAttention && <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">Attn: {vendor.shippingAttention}</div>}
                           {vendor.shippingAddressLine1}<br/>
                           {vendor.shippingAddressLine2 && <>{vendor.shippingAddressLine2}<br/></>}
                           {vendor.shippingCity}, {vendor.shippingState} {vendor.shippingPinCode}<br/>
                           {vendor.shippingCountry}
                         </div>
+                        {vendor.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs"><MapPin size={14} className="text-transparent" /> Phone: {vendor.shippingPhone}</div>}
                       </div>
                     </div>
                   )}

@@ -146,8 +146,58 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
                     <div className="text-gray-900 dark:text-gray-100">{client.placeOfSupply}</div>
                   </>
                 )}
+                {client.sezUnitName && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">SEZ Unit</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.sezUnitName}</div>
+                  </>
+                )}
+                {client.lutBondNo && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">LUT/Bond No</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.lutBondNo}</div>
+                  </>
+                )}
+                {client.foreignTaxId && (
+                  <>
+                    <div className="text-gray-500 dark:text-gray-400">Foreign Tax ID</div>
+                    <div className="text-gray-900 dark:text-gray-100">{client.foreignTaxId}</div>
+                  </>
+                )}
               </div>
             </div>
+
+            {(client.paymentTerms || client.creditLimit || client.industry || client.notes) && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Commercial Details</h3>
+                <div className="grid grid-cols-2 gap-y-4 text-sm">
+                  {client.industry && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Briefcase size={14} /> Industry</div>
+                      <div className="text-gray-900 dark:text-gray-100">{client.industry}</div>
+                    </>
+                  )}
+                  {client.paymentTerms && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Payment Terms</div>
+                      <div className="text-gray-900 dark:text-gray-100">{client.paymentTerms}</div>
+                    </>
+                  )}
+                  {client.creditLimit !== undefined && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Credit Limit</div>
+                      <div className="text-gray-900 dark:text-gray-100">{client.creditLimit}</div>
+                    </>
+                  )}
+                  {client.notes && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">Notes</div>
+                      <div className="text-gray-900 dark:text-gray-100">{client.notes}</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
