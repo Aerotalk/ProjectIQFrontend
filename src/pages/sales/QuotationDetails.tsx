@@ -338,19 +338,10 @@ export default function QuotationDetails() {
       }
 
       let logoBase64 = '';
-      if (company?.logoUrl) {
+      const logoId = company?.invoiceLogoId || company?.logoFileId;
+      if (logoId) {
         try {
-          let endpoint = company.logoUrl;
-          if (endpoint.startsWith('http://localhost:8080/api')) {
-            endpoint = endpoint.replace('http://localhost:8080/api', '');
-          } else if (endpoint.startsWith('http')) {
-            const urlObj = new URL(endpoint);
-            endpoint = urlObj.pathname;
-          }
-          if (!endpoint.startsWith('/')) {
-            endpoint = '/' + endpoint;
-          }
-          const blob = await api.get(endpoint, { responseType: 'blob' });
+          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
           if (blob) {
             logoBase64 = await new Promise((resolve) => {
               const reader = new FileReader();

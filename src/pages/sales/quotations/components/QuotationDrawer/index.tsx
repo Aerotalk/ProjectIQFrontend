@@ -99,20 +99,10 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
       }
 
       let logoBase64 = '';
-      if (company?.logoUrl) {
+      const logoId = company?.invoiceLogoId || company?.logoFileId;
+      if (logoId) {
         try {
-          const endpoint = company.logoUrl;
-          const isInternal = endpoint.startsWith('http://localhost:8080') || endpoint.startsWith('/api');
-          
-          let blob;
-          if (isInternal) {
-            const path = endpoint.replace('http://localhost:8080/api', '').replace('/api', '');
-            blob = await api.get(path, { responseType: 'blob' });
-          } else {
-            const res = await fetch(endpoint);
-            blob = await res.blob();
-          }
-
+          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
           if (blob) {
             logoBase64 = await new Promise((resolve) => {
               const reader = new FileReader();
