@@ -360,12 +360,12 @@ export default function POManagement() {
                     <td className="px-6 py-4">
                       
                       {po.projectName && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500">{po.projectName}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{po.projectName}</p>
                       )}
                     </td>
 
                     {/* Date */}
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       {formatDate(po.poDate)}
                     </td>
 

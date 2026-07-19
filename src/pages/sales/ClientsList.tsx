@@ -175,7 +175,6 @@ export default function ClientsList() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
-                <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client ID</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client Name</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contact Person</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">City</th>
@@ -187,16 +186,15 @@ export default function ClientsList() {
             <tbody className="divide-y divide-gray-200 dark:divide-white/5">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">Loading clients...</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">Loading clients...</td>
                 </tr>
               ) : currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-sm text-gray-500">No clients found.</td>
+                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">No clients found.</td>
                 </tr>
               ) : (
                 currentItems.map((client) => (
                   <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-400">{client.clientNo || client.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-[#792359] dark:text-[#e6a8d0]">{client.displayName}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{client.primaryContactPerson}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{client.billingCity}</td>

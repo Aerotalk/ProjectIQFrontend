@@ -274,17 +274,17 @@ export default function PaymentManagement() {
                       {p.projectId ? (
                         <>
                           
-                          <p className="text-xs text-gray-400 dark:text-gray-500">{p.projectName}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{p.projectName}</p>
                         </>
                       ) : (
-                        <span className="text-gray-400">N/A</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">N/A</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-medium text-gray-900 dark:text-white">{p.paymentMethod}</span>
                       {p.referenceId && <p className="text-xs text-gray-400 dark:text-gray-500">{p.referenceId}</p>}
                     </td>
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       {formatDate(p.paymentDate)}
                     </td>
                     <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white text-right">
