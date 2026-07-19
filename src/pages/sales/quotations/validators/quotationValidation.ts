@@ -43,6 +43,8 @@ export const quotationSchema = z.object({
 
   status: z.enum(['Draft', 'Pending Approval', 'Approved', 'Sent to Client', 'Confirmed Lead']),
 
+  taxType: z.enum(['CGST_SGST', 'IGST']).default('CGST_SGST'),
+
   approvedBy: z.string().nullable().optional(),
   approvalDate: z.string().nullable().optional(),
   woPoDocumentUrl: z.string().nullable().optional()

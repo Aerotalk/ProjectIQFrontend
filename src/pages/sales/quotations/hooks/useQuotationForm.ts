@@ -17,6 +17,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       totalGstAmount: 0,
       deliveryCost: 0,
       grandTotal: 0,
+      taxType: 'CGST_SGST',
       ...defaultValues
     },
     mode: 'onChange'

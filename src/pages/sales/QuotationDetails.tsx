@@ -108,7 +108,8 @@ export default function QuotationDetails() {
     createdOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     currency: 'INR',
-    notes: ''
+    notes: '',
+    taxType: 'CGST_SGST'
   });
 
   const [tempNotes, setTempNotes] = useState('');
@@ -248,7 +249,8 @@ export default function QuotationDetails() {
             createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
             lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
             currency: 'INR',
-            notes: data.notes || ''
+            notes: data.notes || '',
+            taxType: data.taxType || 'CGST_SGST'
           });
           if (data.lineItems && data.lineItems.length > 0) {
             setLineItems(data.lineItems.map(item => ({
@@ -409,7 +411,8 @@ export default function QuotationDetails() {
                       totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
                       totalGstAmount: totalGst,
                       grandTotal: grandTotal,
-                      status: 'Draft'
+                      status: 'Draft',
+                      taxType: quotation.taxType as 'CGST_SGST' | 'IGST'
                     };
 
                     await QuotationService.createQuotation(companyId, newQuotationData);
@@ -604,7 +607,8 @@ export default function QuotationDetails() {
                         grandTotal: Number(quotation.amount) || 0,
                         validUntil: quotation.validTill,
                         totalDiscount: Number(quotation.discount) || 0,
-                        deliveryCost: Number(quotation.deliveryCost) || 0
+                        deliveryCost: Number(quotation.deliveryCost) || 0,
+                        taxType: quotation.taxType
                       });
                       toast.success('Changes saved successfully');
                     } catch (err: any) {
@@ -655,7 +659,8 @@ export default function QuotationDetails() {
                       createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
                       lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                       currency: 'INR',
-                      notes: data.notes || ''
+                      notes: data.notes || '',
+                      taxType: data.taxType || 'CGST_SGST'
                     });
                     if (data.lineItems && data.lineItems.length > 0) {
                       setLineItems(data.lineItems.map(item => ({
@@ -946,10 +951,36 @@ export default function QuotationDetails() {
                         <span className="text-gray-500">Sub Total</span>
                         <span className="font-medium text-gray-900 dark:text-white">{subTotal.toLocaleString('en-IN')}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">GST (18%)</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{totalGst.toLocaleString('en-IN')}</span>
-                      </div>
+                      {quotation.taxType === 'CGST_SGST' ? (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">CGST</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{(totalGst / 2).toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">SGST</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{(totalGst / 2).toLocaleString('en-IN')}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">IGST</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{totalGst.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
+                      {isEditing && (
+                        <div className="flex justify-between text-sm items-center">
+                          <span className="text-gray-500">Tax Type</span>
+                          <CustomSelect
+                            value={quotation.taxType}
+                            onChange={(val) => setQuotation({ ...quotation, taxType: val })}
+                            options={[
+                              { label: 'Intra-State (CGST + SGST)', value: 'CGST_SGST' },
+                              { label: 'Inter-State (IGST)', value: 'IGST' }
+                            ]}
+                          />
+                        </div>
+                      )}
                       <div className="flex justify-between text-sm items-center">
                         <span className="text-gray-500">Discount</span>
                         {isEditing ? (

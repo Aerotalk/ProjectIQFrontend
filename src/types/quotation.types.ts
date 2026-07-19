@@ -45,6 +45,7 @@ export interface Quotation {
   termsAndConditions?: string;
 
   status: QuotationStatus;
+  taxType?: 'CGST_SGST' | 'IGST';
 
   // Workflow specifics
   approvedBy?: string;

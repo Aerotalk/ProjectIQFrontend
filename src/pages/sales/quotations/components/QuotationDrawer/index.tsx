@@ -136,7 +136,14 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         bank_ifsc: company?.bankIfscCode || '',
         bank_account_holder: company?.bankAccountName || '',
         has_taxes: data.totalGstAmount > 0,
-        taxes: data.totalGstAmount > 0 ? [{ tax_type: 'GST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: data.totalGstAmount.toFixed(2) }] : []
+        taxes: data.totalGstAmount > 0 ? (
+          data.taxType === 'IGST' 
+          ? [{ tax_type: 'IGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: data.totalGstAmount.toFixed(2) }] 
+          : [
+              { tax_type: 'CGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: (data.totalGstAmount / 2).toFixed(2) },
+              { tax_type: 'SGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: (data.totalGstAmount / 2).toFixed(2) }
+            ]
+        ) : []
       };
 
       setPreviewTemplate(templateRes.data);
@@ -181,8 +188,8 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
             <LineItemsSection readOnly={readOnly} />
             
             <TotalsSection readOnly={readOnly} />
-            
-            <WorkflowSection readOnly={readOnly} />
+
+            {mode !== 'create' && <WorkflowSection readOnly={readOnly} />}
 
           </form>
         </FormProvider>

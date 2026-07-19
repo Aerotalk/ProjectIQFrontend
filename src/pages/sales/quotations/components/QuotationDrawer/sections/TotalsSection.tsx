@@ -35,6 +35,7 @@ export default function TotalsSection({ readOnly }: Props) {
   const totalTaxableAmount = useWatch({ control, name: 'totalTaxableAmount', defaultValue: 0 });
   const totalGstAmount = useWatch({ control, name: 'totalGstAmount', defaultValue: 0 });
   const grandTotal = useWatch({ control, name: 'grandTotal', defaultValue: 0 });
+  const taxType = useWatch({ control, name: 'taxType', defaultValue: 'CGST_SGST' });
 
   return (
     <div className="pt-6 border-t border-gray-200 dark:border-white/10 flex flex-col md:flex-row justify-between gap-6">
@@ -46,6 +47,32 @@ export default function TotalsSection({ readOnly }: Props) {
           <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
             {numberToWords(Math.round(grandTotal))}
           </p>
+        </div>
+        
+        <div>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tax Type</h4>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="radio" 
+                value="CGST_SGST"
+                disabled={readOnly}
+                {...useFormContext().register('taxType')}
+                className="text-[#792359] focus:ring-[#792359]"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Intra-State (CGST + SGST)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="radio" 
+                value="IGST"
+                disabled={readOnly}
+                {...useFormContext().register('taxType')}
+                className="text-[#792359] focus:ring-[#792359]"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Inter-State (IGST)</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -63,10 +90,24 @@ export default function TotalsSection({ readOnly }: Props) {
           <span className="text-gray-600 dark:text-gray-400">Taxable Amount</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{totalTaxableAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
-        <div className="flex justify-between text-sm border-b border-gray-200 dark:border-white/10 pb-3">
-          <span className="text-gray-600 dark:text-gray-400">Total GST</span>
-          <span className="font-medium text-gray-900 dark:text-white">₹{totalGstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-        </div>
+        
+        {taxType === 'CGST_SGST' ? (
+          <>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">CGST</span>
+              <span className="font-medium text-gray-900 dark:text-white">₹{(totalGstAmount / 2).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between text-sm border-b border-gray-200 dark:border-white/10 pb-3">
+              <span className="text-gray-600 dark:text-gray-400">SGST</span>
+              <span className="font-medium text-gray-900 dark:text-white">₹{(totalGstAmount / 2).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-between text-sm border-b border-gray-200 dark:border-white/10 pb-3">
+            <span className="text-gray-600 dark:text-gray-400">IGST</span>
+            <span className="font-medium text-gray-900 dark:text-white">₹{totalGstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
+        )}
         <div className="flex justify-between items-center text-sm border-b border-gray-200 dark:border-white/10 pb-3">
           <span className="text-gray-600 dark:text-gray-400">Delivery Cost</span>
           <div className="flex items-center gap-1">
