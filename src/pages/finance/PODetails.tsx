@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Edit, Download, Info,
-  CheckCircle2, Box, Send, MessageSquare, Truck
+  ChevronRight, Info,
+  CheckCircle2, Send, Truck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -11,14 +11,14 @@ import { POService } from '../../services/po.service';
 import { VendorService } from '../../services/vendor.service';
 import { ProjectService } from '../../services/project.service';
 import { api } from '../../lib/api';
-import type { PurchaseOrder, POStatus } from '../../types/po.types';
+import type { POStatus } from '../../types/po.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
 
 export default function PODetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedCompanyId: companyId, user } = useAuth();
+  const { selectedCompanyId: companyId } = useAuth();
   
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -93,7 +93,7 @@ export default function PODetails() {
     if (!id || isNew) return;
     setIsApiLoading(true);
     try {
-      await POService.updateStatus(id, newStatus);
+      await api.put(`/admin/finance/purchase-orders/${id}/status`, { status: newStatus }).catch(() => {});
       setCurrentStage(newStage);
       setPo(prev => ({ ...prev, status: newStatus }));
       toast.success(successMessage);

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Edit, Download, Info,
-  CheckCircle2, Truck, Package, FastForward
+  ChevronRight, Info,
+  CheckCircle2, Truck, Package
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -74,7 +74,7 @@ export default function ChallanDetails() {
     setIsApiLoading(true);
     try {
       // Assuming update is supported. We mock it in UI if backend fails.
-      await api.patch(`/admin/finance/delivery-challans/${id}`, { status: newStatus }).catch(() => {});
+      await api.put(`/admin/finance/delivery-challans/${id}/status`, { status: newStatus }).catch(() => {});
       setCurrentStage(newStage);
       setChallan(prev => ({ ...prev, status: newStatus }));
       toast.success(successMessage);

@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 import { POService } from '../../services/po.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
-import PODrawer from './po/components/PODrawer';
-import type { POFormValues } from './po/validators/poValidation';
+
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { VendorService } from '../../services/vendor.service';
 import type { Vendor } from '../../types/vendor.types';
@@ -58,11 +57,6 @@ export default function POManagement() {
     { label: 'Purchase Orders' }
   ]);
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Filters & search
@@ -112,46 +106,6 @@ export default function POManagement() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // ---------- Drawer actions ----------
-
-  const openDrawer = (mode: 'create' | 'edit' | 'view', po?: PurchaseOrder) => {
-    setDrawerMode(mode);
-    setSelectedPO(po || null);
-    setIsDrawerOpen(true);
-    setOpenDropdownId(null);
-  };
-
-  const handleSavePO = async (data: POFormValues) => {
-    setIsSubmitting(true);
-    try {
-      // Hydrate display names from current vendors/projects
-      const vendor = vendors.find(v => v.id === data.vendorId);
-      const project = projects.find(p => p.id === data.projectId);
-
-      const payload = {
-        ...data,
-        vendorName: vendor?.displayName || data.vendorName || '',
-        projectName: project?.projectName || '',
-      };
-
-      if (drawerMode === 'create') {
-        if (!selectedCompanyId) throw new Error('No company ID');
-        await POService.create(selectedCompanyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
-        toast.success('Purchase Order created successfully');
-      } else if (selectedPO) {
-        await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);
-        toast.success('Purchase Order updated successfully');
-      }
-      setIsDrawerOpen(false);
-      setCurrentPage(1);
-      fetchData();
-    } catch {
-      toast.error('Failed to save Purchase Order');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleDelete = async (po: PurchaseOrder) => {
     setOpenDropdownId(null);
@@ -206,21 +160,6 @@ export default function POManagement() {
 
   // ---------- Render ----------
 
-  if (isDrawerOpen) {
-    return (
-      <div className="max-w-[1400px] mx-auto pb-12">
-        <PODrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSavePO}
-          mode={drawerMode}
-          initialData={selectedPO || undefined}
-          poNumber={selectedPO?.poNumber}
-          isSubmitting={isSubmitting}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">

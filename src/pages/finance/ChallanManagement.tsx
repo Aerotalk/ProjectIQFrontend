@@ -6,15 +6,13 @@ import {
 import toast from 'react-hot-toast';
 import { ChallanService } from '../../services/challan.service';
 import type { DeliveryChallan } from '../../types/challan.types';
-import ChallanDrawer from './challan/components/ChallanDrawer';
-import type { ChallanFormValues } from './challan/validators/challanValidation';
+import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { VendorService } from '../../services/vendor.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNextSequenceNumber } from '../../utils/sequence';
-import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { useNavigate } from 'react-router-dom';
 
 export default function ChallanManagement() {
@@ -30,11 +28,6 @@ export default function ChallanManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
 
-  // Drawer state
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedChallan, setSelectedChallan] = useState<DeliveryChallan | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,42 +73,7 @@ export default function ChallanManagement() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const openDrawer = (mode: 'create' | 'edit' | 'view', challan?: DeliveryChallan) => {
-    setDrawerMode(mode);
-    setSelectedChallan(challan || null);
-    setIsDrawerOpen(true);
-    setOpenDropdownId(null);
-  };
 
-  const handleSaveChallan = async (data: ChallanFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const vendor = vendors.find(v => v.id === data.vendorId);
-      const project = projects.find(p => p.id === data.projectId);
-
-      const payload = {
-        ...data,
-        vendorName: vendor?.displayName || data.vendorName || '',
-        projectName: project?.projectName || '',
-      };
-
-      if (drawerMode === 'create') {
-        if (!selectedCompanyId) throw new Error('No company ID');
-        await ChallanService.create(selectedCompanyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
-        toast.success('Delivery Challan created successfully');
-      } else if (selectedChallan) {
-        await ChallanService.update(selectedChallan.id, payload as Omit<DeliveryChallan, 'id' | 'createdAt'>);
-        toast.success('Delivery Challan updated successfully');
-      }
-      setIsDrawerOpen(false);
-      setCurrentPage(1);
-      fetchData();
-    } catch {
-      toast.error('Failed to save Delivery Challan');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleDelete = async (ch: DeliveryChallan) => {
     setOpenDropdownId(null);
@@ -162,21 +120,6 @@ export default function ChallanManagement() {
     }
   };
 
-  if (isDrawerOpen) {
-    return (
-      <div className="max-w-[1400px] mx-auto pb-12">
-        <ChallanDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSaveChallan}
-          mode={drawerMode}
-          initialData={selectedChallan || undefined}
-          challanNumber={selectedChallan?.challanNumber}
-          isSubmitting={isSubmitting}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
@@ -422,17 +365,7 @@ export default function ChallanManagement() {
         </div>
       )}
 
-      {/* ── Challan Drawer ── */}
-      <ChallanDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveChallan}
-        mode={drawerMode}
-        initialData={selectedChallan || undefined}
-        challanNumber={selectedChallan?.challanNumber}
-        isSubmitting={isSubmitting}
-        nextNumber={getNextSequenceNumber(challans, 'challanNumber')}
-      />
+
     </div>
   );
 }
