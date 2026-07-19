@@ -35,7 +35,8 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
         setTemplates(templatesData);
         setIsLoadingTemplates(false);
         if (templatesData.length > 0 && !getValues('templateName')) {
-          setValue('templateName', templatesData[0].filename);
+          const firstTemplate = templatesData[0];
+          setValue('templateName', typeof firstTemplate === 'string' ? firstTemplate : firstTemplate.filename);
         }
       }).catch(() => setIsLoadingTemplates(false));
     });
@@ -184,7 +185,9 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                   <CustomSelect
                     value={field.value || ''}
                     onChange={field.onChange}
-                    options={templates.map(t => ({ label: t.name, value: t.filename }))}
+                    options={templates.map(t => typeof t === 'string' 
+                      ? { label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t } 
+                      : { label: t.name, value: t.filename })}
                   />
                 )}
               />
