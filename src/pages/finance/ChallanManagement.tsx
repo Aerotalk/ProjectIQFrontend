@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import { ChallanService } from '../../services/challan.service';
 import type { DeliveryChallan } from '../../types/challan.types';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import ChallanDrawer from './challan/components/ChallanDrawer';
+import type { ChallanFormValues } from './challan/validators/challanValidation';
 import { VendorService } from '../../services/vendor.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
@@ -44,6 +46,12 @@ export default function ChallanManagement() {
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedChallan, setSelectedChallan] = useState<DeliveryChallan | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   // Filters & search
@@ -93,6 +101,36 @@ export default function ChallanManagement() {
 
 
 
+  const handleSaveChallan = async (data: ChallanFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const vendor = vendors.find(v => v.id === data.vendorId);
+      const project = projects.find(p => p.id === data.projectId);
+
+      const payload = {
+        ...data,
+        vendorName: vendor?.displayName || data.vendorName || '',
+        projectName: project?.projectName || '',
+      };
+
+      if (drawerMode === 'create') {
+        if (!selectedCompanyId) throw new Error('No company ID');
+        await ChallanService.create(selectedCompanyId, payload as Omit<DeliveryChallan, 'id' | 'createdAt' | 'updatedAt'>);
+        toast.success('Delivery Challan created successfully');
+      } else if (selectedChallan) {
+        await ChallanService.update(selectedChallan.id, payload as Omit<DeliveryChallan, 'id' | 'createdAt'>);
+        toast.success('Delivery Challan updated successfully');
+      }
+      setIsDrawerOpen(false);
+      setCurrentPage(1);
+      fetchData();
+    } catch {
+      toast.error('Failed to save Delivery Challan');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDelete = async (ch: DeliveryChallan) => {
     setOpenDropdownId(null);
     if (!window.confirm(`Cancel/delete Challan ${ch.challanNumber}? This cannot be undone.`)) return;
@@ -134,6 +172,22 @@ export default function ChallanManagement() {
   };
 
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <ChallanDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveChallan}
+          mode={drawerMode}
+          initialData={selectedChallan || undefined}
+          challanNumber={selectedChallan?.challanNumber}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
       {/* ── Page Header ── */}
@@ -148,7 +202,7 @@ export default function ChallanManagement() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => navigate('/companydashboard/finance/challans/new')}
+            onClick={() => { setSelectedChallan(null); setDrawerMode('create'); setIsDrawerOpen(true); }}
             className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
           >
             <Plus size={16} />
@@ -313,10 +367,10 @@ export default function ChallanManagement() {
                             View
                           </button>
                           <button
-                            onClick={() => navigate(`/companydashboard/finance/challans/${ch.id || ch.challanNumber}`)}
+                            onClick={() => { setSelectedChallan(ch); setDrawerMode('edit'); setIsDrawerOpen(true); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
-                            Edit
+                            Edit (Drawer)
                           </button>
                           <div className="border-t border-gray-100 dark:border-white/5 my-1" />
                           <button

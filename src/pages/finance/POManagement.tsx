@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 import { POService } from '../../services/po.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
+import PODrawer from './po/components/PODrawer';
+import type { POFormValues } from './po/validators/poValidation';
 
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { VendorService } from '../../services/vendor.service';
@@ -59,6 +61,12 @@ export default function POManagement() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProject, setFilterProject] = useState('');
@@ -106,6 +114,36 @@ export default function POManagement() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleSavePO = async (data: POFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const vendor = vendors.find(v => v.id === data.vendorId);
+      const project = projects.find(p => p.id === data.projectId);
+
+      const payload = {
+        ...data,
+        vendorName: vendor?.displayName || data.vendorName || '',
+        projectName: project?.projectName || '',
+      };
+
+      if (drawerMode === 'create') {
+        if (!selectedCompanyId) throw new Error('No company ID');
+        await POService.create(selectedCompanyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
+        toast.success('Purchase Order created successfully');
+      } else if (selectedPO) {
+        await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);
+        toast.success('Purchase Order updated successfully');
+      }
+      setIsDrawerOpen(false);
+      setCurrentPage(1);
+      fetchData();
+    } catch {
+      toast.error('Failed to save Purchase Order');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDelete = async (po: PurchaseOrder) => {
     setOpenDropdownId(null);
@@ -160,6 +198,21 @@ export default function POManagement() {
 
   // ---------- Render ----------
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <PODrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSavePO}
+          mode={drawerMode}
+          initialData={selectedPO || undefined}
+          poNumber={selectedPO?.poNumber}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
@@ -175,7 +228,7 @@ export default function POManagement() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => navigate('/companydashboard/finance/pos/new')}
+            onClick={() => { setSelectedPO(null); setDrawerMode('create'); setIsDrawerOpen(true); }}
             className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
           >
             <Plus size={16} />
@@ -346,10 +399,10 @@ export default function POManagement() {
                             View
                           </button>
                           <button
-                            onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
+                            onClick={() => { setSelectedPO(po); setDrawerMode('edit'); setIsDrawerOpen(true); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
-                            Edit
+                            Edit (Drawer)
                           </button>
                           <div className="border-t border-gray-100 dark:border-white/5 my-1" />
                           <button
