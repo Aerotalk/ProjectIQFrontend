@@ -160,6 +160,19 @@ export default function QuotationDetails() {
     })();
   };
 
+  const handleUpdateLineItem = (id: string, field: keyof LineItem, value: any) => {
+    setLineItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const updated = { ...item, [field]: value };
+        if (field === 'qty' || field === 'rate') {
+          updated.amount = updated.qty * updated.rate;
+        }
+        return updated;
+      }
+      return item;
+    }));
+  };
+
   useEffect(() => {
     if (companyId) {
       ClientService.getClients(companyId).then(setClients).catch(console.error);
@@ -869,9 +882,46 @@ export default function QuotationDetails() {
                             <td className="px-4 py-3 text-xs text-gray-500">{idx + 1}</td>
                             <td className="px-4 py-3 text-xs font-medium text-gray-900 dark:text-white">{item.name}</td>
                             <td className="px-4 py-3 text-xs text-gray-500">{item.category}</td>
-                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">{item.qty}</td>
-                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">{item.rate.toLocaleString('en-IN')}</td>
-                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">{item.gst}%</td>
+                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">
+                              {isEditing || currentStage === 1 ? (
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={item.qty}
+                                  onChange={(e) => handleUpdateLineItem(item.id, 'qty', Number(e.target.value))}
+                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                />
+                              ) : (
+                                item.qty
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">
+                              {isEditing || currentStage === 1 ? (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={item.rate}
+                                  onChange={(e) => handleUpdateLineItem(item.id, 'rate', Number(e.target.value))}
+                                  className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                />
+                              ) : (
+                                item.rate.toLocaleString('en-IN')
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">
+                              {isEditing || currentStage === 1 ? (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={item.gst}
+                                  onChange={(e) => handleUpdateLineItem(item.id, 'gst', Number(e.target.value))}
+                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                />
+                              ) : (
+                                `${item.gst}%`
+                              )}
+                            </td>
                             <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">{item.amount.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
