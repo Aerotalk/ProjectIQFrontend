@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../types/product.types';
 import ProductDrawer from './products/components/ProductDrawer';
+import ProductProfileView from './products/components/ProductProfileView';
 import type { ProductFormValues } from './products/validators/productValidation';
 import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
@@ -63,15 +64,24 @@ export default function ProductsList() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto">
-        <ProductDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSaveProduct}
-          mode={drawerMode}
-          initialData={selectedProduct as Partial<ProductFormValues>}
-          productId={selectedProduct?.id}
-          isSubmitting={isSubmitting}
-        />
+        {drawerMode === 'view' ? (
+          <ProductProfileView 
+            product={selectedProduct!} 
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => setDrawerMode('edit')}
+          />
+        ) : (
+          <ProductDrawer
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            onSave={handleSaveProduct}
+            mode={drawerMode}
+            initialData={selectedProduct as Partial<ProductFormValues>}
+            productId={selectedProduct?.id}
+            isSubmitting={isSubmitting}
+            nextNumber={getNextSequenceNumber(products, 'itemCode')}
+          />
+        )}
       </div>
     );
   }
@@ -217,17 +227,6 @@ export default function ProductsList() {
           </div>
         </div>
       </div>
-
-      <ProductDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveProduct}
-        mode={drawerMode}
-        initialData={selectedProduct as Partial<ProductFormValues>}
-        productId={selectedProduct?.id}
-        isSubmitting={isSubmitting}
-        nextNumber={getNextSequenceNumber(products, 'itemCode')}
-      />
     </div>
   );
 }

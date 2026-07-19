@@ -70,8 +70,8 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
             <div className="space-y-12">
               {/* Identity Details */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
-                  <FileText size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Identity Details
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
+                  Identity Details
                 </h3>
                 <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">Vendor Type</div>
@@ -96,8 +96,8 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
 
               {/* Primary Contact */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
-                  <User size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Primary Contact
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
+                  Primary Contact
                 </h3>
                 <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">Person</div>
@@ -119,8 +119,8 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
             <div className="space-y-12">
               {/* Tax & Compliance */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
-                  <Shield size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Tax & Compliance
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
+                  Tax & Compliance
                 </h3>
                 <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">GST Treatment</div>
@@ -173,8 +173,8 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
               {/* Commercial Details */}
               {(vendor.paymentTerms || vendor.creditLimit || vendor.notes) && (
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
-                    <FileText size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Commercial
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
+                    Commercial
                   </h3>
                   <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                     {vendor.paymentTerms && (
@@ -201,8 +201,8 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
 
               {/* Address */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2 border-b border-gray-200 dark:border-white/10 pb-3">
-                  <MapPin size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Address Details
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
+                  Address Details
                 </h3>
                 <div className="space-y-6">
                   

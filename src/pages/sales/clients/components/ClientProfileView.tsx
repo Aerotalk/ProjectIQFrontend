@@ -93,21 +93,21 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Primary Contact</h3>
               <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><User size={14} /> Contact Person</div>
+                <div className="text-gray-500 dark:text-gray-400">Contact Person</div>
                 <div className="text-gray-900 dark:text-gray-100 font-medium">{client.primaryContactPerson || '-'}</div>
 
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Briefcase size={14} /> Designation</div>
+                <div className="text-gray-500 dark:text-gray-400">Designation</div>
                 <div className="text-gray-900 dark:text-gray-100">{client.designation || '-'}</div>
 
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Mail size={14} /> Email</div>
+                <div className="text-gray-500 dark:text-gray-400">Email</div>
                 <div className="text-gray-900 dark:text-gray-100">{client.email || '-'}</div>
 
-                <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14} /> Phone</div>
+                <div className="text-gray-500 dark:text-gray-400">Phone</div>
                 <div className="text-gray-900 dark:text-gray-100">{client.phone || '-'}</div>
 
                 {client.alternatePhone && (
                   <>
-                    <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Phone size={14} /> Alt Phone</div>
+                    <div className="text-gray-500 dark:text-gray-400">Alt Phone</div>
                     <div className="text-gray-900 dark:text-gray-100">{client.alternatePhone}</div>
                   </>
                 )}
@@ -173,7 +173,7 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
                 <div className="grid grid-cols-2 gap-y-4 text-sm">
                   {client.industry && (
                     <>
-                      <div className="text-gray-500 dark:text-gray-400 flex items-center gap-2"><Briefcase size={14} /> Industry</div>
+                      <div className="text-gray-500 dark:text-gray-400">Industry</div>
                       <div className="text-gray-900 dark:text-gray-100">{client.industry}</div>
                     </>
                   )}
@@ -203,8 +203,8 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
 
               <div className="mb-4">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <MapPin size={14} className="text-[#792359]" /> Billing Address
+                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Billing Address
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
                   {client.billingAttention && <div>Attn: {client.billingAttention}</div>}
@@ -229,7 +229,7 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
                       {client.shippingCity}, {client.shippingState} {client.shippingPinCode}<br />
                       {client.shippingCountry}
                     </div>
-                    {client.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 flex items-center gap-2"><Phone size={14} className="text-gray-400" /> {client.shippingPhone}</div>}
+                    {client.shippingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 text-xs">Phone: {client.shippingPhone}</div>}
                   </div>
                 </div>
               )}
