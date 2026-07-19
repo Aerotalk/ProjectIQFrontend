@@ -49,7 +49,7 @@ export default function TicketList() {
     const headers = ['Incident Number', 'Subject', 'Client', 'Priority', 'Status', 'Assigned To', 'Updated At'];
     const csvContent = [
       headers.join(','),
-      ...filteredTickets.map(t => `"${t.ticketNo || t.id}","${t.shortDescription}","${t.customerCompany}","${t.priority}","${t.state}","${t.assignedTo}","${t.updatedAt}"`)
+      ...filteredTickets.map(t => `"${t.ticketNo || 'Unknown Ticket'}","${t.shortDescription}","${t.customerCompany}","${t.priority}","${t.state}","${t.assignedTo}","${t.updatedAt}"`)
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -203,7 +203,7 @@ export default function TicketList() {
                 ) : (
                   filteredTickets.map((t) => (
                     <tr 
-                      key={t.id} 
+                      key={t.ticketNo || 'Unknown Ticket'} 
                       onClick={() => navigate(t.id || '')}
                       className="hover:bg-gray-50 cursor-pointer transition-colors group"
                     >

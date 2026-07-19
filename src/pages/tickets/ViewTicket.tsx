@@ -52,7 +52,7 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             <ArrowLeft size={20} className="text-gray-500" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Incident - {formData.id}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Incident - {formData.ticketNo || 'Unknown Incident'}</h1>
             <p className="text-sm text-gray-500">View: Incident with Outages</p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
           <div className="space-y-5 text-sm">
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-gray-600 dark:text-gray-400 font-medium shrink-0">Number</label>
-              <input type="text" disabled value={formData.id} className="flex-1 px-3 py-2 bg-gray-100 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-500 cursor-not-allowed" />
+              <input type="text" disabled value={formData.ticketNo || 'Unknown Incident'} className="flex-1 px-3 py-2 bg-gray-100 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-500 cursor-not-allowed" />
             </div>
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Impact</label>

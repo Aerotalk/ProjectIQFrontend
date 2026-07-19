@@ -191,7 +191,7 @@ export default function TicketDashboard() {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {displayTickets.map((t) => (
                 <tr key={t.realId} onClick={() => navigate(`/companydashboard/tickets/${t.realId}`)} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-                  <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{t.id}</td>
+                  <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{t.id === t.realId ? 'Unknown Ticket' : t.id}</td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
                   <td className="px-6 py-4">

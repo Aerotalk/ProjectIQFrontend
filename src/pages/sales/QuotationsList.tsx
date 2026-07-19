@@ -83,7 +83,7 @@ export default function QuotationsList() {
           onSave={handleSaveQuotation}
           mode={drawerMode}
           initialData={selectedQuotation as Partial<QuotationFormValues>}
-          quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
+          quotationNo={selectedQuotation?.quotationNo || 'Unknown Quotation'}
           isSubmitting={isSubmitting}
         />
       </div>
@@ -237,7 +237,7 @@ export default function QuotationsList() {
         onSave={handleSaveQuotation}
         mode={drawerMode}
         initialData={selectedQuotation as Partial<QuotationFormValues>}
-        quotationNo={selectedQuotation?.quotationNo || selectedQuotation?.id}
+        quotationNo={selectedQuotation?.quotationNo || 'Unknown Quotation'}
         isSubmitting={isSubmitting}
         nextNumber={getNextSequenceNumber(quotations, 'quotationNo')}
       />

@@ -273,7 +273,7 @@ export default function PaymentManagement() {
                     <td className="px-6 py-4">
                       {p.projectId ? (
                         <>
-                          <span className="font-medium text-gray-900 dark:text-white">{p.projectId}</span>
+                          
                           <p className="text-xs text-gray-400 dark:text-gray-500">{p.projectName}</p>
                         </>
                       ) : (

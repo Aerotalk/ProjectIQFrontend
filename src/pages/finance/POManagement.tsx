@@ -356,12 +356,12 @@ export default function POManagement() {
 
                     {/* Vendor */}
                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {po.vendorName || po.vendorId}
+                      {po.vendorName || 'Unknown Vendor'}
                     </td>
 
                     {/* Project */}
                     <td className="px-6 py-4">
-                      <span className="font-medium text-gray-900 dark:text-white">{po.projectId}</span>
+                      
                       {po.projectName && (
                         <p className="text-xs text-gray-400 dark:text-gray-500">{po.projectName}</p>
                       )}

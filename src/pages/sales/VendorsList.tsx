@@ -144,7 +144,7 @@ export default function VendorsList() {
                   <tr key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                       {vendor.displayName || vendor.companyName || vendor.firstName}
-                      <div className="text-xs text-gray-500 font-normal mt-0.5">{vendor.id}</div>
+                      
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{vendor.primaryContactPerson}</td>
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{vendor.email}</td>

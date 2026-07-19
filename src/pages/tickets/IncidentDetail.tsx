@@ -253,7 +253,7 @@ export default function IncidentDetail() {
               <div className="p-4 space-y-4 text-sm">
                 <div className="flex justify-between border-b border-gray-100 pb-2">
                   <span className="text-gray-500">Project</span>
-                  <span className="font-medium text-gray-900 text-right max-w-[300px] truncate">{ticket.projectId}</span>
+                  
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Client</span>

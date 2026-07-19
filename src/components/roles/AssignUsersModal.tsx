@@ -101,7 +101,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
               type="text" 
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Enter Employee UUID" 
+              placeholder="Enter Employee ID" 
               className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
             />
           </div>
