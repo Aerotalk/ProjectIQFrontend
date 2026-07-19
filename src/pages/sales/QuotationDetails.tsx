@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Edit, Download, Info,
-  CheckCircle2, FileText, Send, MessageSquare, Plus, Loader2
+  CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -641,7 +641,8 @@ export default function QuotationDetails() {
                       deliveryCost: data.deliveryCost || 0,
                       createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
                       lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-                      currency: 'INR'
+                      currency: 'INR',
+                      notes: data.notes || ''
                     });
                     if (data.lineItems && data.lineItems.length > 0) {
                       setLineItems(data.lineItems.map(item => ({

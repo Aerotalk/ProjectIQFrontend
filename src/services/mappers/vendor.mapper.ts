@@ -47,6 +47,7 @@ export interface VendorDto {
   billingState?: string;
   billingPinCode?: string;
   billingCountry?: string;
+  billingPhone?: string;
   sameAsBillingAddress: boolean;
   shippingAddressLine1?: string;
   shippingAddressLine2?: string;
@@ -54,6 +55,7 @@ export interface VendorDto {
   shippingState?: string;
   shippingPinCode?: string;
   shippingCountry?: string;
+  shippingPhone?: string;
   paymentTerms?: string;
   creditLimit?: number;
   notes?: string;
@@ -99,6 +101,7 @@ export const mapToVendor = (dto: VendorDto): Vendor => {
     billingState: dto.billingState,
     billingPinCode: dto.billingPinCode,
     billingCountry: dto.billingCountry,
+    billingPhone: dto.billingPhone,
     sameAsBillingAddress: dto.sameAsBillingAddress,
     shippingAddressLine1: dto.shippingAddressLine1,
     shippingAddressLine2: dto.shippingAddressLine2,
@@ -106,6 +109,7 @@ export const mapToVendor = (dto: VendorDto): Vendor => {
     shippingState: dto.shippingState,
     shippingPinCode: dto.shippingPinCode,
     shippingCountry: dto.shippingCountry,
+    shippingPhone: dto.shippingPhone,
     paymentTerms: dto.paymentTerms,
     creditLimit: dto.creditLimit,
     notes: dto.notes,
