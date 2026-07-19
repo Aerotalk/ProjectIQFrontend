@@ -28,6 +28,9 @@ export interface Quotation {
   reference?: string;
   salesperson?: string;
 
+  billingAddress?: string;
+  shippingAddress?: string;
+
   lineItems: QuotationLineItem[];
 
   // Totals

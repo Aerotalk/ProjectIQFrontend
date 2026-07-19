@@ -109,7 +109,7 @@ export default function Login() {
                 if (response.roles && response.roles.includes('ROLE_SUPER_ADMIN')) {
                   navigate('/superadmin/organizations');
                 } else if (response.roles && response.roles.includes('ROLE_COMPANY_ADMIN')) {
-                  navigate('/companydashboard');
+                  navigate('/companydashboard/account');
                 } else if (response.roles && response.roles.includes('ROLE_EMPLOYEE')) {
                   navigate('/employeedashboard');
                 } else {

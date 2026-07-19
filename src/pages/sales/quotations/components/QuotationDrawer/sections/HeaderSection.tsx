@@ -93,7 +93,32 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                 render={({ field }) => (
                   <CustomSelect
                     value={field.value || ''}
-                    onChange={field.onChange}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      const client = clients.find(c => c.id === val);
+                      if (client) {
+                        const formatAddress = (c: any, isShipping: boolean) => {
+                          if (isShipping && !c.sameAsBillingAddress) {
+                            return [
+                              c.companyName || c.displayName,
+                              c.shippingAddressLine1,
+                              c.shippingAddressLine2,
+                              `${c.shippingCity || ''}, ${c.shippingState || ''} ${c.shippingPinCode || ''}`.replace(/^, | ,$|^,|,$/g, '').trim(),
+                              c.shippingCountry
+                            ].filter(Boolean).join('\n');
+                          }
+                          return [
+                            c.companyName || c.displayName,
+                            c.billingAddressLine1,
+                            c.billingAddressLine2,
+                            `${c.billingCity || ''}, ${c.billingState || ''} ${c.billingPinCode || ''}`.replace(/^, | ,$|^,|,$/g, '').trim(),
+                            c.billingCountry
+                          ].filter(Boolean).join('\n');
+                        };
+                        setValue('billingAddress', formatAddress(client, false), { shouldDirty: true });
+                        setValue('shippingAddress', formatAddress(client, true), { shouldDirty: true });
+                      }
+                    }}
                     options={clients.map(client => ({ label: client.displayName, value: client.id }))}
                   />
                 )}
@@ -109,34 +134,21 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
-                <div className="text-gray-800 dark:text-gray-200">
-                  <div className="font-medium">{selectedClient.companyName || selectedClient.displayName}</div>
-                  <div>{selectedClient.billingAddressLine1}</div>
-                  {selectedClient.billingAddressLine2 && <div>{selectedClient.billingAddressLine2}</div>}
-                  <div>{selectedClient.billingCity}, {selectedClient.billingState} {selectedClient.billingPinCode}</div>
-                  <div>{selectedClient.billingCountry}</div>
-                </div>
+                <textarea
+                  {...register('billingAddress')}
+                  disabled={readOnly}
+                  rows={5}
+                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                />
               </div>
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Shipping Address</h4>
-                <div className="text-gray-800 dark:text-gray-200">
-                  <div className="font-medium">{selectedClient.companyName || selectedClient.displayName}</div>
-                  {selectedClient.sameAsBillingAddress ? (
-                    <>
-                      <div>{selectedClient.billingAddressLine1}</div>
-                      {selectedClient.billingAddressLine2 && <div>{selectedClient.billingAddressLine2}</div>}
-                      <div>{selectedClient.billingCity}, {selectedClient.billingState} {selectedClient.billingPinCode}</div>
-                      <div>{selectedClient.billingCountry}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div>{selectedClient.shippingAddressLine1 || '-'}</div>
-                      {selectedClient.shippingAddressLine2 && <div>{selectedClient.shippingAddressLine2}</div>}
-                      <div>{selectedClient.shippingCity || '-'}, {selectedClient.shippingState || '-'} {selectedClient.shippingPinCode || '-'}</div>
-                      <div>{selectedClient.shippingCountry || '-'}</div>
-                    </>
-                  )}
-                </div>
+                <textarea
+                  {...register('shippingAddress')}
+                  disabled={readOnly}
+                  rows={5}
+                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                />
               </div>
             </div>
             <div className="flex flex-wrap gap-x-8 gap-y-2 pt-3 border-t border-gray-200 dark:border-white/10">
