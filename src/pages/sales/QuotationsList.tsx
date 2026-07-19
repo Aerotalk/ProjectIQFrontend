@@ -85,6 +85,7 @@ export default function QuotationsList() {
           initialData={selectedQuotation as Partial<QuotationFormValues>}
           quotationNo={selectedQuotation?.quotationNo || 'Unknown Quotation'}
           isSubmitting={isSubmitting}
+          nextNumber={getNextSequenceNumber(quotations, 'quotationNo', 'QT/2026/')}
         />
       </div>
     );
@@ -239,7 +240,7 @@ export default function QuotationsList() {
         initialData={selectedQuotation as Partial<QuotationFormValues>}
         quotationNo={selectedQuotation?.quotationNo || 'Unknown Quotation'}
         isSubmitting={isSubmitting}
-        nextNumber={getNextSequenceNumber(quotations, 'quotationNo')}
+        nextNumber={getNextSequenceNumber(quotations, 'quotationNo', 'QT/2026/')}
       />
     </div>
   );

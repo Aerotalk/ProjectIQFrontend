@@ -5,13 +5,16 @@
  * @param fieldName The field to extract the string from
  * @returns The next sequence number (max + 1)
  */
-export function getNextSequenceNumber<T>(items: T[], fieldName: keyof T): number {
+export function getNextSequenceNumber<T>(items: T[], fieldName: keyof T, prefix?: string): number {
   if (!items || items.length === 0) return 1;
 
   let maxNum = 0;
   for (const item of items) {
     const val = item[fieldName];
     if (typeof val === 'string') {
+      if (prefix && !val.startsWith(prefix)) {
+        continue;
+      }
       // Extract all digits from the string using regex
       const matches = val.match(/\d+/g);
       if (matches) {
