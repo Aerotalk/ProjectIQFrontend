@@ -22,6 +22,7 @@ export interface VendorBankDetails {
 
 export interface Vendor {
   id: string; // generated, e.g., VEND-0001
+  vendorNo?: string;
   vendorType: VendorType;
   companyName?: string;
   firstName?: string;

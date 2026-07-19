@@ -13,7 +13,7 @@ interface QuotationPreviewPanelProps {
 }
 
 export default function QuotationPreviewPanel({ isOpen, onClose, templateContent, data, filename = 'Quotation.pdf' }: QuotationPreviewPanelProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [compiledHtml, setCompiledHtml] = useState<string>('');
 
@@ -24,7 +24,7 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
         setCompiledHtml(rendered);
       } catch (error) {
         console.error('Error rendering template:', error);
-        setCompiledHtml('<div class="p-4 text-red-500">Error rendering template. Please check the template format.</div>');
+        setCompiledHtml('<div style="padding:1rem; color:red;">Error rendering template. Please check the template format.</div>');
       }
     }
   }, [isOpen, templateContent, data]);
@@ -32,22 +32,61 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
   if (!isOpen) return null;
 
   const handleDownload = async () => {
-    if (!containerRef.current) return;
+    if (!iframeRef.current || !iframeRef.current.contentDocument) return;
     setIsGeneratingPdf(true);
+    
+    // Inject style to fix html2canvas oklch crash from Tailwind v4 without breaking template CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :where(.html2pdf__container *) {
+        border-color: transparent;
+        outline-color: transparent;
+        text-decoration-color: transparent;
+        background-color: transparent;
+      }
+      .html2pdf__container {
+        background-color: #ffffff;
+        color: #000000;
+      }
+    `;
+    document.head.appendChild(style);
+
     try {
-      const element = containerRef.current;
+      const doc = iframeRef.current.contentDocument;
+      
+      // Create a generic wrapper DIV instead of passing the BODY tag.
+      // This prevents Tailwind's 'body' selector from applying oklch background-color.
+      const wrapper = document.createElement('div');
+      
+      // Copy all styles from the template's <head>
+      const styles = doc.head.querySelectorAll('style, link[rel="stylesheet"]');
+      styles.forEach(s => wrapper.appendChild(s.cloneNode(true)));
+      
+      // Copy all content from the template's <body>
+      Array.from(doc.body.childNodes).forEach(node => {
+        wrapper.appendChild(node.cloneNode(true));
+      });
+      
+      // Copy inline styles from body (like --primary-color)
+      wrapper.style.cssText = doc.body.style.cssText;
+      wrapper.style.backgroundColor = '#ffffff'; // Ensure valid background
+      wrapper.style.color = '#1e293b';
+
       const opt = {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
-      await html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(wrapper).save();
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
       setIsGeneratingPdf(false);
+      if (style.parentNode) {
+        document.head.removeChild(style);
+      }
     }
   };
 
@@ -80,11 +119,12 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-black/20 p-8 flex justify-center">
-          <div className="bg-white shadow-md" style={{ width: '210mm', minHeight: '297mm' }}>
-            <div 
-              ref={containerRef}
-              className="w-full h-full text-black"
-              dangerouslySetInnerHTML={{ __html: compiledHtml }}
+          <div className="bg-white shadow-md overflow-hidden" style={{ width: '210mm', minHeight: '297mm' }}>
+            <iframe 
+              ref={iframeRef}
+              srcDoc={compiledHtml}
+              className="w-full h-full border-none pointer-events-none"
+              title="Quotation Preview"
             />
           </div>
         </div>

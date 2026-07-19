@@ -31,6 +31,7 @@ export default function QuotationDetails() {
   const [users, setUsers] = useState<UserData[]>([]);
 
   const isNew = id === 'new';
+  const isAdmin = user?.roles?.some(r => ['ROLE_ADMIN', 'ROLE_MANAGER', 'quotation.approve'].includes(r)) || false;
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
@@ -42,9 +43,11 @@ export default function QuotationDetails() {
 
 
   const [products, setProducts] = useState<any[]>([]);
+  const [company, setCompany] = useState<any>(null);
 
   useEffect(() => {
     if (!companyId) return;
+    api.get(`/admin/companies/${companyId}`).then(res => setCompany(res.data)).catch(console.error);
     ClientService.getClients(companyId).then(data => setClients(data));
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
@@ -135,17 +138,17 @@ export default function QuotationDetails() {
 
   const handleAddCommunication = () => {
     if (!tempNotes.trim() || !id) return;
-    
+
     const newNote = {
       id: Math.random().toString(36).substr(2, 9),
       text: tempNotes.trim(),
       timestamp: new Date().toISOString(),
       user: user?.username || user?.email || 'User'
     };
-    
+
     const updatedNotesList = [...parsedCommunications, newNote];
     const newNotesStr = JSON.stringify(updatedNotesList);
-    
+
     // Optimistic UI update
     setQuotation({ ...quotation, notes: newNotesStr });
     setTempNotes('');
@@ -289,48 +292,145 @@ export default function QuotationDetails() {
   const totalGst = lineItems.reduce((sum, item) => sum + (item.rate * item.qty * item.gst / 100), 0);
   const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
 
+  const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
+  const selectedClient = clients.find(c => c.id === quotation.clientId);
+  const clientState = selectedClient?.billingState?.trim().toLowerCase() || '';
+  const isSameState = companyState && clientState && companyState === clientState;
+
+  const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
+  lineItems.forEach(item => {
+    if (item.gst > 0) {
+      if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
+      taxGroups[item.gst].taxable += (item.rate * item.qty);
+      taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
+    }
+  });
+
+  const uiTaxBreakdown: { type: string, rate: number, amount: number }[] = [];
+  Object.keys(taxGroups).forEach(rateStr => {
+    const rate = Number(rateStr);
+    const group = taxGroups[rate];
+    if (isSameState) {
+      const halfRate = rate / 2;
+      const halfAmount = (group.taxAmount / 2);
+      uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: halfAmount });
+      uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: halfAmount });
+    } else {
+      uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: group.taxAmount });
+    }
+  });
+
   const handlePreview = async () => {
     try {
       setIsLoadingPreview(true);
       const data = quotation;
-      
+
       const templateName = (data as any).templateName || 'quotation.html';
       const templateRes = await api.get(`/admin/templates/${templateName}`);
       let company = null;
       if (companyId) {
         const companyRes = await api.get(`/admin/companies/${companyId}`);
-        company = companyRes.data;
+        company = companyRes;
       }
-      
+
       let client = null;
       if (data.clientId && companyId) {
         const clientsList = await ClientService.getClients(companyId);
         client = clientsList.find(c => c.id === data.clientId);
       }
 
+      let logoBase64 = '';
+      if (company?.logoUrl) {
+        try {
+          let endpoint = company.logoUrl;
+          if (endpoint.startsWith('http://localhost:8080/api')) {
+            endpoint = endpoint.replace('http://localhost:8080/api', '');
+          } else if (endpoint.startsWith('http')) {
+            const urlObj = new URL(endpoint);
+            endpoint = urlObj.pathname;
+          }
+          if (!endpoint.startsWith('/')) {
+            endpoint = '/' + endpoint;
+          }
+          const blob = await api.get(endpoint, { responseType: 'blob' });
+          if (blob) {
+            logoBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch logo', e);
+        }
+      }
+
+      const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
+      const clientState = client?.billingState?.trim().toLowerCase() || '';
+      const isSameState = companyState && clientState && companyState === clientState;
+
+      const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
+      lineItems.forEach(item => {
+        if (item.gst > 0) {
+          if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
+          taxGroups[item.gst].taxable += (item.rate * item.qty);
+          taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
+        }
+      });
+
+      const taxBreakdown: any[] = [];
+      Object.keys(taxGroups).forEach(rateStr => {
+        const rate = Number(rateStr);
+        const group = taxGroups[rate];
+        if (isSameState) {
+          const halfRate = rate / 2;
+          const halfAmount = (group.taxAmount / 2).toFixed(2);
+          taxBreakdown.push({
+            tax_type: 'CGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+          taxBreakdown.push({
+            tax_type: 'SGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+        } else {
+          taxBreakdown.push({
+            tax_type: 'IGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: rate,
+            tax_amount: group.taxAmount.toFixed(2)
+          });
+        }
+      });
+
       const previewPayload = {
         primary_color_hex: '#792359',
-        company_name: company?.name || 'Company Name',
-        company_logo_url: company?.logoUrl || '',
-        company_address_line1: company?.addressLine1 || '',
-        company_address_line2: company?.addressLine2 || '',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
         company_phone: company?.phone || '',
         company_email: company?.email || '',
-        company_gstin: company?.gstin || '',
-        company_pan: company?.pan || '',
-        client_name: client?.companyName || client?.displayName || data.client || 'Client Name',
-        client_address_line1: (data as any).billingAddress ? (data as any).billingAddress.split('\n')[0] : (client?.billingAddressLine1 || ''),
-        client_address_line2: (data as any).billingAddress ? (data as any).billingAddress.split('\n').slice(1).join(', ') : (client?.billingAddressLine2 || ''),
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        client_name: client?.displayName || quotation.client || 'Client Name',
+        client_address_line1: client?.billingAddressLine1 || '',
+        client_address_line2: client?.billingCity || '',
         client_phone: client?.phone || '',
         client_state: client?.billingState || '',
         client_email: client?.email || '',
-        estimate_number: data.qtnNo,
-        estimate_date: data.createdOn,
-        place_of_supply: (data as any).shippingAddress ? (data as any).shippingAddress.split('\n').join(', ') : (client?.shippingState || client?.billingState || ''),
-        items: lineItems.map((item, idx) => ({
-          item_index: idx + 1,
+        estimate_number: quotation.qtnNo || 'Draft',
+        estimate_date: quotation.createdOn || new Date().toLocaleDateString('en-GB'),
+        place_of_supply: client?.billingState || '',
+        items: lineItems.map((item, index) => ({
+          item_index: index + 1,
           item_name: item.name,
-          item_description: item.name,
+          item_description: '',
+          item_hsn: '',
           item_quantity: item.qty,
           item_unit: 'Unit',
           item_price: item.rate.toFixed(2),
@@ -341,15 +441,15 @@ export default function QuotationDetails() {
         grand_total: grandTotal.toFixed(2),
         amount_in_words: 'Amount in words not calculated',
         terms_and_conditions: 'Terms and conditions apply',
-        bank_name: company?.bankName || '',
-        bank_account_no: company?.bankAccountNumber || '',
-        bank_ifsc: company?.bankIfscCode || '',
-        bank_account_holder: company?.bankAccountName || '',
+        bank_name: company?.bankAccounts?.[0]?.bankName || '',
+        bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
+        bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: totalGst > 0,
-        taxes: totalGst > 0 ? [{ tax_type: 'GST', taxable_amount: subTotal.toFixed(2), tax_rate: 'VARIOUS', tax_amount: totalGst.toFixed(2) }] : []
+        taxes: taxBreakdown
       };
 
-      setPreviewTemplate(templateRes.data);
+      setPreviewTemplate(templateRes);
       setPreviewData(previewPayload);
       setIsPreviewOpen(true);
     } catch (err: any) {
@@ -452,22 +552,24 @@ export default function QuotationDetails() {
               <Info className="text-yellow-600 dark:text-yellow-500" size={20} />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">Quotation is sent for internal approval. You will be notified once it is approved or rejected.</p>
             </div>
-            <div className="flex gap-2">
-              <button
-                disabled={isApiLoading}
-                onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
-              >
-                Reject
-              </button>
-              <button
-                disabled={isApiLoading}
-                onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
-              >
-                Approve
-              </button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <button
+                  disabled={isApiLoading}
+                  onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
+                  className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                >
+                  Reject
+                </button>
+                <button
+                  disabled={isApiLoading}
+                  onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
+                  className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+                >
+                  Approve
+                </button>
+              </div>
+            )}
           </div>
         );
       case 3:
@@ -623,8 +725,8 @@ export default function QuotationDetails() {
                 setIsEditing(!isEditing);
               }}
               className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${isEditing
-                  ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
-                  : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
+                : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                 }`}
             >
               {isEditing ? 'Save Changes' : <><Edit size={16} /> Edit</>}
@@ -681,7 +783,7 @@ export default function QuotationDetails() {
               Cancel
             </button>
           )}
-          <button 
+          <button
             disabled={isLoadingPreview}
             onClick={handlePreview}
             className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
@@ -760,7 +862,7 @@ export default function QuotationDetails() {
                         const client = clients.find(c => c.id === val);
                         setQuotation({ ...quotation, clientId: val, client: client ? (client.displayName || client.companyName || '') : '' });
                       }}
-                      options={[{label: 'Select Client', value: ''}, ...clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))]}
+                      options={[{ label: 'Select Client', value: '' }, ...clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))]}
                     />
                   ) : (
                     <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
@@ -815,7 +917,7 @@ export default function QuotationDetails() {
                     <CustomSelect
                       value={quotation.owner}
                       onChange={(val) => setQuotation({ ...quotation, owner: val })}
-                      options={[{label: 'Select Owner', value: ''}, ...users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))]}
+                      options={[{ label: 'Select Owner', value: '' }, ...users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))]}
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.owner}</p>
@@ -857,8 +959,8 @@ export default function QuotationDetails() {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                        ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                   >
                     {tab}
@@ -949,38 +1051,23 @@ export default function QuotationDetails() {
                     <div className="w-64 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Sub Total</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{subTotal.toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
-                      {quotation.taxType === 'CGST_SGST' ? (
-                        <>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">CGST</span>
-                            <span className="font-medium text-gray-900 dark:text-white">{(totalGst / 2).toLocaleString('en-IN')}</span>
+
+                      {uiTaxBreakdown.length > 0 ? (
+                        uiTaxBreakdown.map((tax, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="text-gray-500">{tax.type} ({tax.rate}%)</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{tax.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">SGST</span>
-                            <span className="font-medium text-gray-900 dark:text-white">{(totalGst / 2).toLocaleString('en-IN')}</span>
-                          </div>
-                        </>
+                        ))
                       ) : (
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">IGST</span>
-                          <span className="font-medium text-gray-900 dark:text-white">{totalGst.toLocaleString('en-IN')}</span>
+                          <span className="text-gray-500">GST</span>
+                          <span className="font-medium text-gray-900 dark:text-white">0.00</span>
                         </div>
                       )}
-                      {isEditing && (
-                        <div className="flex justify-between text-sm items-center">
-                          <span className="text-gray-500">Tax Type</span>
-                          <CustomSelect
-                            value={quotation.taxType}
-                            onChange={(val) => setQuotation({ ...quotation, taxType: val })}
-                            options={[
-                              { label: 'Intra-State (CGST + SGST)', value: 'CGST_SGST' },
-                              { label: 'Inter-State (IGST)', value: 'IGST' }
-                            ]}
-                          />
-                        </div>
-                      )}
+
                       <div className="flex justify-between text-sm items-center">
                         <span className="text-gray-500">Discount</span>
                         {isEditing ? (
@@ -1031,7 +1118,7 @@ export default function QuotationDetails() {
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-xs font-bold text-gray-900 dark:text-white">Communication & Internal Notes</h4>
               </div>
-              
+
               <div className="bg-gray-50/50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/5 mb-4">
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                   {parsedCommunications.length === 0 ? (
@@ -1225,7 +1312,7 @@ export default function QuotationDetails() {
           </div>
         </div>
       )}
-      
+
       <QuotationPreviewPanel
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
