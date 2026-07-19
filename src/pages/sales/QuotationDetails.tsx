@@ -112,7 +112,7 @@ export default function QuotationDetails() {
     lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     currency: 'INR',
     notes: '',
-    taxType: 'CGST_SGST'
+    taxType: 'CGST_SGST' as 'CGST_SGST' | 'IGST'
   });
 
   const [tempNotes, setTempNotes] = useState('');
