@@ -31,6 +31,7 @@ export interface ClientDto {
   billingPinCode?: string;
   billingCountry?: string;
   billingPhone?: string;
+  billingAttention?: string;
   sameAsBillingAddress: boolean;
   shippingAddressLine1?: string;
   shippingAddressLine2?: string;
@@ -39,6 +40,7 @@ export interface ClientDto {
   shippingPinCode?: string;
   shippingCountry?: string;
   shippingPhone?: string;
+  shippingAttention?: string;
   paymentTerms?: string;
   creditLimit?: number;
   industry?: string;
@@ -93,6 +95,7 @@ export const mapToClient = (dto: ClientDto): Client => {
     billingPinCode: dto.billingPinCode,
     billingCountry: dto.billingCountry,
     billingPhone: dto.billingPhone,
+    billingAttention: dto.billingAttention,
     sameAsBillingAddress: dto.sameAsBillingAddress,
     shippingAddressLine1: dto.shippingAddressLine1,
     shippingAddressLine2: dto.shippingAddressLine2,
@@ -101,6 +104,7 @@ export const mapToClient = (dto: ClientDto): Client => {
     shippingPinCode: dto.shippingPinCode,
     shippingCountry: dto.shippingCountry,
     shippingPhone: dto.shippingPhone,
+    shippingAttention: dto.shippingAttention,
     paymentTerms: dto.paymentTerms,
     creditLimit: dto.creditLimit,
     industry: dto.industry,
