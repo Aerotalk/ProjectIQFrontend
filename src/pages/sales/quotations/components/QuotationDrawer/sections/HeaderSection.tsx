@@ -17,7 +17,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
   const { register, control, formState: { errors }, setValue, getValues, watch } = useFormContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
-  const [templates, setTemplates] = useState<string[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
 
   const { selectedCompanyId: companyId, user } = useAuth();
@@ -35,7 +35,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
         setTemplates(templatesData);
         setIsLoadingTemplates(false);
         if (templatesData.length > 0 && !getValues('templateName')) {
-          setValue('templateName', templatesData[0]);
+          setValue('templateName', templatesData[0].filename);
         }
       }).catch(() => setIsLoadingTemplates(false));
     });
@@ -184,7 +184,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                   <CustomSelect
                     value={field.value || ''}
                     onChange={field.onChange}
-                    options={templates.map(t => ({ label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t }))}
+                    options={templates.map(t => ({ label: t.name, value: t.filename }))}
                   />
                 )}
               />
