@@ -370,7 +370,7 @@ export default function ChallanManagement() {
                             onClick={() => { setSelectedChallan(ch); setDrawerMode('edit'); setIsDrawerOpen(true); }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
-                            Edit (Drawer)
+                            Edit
                           </button>
                           <div className="border-t border-gray-100 dark:border-white/5 my-1" />
                           <button
