@@ -15,6 +15,7 @@ import { VendorService } from '../../services/vendor.service';
 import type { Vendor } from '../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 // ---------- Status helpers ----------
 
@@ -46,6 +47,7 @@ const ALL_STATUSES: POStatus[] = [
 // ---------- Component ----------
 
 export default function POManagement() {
+  const navigate = useNavigate();
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
@@ -163,6 +165,7 @@ export default function POManagement() {
     }
   };
 
+
   // ---------- Filtering & pagination ----------
 
   const filtered = pos.filter(po => {
@@ -231,13 +234,15 @@ export default function POManagement() {
             Manage vendor POs, track delivery status and approvals.
           </p>
         </div>
-        <button
-          onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-        >
-          <Plus size={16} />
-          Create PO
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/companydashboard/finance/pos/new')}
+            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          >
+            <Plus size={16} />
+            Create PO
+          </button>
+        </div>
       </div>
 
       {/* ── Table Card ── */}
@@ -342,7 +347,7 @@ export default function POManagement() {
                     {/* PO Number */}
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => openDrawer('view', po)}
+                        onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
                         className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
                       >
                         {po.poNumber}
@@ -396,13 +401,13 @@ export default function POManagement() {
                       {openDropdownId === po.id && (
                         <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-20 py-1 text-left">
                           <button
-                            onClick={() => openDrawer('view', po)}
+                            onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
                             View
                           </button>
                           <button
-                            onClick={() => openDrawer('edit', po)}
+                            onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
                             Edit

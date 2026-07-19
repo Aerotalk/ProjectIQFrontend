@@ -21,7 +21,9 @@ import QuotationsList from './sales/QuotationsList';
 import QuotationDetails from './sales/QuotationDetails';
 import FinanceDashboard from './finance/FinanceDashboard';
 import POManagement from './finance/POManagement';
+import PODetails from './finance/PODetails';
 import ChallanManagement from './finance/ChallanManagement';
+import ChallanDetails from './finance/ChallanDetails';
 import PaymentManagement from './finance/PaymentManagement';
 import ExpenseManagement from './projects/ExpenseManagement';
 import ProjectFinanceDetails from './finance/ProjectFinanceDetails';
@@ -101,9 +103,19 @@ export default function CompanyDashboard() {
             <POManagement />
           </PermissionGate>
         } />
+        <Route path="/finance/pos/:id" element={
+          <PermissionGate permission="finance.pos.view">
+            <PODetails />
+          </PermissionGate>
+        } />
         <Route path="/finance/challans" element={
           <PermissionGate permission="finance.challans.view">
             <ChallanManagement />
+          </PermissionGate>
+        } />
+        <Route path="/finance/challans/:id" element={
+          <PermissionGate permission="finance.challans.view">
+            <ChallanDetails />
           </PermissionGate>
         } />
         <Route path="/finance/payments" element={

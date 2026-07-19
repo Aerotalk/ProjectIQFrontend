@@ -11,6 +11,8 @@ export interface DeliveryChallan {
   linkedVendorPoNumber?: string; // Hydrated for display
   attachmentName?: string;    // Optional uploaded file name
   remarks?: string;           // Optional internal remarks
+  status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
+  lineItems?: any[];
   
   createdAt?: string;
   updatedAt?: string;

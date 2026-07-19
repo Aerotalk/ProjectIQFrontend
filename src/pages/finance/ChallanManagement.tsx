@@ -15,8 +15,10 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNextSequenceNumber } from '../../utils/sequence';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import { useNavigate } from 'react-router-dom';
 
 export default function ChallanManagement() {
+  const navigate = useNavigate();
   useBreadcrumbs([
     { label: 'Finance', path: '/companydashboard/finance' },
     { label: 'Delivery Challans' }
@@ -115,17 +117,18 @@ export default function ChallanManagement() {
     }
   };
 
-  const handleDelete = async (challan: DeliveryChallan) => {
+  const handleDelete = async (ch: DeliveryChallan) => {
     setOpenDropdownId(null);
-    if (!window.confirm(`Delete Challan ${challan.challanNumber}? This cannot be undone.`)) return;
+    if (!window.confirm(`Cancel/delete Challan ${ch.challanNumber}? This cannot be undone.`)) return;
     try {
-      await ChallanService.delete(challan.id);
-      toast.success(`Challan ${challan.challanNumber} deleted`);
+      await ChallanService.delete(ch.id);
+      toast.success(`Challan ${ch.challanNumber} deleted`);
       fetchData();
     } catch {
       toast.error('Failed to delete Delivery Challan');
     }
   };
+
 
   const filtered = challans.filter(ch => {
     const term = searchTerm.toLowerCase();
@@ -187,13 +190,15 @@ export default function ChallanManagement() {
             Track deliveries received from vendors.
           </p>
         </div>
-        <button
-          onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-        >
-          <Plus size={16} />
-          Add Challan
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/companydashboard/finance/challans/new')}
+            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          >
+            <Plus size={16} />
+            Add Challan
+          </button>
+        </div>
       </div>
 
       {/* ── Table Card ── */}
@@ -284,7 +289,7 @@ export default function ChallanManagement() {
                     {/* Challan Number */}
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => openDrawer('view', ch)}
+                        onClick={() => navigate(`/companydashboard/finance/challans/${ch.id || ch.challanNumber}`)}
                         className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
                       >
                         {ch.challanNumber}
@@ -325,13 +330,13 @@ export default function ChallanManagement() {
                       {openDropdownId === ch.id && (
                         <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-20 py-1 text-left">
                           <button
-                            onClick={() => openDrawer('view', ch)}
+                            onClick={() => navigate(`/companydashboard/finance/challans/${ch.id || ch.challanNumber}`)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
                             View
                           </button>
                           <button
-                            onClick={() => openDrawer('edit', ch)}
+                            onClick={() => navigate(`/companydashboard/finance/challans/${ch.id || ch.challanNumber}`)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                           >
                             Edit
