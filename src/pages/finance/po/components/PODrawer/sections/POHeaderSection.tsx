@@ -7,12 +7,14 @@ import { VendorService } from '@/services/vendor.service';
 import { useProjects } from '@/hooks/useProjects';
 import type { Vendor } from '@/types/vendor.types';
 import { useAuth } from '@/contexts/AuthContext';
+import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
   readOnly?: boolean;
+  nextNumber?: number;
 }
 
-export default function POHeaderSection({ readOnly }: Props) {
+export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const {
     register,
     formState: { errors },
@@ -82,7 +84,25 @@ export default function POHeaderSection({ readOnly }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* ── Project ── */}
+        {/* -- PO Number -- */}
+        <div>
+          <label className={labelClass}>
+            PO Number <span className="text-red-500 normal-case font-normal">*</span>
+          </label>
+          <AutoNumberInput
+            name="poNumber"
+            disabled={readOnly}
+            placeholder="e.g. PO-001"
+            defaultPrefix="PO-"
+            nextNumber={nextNumber}
+            className={fieldClass(!!errors.poNumber)}
+          />
+          {errors.poNumber && (
+            <p className="text-red-500 text-xs mt-1">{errors.poNumber.message as string}</p>
+          )}
+        </div>
+
+        {/* -- Project -- */}
         <div>
           <label className={labelClass}>
             Project <span className="text-red-500 normal-case font-normal">*</span>
@@ -105,7 +125,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           )}
         </div>
 
-        {/* ── Vendor ── */}
+        {/* -- Vendor -- */}
         <div>
           <label className={labelClass}>
             Vendor <span className="text-red-500 normal-case font-normal">*</span>
@@ -133,7 +153,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           )}
         </div>
 
-        {/* ── PO Date ── */}
+        {/* -- PO Date -- */}
         <div>
           <label className={labelClass}>
             PO Date <span className="text-red-500 normal-case font-normal">*</span>
@@ -149,7 +169,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           )}
         </div>
 
-        {/* ── Expected Delivery Date (TechSpec §4.2 optional field) ── */}
+        {/* -- Expected Delivery Date (TechSpec §4.2 optional field) -- */}
         <div>
           <label className={labelClass}>
             Expected Delivery Date
@@ -163,7 +183,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           />
         </div>
 
-        {/* ── Status ── */}
+        {/* -- Status -- */}
         <div>
           <label className={labelClass}>
             Status <span className="text-red-500 normal-case font-normal">*</span>
@@ -189,7 +209,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           )}
         </div>
 
-        {/* ── Attachment (TechSpec §4.2 optional field) ── */}
+        {/* -- Attachment (TechSpec §4.2 optional field) -- */}
         <div>
           <label className={labelClass}>
             Attachment
@@ -244,7 +264,7 @@ export default function POHeaderSection({ readOnly }: Props) {
           )}
         </div>
 
-        {/* ── Description (TechSpec §4.2 Required textarea) ── */}
+        {/* -- Description (TechSpec §4.2 Required textarea) -- */}
         <div className="md:col-span-2">
           <label className={labelClass}>
             Description <span className="text-red-500 normal-case font-normal">*</span>
@@ -270,4 +290,3 @@ export default function POHeaderSection({ readOnly }: Props) {
     </div>
   );
 }
-

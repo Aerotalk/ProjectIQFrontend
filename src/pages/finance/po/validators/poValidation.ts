@@ -13,6 +13,7 @@ export const poLineItemSchema = z.object({
 });
 
 export const poSchema = z.object({
+  poNumber: z.string().min(1, 'PO Number is required'),
   projectId: z.string().min(1, 'Project is required'),
   projectName: z.string().nullable().optional(),
   vendorId: z.string().min(1, 'Vendor is required'),

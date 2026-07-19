@@ -16,9 +16,10 @@ interface Props {
   initialData?: Partial<PurchaseOrder>;
   poNumber?: string;
   isSubmitting?: boolean;
+  nextNumber?: number;
 }
 
-export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, poNumber, isSubmitting }: Props) {
+export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, poNumber, isSubmitting, nextNumber }: Props) {
   const form = usePOForm();
 
   React.useEffect(() => {
@@ -107,7 +108,7 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
       <div className="flex-1 overflow-y-auto p-6">
         <FormProvider {...form}>
           <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <POHeaderSection readOnly={readOnly} />
+            <POHeaderSection readOnly={readOnly} nextNumber={nextNumber} />
             <POLineItemsSection readOnly={readOnly} />
             <POTotalsSection readOnly={readOnly} />
           </form>

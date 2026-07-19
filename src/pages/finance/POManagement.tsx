@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { POService } from '../../services/po.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { PurchaseOrder, POStatus } from '../../types/po.types';
+import { getNextSequenceNumber } from '@/utils/sequence';
 import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
 
@@ -129,10 +130,10 @@ export default function POManagement() {
 
       if (drawerMode === 'create') {
         if (!selectedCompanyId) throw new Error('No company ID');
-        await POService.create(selectedCompanyId, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt' | 'updatedAt'>);
+        await POService.create(selectedCompanyId, payload as Omit<PurchaseOrder, 'id' | 'createdAt' | 'updatedAt'>);
         toast.success('Purchase Order created successfully');
       } else if (selectedPO) {
-        await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'poNumber' | 'createdAt'>);
+        await POService.update(selectedPO.id, payload as Omit<PurchaseOrder, 'id' | 'createdAt'>);
         toast.success('Purchase Order updated successfully');
       }
       setIsDrawerOpen(false);
@@ -209,6 +210,7 @@ export default function POManagement() {
           initialData={selectedPO || undefined}
           poNumber={selectedPO?.poNumber}
           isSubmitting={isSubmitting}
+          nextNumber={getNextSequenceNumber(pos, 'poNumber')}
         />
       </div>
     );
