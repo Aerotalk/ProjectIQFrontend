@@ -60,8 +60,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const isReadOnly = mode === 'view';
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-white dark:bg-[#181a1f] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-gray-200 dark:border-white/10">
+    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
@@ -181,7 +180,6 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
               )}
             </button>
           )}
-        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Search, Plus, MoreHorizontal, FolderKanban, Filter } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Plus, MoreVertical, FolderKanban, Filter } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';
 import type { Project, ProjectFormValues } from '../../types/project.types';
@@ -19,6 +19,9 @@ export default function ProjectDashboard() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
+  
+  // Dropdown ref
+  const dropdownRef = useRef<HTMLTableCellElement>(null);
 
   // Click outside to close action menu
   if (typeof window !== 'undefined') {
@@ -46,6 +49,16 @@ export default function ProjectDashboard() {
   useEffect(() => {
     fetchProjects();
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenActionId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleCreate = () => {
     setDrawerMode('create');
@@ -102,9 +115,26 @@ export default function ProjectDashboard() {
     return matchesSearch && matchesFilter;
   });
 
+  // ---------- Render ----------
+
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto pb-12">
+        <ProjectDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveProject}
+          mode={drawerMode}
+          initialData={selectedProject}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
             <FolderKanban size={24} className="text-[#792359] dark:text-[#e6a8d0]" />
@@ -150,76 +180,76 @@ export default function ProjectDashboard() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 dark:bg-black/20 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
-                <tr>
-                  <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Project Code</th>
-                  <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Project Name</th>
-                  <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Status</th>
-                  <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5">Description</th>
-                  <th className="px-6 py-4 border-b border-gray-100 dark:border-white/5 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {filteredProjects.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
-                    <td onClick={() => handleView(p)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{p.projectCode}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{p.projectName}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                        p.status === 'Completed' ? 'text-green-700 bg-green-50 dark:bg-green-500/10' :
-                        p.status === 'In Progress' ? 'text-blue-700 bg-blue-50 dark:bg-blue-500/10' :
-                        'text-orange-700 bg-orange-50 dark:bg-orange-500/10'
-                      }`}>
-                        {p.status || 'Draft'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-300 max-w-[200px] truncate" title={p.description}>
-                      {p.description || 'N/A'}
-                    </td>
-                    <td className={`px-6 py-4 text-center ${openActionId === p.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); if (p.id) setOpenActionId(openActionId === p.id ? null : p.id); }}
-                        className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {filteredProjects.map((p) => (
+            <div key={p.id} className="bg-white dark:bg-[#181a1f] border border-[#792359]/30 dark:border-[#e6a8d0]/30 hover:border-[#792359] dark:hover:border-[#e6a8d0] rounded-sm hover:shadow-md transition-all flex flex-col group relative">
+              <div className="p-5 flex flex-col h-full relative">
+                 {/* Top row: Project Code & Action Menu */}
+                 <div className="flex justify-between items-start mb-4">
+                   <div className="flex items-center gap-2">
+                     <span 
+                       onClick={() => handleView(p)}
+                       className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/5 dark:bg-[#792359]/20 px-2 py-1 rounded-sm cursor-pointer hover:underline"
+                     >
+                       {p.projectCode}
+                     </span>
+                   </div>
+                   
+                   <div className="relative" ref={openActionId === p.id ? dropdownRef : undefined}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === p.id ? null : p.id || null); }}
+                        className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                       >
-                        <MoreHorizontal size={16} />
+                        <MoreVertical size={16} />
                       </button>
                       {openActionId === p.id && (
-                        <div className="action-menu-dropdown absolute right-12 top-10 w-40 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm">
-                          <button onClick={(e) => { e.stopPropagation(); handleView(p); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
-                            View Details
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleEdit(p); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
-                            Edit Project
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); if (p.id) handleDelete(p.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
-                            Delete Project
-                          </button>
+                        <div className="absolute right-0 top-6 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm z-20 py-1 text-left">
+                          <button onClick={(e) => { e.stopPropagation(); handleView(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">View Details</button>
+                          <button onClick={(e) => { e.stopPropagation(); handleEdit(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">Edit Project</button>
+                          <div className="border-t border-gray-100 dark:border-white/5 my-1" />
+                          <button onClick={(e) => { e.stopPropagation(); if (p.id) handleDelete(p.id); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">Delete</button>
                         </div>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredProjects.length === 0 && (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                No projects found.
+                   </div>
+                 </div>
+
+                 {/* Project Name & Description */}
+                 <div className="mb-5 flex-1">
+                   <h3 
+                     onClick={() => handleView(p)}
+                     className="text-base font-medium text-gray-900 dark:text-white leading-snug mb-1.5 cursor-pointer hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors line-clamp-2"
+                   >
+                     {p.projectName}
+                   </h3>
+                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                     {p.description || 'No description provided'}
+                   </p>
+                 </div>
+
+                 {/* Bottom row: Status */}
+                 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                     <span className={`w-2 h-2 rounded-full ${
+                        p.status === 'Completed' ? 'bg-green-500' :
+                        p.status === 'In Progress' ? 'bg-blue-500' :
+                        'bg-orange-500'
+                     }`}></span>
+                     <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                       {p.status || 'Draft'}
+                     </span>
+                   </div>
+                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          ))}
+          {filteredProjects.length === 0 && (
+            <div className="col-span-full py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-[#181a1f] border border-dashed border-gray-300 dark:border-white/10 rounded-xl">
+              No projects found.
+            </div>
+          )}
         </div>
       )}
 
-      <ProjectDrawer 
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveProject}
-        mode={drawerMode}
-        initialData={selectedProject}
-      />
     </div>
   );
 }
