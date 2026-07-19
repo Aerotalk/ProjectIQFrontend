@@ -310,14 +310,12 @@ export default function QuotationDetails() {
   Object.keys(taxGroups).forEach(rateStr => {
     const rate = Number(rateStr);
     const group = taxGroups[rate];
-    if (isSameState) {
-      const halfRate = rate / 2;
-      const halfAmount = (group.taxAmount / 2);
-      uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: halfAmount });
-      uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: halfAmount });
-    } else {
-      uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: group.taxAmount });
-    }
+    const halfRate = rate / 2;
+    const halfAmount = group.taxAmount / 2;
+    
+    uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
+    uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
+    uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: isSameState ? 0 : group.taxAmount });
   });
 
   const handlePreview = async () => {

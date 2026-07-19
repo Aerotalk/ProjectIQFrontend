@@ -141,29 +141,27 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
       Object.keys(taxGroups).forEach(rateStr => {
         const rate = Number(rateStr);
         const group = taxGroups[rate];
-        if (isSameState) {
-          const halfRate = rate / 2;
-          const halfAmount = (group.taxAmount / 2).toFixed(2);
-          taxBreakdown.push({
-            tax_type: 'CGST',
-            taxable_amount: group.taxable.toFixed(2),
-            tax_rate: halfRate,
-            tax_amount: halfAmount
-          });
-          taxBreakdown.push({
-            tax_type: 'SGST',
-            taxable_amount: group.taxable.toFixed(2),
-            tax_rate: halfRate,
-            tax_amount: halfAmount
-          });
-        } else {
-          taxBreakdown.push({
-            tax_type: 'IGST',
-            taxable_amount: group.taxable.toFixed(2),
-            tax_rate: rate,
-            tax_amount: group.taxAmount.toFixed(2)
-          });
-        }
+        const halfRate = rate / 2;
+        const halfAmount = (group.taxAmount / 2).toFixed(2);
+        
+        taxBreakdown.push({
+          tax_type: 'CGST',
+          taxable_amount: group.taxable.toFixed(2),
+          tax_rate: halfRate,
+          tax_amount: isSameState ? halfAmount : '0.00'
+        });
+        taxBreakdown.push({
+          tax_type: 'SGST',
+          taxable_amount: group.taxable.toFixed(2),
+          tax_rate: halfRate,
+          tax_amount: isSameState ? halfAmount : '0.00'
+        });
+        taxBreakdown.push({
+          tax_type: 'IGST',
+          taxable_amount: group.taxable.toFixed(2),
+          tax_rate: rate,
+          tax_amount: isSameState ? '0.00' : group.taxAmount.toFixed(2)
+        });
       });
 
       const previewPayload = {
