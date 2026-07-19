@@ -5,7 +5,8 @@ import { poSchema, type POFormValues } from '../validators/poValidation';
 
 export const usePOForm = (defaultValues?: Partial<POFormValues>) => {
   const form = useForm<POFormValues>({
-    resolver: zodResolver(poSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(poSchema) as any,
     defaultValues: {
       poDate: new Date().toISOString().split('T')[0],
       status: 'Draft',
@@ -39,13 +40,19 @@ export const usePOForm = (defaultValues?: Partial<POFormValues>) => {
 
     lineItems.forEach((item, index) => {
       const qty = item.quantity || 0;
-      const price = item.unitPrice || 0;
+      const price = item.rate || 0;
       const gstRate = item.gstRate || 0;
 
       const baseTotal = qty * price;
       const gstAmount = baseTotal * (gstRate / 100);
       const rowTotal = baseTotal + gstAmount;
 
+      if (item.taxableAmount !== baseTotal) {
+        setValue(`lineItems.${index}.taxableAmount`, baseTotal, { shouldValidate: false });
+      }
+      if (item.discount !== 0) {
+        setValue(`lineItems.${index}.discount`, 0, { shouldValidate: false });
+      }
       if (item.gstAmount !== gstAmount) {
         setValue(`lineItems.${index}.gstAmount`, gstAmount, { shouldValidate: false });
       }

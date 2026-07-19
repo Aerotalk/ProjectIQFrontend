@@ -122,8 +122,10 @@ export default function POManagement() {
       const vendor = vendors.find(v => v.id === data.vendorId);
       const project = projects.find(p => p.id === data.projectId);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { discountPercentage, ...restData } = data;
       const payload = {
-        ...data,
+        ...restData,
         vendorName: vendor?.displayName || data.vendorName || '',
         projectName: project?.projectName || '',
       };

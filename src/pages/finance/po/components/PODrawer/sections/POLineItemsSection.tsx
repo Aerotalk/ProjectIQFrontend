@@ -40,7 +40,9 @@ export default function POLineItemsSection({ readOnly }: Props) {
       description: '',
       quantity: 1,
       unit: 'Pieces',
-      unitPrice: 0,
+      rate: 0,
+      discount: 0,
+      taxableAmount: 0,
       gstRate: 0,
       gstAmount: 0,
       totalAmount: 0,
@@ -117,7 +119,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
                               if (prod) {
                                 setValue(`lineItems.${index}.description`, prod.itemName);
                                 setValue(`lineItems.${index}.unit`, prod.unit || 'Pieces');
-                                setValue(`lineItems.${index}.unitPrice`, prod.standardRate || 0);
+                                setValue(`lineItems.${index}.rate`, prod.standardRate || 0);
                                 setValue(`lineItems.${index}.gstRate`, parseFloat(prod.gstRate) || 0);
                               }
                             }}
@@ -165,18 +167,18 @@ export default function POLineItemsSection({ readOnly }: Props) {
                     </div>
                   </td>
 
-                  {/* Unit Price */}
+                  {/* Rate */}
                   <td className="px-3 py-2">
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      {...register(`lineItems.${index}.unitPrice`, { valueAsNumber: true })}
+                      {...register(`lineItems.${index}.rate`, { valueAsNumber: true })}
                       disabled={readOnly}
-                      className={`${cellClass} ${lineErrors?.unitPrice ? 'border-red-400' : ''}`}
+                      className={`${cellClass} ${lineErrors?.rate ? 'border-red-400' : ''}`}
                     />
-                    {lineErrors?.unitPrice && (
-                      <p className="text-red-500 text-[10px] mt-0.5">{lineErrors.unitPrice.message}</p>
+                    {lineErrors?.rate && (
+                      <p className="text-red-500 text-[10px] mt-0.5">{lineErrors.rate.message}</p>
                     )}
                   </td>
 

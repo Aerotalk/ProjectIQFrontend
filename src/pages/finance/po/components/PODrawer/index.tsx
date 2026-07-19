@@ -26,6 +26,7 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
     if (isOpen) {
       if (initialData && (mode === 'edit' || mode === 'view')) {
         form.reset({
+          poNumber: initialData.poNumber || '',
           projectId: initialData.projectId || '',
           projectName: initialData.projectName || '',
           vendorId: initialData.vendorId || '',
@@ -36,21 +37,30 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
           attachmentName: initialData.attachmentName || '',
           lineItems: (initialData.lineItems || []).map(li => ({
             id: li.id,
+            productId: li.productId,
+            itemName: li.itemName,
             description: li.description,
             quantity: li.quantity,
             unit: li.unit,
-            unitPrice: li.unitPrice,
-            totalAmount: li.totalAmount,
+            rate: li.rate || 0,
+            discount: li.discount || 0,
+            taxableAmount: li.taxableAmount || 0,
+            gstRate: li.gstRate || 0,
+            gstAmount: li.gstAmount || 0,
+            totalAmount: li.totalAmount || 0,
           })),
+          discountPercentage: initialData.discountPercentage ?? 0,
           grandTotal: initialData.grandTotal || 0,
           status: (initialData.status as POFormValues['status']) || 'Draft',
           internalNotes: initialData.internalNotes || '',
         });
       } else {
         form.reset({
+          poNumber: '',
           poDate: new Date().toISOString().split('T')[0],
           status: 'Draft',
           lineItems: [],
+          discountPercentage: 0,
           grandTotal: 0,
           projectId: '',
           vendorId: '',
@@ -107,7 +117,8 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-6">
         <FormProvider {...form}>
-          <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
             <POHeaderSection readOnly={readOnly} nextNumber={nextNumber} />
             <POLineItemsSection readOnly={readOnly} />
             <POTotalsSection readOnly={readOnly} />

@@ -3,10 +3,13 @@ export type POStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Ordered' | '
 export interface POLineItem {
   id?: string;
   productId?: string;
+  itemName?: string;
   description: string;
   quantity: number;
   unit: string;
-  unitPrice: number;
+  rate: number;
+  discount?: number;
+  taxableAmount?: number;
   gstRate?: number;
   gstAmount?: number;
   totalAmount: number; // calculated total
