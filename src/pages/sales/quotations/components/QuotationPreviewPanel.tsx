@@ -46,6 +46,18 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     if (!iframeRef.current || !iframeRef.current.contentDocument) return;
     setIsGeneratingPdf(true);
     
+    // TEMPORARY WORKAROUND: Remove main document stylesheets to prevent html2canvas from crashing on oklch()
+    const parentStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
+    const placeholders: { el: Element, parent: Node, nextSibling: Node | null }[] = [];
+    
+    parentStyles.forEach(style => {
+      const isStyleSheet = style.tagName.toLowerCase() === 'style' || (style as HTMLLinkElement).href?.includes('.css');
+      if (isStyleSheet) {
+        placeholders.push({ el: style, parent: style.parentNode!, nextSibling: style.nextSibling });
+        style.remove();
+      }
+    });
+
     try {
       const element = iframeRef.current.contentDocument.documentElement;
       const opt = {
@@ -54,23 +66,7 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
-          useCORS: true,
-          onclone: (documentClone: Document) => {
-            // Remove parent application's Tailwind CSS which causes html2canvas to crash on oklch()
-            const styles = documentClone.querySelectorAll('style');
-            styles.forEach(style => {
-              if (style.innerHTML.includes('oklch') || style.innerHTML.includes('tailwind')) {
-                style.remove();
-              }
-            });
-            const links = documentClone.querySelectorAll('link[rel="stylesheet"]');
-            links.forEach(link => {
-              const href = (link as HTMLLinkElement).href || '';
-              if (href.includes('index-') || href.includes('index.css') || href.includes('assets/')) {
-                link.remove();
-              }
-            });
-          }
+          useCORS: true
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
@@ -78,6 +74,10 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
+      // Restore styles immediately
+      placeholders.forEach(({ el, parent, nextSibling }) => {
+        parent.insertBefore(el, nextSibling);
+      });
       setIsGeneratingPdf(false);
     }
   };
