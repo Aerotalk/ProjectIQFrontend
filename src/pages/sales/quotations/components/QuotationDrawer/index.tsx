@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
 import { useQuotationForm } from '../../hooks/useQuotationForm';
@@ -7,6 +7,10 @@ import HeaderSection from './sections/HeaderSection';
 import LineItemsSection from './sections/LineItemsSection';
 import TotalsSection from './sections/TotalsSection';
 import WorkflowSection from './sections/WorkflowSection';
+import QuotationPreviewPanel from '../QuotationPreviewPanel';
+import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { ClientService } from '@/services/client.service';
 
 interface Props {
   isOpen: boolean;
@@ -21,6 +25,12 @@ interface Props {
 
 export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initialData, quotationNo, isSubmitting, nextNumber }: Props) {
   const form = useQuotationForm(initialData);
+  const { selectedCompanyId: companyId } = useAuth();
+  
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState('');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   // Reset form when drawer opens/closes or initialData changes
   React.useEffect(() => {
@@ -61,6 +71,81 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           toast.error('An unexpected error occurred while saving.');
         });
       }
+    }
+  };
+
+  const handlePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      const data = form.getValues();
+      const templateName = (data as any).templateName;
+      if (!templateName) {
+        import('react-hot-toast').then(({ default: toast }) => toast.error('Please select a template first.'));
+        setIsLoadingPreview(false);
+        return;
+      }
+      
+      const templateRes = await api.get(`/admin/templates/${templateName}`);
+      let company = null;
+      if (companyId) {
+        const companyRes = await api.get(`/admin/companies/${companyId}`);
+        company = companyRes.data;
+      }
+      
+      let client = null;
+      if (data.clientId && companyId) {
+        const clients = await ClientService.getClients(companyId);
+        client = clients.find(c => c.id === data.clientId);
+      }
+
+      const previewPayload = {
+        primary_color_hex: '#792359',
+        company_name: company?.name || 'Company Name',
+        company_logo_url: company?.logoUrl || '',
+        company_address_line1: company?.addressLine1 || '',
+        company_address_line2: company?.addressLine2 || '',
+        company_phone: company?.phone || '',
+        company_email: company?.email || '',
+        company_gstin: company?.gstin || '',
+        company_pan: company?.pan || '',
+        client_name: client?.companyName || client?.displayName || 'Client Name',
+        client_address_line1: client?.billingAddressLine1 || '',
+        client_address_line2: client?.billingAddressLine2 || '',
+        client_phone: client?.phone || '',
+        client_state: client?.billingState || '',
+        client_email: client?.email || '',
+        estimate_number: data.quotationNo,
+        estimate_date: data.date,
+        place_of_supply: client?.shippingState || client?.billingState || '',
+        items: data.lineItems.map((item, idx) => ({
+          item_index: idx + 1,
+          item_name: item.itemName,
+          item_description: item.description,
+          item_quantity: item.quantity,
+          item_unit: item.unit,
+          item_price: item.rate.toFixed(2),
+          item_amount: item.totalAmount.toFixed(2)
+        })),
+        sub_total: data.subTotal.toFixed(2),
+        total_tax: data.totalGstAmount.toFixed(2),
+        grand_total: data.grandTotal.toFixed(2),
+        amount_in_words: 'Amount in words not calculated',
+        terms_and_conditions: data.termsAndConditions,
+        bank_name: company?.bankName || '',
+        bank_account_no: company?.bankAccountNumber || '',
+        bank_ifsc: company?.bankIfscCode || '',
+        bank_account_holder: company?.bankAccountName || '',
+        has_taxes: data.totalGstAmount > 0,
+        taxes: data.totalGstAmount > 0 ? [{ tax_type: 'GST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: data.totalGstAmount.toFixed(2) }] : []
+      };
+
+      setPreviewTemplate(templateRes.data);
+      setPreviewData(previewPayload);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      import('react-hot-toast').then(({ default: toast }) => toast.error('Failed to generate preview.'));
+    } finally {
+      setIsLoadingPreview(false);
     }
   };
 
@@ -113,6 +198,19 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           {mode === 'view' ? 'Close' : 'Cancel'}
         </button>
         
+        <button
+          type="button"
+          onClick={handlePreview}
+          disabled={isLoadingPreview}
+          className="px-4 py-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 disabled:opacity-70 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+        >
+          {isLoadingPreview ? (
+            <><Loader2 size={16} className="animate-spin" /> Loading...</>
+          ) : (
+            'Preview'
+          )}
+        </button>
+        
         {!readOnly && (
           <button
             type="submit"
@@ -134,6 +232,14 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           </button>
         )}
       </div>
+
+      <QuotationPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        templateContent={previewTemplate}
+        data={previewData}
+        filename={`Quotation_${form.getValues('quotationNo')}.pdf`}
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
 import { formatQuotationId } from '../../lib/utils';
+import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
 
 interface UserData {
   id: string;
@@ -34,6 +35,10 @@ export default function QuotationDetails() {
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState('');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
 
   const [products, setProducts] = useState<any[]>([]);
@@ -134,7 +139,11 @@ export default function QuotationDetails() {
     if (!id || isNew) return;
     setIsApiLoading(true);
     try {
-      await QuotationService.updateQuotation(id, { status: newStatus });
+      let approvedBy;
+      if (newStatus === 'Approved' || newStatus === 'Rejected') {
+        approvedBy = user?.username || user?.email;
+      }
+      await QuotationService.updateQuotationStatus(id, newStatus, approvedBy);
       setCurrentStage(newStage);
       toast.success(successMessage);
     } catch (err: any) {
@@ -213,6 +222,76 @@ export default function QuotationDetails() {
   const subTotal = lineItems.reduce((sum, item) => sum + (item.rate * item.qty), 0);
   const totalGst = lineItems.reduce((sum, item) => sum + (item.rate * item.qty * item.gst / 100), 0);
   const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
+
+  const handlePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      const data = quotation;
+      
+      const templateName = (data as any).templateName || 'quotation.html';
+      const templateRes = await api.get(`/admin/templates/${templateName}`);
+      let company = null;
+      if (companyId) {
+        const companyRes = await api.get(`/admin/companies/${companyId}`);
+        company = companyRes.data;
+      }
+      
+      let client = null;
+      if (data.clientId && companyId) {
+        const clientsList = await ClientService.getClients(companyId);
+        client = clientsList.find(c => c.id === data.clientId);
+      }
+
+      const previewPayload = {
+        primary_color_hex: '#792359',
+        company_name: company?.name || 'Company Name',
+        company_logo_url: company?.logoUrl || '',
+        company_address_line1: company?.addressLine1 || '',
+        company_address_line2: company?.addressLine2 || '',
+        company_phone: company?.phone || '',
+        company_email: company?.email || '',
+        company_gstin: company?.gstin || '',
+        company_pan: company?.pan || '',
+        client_name: client?.companyName || client?.displayName || data.client || 'Client Name',
+        client_address_line1: client?.billingAddressLine1 || '',
+        client_address_line2: client?.billingAddressLine2 || '',
+        client_phone: client?.phone || '',
+        client_state: client?.billingState || '',
+        client_email: client?.email || '',
+        estimate_number: data.qtnNo,
+        estimate_date: data.createdOn,
+        place_of_supply: client?.shippingState || client?.billingState || '',
+        items: lineItems.map((item, idx) => ({
+          item_index: idx + 1,
+          item_name: item.name,
+          item_description: item.name,
+          item_quantity: item.qty,
+          item_unit: 'Unit',
+          item_price: item.rate.toFixed(2),
+          item_amount: item.amount.toFixed(2)
+        })),
+        sub_total: subTotal.toFixed(2),
+        total_tax: totalGst.toFixed(2),
+        grand_total: grandTotal.toFixed(2),
+        amount_in_words: 'Amount in words not calculated',
+        terms_and_conditions: 'Terms and conditions apply',
+        bank_name: company?.bankName || '',
+        bank_account_no: company?.bankAccountNumber || '',
+        bank_ifsc: company?.bankIfscCode || '',
+        bank_account_holder: company?.bankAccountName || '',
+        has_taxes: totalGst > 0,
+        taxes: totalGst > 0 ? [{ tax_type: 'GST', taxable_amount: subTotal.toFixed(2), tax_rate: 'VARIOUS', tax_amount: totalGst.toFixed(2) }] : []
+      };
+
+      setPreviewTemplate(templateRes.data);
+      setPreviewData(previewPayload);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      toast.error('Failed to generate preview.');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
   const renderBanner = () => {
     switch (currentStage) {
@@ -532,7 +611,11 @@ export default function QuotationDetails() {
               Cancel
             </button>
           )}
-          <button className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2">
+          <button 
+            disabled={isLoadingPreview}
+            onClick={handlePreview}
+            className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
+          >
             <Download size={16} /> Download PDF
           </button>
 
@@ -1060,6 +1143,14 @@ export default function QuotationDetails() {
           </div>
         </div>
       )}
+      
+      <QuotationPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        templateContent={previewTemplate}
+        data={previewData}
+        filename={`Quotation_${quotation.qtnNo}.pdf`}
+      />
     </div>
   );
 }

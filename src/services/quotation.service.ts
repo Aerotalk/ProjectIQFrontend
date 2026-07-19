@@ -27,6 +27,15 @@ export const QuotationService = {
     return mapToQuotation(response as QuotationDto);
   },
 
+  updateQuotationStatus: async (id: string, status: string, approvedBy?: string): Promise<Quotation> => {
+    let url = `/admin/sales/quotations/${id}/status?status=${encodeURIComponent(status)}`;
+    if (approvedBy) {
+      url += `&approvedBy=${encodeURIComponent(approvedBy)}`;
+    }
+    const response = await api.put(url, {});
+    return mapToQuotation(response as QuotationDto);
+  },
+
   deleteQuotation: async (id: string): Promise<void> => {
     await api.delete(`/admin/sales/quotations/${id}`);
   }

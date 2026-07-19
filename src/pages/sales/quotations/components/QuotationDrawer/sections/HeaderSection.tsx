@@ -17,6 +17,8 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
   const { register, control, formState: { errors }, setValue, getValues, watch } = useFormContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingClients, setIsLoadingClients] = useState(true);
+  const [templates, setTemplates] = useState<string[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
 
   const { selectedCompanyId: companyId, user } = useAuth();
 
@@ -26,7 +28,17 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
       setClients(data);
       setIsLoadingClients(false);
     });
-  }, [companyId]);
+    
+    import('@/lib/api').then(({ api }) => {
+      api.get('/admin/templates?type=quotation').then(res => {
+        setTemplates(res.data);
+        setIsLoadingTemplates(false);
+        if (res.data.length > 0 && !getValues('templateName')) {
+          setValue('templateName', res.data[0]);
+        }
+      }).catch(() => setIsLoadingTemplates(false));
+    });
+  }, [companyId, setValue, getValues]);
 
   useEffect(() => {
     if (user && !getValues('salesperson')) {
@@ -156,6 +168,28 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
             placeholder="Brief subject line"
             className={fieldClass(!!errors.subject)}
           />
+        </div>
+
+        <div>
+          <label className={labelClass}>
+            Document Template <span className="text-red-500 normal-case font-normal">*</span>
+          </label>
+          <div className="relative">
+            <div className={readOnly || isLoadingTemplates ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="templateName"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={templates.map(t => ({ label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t }))}
+                  />
+                )}
+              />
+            </div>
+            {isLoadingTemplates && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+          </div>
         </div>
 
         <div>
