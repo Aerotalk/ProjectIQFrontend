@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Edit, Download, Info,
-  CheckCircle2, FileText, Send, MessageSquare, Plus
+  CheckCircle2, FileText, Send, MessageSquare, Plus, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -107,8 +107,58 @@ export default function QuotationDetails() {
     deliveryCost: 0,
     createdOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-    currency: 'INR'
+    currency: 'INR',
+    notes: ''
   });
+
+  const [tempNotes, setTempNotes] = useState('');
+
+  const parsedCommunications = (() => {
+    try {
+      if (!quotation.notes) return [];
+      const parsed = JSON.parse(quotation.notes);
+      if (Array.isArray(parsed)) return parsed;
+      return [];
+    } catch (e) {
+      if (quotation.notes) {
+        return [{
+          id: 'old-note',
+          text: quotation.notes,
+          timestamp: new Date().toISOString(),
+          user: quotation.owner || 'System'
+        }];
+      }
+      return [];
+    }
+  })();
+
+  const handleAddCommunication = () => {
+    if (!tempNotes.trim() || !id) return;
+    
+    const newNote = {
+      id: Math.random().toString(36).substr(2, 9),
+      text: tempNotes.trim(),
+      timestamp: new Date().toISOString(),
+      user: user?.username || user?.email || 'User'
+    };
+    
+    const updatedNotesList = [...parsedCommunications, newNote];
+    const newNotesStr = JSON.stringify(updatedNotesList);
+    
+    // Optimistic UI update
+    setQuotation({ ...quotation, notes: newNotesStr });
+    setTempNotes('');
+
+    // Fire and forget backend update
+    (async () => {
+      try {
+        const fullQuotation = await QuotationService.getQuotation(id);
+        await QuotationService.updateQuotation(id, { ...fullQuotation, notes: newNotesStr });
+      } catch (err: any) {
+        toast.error('Failed to sync note to server');
+      }
+    })();
+  };
 
   useEffect(() => {
     if (companyId) {
@@ -184,7 +234,8 @@ export default function QuotationDetails() {
             deliveryCost: data.deliveryCost || 0,
             createdOn: data.date ? new Date(data.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
             lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            currency: 'INR'
+            currency: 'INR',
+            notes: data.notes || ''
           });
           if (data.lineItems && data.lineItems.length > 0) {
             setLineItems(data.lineItems.map(item => ({
@@ -893,99 +944,48 @@ export default function QuotationDetails() {
               )}
             </div>
 
-            {/* Communication & Notes Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 dark:border-white/5 pt-6 mt-8">
-              <div>
-                <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-3">Client Communication</h4>
-                {currentStage === 1 ? (
-                  <div className="text-sm text-gray-500 py-4 text-center border border-gray-100 dark:border-white/5 rounded-sm bg-gray-50 dark:bg-transparent">
-                    No communication yet.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                        <Send size={14} className="text-blue-600 dark:text-blue-400" />
+            {/* Communication & Notes Chain */}
+            <div className="border-t border-gray-200 dark:border-white/5 pt-6 mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-xs font-bold text-gray-900 dark:text-white">Communication & Internal Notes</h4>
+              </div>
+              
+              <div className="bg-gray-50/50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/5 mb-4">
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                  {parsedCommunications.length === 0 ? (
+                    <div className="text-sm text-gray-500 italic py-4 text-center">No notes or communication yet.</div>
+                  ) : parsedCommunications.map((comm: any) => (
+                    <div key={comm.id} className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 mt-1">
+                        <MessageSquare size={14} className="text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-semibold text-gray-900 dark:text-white">Quotation sent for approval</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <span className="text-xs font-semibold text-gray-900 dark:text-white">{comm.user}</span>
+                          <span className="text-xs text-gray-500">{new Date(comm.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mb-1">10 May 2025, 11:05 AM</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">Sent to Rohit Singh (Sales Manager)</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comm.text}</p>
                       </div>
                     </div>
-                    {currentStage >= 3 && (
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#792359]/10 flex items-center justify-center shrink-0">
-                          <Send size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-semibold text-gray-900 dark:text-white">Quotation sent to client</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mb-1">12 May 2025, 04:30 PM</p>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Sent to raj.mehta@technova.com</p>
-                        </div>
-                      </div>
-                    )}
-                    {currentStage >= 4 && (
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center shrink-0">
-                          <MessageSquare size={14} className="text-orange-600 dark:text-orange-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-semibold text-gray-900 dark:text-white">Client requested changes</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mb-1">16 May 2025, 11:00 AM</p>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Reduce training cost and extend support</p>
-                        </div>
-                      </div>
-                    )}
-                    {currentStage >= 5 && (
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                          <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-semibold text-gray-900 dark:text-white">Client accepted the quotation</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mb-1">18 May 2025, 11:30 AM</p>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">Thanks, we are happy with the proposal.</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="mt-4 relative">
-                  <input type="text" placeholder="Add communication note..." className="w-full pl-3 pr-10 py-2 border border-gray-200 dark:border-white/10 rounded-sm text-sm bg-gray-50 dark:bg-[#0f1115]" />
-                  <button
-                    onClick={() => toast.success('Note added successfully')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#792359] transition-colors"
-                  >
-                    <Send size={16} />
-                  </button>
+                  ))}
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-3">Notes</h4>
-                <div className="p-3 border border-gray-200 dark:border-white/10 rounded-sm bg-yellow-50/50 dark:bg-yellow-500/5 min-h-[120px] text-sm text-gray-700 dark:text-gray-300">
-                  {currentStage >= 4 ? (
-                    "Client wants 10% discount on training and support extended to 6 months. Preparing revised quotation."
-                  ) : currentStage >= 6 ? (
-                    "Project and finance record created automatically."
-                  ) : (
-                    <span className="text-gray-400 italic">Add internal notes here...</span>
-                  )}
-                </div>
-                <div className="mt-2 flex justify-end">
-                  <button className="text-xs text-gray-500 hover:text-[#792359] dark:hover:text-[#e6a8d0] flex items-center gap-1 font-medium transition-colors">
-                    <Edit size={12} /> Edit Notes
-                  </button>
-                </div>
+              <div className="relative">
+                <textarea
+                  value={tempNotes}
+                  onChange={(e) => setTempNotes(e.target.value)}
+                  placeholder="Add a new note or communication..."
+                  className="w-full pl-3 pr-12 py-3 border border-gray-200 dark:border-white/10 rounded-sm text-sm bg-gray-50 dark:bg-[#0f1115] min-h-[80px] resize-none focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                />
+                <button
+                  disabled={!tempNotes.trim()}
+                  onClick={handleAddCommunication}
+                  className="absolute right-3 bottom-3 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors disabled:opacity-50 bg-white dark:bg-[#0f1115] rounded-full p-1"
+                  title="Send Note"
+                >
+                  <Send size={18} />
+                </button>
               </div>
             </div>
           </div>
