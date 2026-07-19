@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, MoreVertical, FolderKanban, Filter } from 'lucide-react';
+import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';
 import type { Project, ProjectFormValues } from '../../types/project.types';
@@ -183,62 +183,90 @@ export default function ProjectDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredProjects.map((p) => (
             <div key={p.id} className="bg-white dark:bg-[#181a1f] border border-[#792359]/30 dark:border-[#e6a8d0]/30 hover:border-[#792359] dark:hover:border-[#e6a8d0] rounded-sm hover:shadow-md transition-all flex flex-col group relative">
-              <div className="p-5 flex flex-col h-full relative">
-                 {/* Top row: Project Code & Action Menu */}
-                 <div className="flex justify-between items-start mb-4">
-                   <div className="flex items-center gap-2">
-                     <span 
-                       onClick={() => handleView(p)}
-                       className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/5 dark:bg-[#792359]/20 px-2 py-1 rounded-sm cursor-pointer hover:underline"
-                     >
-                       {p.projectCode}
-                     </span>
-                   </div>
-                   
-                   <div className="relative" ref={openActionId === p.id ? dropdownRef : undefined}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === p.id ? null : p.id || null); }}
-                        className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                      {openActionId === p.id && (
-                        <div className="absolute right-0 top-6 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm z-20 py-1 text-left">
-                          <button onClick={(e) => { e.stopPropagation(); handleView(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">View Details</button>
-                          <button onClick={(e) => { e.stopPropagation(); handleEdit(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">Edit Project</button>
-                          <div className="border-t border-gray-100 dark:border-white/5 my-1" />
-                          <button onClick={(e) => { e.stopPropagation(); if (p.id) handleDelete(p.id); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">Delete</button>
-                        </div>
-                      )}
-                   </div>
-                 </div>
+              <div className="p-5 flex flex-col h-full relative space-y-4">
+                
+                {/* Top row: Project Name & Status & Action */}
+                <div className="flex justify-between items-start">
+                  <h3 
+                    onClick={() => handleView(p)}
+                    className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide cursor-pointer hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors line-clamp-2 pr-2"
+                  >
+                    {p.projectName || p.projectCode || 'Unnamed Project'}
+                  </h3>
+                  <div className="flex items-center gap-2 shrink-0">
+                     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${
+                       p.status === 'Completed' ? 'bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/20 text-green-700 dark:text-green-400' :
+                       p.status === 'In Progress' || p.status === 'Active' ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400' :
+                       'bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 text-orange-700 dark:text-orange-400'
+                     }`}>
+                       <span className={`w-1.5 h-1.5 rounded-full ${
+                         p.status === 'Completed' ? 'bg-green-500' :
+                         p.status === 'In Progress' || p.status === 'Active' ? 'bg-blue-500' :
+                         'bg-orange-500'
+                       }`}></span>
+                       <span className="text-[10px] font-medium">{p.status || 'Draft'}</span>
+                     </div>
+                     <div className="relative" ref={openActionId === p.id ? dropdownRef : undefined}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setOpenActionId(openActionId === p.id ? null : p.id || null); }}
+                          className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors -mr-2 p-1"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                        {openActionId === p.id && (
+                          <div className="absolute right-0 top-6 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm z-20 py-1 text-left">
+                            <button onClick={(e) => { e.stopPropagation(); handleView(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">View Details</button>
+                            <button onClick={(e) => { e.stopPropagation(); handleEdit(p); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2">Edit Project</button>
+                            <div className="border-t border-gray-100 dark:border-white/5 my-1" />
+                            <button onClick={(e) => { e.stopPropagation(); if (p.id) handleDelete(p.id); setOpenActionId(null); }} className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">Delete</button>
+                          </div>
+                        )}
+                     </div>
+                  </div>
+                </div>
 
-                 {/* Project Name & Description */}
-                 <div className="mb-5 flex-1">
-                   <h3 
-                     onClick={() => handleView(p)}
-                     className="text-base font-medium text-gray-900 dark:text-white leading-snug mb-1.5 cursor-pointer hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors line-clamp-2"
-                   >
-                     {p.projectName}
-                   </h3>
-                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                     {p.description || 'No description provided'}
-                   </p>
-                 </div>
+                {/* Client & Vendors */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <Briefcase size={14} className="text-gray-400" />
+                    CLIENT: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.client || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <FolderKanban size={14} className="text-gray-400" />
+                    VENDORS: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.assignedVendors?.length ? `${p.assignedVendors.length} Assigned` : 'None'}</span>
+                  </div>
+                </div>
 
-                 {/* Bottom row: Status */}
-                 <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
-                   <div className="flex items-center gap-2">
-                     <span className={`w-2 h-2 rounded-full ${
-                        p.status === 'Completed' ? 'bg-green-500' :
-                        p.status === 'In Progress' ? 'bg-blue-500' :
-                        'bg-orange-500'
-                     }`}></span>
-                     <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                       {p.status || 'Draft'}
-                     </span>
-                   </div>
-                 </div>
+                <hr className="border-gray-100 dark:border-white/5" />
+
+                {/* Project Scope & Avatars */}
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Project Scope</div>
+                    <div className="text-base font-bold text-gray-900 dark:text-white">
+                      ₹{(p.expectedRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                  <div className="flex -space-x-2">
+                     <div title={p.projectManager || 'Unassigned'} className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 border-2 border-white dark:border-[#181a1f] flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                       {p.projectManager ? p.projectManager.substring(0, 2).toUpperCase() : 'U'}
+                     </div>
+                  </div>
+                </div>
+
+                <hr className="border-gray-100 dark:border-white/5" />
+
+                {/* Due Date & View Details */}
+                <div className="flex justify-between items-center pt-1">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <Calendar size={14} className="text-gray-400" />
+                    <span>Due: {p.expectedEndDate ? new Date(p.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+                  </div>
+                  <button onClick={() => handleView(p)} className="text-xs font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                    View Details
+                  </button>
+                </div>
+
               </div>
             </div>
           ))}

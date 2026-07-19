@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X, Save, FolderKanban } from 'lucide-react';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useVendors } from '../../../hooks/useVendors';
+import { api } from '../../../lib/api';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 
@@ -12,13 +15,38 @@ interface ProjectDrawerProps {
 }
 
 export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialData }: ProjectDrawerProps) {
+  const { selectedCompanyId } = useAuth();
+  const { vendors } = useVendors({ companyId: selectedCompanyId || null });
+  const [users, setUsers] = useState<any[]>([]);
+
   const [formData, setFormData] = useState<ProjectFormValues>({
     projectCode: '',
     projectName: '',
+    linkedQuotation: '',
+    client: '',
+    assignedVendors: [],
+    projectManager: '',
+    startDate: '',
+    expectedEndDate: '',
     description: '',
-    status: 'In Progress'
+    status: 'Pending Approval'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response: any = await api.get('/admin/users');
+        const data = Array.isArray(response) ? response : (response.content || []);
+        setUsers(data);
+      } catch (err) {
+        console.error('Failed to load users', err);
+      }
+    };
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -26,15 +54,27 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         setFormData({
           projectCode: initialData.projectCode || '',
           projectName: initialData.projectName || '',
+          linkedQuotation: initialData.linkedQuotation || '',
+          client: initialData.client || '',
+          assignedVendors: initialData.assignedVendors || [],
+          projectManager: initialData.projectManager || '',
+          startDate: initialData.startDate || '',
+          expectedEndDate: initialData.expectedEndDate || '',
           description: initialData.description || '',
-          status: initialData.status || 'In Progress'
+          status: initialData.status || 'Pending Approval'
         });
       } else {
         setFormData({
           projectCode: '',
           projectName: '',
+          linkedQuotation: '',
+          client: '',
+          assignedVendors: [],
+          projectManager: '',
+          startDate: '',
+          expectedEndDate: '',
           description: '',
-          status: 'In Progress'
+          status: 'Pending Approval'
         });
       }
     }
@@ -90,17 +130,45 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
             
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Code *</label>
-                <input
-                  required
-                  type="text"
-                  disabled={isReadOnly}
-                  value={formData.projectCode}
-                  onChange={(e) => setFormData({ ...formData, projectCode: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                  placeholder="e.g. PRJ-001"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Code *</label>
+                  <input
+                    required
+                    type="text"
+                    disabled={isReadOnly}
+                    value={formData.projectCode}
+                    onChange={(e) => setFormData({ ...formData, projectCode: e.target.value })}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                    placeholder="e.g. PROJ-2526-0001"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                  {isReadOnly ? (
+                    <CustomSelect
+                      value={formData.status}
+                      onChange={(val) => {
+                        const newData = { ...formData, status: val };
+                        setFormData(newData);
+                        onSave(newData); // quick save in view mode
+                      }}
+                      options={[
+                        { label: 'Pending Approval', value: 'Pending Approval' },
+                        { label: 'Active', value: 'Active' },
+                        { label: 'In Progress', value: 'In Progress' },
+                        { label: 'On Hold', value: 'On Hold' },
+                        { label: 'Completed', value: 'Completed' },
+                        { label: 'Cancelled', value: 'Cancelled' }
+                      ]}
+                    />
+                  ) : (
+                    <div className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300">
+                      {formData.status}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -115,24 +183,96 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   placeholder="e.g. ERP Implementation"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                {isReadOnly ? (
-                  <div className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300">
-                    {formData.status}
-                  </div>
-                ) : (
-                  <CustomSelect
-                    value={formData.status}
-                    onChange={(val) => setFormData({ ...formData, status: val })}
-                    options={[
-                      { label: 'In Progress', value: 'In Progress' },
-                      { label: 'Completed', value: 'Completed' },
-                      { label: 'On Hold', value: 'On Hold' }
-                    ]}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Quotation</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={formData.linkedQuotation}
+                    onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                    placeholder="Quotation number"
                   />
-                )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Client</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={formData.client}
+                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                    placeholder="Client name"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date *</label>
+                  <input
+                    required
+                    type="date"
+                    disabled={isReadOnly}
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected End Date</label>
+                  <input
+                    type="date"
+                    disabled={isReadOnly}
+                    value={formData.expectedEndDate}
+                    onChange={(e) => setFormData({ ...formData, expectedEndDate: e.target.value })}
+                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Manager *</label>
+                <CustomSelect
+                  disabled={isReadOnly}
+                  value={formData.projectManager || ''}
+                  onChange={(val) => setFormData({ ...formData, projectManager: val })}
+                  options={[
+                    { label: 'Select Manager...', value: '' },
+                    ...users.map(u => ({ label: u.username || u.email, value: u.id }))
+                  ]}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Vendors</label>
+                <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                  {vendors.length === 0 ? (
+                    <span className="text-gray-400 italic">No vendors found</span>
+                  ) : (
+                    vendors.map(vendor => (
+                      <label key={vendor.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.assignedVendors || []).includes(vendor.id)}
+                          onChange={(e) => {
+                            const current = formData.assignedVendors || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, assignedVendors: [...current, vendor.id] });
+                            } else {
+                              setFormData({ ...formData, assignedVendors: current.filter(id => id !== vendor.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {vendor.displayName}
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
 
               <div>
@@ -143,7 +283,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none disabled:opacity-70"
                   placeholder="Project details and scope..."
-                  rows={4}
+                  rows={3}
                 />
               </div>
 
