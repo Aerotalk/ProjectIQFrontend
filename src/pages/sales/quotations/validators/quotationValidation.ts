@@ -25,6 +25,7 @@ export const quotationSchema = z.object({
   subject: z.string().nullable().optional(),
   reference: z.string().nullable().optional(),
   salesperson: z.string().nullable().optional(),
+  templateName: z.string().min(1, 'Template is required'),
 
   lineItems: z.array(quotationLineItemSchema).min(1, 'At least one line item is required'),
 
