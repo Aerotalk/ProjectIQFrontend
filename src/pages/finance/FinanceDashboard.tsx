@@ -48,35 +48,44 @@ export default function FinanceDashboard() {
         const poSum = pos.reduce((acc, po) => acc + (po.grandTotal || 0), 0);
         setPoTotal(poSum);
         
-        const formattedPOs = pos.slice(0, 5).map(po => ({
-          id: po.poNumber || po.id,
-          vendor: po.vendorName,
-          project: po.projectId,
-          amount: `₹ ${(po.grandTotal || 0).toLocaleString('en-IN')}`,
-          status: po.status,
-          statusColor: po.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-        }));
+        const formattedPOs = pos.slice(0, 5).map(po => {
+          const proj = projs.find(p => p.id === po.projectId);
+          return {
+            id: po.poNumber || `PO-${po.id.substring(0,6).toUpperCase()}`,
+            vendor: po.vendorName,
+            project: proj ? (proj.projectCode || proj.projectName) : (po.projectId ? `PRJ-${po.projectId.substring(0,6).toUpperCase()}` : 'General'),
+            amount: `₹ ${(po.grandTotal || 0).toLocaleString('en-IN')}`,
+            status: po.status,
+            statusColor: po.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+          };
+        });
         setRecentPOs(formattedPOs);
 
         const expSum = expenses.reduce((acc, ex) => acc + (ex.amount || 0), 0);
         setExpenseTotal(expSum);
 
-        const formattedExpenses = expenses.slice(0, 5).map(ex => ({
-          date: new Date(ex.expenseDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-          type: ex.category,
-          project: ex.projectId,
-          amount: `₹ ${(ex.amount || 0).toLocaleString('en-IN')}`
-        }));
+        const formattedExpenses = expenses.slice(0, 5).map(ex => {
+          const proj = projs.find(p => p.id === ex.projectId);
+          return {
+            date: new Date(ex.expenseDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            type: ex.category,
+            project: proj ? (proj.projectCode || proj.projectName) : (ex.projectId ? `PRJ-${ex.projectId.substring(0,6).toUpperCase()}` : 'General'),
+            amount: `₹ ${(ex.amount || 0).toLocaleString('en-IN')}`
+          };
+        });
         setRecentExpenses(formattedExpenses);
 
-        const formattedChallans = challans.slice(0, 5).map(ch => ({
-          id: ch.challanNumber || ch.id,
-          vendor: ch.vendorName || 'Vendor',
-          project: ch.projectId,
-          date: new Date(ch.challanDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-          status: 'Received',
-          statusColor: 'bg-green-100 text-green-700'
-        }));
+        const formattedChallans = challans.slice(0, 5).map(ch => {
+          const proj = projs.find(p => p.id === ch.projectId);
+          return {
+            id: ch.challanNumber || `DC-${ch.id.substring(0,6).toUpperCase()}`,
+            vendor: ch.vendorName || 'Vendor',
+            project: proj ? (proj.projectCode || proj.projectName) : (ch.projectId ? `PRJ-${ch.projectId.substring(0,6).toUpperCase()}` : 'General'),
+            date: new Date(ch.challanDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+            status: 'Received',
+            statusColor: 'bg-green-100 text-green-700'
+          };
+        });
         setRecentChallans(formattedChallans);
         
         const formattedProjects = projs.slice(0, 5).map(p => {
@@ -84,7 +93,7 @@ export default function FinanceDashboard() {
           const pExps = expenses.filter(ex => ex.projectId === p.id);
           const pCost = pPOs.reduce((acc, po) => acc + (po.grandTotal || 0), 0) + pExps.reduce((acc, ex) => acc + (ex.amount || 0), 0);
           return {
-            id: p.projectCode || p.id,
+            id: p.projectCode || `PRJ-${p.id.substring(0,6).toUpperCase()}`,
             realId: p.id,
             name: p.projectName,
             customer: 'N/A', // Client association not stored in Project
