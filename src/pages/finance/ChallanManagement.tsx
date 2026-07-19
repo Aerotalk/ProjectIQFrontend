@@ -325,7 +325,7 @@ export default function ChallanManagement() {
                     </td>
 
                     {/* Vendor */}
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                    <td className="px-6 py-4 dark:text-white">
                       {ch.vendorName || 'Unknown Vendor'}
                     </td>
 
@@ -333,12 +333,12 @@ export default function ChallanManagement() {
                     <td className="px-6 py-4">
                       
                       {ch.projectName && (
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{ch.projectName}</p>
+                        <p className="text-sm dark:text-white">{ch.projectName}</p>
                       )}
                     </td>
 
                     {/* Date */}
-                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-6 py-4 text-sm dark:text-white">
                       {formatDate(ch.challanDate)}
                     </td>
 
