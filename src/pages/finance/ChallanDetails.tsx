@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Info,
+  ChevronRight, Info, Download, Loader2,
   CheckCircle2, Truck, Package
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import { api } from '../../lib/api';
 import type { DeliveryChallan } from '../../types/challan.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
+import QuotationPreviewPanel from '../sales/quotations/components/QuotationPreviewPanel';
 
 export default function ChallanDetails() {
   const { id } = useParams();
@@ -28,6 +29,11 @@ export default function ChallanDetails() {
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Overview');
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState('');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -105,6 +111,73 @@ export default function ChallanDetails() {
     }
   }, [id, isNew, companyId]);
 
+
+  const handlePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      const templateName = 'delivery_challan.html';
+      const templateRes = await api.get(`/admin/templates/${templateName}`);
+      
+      let company = null;
+      if (companyId) {
+        company = await api.get(`/admin/companies/${companyId}`);
+      }
+
+      let logoBase64 = '';
+      const logoId = company?.invoiceLogoId || company?.logoFileId;
+      if (logoId) {
+        try {
+          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
+          if (blob) {
+            logoBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob as Blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch logo', e);
+        }
+      }
+
+      const vendor = vendors.find(v => v.id === challan.vendorId);
+
+      const previewPayload = {
+        primary_color_hex: '#792359',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
+        company_phone: company?.phone || '',
+        company_email: company?.email || '',
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        client_name: vendor?.companyName || vendor?.displayName || challan.vendorName || 'Vendor',
+        client_address_line1: vendor?.billingAddressLine1 || '',
+        client_address_line2: vendor?.billingCity || '',
+        client_gstin: vendor?.gstin || '',
+        client_state: vendor?.billingState || '',
+        challan_number: challan.challanNumber || 'Draft',
+        challan_date: challan.challanDate || new Date().toLocaleDateString(),
+        place_of_supply: vendor?.billingState || '',
+        items: [{
+          item_index: 1,
+          item_name: challan.description || 'Goods as per challan',
+          item_quantity: 1,
+          item_unit: 'Lot',
+          item_description: challan.remarks || ''
+        }]
+      };
+
+      setPreviewTemplate(templateRes);
+      setPreviewData(previewPayload);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      toast.error('Failed to load preview template');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
   const renderBanner = () => {
     switch (currentStage) {
@@ -232,6 +305,16 @@ export default function ChallanDetails() {
         </div>
 
         <div className="flex items-center gap-2">
+          {!isNew && (
+            <button
+              disabled={isLoadingPreview}
+              onClick={handlePreview}
+              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
+            >
+              {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} 
+              {currentStage === 1 ? 'Preview / Download' : 'Download PDF'}
+            </button>
+          )}
           {!isNew && currentStage === 1 && (
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -367,6 +450,14 @@ export default function ChallanDetails() {
           </div>
         </div>
       </div>
+      <QuotationPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        templateContent={previewTemplate}
+        data={previewData}
+        filename={`Challan-${challan.challanNumber}.pdf`}
+        title="Delivery Challan"
+      />
     </div>
   );
 }
