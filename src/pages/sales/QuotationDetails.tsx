@@ -819,6 +819,7 @@ export default function QuotationDetails() {
                       lastUpdated: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
                       currency: 'INR',
                       notes: data.notes || '',
+                      termsAndConditions: data.termsAndConditions || '',
                       taxType: data.taxType || 'CGST_SGST'
                     });
                     if (data.lineItems && data.lineItems.length > 0) {
