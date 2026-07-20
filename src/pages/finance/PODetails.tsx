@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Info, Download, Loader2,
+  ChevronRight, Info,
   CheckCircle2, Send, Truck
 } from 'lucide-react';
-import { ToWords } from 'to-words';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,27 +14,6 @@ import { api } from '../../lib/api';
 import type { POStatus } from '../../types/po.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
-import QuotationPreviewPanel from '../sales/quotations/components/QuotationPreviewPanel';
-
-const toWords = new ToWords({
-  localeCode: 'en-IN',
-  converterOptions: {
-    currency: true,
-    ignoreDecimal: false,
-    ignoreZeroCurrency: false,
-    doNotAddOnly: false,
-    currencyOptions: {
-      name: 'Rupee',
-      plural: 'Rupees',
-      symbol: '₹',
-      fractionalUnit: {
-        name: 'Paisa',
-        plural: 'Paise',
-        symbol: '',
-      },
-    },
-  },
-});
 
 export default function PODetails() {
   const { id } = useParams();
@@ -50,11 +28,6 @@ export default function PODetails() {
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
-
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState('');
-  const [previewData, setPreviewData] = useState<any>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -173,101 +146,6 @@ export default function PODetails() {
 
   const subTotal = lineItems.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
   const calculatedGrandTotal = subTotal - (subTotal * (Number(po.discount) / 100));
-
-  const handlePreview = async () => {
-    try {
-      setIsLoadingPreview(true);
-      const templateName = 'purchase_order.html';
-      const templateRes = await api.get(`/admin/templates/${templateName}`);
-      
-      let company = null;
-      if (companyId) {
-        company = await api.get(`/admin/companies/${companyId}`);
-      }
-
-      let logoBase64 = '';
-      const logoId = company?.invoiceLogoId || company?.logoFileId;
-      if (logoId) {
-        try {
-          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
-          if (blob) {
-            logoBase64 = await new Promise((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob as Blob);
-            });
-          }
-        } catch (e) {
-          console.error('Failed to pre-fetch logo', e);
-        }
-      }
-      
-      let signatureBase64 = '';
-      const stampId = company?.stampFileId;
-      if (stampId) {
-        try {
-          const blob = await api.get(`/admin/files/${stampId}`, { responseType: 'blob' });
-          if (blob) {
-            signatureBase64 = await new Promise((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob as Blob);
-            });
-          }
-        } catch (e) {
-          console.error('Failed to pre-fetch signature', e);
-        }
-      }
-
-      const vendor = vendors.find(v => v.id === po.vendorId);
-
-      const previewPayload = {
-        primary_color_hex: '#792359',
-        company_name: company?.name || company?.companyName || 'Company Name',
-        company_logo_url: logoBase64 || '',
-        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
-        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
-        company_phone: company?.phone || '',
-        company_email: company?.email || '',
-        company_gstin: company?.gstNumber || '',
-        company_pan: company?.panNumber || '',
-        vendor_name: vendor?.companyName || vendor?.displayName || po.vendorName || 'Vendor',
-        vendor_address_line1: vendor?.billingAddressLine1 || '',
-        vendor_address_line2: vendor?.billingCity || '',
-        vendor_phone: vendor?.phone || '',
-        vendor_gstin: vendor?.gstin || '',
-        vendor_state: vendor?.billingState || '',
-        po_number: po.poNumber || 'Draft',
-        po_date: po.poDate || new Date().toLocaleDateString(),
-        place_of_supply: vendor?.billingState || '',
-        items: lineItems.map((item, index) => ({
-          item_index: index + 1,
-          item_name: item.description,
-          item_hsn: '', // HSN is missing in PO items on frontend
-          item_quantity: item.qty,
-          item_unit: item.unit || 'Unit',
-          item_price: item.unitPrice.toFixed(2),
-          item_amount: (item.qty * item.unitPrice).toFixed(2)
-        })),
-        sub_total: subTotal.toFixed(2),
-        total_tax: '0.00', // PO doesn't have tax in frontend model currently
-        grand_total: calculatedGrandTotal.toFixed(2),
-        advance_amount: '0.00',
-        balance_amount: calculatedGrandTotal.toFixed(2),
-        amount_in_words: toWords.convert(calculatedGrandTotal),
-        terms_and_conditions: po.internalNotes || company?.termsAndConditions || '',
-        signature_url: signatureBase64
-      };
-
-      setPreviewTemplate(templateRes);
-      setPreviewData(previewPayload);
-      setIsPreviewOpen(true);
-    } catch (err: any) {
-      toast.error('Failed to load preview template');
-    } finally {
-      setIsLoadingPreview(false);
-    }
-  };
 
   const renderBanner = () => {
     switch (currentStage) {
@@ -455,16 +333,6 @@ export default function PODetails() {
         </div>
 
         <div className="flex items-center gap-2">
-          {!isNew && (
-            <button
-              disabled={isLoadingPreview}
-              onClick={handlePreview}
-              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 disabled:opacity-50"
-            >
-              {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} 
-              {currentStage === 1 ? 'Preview / Download' : 'Download PDF'}
-            </button>
-          )}
           {!isNew && currentStage === 1 && (
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -695,14 +563,6 @@ export default function PODetails() {
           </div>
         </div>
       </div>
-      <QuotationPreviewPanel
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        templateContent={previewTemplate}
-        data={previewData}
-        filename={`PO-${po.poNumber}.pdf`}
-        title="Purchase Order"
-      />
     </div>
   );
 }
