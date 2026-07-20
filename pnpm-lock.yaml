@@ -83,6 +83,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.2
         version: 4.3.3
+      to-words:
+        specifier: ^5.6.1
+        version: 5.6.1
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
@@ -3050,6 +3053,11 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  to-words@5.6.1:
+    resolution: {integrity: sha512-I2tQDzfUjFUbBiRFkoN4qYvm88us5h/hXayyfsszlWK21NY5fGRU0BOURrejmh55isf6lEt1rCstW9ezkdXFyw==}
+    engines: {node: '>=20.0.0'}
+    hasBin: true
 
   toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
@@ -6225,6 +6233,8 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  to-words@5.6.1: {}
 
   toidentifier@1.0.1: {}
 

@@ -39,6 +39,7 @@ interface AccountData {
   logoFileId?: string;
   invoiceLogoId?: string;
   stampFileId?: string;
+  termsAndConditions?: string;
   
   addressType: string;
   addressLine1: string;
@@ -126,7 +127,11 @@ const AccountForm = ({
     phone: initialData?.phone || '',
     website: initialData?.website || '',
     primaryColor: initialData?.primaryColor || '#792359',
-    secondaryColor: initialData?.secondaryColor || '#E6A8D0',
+    secondaryColor: initialData?.secondaryColor || '#e6a8d0',
+    logoFileId: initialData?.logoFileId,
+    invoiceLogoId: initialData?.invoiceLogoId,
+    stampFileId: initialData?.stampFileId,
+    termsAndConditions: initialData?.termsAndConditions || '',
     adminPassword: '',
     addressType: primaryAddress?.addressType || 'Registered',
     addressLine1: primaryAddress?.addressLine1 || '',
@@ -423,6 +428,18 @@ const AccountForm = ({
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
                 </div>
               </div>
+            </div>
+            
+            {/* Terms and Conditions */}
+            <div className="mt-6 space-y-1.5 border-t border-gray-200 dark:border-white/10 pt-6">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Default Terms and Conditions</label>
+              <textarea
+                value={formData.termsAndConditions || ''}
+                onChange={(e) => updateField('termsAndConditions', e.target.value)}
+                rows={4}
+                placeholder="Enter default terms and conditions for quotations and invoices..."
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+              />
             </div>
           </div>
         </div>
