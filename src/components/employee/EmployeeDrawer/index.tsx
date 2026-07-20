@@ -105,10 +105,10 @@ export default function EmployeeDrawer({ isOpen, onClose, onSave, mode, initialD
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 flex max-w-full">
+    <div className="fixed inset-y-0 right-0 left-[220px] xl:left-[260px] z-50 flex">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
-      <div className="relative w-screen bg-white dark:bg-[#181a1f] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="relative w-full bg-white dark:bg-[#181a1f] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
