@@ -113,6 +113,34 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
                 )}
               </div>
             </div>
+
+            {client.additionalContacts && client.additionalContacts.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Additional Contacts</h3>
+                <div className="space-y-4">
+                  {client.additionalContacts.map((contact, index) => (
+                    <div key={index} className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-medium text-gray-900 dark:text-white">{contact.name}</div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] uppercase tracking-wider">{contact.role}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-y-2 mt-2">
+                        {contact.designation && (
+                          <>
+                            <div className="text-gray-500 dark:text-gray-400">Designation</div>
+                            <div className="text-gray-900 dark:text-gray-100">{contact.designation}</div>
+                          </>
+                        )}
+                        <div className="text-gray-500 dark:text-gray-400">Email</div>
+                        <div className="text-gray-900 dark:text-gray-100">{contact.email}</div>
+                        <div className="text-gray-500 dark:text-gray-400">Phone</div>
+                        <div className="text-gray-900 dark:text-gray-100">{contact.phone}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tax & Commercial Section */}
@@ -203,16 +231,18 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Address</h3>
 
               <div className="mb-4">
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                <div className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                   Billing Address
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/5 p-3 rounded-sm border border-gray-100 dark:border-white/10">
-                  {client.billingAttention && <div>Attn: {client.billingAttention}</div>}
-                  <div>{client.billingAddressLine1}</div>
-                  {client.billingAddressLine2 && <div>{client.billingAddressLine2}</div>}
-                  <div>{client.billingCity}, {client.billingState} {client.billingPinCode}</div>
-                  <div>{client.billingCountry}</div>
-                  {client.billingPhone && <div>Phone: {client.billingPhone}</div>}
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10">
+                  {client.billingAttention && <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">Attn: {client.billingAttention}</div>}
+                  <div className="leading-relaxed">
+                    {client.billingAddressLine1}<br />
+                    {client.billingAddressLine2 && <>{client.billingAddressLine2}<br /></>}
+                    {client.billingCity}, {client.billingState} {client.billingPinCode}<br />
+                    {client.billingCountry}
+                  </div>
+                  {client.billingPhone && <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/10 text-xs">Phone: {client.billingPhone}</div>}
                 </div>
               </div>
 

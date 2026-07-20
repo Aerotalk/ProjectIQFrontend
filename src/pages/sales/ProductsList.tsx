@@ -142,7 +142,12 @@ export default function ProductsList() {
                 {currentItems.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{product.itemName}</div>
+                      <button 
+                        onClick={() => openDrawer('view', product)}
+                        className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline text-left focus:outline-none block"
+                      >
+                        {product.itemName}
+                      </button>
                       <div className="text-xs text-gray-500 font-normal mt-0.5">{product.itemCode}</div>
                     </td>
                     <td className="px-6 py-4">

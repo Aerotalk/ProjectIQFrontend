@@ -98,6 +98,22 @@ export default function EmployeeDirectory() {
     }
   };
 
+  if (isDrawerOpen) {
+    return (
+      <div className="max-w-[1400px] mx-auto">
+        <EmployeeDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          onSave={handleSaveEmployee}
+          mode={drawerMode}
+          initialData={selectedEmployee as any}
+          employeeId={selectedEmployee?.employeeCode}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -233,16 +249,6 @@ export default function EmployeeDirectory() {
           ))}
         </div>
       )}
-
-      <EmployeeDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveEmployee}
-        mode={drawerMode}
-        initialData={selectedEmployee as any}
-        employeeId={selectedEmployee?.employeeCode}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }
