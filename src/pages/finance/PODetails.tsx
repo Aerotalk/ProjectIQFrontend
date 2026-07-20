@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Info,
-  CheckCircle2, Send, Truck
+  CheckCircle2, Send, Truck, Download, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -14,6 +14,19 @@ import { api } from '../../lib/api';
 import type { POStatus } from '../../types/po.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
+import POPreviewPanel from './po/components/POPreviewPanel';
+import { ToWords } from 'to-words';
+
+const toWords = new ToWords({
+  localeCode: 'en-IN',
+  converterOptions: {
+    currency: true,
+    ignoreDecimal: false,
+    ignoreZeroCurrency: false,
+    doNotAddOnly: false,
+    currencyOptions: { name: 'Rupee', plural: 'Rupees', symbol: '₹', fractionalUnit: { name: 'Paisa', plural: 'Paise', symbol: '' } }
+  }
+});
 
 export default function PODetails() {
   const { id } = useParams();
@@ -28,6 +41,11 @@ export default function PODetails() {
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState('');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [company, setCompany] = useState<any>(null);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -45,6 +63,8 @@ export default function PODetails() {
     unit: string;
     unitPrice: number;
     amount: number;
+    gstRate?: number;
+    gstAmount?: number;
   }
 
   const [lineItems, setLineItems] = useState<LineItem[]>(isNew ? [{
@@ -60,7 +80,7 @@ export default function PODetails() {
     poDate: new Date().toISOString().split('T')[0],
     expectedDelivery: '',
     description: '',
-    discount: 0,
+    discount: 0 as number | string,
     grandTotal: 0,
     status: 'Draft' as POStatus,
     internalNotes: ''
@@ -68,6 +88,7 @@ export default function PODetails() {
 
   useEffect(() => {
     if (companyId) {
+      api.get(`/admin/companies/${companyId}`).then(res => setCompany(res)).catch(console.error);
       VendorService.getVendors(companyId).then(setVendors).catch(console.error);
       ProjectService.getAll(companyId).then((data: any) => {
         const pData = Array.isArray(data) ? data : (data?.data || data?.content || []);
@@ -128,14 +149,30 @@ export default function PODetails() {
               internalNotes: foundPo.internalNotes || ''
             });
             if (foundPo.lineItems) {
-              setLineItems(foundPo.lineItems.map((item: any) => ({
+              const mappedItems = foundPo.lineItems.map((item: any) => ({
                 id: Math.random().toString(),
                 description: item.description,
-                qty: item.quantity,
-                unit: item.unit,
-                unitPrice: item.unitPrice,
-                amount: item.totalAmount
-              })));
+                qty: item.quantity || 0,
+                unit: item.unit || '',
+                unitPrice: item.rate !== undefined ? item.rate : (item.unitPrice || 0),
+                amount: item.totalAmount || 0,
+                gstRate: item.gstRate || 0,
+                gstAmount: item.gstAmount || 0
+              }));
+              setLineItems(mappedItems);
+              
+              const calcSubTotal = mappedItems.reduce((sum: number, item: any) => sum + (item.unitPrice * item.qty), 0);
+              const calcTotalTax = mappedItems.reduce((sum: number, item: any) => sum + (item.gstAmount || 0), 0);
+              
+              let inferredDiscount = 0;
+              if (foundPo.grandTotal && foundPo.grandTotal < (calcSubTotal + calcTotalTax)) {
+                  inferredDiscount = calcSubTotal + calcTotalTax - foundPo.grandTotal;
+              }
+              
+              setPo(prev => ({
+                ...prev,
+                discount: Number(inferredDiscount.toFixed(2))
+              }));
             }
           }
         })
@@ -145,7 +182,109 @@ export default function PODetails() {
   }, [id, isNew, companyId]);
 
   const subTotal = lineItems.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-  const calculatedGrandTotal = subTotal - (subTotal * (Number(po.discount) / 100));
+  const totalTax = lineItems.reduce((sum, item) => sum + (item.gstAmount || 0), 0);
+  const calculatedGrandTotal = subTotal + totalTax - Number(po.discount || 0);
+
+  const handlePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      
+      const templateRes = await api.get(`/admin/templates/purchase_order.html`);
+      
+      let logoBase64 = '';
+      const logoId = company?.invoiceLogoId || company?.logoFileId;
+      if (logoId) {
+        try {
+          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
+          if (blob) {
+            logoBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch logo', e);
+        }
+      }
+      
+      let signatureBase64 = '';
+      const stampId = company?.stampFileId;
+      if (stampId) {
+        try {
+          const blob = await api.get(`/admin/files/${stampId}`, { responseType: 'blob' });
+          if (blob) {
+            signatureBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch signature', e);
+        }
+      }
+      
+      const vendor = vendors.find(v => v.id === po.vendorId);
+      const advanceAmount = 0;
+      
+      const payload = {
+        primary_color_hex: '#792359',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
+        company_phone: company?.phone || '',
+        company_email: company?.email || '',
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        
+        vendor_name: vendor?.displayName || vendor?.companyName || po.vendorName || 'Vendor Name',
+        vendor_address_line1: vendor?.billingAddressLine1 || '',
+        vendor_address_line2: vendor?.billingCity || '',
+        vendor_phone: vendor?.phone || vendor?.billingPhone || '',
+        vendor_gstin: vendor?.gstin || '',
+        vendor_state: vendor?.billingState || '',
+        
+        transport_mode: 'By Road', 
+        delivery_location: vendor?.shippingCity || vendor?.billingCity || '',
+        
+        po_number: po.poNumber || 'Draft',
+        po_date: po.poDate ? new Date(po.poDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+        place_of_supply: vendor?.billingState || '',
+        due_date: po.expectedDelivery ? new Date(po.expectedDelivery).toLocaleDateString('en-GB') : 'N/A',
+        
+        items: lineItems.map((item, index) => ({
+          item_index: index + 1,
+          item_name: item.description || 'Item',
+          item_hsn: '', 
+          item_quantity: item.qty || 1,
+          item_unit: item.unit || 'PCS',
+          item_price: item.unitPrice.toFixed(2),
+          item_amount: (item.qty * item.unitPrice).toFixed(2)
+        })),
+        
+        sub_total: subTotal.toFixed(2),
+        total_tax: totalTax.toFixed(2),
+        grand_total: calculatedGrandTotal.toFixed(2),
+        advance_amount: advanceAmount.toFixed(2),
+        balance_amount: (calculatedGrandTotal - advanceAmount).toFixed(2),
+        amount_in_words: toWords.convert(calculatedGrandTotal),
+        
+        terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
+        signature_url: signatureBase64
+      };
+      
+      setPreviewTemplate(templateRes);
+      setPreviewData(payload);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      toast.error('Failed to generate preview.');
+      console.error(err);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
   const renderBanner = () => {
     switch (currentStage) {
@@ -175,8 +314,12 @@ export default function PODetails() {
                         description: item.description,
                         quantity: item.qty,
                         unit: item.unit,
+                        rate: item.unitPrice, // Backend expects 'rate'
                         unitPrice: item.unitPrice,
-                        totalAmount: item.unitPrice * item.qty
+                        gstRate: item.gstRate || 0,
+                        gstAmount: item.gstAmount || 0,
+                        taxableAmount: item.unitPrice * item.qty,
+                        totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0)
                       })),
                       grandTotal: calculatedGrandTotal
                     };
@@ -333,13 +476,66 @@ export default function PODetails() {
         </div>
 
         <div className="flex items-center gap-2">
-          {!isNew && currentStage === 1 && (
+          {!isNew && (
             <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+              onClick={handlePreview}
+              disabled={isLoadingPreview}
+              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
             >
-              {isEditing ? 'Cancel Edit' : 'Edit PO'}
+              {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              {isLoadingPreview ? 'Preparing PDF...' : 'Download PDF'}
             </button>
+          )}
+          {!isNew && currentStage === 1 && (
+            <div className="flex items-center gap-2">
+              {isEditing && (
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                disabled={isApiLoading}
+                onClick={async () => {
+                  if (isEditing && id) {
+                    setIsApiLoading(true);
+                    try {
+                      const payload = {
+                        ...po,
+                        companyId: companyId,
+                        lineItems: lineItems.map(item => ({
+                          description: item.description,
+                          quantity: item.qty,
+                          unit: item.unit,
+                          rate: item.unitPrice, 
+                          unitPrice: item.unitPrice,
+                          gstRate: item.gstRate || 0,
+                          gstAmount: item.gstAmount || 0,
+                          taxableAmount: item.unitPrice * item.qty,
+                          totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0)
+                        })),
+                        grandTotal: calculatedGrandTotal
+                      };
+                      await POService.update(id, payload as any);
+                      toast.success('Changes saved successfully');
+                    } catch (err: any) {
+                      toast.error(err?.message || 'Failed to save changes');
+                    } finally {
+                      setIsApiLoading(false);
+                    }
+                  }
+                  setIsEditing(!isEditing);
+                }}
+                className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${isEditing
+                  ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
+                  : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                }`}
+              >
+                {isEditing ? 'Save Changes' : 'Edit PO'}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -526,7 +722,13 @@ export default function PODetails() {
                     <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-white/10">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        ₹ {lineItems.reduce((acc, curr) => acc + (curr.qty * curr.unitPrice), 0).toLocaleString('en-IN')}
+                        ₹ {subTotal.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-white/10">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Tax (₹)</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        ₹ {totalTax.toLocaleString('en-IN')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-white/10">
@@ -535,7 +737,7 @@ export default function PODetails() {
                         <input
                           type="number"
                           value={po.discount}
-                          onChange={e => setPo({...po, discount: Number(e.target.value)})}
+                          onChange={e => setPo({...po, discount: e.target.value === '' ? '' : Number(e.target.value)})}
                           className="w-32 px-2 py-1 text-sm text-right bg-white border rounded-sm dark:bg-[#0f1115] dark:border-white/10"
                         />
                       ) : (
@@ -547,7 +749,7 @@ export default function PODetails() {
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-base font-bold text-gray-900 dark:text-white">Grand Total</span>
                       <span className="text-lg font-bold text-[#792359] dark:text-[#e6a8d0]">
-                        ₹ {isEditing ? calculatedGrandTotal.toLocaleString('en-IN') : (po.grandTotal || 0).toLocaleString('en-IN')}
+                        ₹ {calculatedGrandTotal.toLocaleString('en-IN')}
                       </span>
                     </div>
                   </div>
@@ -563,6 +765,13 @@ export default function PODetails() {
           </div>
         </div>
       </div>
+      <POPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        templateContent={previewTemplate}
+        data={previewData}
+        filename={`PO_${po.poNumber || 'Draft'}.pdf`}
+      />
     </div>
   );
 }

@@ -62,7 +62,7 @@ export default function QuotationDetails() {
 
   useEffect(() => {
     if (!companyId) return;
-    api.get(`/admin/companies/${companyId}`).then(res => setCompany(res.data)).catch(console.error);
+    api.get(`/admin/companies/${companyId}`).then(res => setCompany(res)).catch(console.error);
     ClientService.getClients(companyId).then(data => setClients(data));
     ProjectService.getAll(companyId).then(data => setProjects(data));
     api.get('/admin/users').then((data: any) => {

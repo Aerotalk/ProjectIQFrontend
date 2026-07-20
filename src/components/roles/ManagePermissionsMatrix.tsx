@@ -24,16 +24,9 @@ export default function ManagePermissionsMatrix({ role, onClose }: Props) {
         setMatrix(matrixData);
 
         // Fetch currently assigned permissions for role.
-        // Wait, the getRoleById returns a role which might have permissions?
-        // Let's assume there's an endpoint to get permissions for a role OR the role object has it.
-        // If not, we might need a specific endpoint or to check role.permissions if the API returns them.
-        
-        // As a placeholder, we'll try to extract them if role.permissions exists.
-        const roleWithPerms: any = role; // Replace with actual backend fetch if needed
-        if (roleWithPerms.permissions) {
-          const ids = roleWithPerms.permissions.map((p: any) => p.id);
-          setSelectedIds(new Set(ids));
-        }
+        const assignedIds = await permissionsService.getRolePermissionIds(role.id);
+        console.log('assignedIds:', assignedIds);
+        setSelectedIds(new Set(assignedIds));
 
       } catch (error) {
         console.error('Failed to load permissions matrix', error);

@@ -101,6 +101,7 @@ export default function PaymentManagement() {
       const project = projects.find(p => p.id === data.projectId);
       const payload = {
         ...data,
+        paymentId: data.paymentNo || undefined,
         projectName: project?.projectName || '',
       };
 
@@ -178,6 +179,7 @@ export default function PaymentManagement() {
           initialData={selectedPayment || undefined}
           paymentId={selectedPayment?.paymentId}
           isSubmitting={isSubmitting}
+          nextNumber={getNextSequenceNumber(payments, 'paymentId')}
         />
       </div>
     );
