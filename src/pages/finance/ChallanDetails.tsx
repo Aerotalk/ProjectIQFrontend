@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Info,
-  CheckCircle2, Truck, Package
+  CheckCircle2, Truck, Package, Download, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -14,6 +14,7 @@ import { api } from '../../lib/api';
 import type { DeliveryChallan } from '../../types/challan.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
+import ChallanPreviewPanel from './challan/components/ChallanPreviewPanel';
 
 export default function ChallanDetails() {
   const { id } = useParams();
@@ -28,6 +29,11 @@ export default function ChallanDetails() {
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Overview');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState('');
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [company, setCompany] = useState<any>(null);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -51,6 +57,7 @@ export default function ChallanDetails() {
 
   useEffect(() => {
     if (companyId) {
+      api.get(`/admin/companies/${companyId}`).then(res => setCompany(res)).catch(console.error);
       VendorService.getVendors(companyId).then(setVendors).catch(console.error);
       ProjectService.getAll(companyId).then((data: any) => {
         const pData = Array.isArray(data) ? data : (data?.data || data?.content || []);
@@ -104,6 +111,110 @@ export default function ChallanDetails() {
         .finally(() => setIsApiLoading(false));
     }
   }, [id, isNew, companyId]);
+
+  const handlePreview = async () => {
+    try {
+      setIsLoadingPreview(true);
+      
+      const templateRes = await api.get(`/admin/templates/delivery_challan.html`);
+      
+      let logoBase64 = '';
+      const logoId = company?.invoiceLogoId || company?.logoFileId;
+      if (logoId) {
+        try {
+          const blob = await api.get(`/admin/files/${logoId}`, { responseType: 'blob' });
+          if (blob) {
+            logoBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch logo', e);
+        }
+      }
+      
+      let signatureBase64 = '';
+      const stampId = company?.stampFileId;
+      if (stampId) {
+        try {
+          const blob = await api.get(`/admin/files/${stampId}`, { responseType: 'blob' });
+          if (blob) {
+            signatureBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch signature', e);
+        }
+      }
+      
+      const vendor = vendors.find(v => v.id === challan.vendorId);
+      
+      const payload = {
+        primary_color_hex: '#792359',
+        company_name: company?.name || company?.companyName || 'Company Name',
+        company_logo_url: logoBase64 || '',
+        company_address_line1: company?.addresses?.[0]?.addressLine1 || '',
+        company_address_line2: company?.addresses?.[0]?.addressLine2 || '',
+        company_phone: company?.phone || '',
+        company_email: company?.email || '',
+        company_gstin: company?.gstNumber || '',
+        company_pan: company?.panNumber || '',
+        
+        client_name: vendor?.displayName || vendor?.companyName || challan.vendorName || 'Client Name',
+        client_address_line1: vendor?.billingAddressLine1 || '',
+        client_address_line2: vendor?.billingCity || '',
+        client_gstin: vendor?.gstin || '',
+        client_state: vendor?.billingState || '',
+        
+        ship_to_name: vendor?.displayName || vendor?.companyName || challan.vendorName || 'Client Name',
+        ship_to_address_line1: vendor?.shippingAddressLine1 || vendor?.billingAddressLine1 || '',
+        ship_to_address_line2: vendor?.shippingCity || vendor?.billingCity || '',
+        ship_to_state: vendor?.shippingState || vendor?.billingState || '',
+        
+        transport_mode: 'By Road', // Can be made dynamic if added to model
+        delivery_location: vendor?.shippingCity || vendor?.billingCity || '',
+        po_number: challan.linkedVendorPoNumber || 'N/A',
+        
+        challan_number: challan.challanNumber || 'Draft',
+        challan_date: challan.challanDate || new Date().toLocaleDateString('en-GB'),
+        place_of_supply: vendor?.billingState || '',
+        
+        items: challan.lineItems?.length ? challan.lineItems.map((item, index) => ({
+          item_index: index + 1,
+          item_name: item.itemName || item.name || 'Item',
+          item_description: item.description || '',
+          item_hsn: item.hsnSac || item.hsn || '',
+          item_quantity: item.quantity || item.qty || 1,
+          item_unit: item.unit || 'Unit'
+        })) : [{
+          item_index: 1,
+          item_name: 'As per description',
+          item_description: challan.description || '',
+          item_hsn: '',
+          item_quantity: 1,
+          item_unit: 'Lot'
+        }],
+        total_quantity: challan.lineItems?.reduce((sum, item) => sum + (Number(item.quantity) || Number(item.qty) || 1), 0) || 1,
+        
+        terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
+        signature_url: signatureBase64
+      };
+      
+      setPreviewTemplate(templateRes);
+      setPreviewData(payload);
+      setIsPreviewOpen(true);
+    } catch (err: any) {
+      toast.error('Failed to generate preview.');
+      console.error(err);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
 
   const renderBanner = () => {
@@ -232,6 +343,16 @@ export default function ChallanDetails() {
         </div>
 
         <div className="flex items-center gap-2">
+          {!isNew && (
+            <button
+              onClick={handlePreview}
+              disabled={isLoadingPreview}
+              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+            >
+              {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              {isLoadingPreview ? 'Preparing PDF...' : 'Download PDF'}
+            </button>
+          )}
           {!isNew && currentStage === 1 && (
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -367,6 +488,13 @@ export default function ChallanDetails() {
           </div>
         </div>
       </div>
+      <ChallanPreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        templateContent={previewTemplate}
+        data={previewData}
+        filename={`Challan_${challan.challanNumber || 'Draft'}.pdf`}
+      />
     </div>
   );
 }
