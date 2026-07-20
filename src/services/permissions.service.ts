@@ -13,6 +13,10 @@ export const permissionsService = {
     return api.get('/admin/permissions/matrix');
   },
 
+  getRolePermissionIds: async (roleId: string): Promise<string[]> => {
+    return api.get(`/admin/permissions/roles/${roleId}`);
+  },
+
   updateRolePermissions: async (roleId: string, permissionIds: string[]): Promise<void> => {
     return api.put(`/admin/permissions/roles/${roleId}`, permissionIds);
   },

@@ -17,6 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FileText, CheckCircle2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { getNextSequenceNumber } from '../../utils/sequence';
 
 const STATUS_STYLES: Record<string, string> = {
   'Draft': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-white/5 dark:text-gray-300 dark:border-white/10',
@@ -183,6 +184,7 @@ export default function ChallanManagement() {
           initialData={selectedChallan || undefined}
           challanNumber={selectedChallan?.challanNumber}
           isSubmitting={isSubmitting}
+          nextNumber={getNextSequenceNumber(challans, 'challanNumber')}
         />
       </div>
     );

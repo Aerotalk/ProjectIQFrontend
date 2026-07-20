@@ -40,7 +40,7 @@ export default function RolesList() {
         fetchRoles();
       } catch (err: any) {
         console.error('Failed to delete role', err);
-        alert(err.response?.data?.error || err.response?.data?.message || 'Failed to delete role');
+        alert(err.message || err.response?.data?.error || err.response?.data?.message || 'Failed to delete role');
       }
     }
   };
@@ -112,8 +112,9 @@ export default function RolesList() {
                         <PermissionGate permission="role.edit">
                           <button 
                             onClick={() => setSelectedRoleForEdit(role)}
-                            className="p-1.5 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-white/5" 
-                            title="Edit Role"
+                            disabled={role.systemRole}
+                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                            title={role.systemRole ? "Cannot edit system role" : "Edit Role"}
                           >
                             <Edit2 size={16} />
                           </button>
@@ -122,8 +123,9 @@ export default function RolesList() {
                         <PermissionGate permission="role.assign">
                           <button 
                             onClick={() => setSelectedRoleForPermissions(role)}
-                            className="p-1.5 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-white/5" 
-                            title="Manage Permissions"
+                            disabled={role.systemRole}
+                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                            title={role.systemRole ? "Cannot manage permissions for system role" : "Manage Permissions"}
                           >
                             <Key size={16} />
                           </button>
