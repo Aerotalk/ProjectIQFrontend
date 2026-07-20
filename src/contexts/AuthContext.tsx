@@ -13,6 +13,8 @@ export interface User {
   effectivePermissions: string[];
   profilePhotoId: string | null;
   companyLogoId: string | null;
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
 }
 
 interface AuthContextType {
@@ -54,6 +56,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     initAuth();
   }, []);
+
+  // Apply theme when user changes
+  useEffect(() => {
+    if (user?.primaryColor) {
+      document.documentElement.style.setProperty('--primary', user.primaryColor);
+      document.documentElement.style.setProperty('--sidebar-primary', user.primaryColor);
+    } else {
+      document.documentElement.style.removeProperty('--primary');
+      document.documentElement.style.removeProperty('--sidebar-primary');
+    }
+  }, [user?.primaryColor]);
 
   const login = (userData: User) => {
     setUser(userData);
