@@ -10,6 +10,7 @@ interface AddressSectionProps {
   readOnly?: boolean;
   isOverseas?: boolean;
   disabledState?: boolean;
+  optionalFields?: boolean;
 }
 
 const COUNTRIES = Country.getAllCountries().map(c => ({
@@ -17,7 +18,7 @@ const COUNTRIES = Country.getAllCountries().map(c => ({
   value: c.isoCode
 }));
 
-export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabledState }: AddressSectionProps) {
+export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabledState, optionalFields }: AddressSectionProps) {
   const { formState: { errors }, setValue, control } = useFormContext();
 
   const countryCode = useWatch({ name: `${prefix}Country`, control });
@@ -76,7 +77,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 1 *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 1 {!optionalFields && '*'}</label>
           <Controller
             name={`${prefix}AddressLine1`}
             control={control}
@@ -111,7 +112,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">City *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">City {!optionalFields && '*'}</label>
           <Controller
             name={`${prefix}City`}
             control={control}
@@ -129,7 +130,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">State / Province {!isOverseas && '*'}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">State / Province {!isOverseas && !optionalFields && '*'}</label>
           <div className={pointerEventsClass}>
             <Controller
               name={`${prefix}State`}
@@ -157,7 +158,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">PIN / Postal Code {!isOverseas && '*'}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">PIN / Postal Code {!isOverseas && !optionalFields && '*'}</label>
           <Controller
             name={`${prefix}PinCode`}
             control={control}

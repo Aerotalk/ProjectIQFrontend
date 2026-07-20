@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Search, Plus, User, Mail, Briefcase, Trash2, Edit2, Loader2, MapPin } from 'lucide-react';
-import AddEmployeeModal from '../components/modals/AddEmployeeModal';
 import CustomSelect from '@/components/ui/CustomSelect';
+import EmployeeDrawer from '../components/employee/EmployeeDrawer';
+import type { EmployeeFormValues } from '../components/employee/EmployeeDrawer/validators/employeeValidation';
+import toast from 'react-hot-toast';
 
 interface Employee {
   id: string;
@@ -27,9 +29,10 @@ export default function EmployeeDirectory() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -52,6 +55,49 @@ export default function EmployeeDirectory() {
     emp.department?.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const openDrawer = (mode: 'create' | 'edit' | 'view', emp?: Employee) => {
+    setDrawerMode(mode);
+    setSelectedEmployee(emp || null);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSaveEmployee = async (data: EmployeeFormValues) => {
+    try {
+      setIsSubmitting(true);
+      if (drawerMode === 'create') {
+        // Create user account first
+        const userPayload = {
+          username: data.workEmail,
+          email: data.workEmail,
+          mobile: data.phone,
+          password: 'Password@123', // Default temporary password
+          status: 'ACTIVE',
+          role: 'ROLE_EMPLOYEE',
+          companyId: data.companyId || null
+        };
+        const userRes = await api.post('/admin/users', userPayload);
+        
+        // Create employee profile
+        const empPayload = {
+          userId: userRes.id,
+          ...data
+        };
+        await api.post(`/admin/employees`, empPayload);
+        toast.success('Employee created successfully');
+      } else if (drawerMode === 'edit' && selectedEmployee) {
+        // Update employee
+        await api.put(`/admin/employees/${selectedEmployee.id}`, data);
+        toast.success('Employee updated successfully');
+      }
+      setIsDrawerOpen(false);
+      fetchEmployees();
+    } catch (err: any) {
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -61,7 +107,7 @@ export default function EmployeeDirectory() {
         </div>
 
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => openDrawer('create')}
           className="flex items-center gap-2 bg-[#792359] hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-sm font-medium text-sm transition-colors shadow-sm hover:shadow-md"
         >
           <Plus size={16} />
@@ -172,7 +218,10 @@ export default function EmployeeDirectory() {
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2">
-                  <button className="flex-1 py-1.5 flex justify-center items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-[#792359]/5 dark:hover:bg-white/5 rounded-sm transition-colors">
+                  <button 
+                    onClick={() => openDrawer('edit', emp)}
+                    className="flex-1 py-1.5 flex justify-center items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-[#792359]/5 dark:hover:bg-white/5 rounded-sm transition-colors"
+                  >
                     <Edit2 size={14} /> Edit
                   </button>
                   <button className="flex-1 py-1.5 flex justify-center items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-sm transition-colors">
@@ -185,10 +234,14 @@ export default function EmployeeDirectory() {
         </div>
       )}
 
-      <AddEmployeeModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={fetchEmployees}
+      <EmployeeDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveEmployee}
+        mode={drawerMode}
+        initialData={selectedEmployee as any}
+        employeeId={selectedEmployee?.employeeCode}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
