@@ -10,9 +10,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
 import { ClientService } from '../../services/client.service';
 import { ProductService } from '../../services/product.service';
+import { ProjectService } from '../../services/project.service';
 import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
+import type { Project } from '../../types/project.types';
 import { formatQuotationId } from '../../lib/utils';
 import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
 
@@ -22,16 +24,29 @@ interface UserData {
   email: string;
 }
 
+import { ToWords } from 'to-words';
+const toWords = new ToWords({
+  localeCode: 'en-IN',
+  converterOptions: {
+    currency: true,
+    ignoreDecimal: false,
+    ignoreZeroCurrency: false,
+    doNotAddOnly: false,
+    currencyOptions: { name: 'Rupee', plural: 'Rupees', symbol: '₹', fractionalUnit: { name: 'Paisa', plural: 'Paise', symbol: '' } }
+  }
+});
+
 export default function QuotationDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { selectedCompanyId: companyId, user } = useAuth();
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
 
   const isNew = id === 'new';
-  const isAdmin = user?.roles?.some(r => ['ROLE_ADMIN', 'ROLE_MANAGER', 'quotation.approve'].includes(r)) || false;
+  const isAdmin = user?.roles?.some(r => ['ROLE_ADMIN', 'ROLE_COMPANY_ADMIN', 'ROLE_MANAGER', 'quotation.approve'].includes(r)) || false;
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
@@ -49,6 +64,7 @@ export default function QuotationDetails() {
     if (!companyId) return;
     api.get(`/admin/companies/${companyId}`).then(res => setCompany(res.data)).catch(console.error);
     ClientService.getClients(companyId).then(data => setClients(data));
+    ProjectService.getAll(companyId).then(data => setProjects(data));
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
     });
@@ -358,6 +374,23 @@ export default function QuotationDetails() {
         }
       }
 
+      let signatureBase64 = '';
+      const stampId = company?.stampFileId;
+      if (stampId) {
+        try {
+          const blob = await api.get(`/admin/files/${stampId}`, { responseType: 'blob' });
+          if (blob) {
+            signatureBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch signature', e);
+        }
+      }
+
       const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
       const clientState = client?.billingState?.trim().toLowerCase() || '';
       const isSameState = companyState && clientState && companyState === clientState;
@@ -434,9 +467,14 @@ export default function QuotationDetails() {
         }),
         sub_total: subTotal.toFixed(2),
         total_tax: totalGst.toFixed(2),
+        delivery_cost: (Number(quotation.deliveryCost) || 0).toFixed(2),
+        has_delivery_cost: Number(quotation.deliveryCost) > 0,
+        discount: (Number(quotation.discount) || 0).toFixed(2),
+        has_discount: Number(quotation.discount) > 0,
         grand_total: grandTotal.toFixed(2),
-        amount_in_words: 'Amount in words not calculated',
-        terms_and_conditions: 'Terms and conditions apply',
+        amount_in_words: toWords.convert(grandTotal),
+        terms_and_conditions: quotation.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
+        company_signature_url: signatureBase64,
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
@@ -697,16 +735,37 @@ export default function QuotationDetails() {
                   if (!isNew && id) {
                     setIsApiLoading(true);
                     try {
+                      const subTotal = lineItems.reduce((acc, item) => acc + (item.rate * item.qty), 0);
+                      const totalGst = lineItems.reduce((acc, item) => acc + (item.rate * item.qty * item.gst / 100), 0);
+                      const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
+
+                      const fullQuotation = await QuotationService.getQuotation(id);
                       await QuotationService.updateQuotation(id, {
+                        ...fullQuotation,
                         clientId: quotation.clientId,
                         clientName: quotation.client,
                         subject: quotation.project,
                         salesperson: quotation.owner,
-                        grandTotal: Number(quotation.amount) || 0,
                         validUntil: quotation.validTill,
                         totalDiscount: Number(quotation.discount) || 0,
                         deliveryCost: Number(quotation.deliveryCost) || 0,
-                        taxType: quotation.taxType
+                        taxType: quotation.taxType,
+                        subTotal: subTotal,
+                        totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
+                        totalGstAmount: totalGst,
+                        grandTotal: grandTotal,
+                        lineItems: lineItems.map(item => ({
+                          productId: item.productId || item.id,
+                          itemName: item.name,
+                          quantity: item.qty,
+                          unit: 'Unit',
+                          rate: item.rate,
+                          discount: 0,
+                          gstRate: item.gst,
+                          taxableAmount: item.rate * item.qty,
+                          gstAmount: item.rate * item.qty * item.gst / 100,
+                          totalAmount: item.rate * item.qty * (1 + item.gst / 100)
+                        }))
                       });
                       toast.success('Changes saved successfully');
                     } catch (err: any) {
@@ -869,12 +928,10 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Project / Opportunity</p>
                   {isEditing ? (
-                    <input
-                      type="text"
+                    <CustomSelect
                       value={quotation.project}
-                      onChange={(e) => setQuotation({ ...quotation, project: e.target.value })}
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
-                      placeholder="Enter Project Name"
+                      onChange={(val) => setQuotation({ ...quotation, project: val })}
+                      options={[{ label: 'Select Project', value: '' }, ...projects.map(p => ({ label: p.projectName, value: p.projectName }))]}
                     />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.project}</p>
