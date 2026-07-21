@@ -9,6 +9,7 @@ export const productSchema = z.object({
   unit: z.string().min(1, 'Unit is required'),
   standardRate: z.number().min(0, 'Standard Rate must be a positive number'),
   hsnSac: z.string().nullable().optional(),
+  hsnDescription: z.string().nullable().optional(),
   gstRate: z.string().min(1, 'GST Rate is required'),
   status: z.enum(['Active', 'Inactive'])
 });

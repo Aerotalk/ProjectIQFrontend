@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Edit } from 'lucide-react';
 import type { Product } from '../../../../types/product.types';
 import { ProductService } from '../../../../services/product.service';
+import { HSN_SAC_CODES } from '../../../../data/hsnCodes';
 
 interface Props {
   product: Product;
@@ -119,6 +120,12 @@ export default function ProductProfileView({ product: initialProduct, onClose, o
                     <>
                       <div className="text-gray-500 dark:text-gray-400">HSN/SAC Code</div>
                       <div className="text-gray-900 dark:text-gray-100 tracking-wide">{product.hsnSac}</div>
+                    </>
+                  )}
+                  {(product.hsnDescription || (product.hsnSac && HSN_SAC_CODES.find(c => c.value === product.hsnSac)?.label.split(' - ')[1])) && (
+                    <>
+                      <div className="text-gray-500 dark:text-gray-400">HSN Description</div>
+                      <div className="text-gray-900 dark:text-gray-100">{product.hsnDescription || HSN_SAC_CODES.find(c => c.value === product.hsnSac)?.label.split(' - ')[1]}</div>
                     </>
                   )}
                 </div>

@@ -1,5 +1,5 @@
 "use no memo";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
@@ -76,6 +76,17 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
+  const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
+  
+  const vendorOptions = useMemo(() => {
+    if (!selectedProjectId || !selectedProject?.assignedVendors?.length) return [];
+    
+    // Use Set for O(1) lookup
+    const assignedSet = new Set(selectedProject.assignedVendors);
+    const filtered = vendors.filter(v => assignedSet.has(v.id));
+    return filtered.map(v => ({ label: v.displayName || v.id, value: v.id }));
+  }, [selectedProjectId, selectedProject, vendors]);
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2">
@@ -135,13 +146,16 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
               <Controller
                 name="vendorId"
                 control={control}
-                render={({ field }) => (
-                  <CustomSelect
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    options={vendors.map(v => ({ label: v.displayName || v.id, value: v.id }))}
-                  />
-                )}
+                render={({ field }) => {
+                  return (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={vendorOptions}
+                      disabled={readOnly || !selectedProjectId}
+                    />
+                  );
+                }}
               />
             </div>
             {isLoadingVendors && (

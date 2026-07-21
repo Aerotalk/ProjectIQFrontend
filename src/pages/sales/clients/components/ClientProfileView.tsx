@@ -117,25 +117,27 @@ export default function ClientProfileView({ client: initialClient, onClose, onEd
             {client.additionalContacts && client.additionalContacts.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Additional Contacts</h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {client.additionalContacts.map((contact, index) => (
-                    <div key={index} className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-medium text-gray-900 dark:text-white">{contact.name}</div>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] uppercase tracking-wider">{contact.role}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-y-2 mt-2">
-                        {contact.designation && (
-                          <>
-                            <div className="text-gray-500 dark:text-gray-400">Designation</div>
-                            <div className="text-gray-900 dark:text-gray-100">{contact.designation}</div>
-                          </>
+                    <div key={index} className="grid grid-cols-2 gap-y-4 text-sm">
+                      <div className="text-gray-500 dark:text-gray-400">Contact Person</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-900 dark:text-gray-100 font-medium">{contact.name}</span>
+                        {contact.role && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] uppercase tracking-wider">{contact.role}</span>
                         )}
-                        <div className="text-gray-500 dark:text-gray-400">Email</div>
-                        <div className="text-gray-900 dark:text-gray-100">{contact.email}</div>
-                        <div className="text-gray-500 dark:text-gray-400">Phone</div>
-                        <div className="text-gray-900 dark:text-gray-100">{contact.phone}</div>
                       </div>
+                      
+                      {contact.designation && (
+                        <>
+                          <div className="text-gray-500 dark:text-gray-400">Designation</div>
+                          <div className="text-gray-900 dark:text-gray-100">{contact.designation}</div>
+                        </>
+                      )}
+                      <div className="text-gray-500 dark:text-gray-400">Email</div>
+                      <div className="text-gray-900 dark:text-gray-100">{contact.email || '-'}</div>
+                      <div className="text-gray-500 dark:text-gray-400">Phone</div>
+                      <div className="text-gray-900 dark:text-gray-100">{contact.phone || '-'}</div>
                     </div>
                   ))}
                 </div>

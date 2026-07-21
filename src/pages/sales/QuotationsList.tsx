@@ -152,7 +152,7 @@ export default function QuotationsList() {
                     onClick={() => navigate(`/companydashboard/sales/quotations/${quotation.id}`)}
                   >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890]">{formatQuotationId(quotation.quotationNo || quotation.id)}</div>
+                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">{formatQuotationId(quotation.quotationNo || quotation.id)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(quotation.date).toLocaleDateString('en-GB')}</div>

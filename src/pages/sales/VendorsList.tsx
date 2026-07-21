@@ -141,10 +141,15 @@ export default function VendorsList() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                 {currentItems.map((vendor) => (
-                  <tr key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                      {vendor.displayName || vendor.companyName || vendor.firstName}
-                      
+                  <tr 
+                    key={vendor.id} 
+                    className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                    onClick={() => openDrawer('view', vendor)}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">
+                        {vendor.displayName || vendor.companyName || vendor.firstName}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-black dark:text-white">{vendor.primaryContactPerson}</td>
                     <td className="px-6 py-4 text-sm text-black dark:text-white">{vendor.email}</td>
@@ -160,7 +165,10 @@ export default function VendorsList() {
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === vendor.id ? 'relative z-50' : 'relative z-10'}`}>
                       <button 
-                        onClick={() => setOpenDropdownId(openDropdownId === vendor.id ? null : vendor.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdownId(openDropdownId === vendor.id ? null : vendor.id);
+                        }}
                         className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
                         <MoreVertical size={16} />
