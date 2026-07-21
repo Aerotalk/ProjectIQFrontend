@@ -3,6 +3,10 @@ import { X, Save, FolderKanban } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { api } from '../../../lib/api';
+import { POService } from '../../../services/po.service';
+import { QuotationService } from '../../../services/quotation.service';
+import { ExpenseService } from '../../../services/expense.service';
+import { TicketService } from '../../../services/ticket.service';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 
@@ -18,6 +22,10 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const { selectedCompanyId } = useAuth();
   const { vendors } = useVendors({ companyId: selectedCompanyId || null });
   const [users, setUsers] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<any[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
+  const [pos, setPos] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState<ProjectFormValues>({
     projectCode: '',
@@ -29,7 +37,12 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
     startDate: '',
     expectedEndDate: '',
     description: '',
-    status: 'Pending Approval'
+    status: 'Pending Approval',
+    assignedEntities: [],
+    linkedIncidents: [],
+    linkedQuotations: [],
+    linkedPOs: [],
+    linkedExpenses: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,10 +56,29 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         console.error('Failed to load users', err);
       }
     };
+    const fetchRelations = async () => {
+      if (!selectedCompanyId) return;
+      try {
+        const [allPos, allQuotations, allExpenses, allTickets] = await Promise.all([
+          POService.getAll(selectedCompanyId).catch(() => []),
+          QuotationService.getQuotations(selectedCompanyId).catch(() => []),
+          ExpenseService.getAll(selectedCompanyId).catch(() => []),
+          TicketService.getAll(selectedCompanyId).catch(() => [])
+        ]);
+        setPos(allPos);
+        setQuotations(allQuotations);
+        setExpenses(allExpenses);
+        setIncidents(allTickets.filter((t: any) => t.type?.toLowerCase() === 'incident' || !t.type));
+      } catch (err) {
+        console.error('Failed to load relations', err);
+      }
+    };
+    
     if (isOpen) {
       fetchUsers();
+      fetchRelations();
     }
-  }, [isOpen]);
+  }, [isOpen, selectedCompanyId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -61,7 +93,12 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           startDate: initialData.startDate || '',
           expectedEndDate: initialData.expectedEndDate || '',
           description: initialData.description || '',
-          status: initialData.status || 'Pending Approval'
+          status: initialData.status || 'Pending Approval',
+          assignedEntities: initialData.assignedEntities || [],
+          linkedIncidents: initialData.linkedIncidents || [],
+          linkedQuotations: initialData.linkedQuotations || [],
+          linkedPOs: initialData.linkedPOs || [],
+          linkedExpenses: initialData.linkedExpenses || []
         });
       } else {
         setFormData({
@@ -74,7 +111,12 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           startDate: '',
           expectedEndDate: '',
           description: '',
-          status: 'Pending Approval'
+          status: 'Pending Approval',
+          assignedEntities: [],
+          linkedIncidents: [],
+          linkedQuotations: [],
+          linkedPOs: [],
+          linkedExpenses: []
         });
       }
     }
@@ -132,15 +174,13 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Code *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Code</label>
                   <input
-                    required
                     type="text"
-                    disabled={isReadOnly}
+                    disabled={true}
                     value={formData.projectCode}
-                    onChange={(e) => setFormData({ ...formData, projectCode: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                    placeholder="e.g. PROJ-2526-0001"
+                    className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                    placeholder={mode === 'create' ? "Auto-generated upon save" : ""}
                   />
                 </div>
 
@@ -272,6 +312,155 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                       </label>
                     ))
                   )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Entities (Employees)</label>
+                <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                  {users.length === 0 ? (
+                    <span className="text-gray-400 italic">No employees found</span>
+                  ) : (
+                    users.map(user => (
+                      <label key={user.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.assignedEntities || []).includes(user.id)}
+                          onChange={(e) => {
+                            const current = formData.assignedEntities || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, assignedEntities: [...current, user.id] });
+                            } else {
+                              setFormData({ ...formData, assignedEntities: current.filter(id => id !== user.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {user.firstName} {user.lastName} ({user.email})
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Incidents</label>
+                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                    {incidents.length === 0 ? (
+                      <span className="text-gray-400 italic">No incidents found</span>
+                    ) : (
+                      incidents.map(inc => (
+                        <label key={inc.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                          <input 
+                            type="checkbox"
+                            disabled={isReadOnly}
+                            checked={(formData.linkedIncidents || []).includes(inc.id)}
+                            onChange={(e) => {
+                              const current = formData.linkedIncidents || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, linkedIncidents: [...current, inc.id] });
+                              } else {
+                                setFormData({ ...formData, linkedIncidents: current.filter(id => id !== inc.id) });
+                              }
+                            }}
+                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                          />
+                          {inc.ticketNumber || inc.subject}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Quotations</label>
+                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                    {quotations.length === 0 ? (
+                      <span className="text-gray-400 italic">No quotations found</span>
+                    ) : (
+                      quotations.map(q => (
+                        <label key={q.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                          <input 
+                            type="checkbox"
+                            disabled={isReadOnly}
+                            checked={(formData.linkedQuotations || []).includes(q.id)}
+                            onChange={(e) => {
+                              const current = formData.linkedQuotations || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, linkedQuotations: [...current, q.id] });
+                              } else {
+                                setFormData({ ...formData, linkedQuotations: current.filter(id => id !== q.id) });
+                              }
+                            }}
+                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                          />
+                          {q.quotationNo}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked POs</label>
+                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                    {pos.length === 0 ? (
+                      <span className="text-gray-400 italic">No POs found</span>
+                    ) : (
+                      pos.map(po => (
+                        <label key={po.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                          <input 
+                            type="checkbox"
+                            disabled={isReadOnly}
+                            checked={(formData.linkedPOs || []).includes(po.id)}
+                            onChange={(e) => {
+                              const current = formData.linkedPOs || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, linkedPOs: [...current, po.id] });
+                              } else {
+                                setFormData({ ...formData, linkedPOs: current.filter(id => id !== po.id) });
+                              }
+                            }}
+                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                          />
+                          {po.poNumber || 'Draft PO'}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Expenses</label>
+                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+                    {expenses.length === 0 ? (
+                      <span className="text-gray-400 italic">No expenses found</span>
+                    ) : (
+                      expenses.map(ex => (
+                        <label key={ex.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                          <input 
+                            type="checkbox"
+                            disabled={isReadOnly}
+                            checked={(formData.linkedExpenses || []).includes(ex.id)}
+                            onChange={(e) => {
+                              const current = formData.linkedExpenses || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, linkedExpenses: [...current, ex.id] });
+                              } else {
+                                setFormData({ ...formData, linkedExpenses: current.filter(id => id !== ex.id) });
+                              }
+                            }}
+                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                          />
+                          {ex.description} (₹{ex.amount})
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
 

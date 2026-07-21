@@ -11,6 +11,13 @@ export interface Project {
   expectedRevenue?: number;
   description?: string;
   status: string;
+
+  // Added Relationships
+  assignedEntities?: string[];
+  linkedIncidents?: string[];
+  linkedQuotations?: string[];
+  linkedPOs?: string[];
+  linkedExpenses?: string[];
 }
 
 export interface ProjectFormValues {
@@ -24,4 +31,10 @@ export interface ProjectFormValues {
   expectedEndDate?: string;
   description?: string;
   status: string;
+  
+  assignedEntities?: string[];
+  linkedIncidents?: string[];
+  linkedQuotations?: string[];
+  linkedPOs?: string[];
+  linkedExpenses?: string[];
 }

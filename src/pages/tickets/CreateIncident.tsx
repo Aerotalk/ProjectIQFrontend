@@ -231,10 +231,10 @@ export default function CreateIncident() {
                     render={({ field }) => (
                       <CustomSelect
                         options={[
-                          { label: 'Low', value: 'Low' },
-                          { label: 'Medium', value: 'Medium' },
-                          { label: 'High', value: 'High' },
-                          { label: 'Critical', value: 'Critical' }
+                          { label: 'P1', value: 'P1' },
+                          { label: 'P2', value: 'P2' },
+                          { label: 'P3', value: 'P3' },
+                          { label: 'P4', value: 'P4' }
                         ]}
                         value={field.value || ''}
                         onChange={field.onChange}

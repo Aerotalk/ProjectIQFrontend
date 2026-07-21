@@ -86,16 +86,19 @@ export default function TicketList() {
   };
 
   const getPriorityBadge = (priority?: string | null) => {
-    switch (priority) {
-      case 'Critical':
-        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-red-700 bg-red-50 border border-red-200">Critical</span>;
-      case 'High':
-        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-orange-700 bg-orange-50 border border-orange-200">High</span>;
-      case 'Medium':
-        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-yellow-700 bg-yellow-50 border border-yellow-200">Medium</span>;
-      case 'Low':
-      default:
-        return <span className="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-sm text-gray-700 bg-gray-50 border border-gray-200">Low</span>;
+    switch (priority?.toUpperCase()) {
+      case 'P1':
+      case 'CRITICAL':
+      case 'HIGH':
+      case '1 - HIGH': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">{priority}</span>;
+      case 'P2':
+      case 'MEDIUM':
+      case '2 - MEDIUM': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">{priority}</span>;
+      case 'P3': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">{priority}</span>;
+      case 'P4':
+      case 'LOW':
+      case '3 - LOW': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">{priority}</span>;
+      default: return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">{priority || 'N/A'}</span>;
     }
   };
 
