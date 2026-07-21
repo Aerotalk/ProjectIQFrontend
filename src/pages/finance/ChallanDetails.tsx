@@ -170,6 +170,8 @@ export default function ChallanDetails() {
         client_address_line2: vendor?.billingCity || '',
         client_gstin: vendor?.gstin || '',
         client_state: vendor?.billingState || '',
+        client_phone: vendor?.phone || '',
+        client_email: vendor?.email || '',
         
         ship_to_name: vendor?.displayName || vendor?.companyName || challan.vendorName || 'Client Name',
         ship_to_address_line1: vendor?.shippingAddressLine1 || vendor?.billingAddressLine1 || '',
