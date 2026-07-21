@@ -48,11 +48,13 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     lineItems.forEach((item, index) => {
       const qty = item.quantity || 0;
       const rate = item.rate || 0;
-      const discount = item.discount || 0;
+      const discountValue = item.discount || 0;
+      const discountType = item.discountType || 'FLAT';
       const gstRate = item.gstRate || 0;
 
       const rowSubTotal = qty * rate;
-      const rowTaxableAmount = Math.max(0, rowSubTotal - discount);
+      const discountAmount = discountType === 'PERCENTAGE' ? (rowSubTotal * discountValue / 100) : discountValue;
+      const rowTaxableAmount = Math.max(0, rowSubTotal - discountAmount);
       const rowGstAmount = rowTaxableAmount * (gstRate / 100);
       const rowTotalAmount = rowTaxableAmount + rowGstAmount;
 
@@ -62,7 +64,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       if (item.totalAmount !== rowTotalAmount) setValue(`lineItems.${index}.totalAmount`, rowTotalAmount, { shouldValidate: false });
 
       subTotal += rowSubTotal;
-      totalDiscount += discount;
+      totalDiscount += discountAmount;
       totalTaxableAmount += rowTaxableAmount;
       totalGstAmount += rowGstAmount;
       grandTotal += rowTotalAmount;

@@ -79,7 +79,7 @@ export default function LineItemsSection({ readOnly }: Props) {
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Disc (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Disc</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
               {!readOnly && <th className="px-3 py-2.5 w-10"></th>}
@@ -142,7 +142,23 @@ export default function LineItemsSection({ readOnly }: Props) {
                     <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2 align-top">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-200 dark:border-white/10 overflow-hidden focus-within:border-[#792359] focus-within:ring-1 focus-within:ring-[#792359]">
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} 
+                        disabled={readOnly} 
+                        className="w-full px-2 py-1.5 text-sm bg-transparent outline-none text-gray-900 dark:text-white min-w-0"
+                      />
+                      <select 
+                        {...register(`lineItems.${index}.discountType`)}
+                        disabled={readOnly}
+                        className="bg-gray-50 dark:bg-black/20 text-sm text-gray-700 dark:text-gray-300 px-1 border-l border-gray-200 dark:border-white/10 outline-none cursor-pointer"
+                      >
+                        <option value="FLAT">₹</option>
+                        <option value="PERCENTAGE">%</option>
+                      </select>
+                    </div>
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />

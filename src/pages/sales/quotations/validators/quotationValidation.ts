@@ -10,6 +10,7 @@ export const quotationLineItemSchema = z.object({
   unit: z.string().min(1, 'Unit is required'),
   rate: z.number().min(0, 'Rate must be positive'),
   discount: z.number().min(0, 'Discount cannot be negative'),
+  discountType: z.enum(['PERCENTAGE', 'FLAT']).optional().default('FLAT'),
   gstRate: z.number().min(0, 'GST Rate must be positive'),
   taxableAmount: z.number().min(0),
   gstAmount: z.number().min(0),

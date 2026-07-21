@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
 import { useQuotationForm } from '../../hooks/useQuotationForm';
+import { numberToWords } from '@/lib/utils';
 import type { QuotationFormValues } from '../../validators/quotationValidation';
 import HeaderSection from './sections/HeaderSection';
 import LineItemsSection from './sections/LineItemsSection';
@@ -187,7 +188,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         sub_total: data.subTotal.toFixed(2),
         total_tax: data.totalGstAmount.toFixed(2),
         grand_total: data.grandTotal.toFixed(2),
-        amount_in_words: 'Amount in words not calculated',
+        amount_in_words: numberToWords(data.grandTotal),
         terms_and_conditions: data.termsAndConditions || 'Terms and conditions apply',
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
