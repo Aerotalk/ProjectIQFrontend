@@ -134,7 +134,19 @@ export default function POLineItemsSection({ readOnly }: Props) {
                     </div>
                   </td>
                   <td className="px-3 py-2 align-top">
-                    <input type="number" step={isWholeNumberUnit ? "1" : "0.01"} min={isWholeNumberUnit ? "1" : "0.01"} {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={`${cellClass} ${lineErrors?.quantity ? 'border-red-400' : ''}`} />
+                    <input 
+                      type="number" 
+                      step={isWholeNumberUnit ? "1" : "0.01"} 
+                      min={isWholeNumberUnit ? "1" : "0.01"} 
+                      {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} 
+                      onKeyDown={(e) => {
+                        if (isWholeNumberUnit && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
+                          e.preventDefault();
+                        }
+                      }}
+                      disabled={readOnly} 
+                      className={`${cellClass} ${lineErrors?.quantity ? 'border-red-400' : ''}`} 
+                    />
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
