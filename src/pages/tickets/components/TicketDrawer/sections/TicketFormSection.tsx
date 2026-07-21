@@ -158,7 +158,25 @@ export default function TicketFormSection({ readOnly }: Props) {
             </div>
             <div><label className={labelClass}>Impact</label><Input type="text" {...register('impact')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Urgency</label><Input type="text" {...register('urgency')} disabled={readOnly} /></div>
-            <div><label className={labelClass}>Priority</label><Input type="text" {...register('priority')} disabled={readOnly} /></div>
+            <div>
+              <label className={labelClass}>Priority</label>
+              <Controller
+                name="priority"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect 
+                    value={field.value || ''} 
+                    onChange={field.onChange} 
+                    options={[
+                      {label: 'P1', value: 'P1'},
+                      {label: 'P2', value: 'P2'},
+                      {label: 'P3', value: 'P3'},
+                      {label: 'P4', value: 'P4'}
+                    ]} 
+                  />
+                )}
+              />
+            </div>
             <div><label className={labelClass}>Incident Type</label><Input type="text" {...register('incidentType')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Severity</label><Input type="text" {...register('severity')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Business Service</label><Input type="text" {...register('businessService')} disabled={readOnly} /></div>

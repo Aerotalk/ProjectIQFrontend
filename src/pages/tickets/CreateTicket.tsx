@@ -30,7 +30,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
 
   const [caller, setCaller] = useState('');
   const [shortDesc, setShortDesc] = useState('');
-  const [priority, setPriority] = useState('3 - Low');
+  const [priority, setPriority] = useState('P4');
   const [urgency, setUrgency] = useState('3 - Low');
   const [state, setState] = useState('New');
   const [assignedTo, setAssignedTo] = useState('');
@@ -149,15 +149,16 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Impact</label>
+              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Priority</label>
               <div className="flex-1">
                 <CustomSelect
                   value={priority}
                   onChange={setPriority}
                   options={[
-                    { label: '1 - High', value: '1 - High' },
-                    { label: '2 - Medium', value: '2 - Medium' },
-                    { label: '3 - Low', value: '3 - Low' }
+                    { label: 'P1', value: 'P1' },
+                    { label: 'P2', value: 'P2' },
+                    { label: 'P3', value: 'P3' },
+                    { label: 'P4', value: 'P4' }
                   ]}
                 />
               </div>
