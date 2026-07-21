@@ -1,26 +1,28 @@
 import { z } from 'zod';
+import { zodNumeric, zodNumericOptional } from '@/utils/validation';
+import { validateQuantity } from '@/utils/unit';
 
 export const poLineItemSchema = z.object({
   id: z.string().optional(),
   productId: z.string().optional(),
   itemName: z.string().optional(),
   description: z.string().min(1, 'Description is required'),
-  quantity: z.number({ message: 'Quantity must be a number' }).min(0.01, 'Quantity must be greater than 0'),
+  quantity: zodNumeric('Quantity is required', 0.01),
   unit: z.string().min(1, 'Unit is required'),
-  rate: z.number({ message: 'Rate must be a number' }).min(0, 'Rate cannot be negative'),
-  discount: z.coerce.number().min(0, 'Discount cannot be negative').optional().default(0),
+  rate: zodNumeric('Rate is required', 0),
+  discount: zodNumericOptional(0).default(0),
   discountType: z.enum(['PERCENTAGE', 'FLAT']).optional().default('FLAT'),
-  taxableAmount: z.number().min(0).optional(),
-  gstRate: z.number().min(0).optional(),
-  gstAmount: z.number().min(0).optional(),
-  totalAmount: z.number().min(0),
+  taxableAmount: zodNumericOptional(0),
+  gstRate: zodNumericOptional(0),
+  gstAmount: zodNumericOptional(0),
+  totalAmount: zodNumeric('Total Amount is required', 0),
 }).superRefine((data, ctx) => {
-  const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes((data.unit || '').toLowerCase());
-  if (isWholeNumberUnit && !Number.isInteger(data.quantity)) {
+  const validationResult = validateQuantity(data.quantity, data.unit);
+  if (validationResult !== true) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['quantity'],
-      message: `Quantity must be a whole number for ${data.unit}`,
+      message: validationResult,
     });
   }
 });
@@ -35,12 +37,12 @@ export const poSchema = z.object({
   // TechSpec §4.2: Description is Required ("What is being procured. Clear description required.")
   description: z.string().min(1, 'Description is required — specify what is being procured'),
   lineItems: z.array(poLineItemSchema).min(1, 'At least one line item is required'),
-  subTotal: z.number().min(0),
-  totalDiscount: z.number().min(0),
-  totalTaxableAmount: z.number().min(0),
-  totalGstAmount: z.number().min(0),
-  deliveryCost: z.number().min(0).nullable().optional(),
-  grandTotal: z.number().min(0),
+  subTotal: zodNumeric('SubTotal is required', 0),
+  totalDiscount: zodNumeric('Total Discount is required', 0),
+  totalTaxableAmount: zodNumeric('Total Taxable Amount is required', 0),
+  totalGstAmount: zodNumeric('Total GST Amount is required', 0),
+  deliveryCost: zodNumericOptional(0).nullable(),
+  grandTotal: zodNumeric('Grand Total is required', 0),
   status: z.enum(['Draft', 'Pending Approval', 'Approved', 'Ordered', 'Partially Received', 'Completed', 'Cancelled']),
   internalNotes: z.string().nullable().optional(),
   // TechSpec §4.2: Optional fields

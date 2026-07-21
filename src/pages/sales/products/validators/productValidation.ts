@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { zodNumeric } from '@/utils/validation';
 
 export const productSchema = z.object({
   id: z.string().nullable().optional(),
@@ -7,7 +8,7 @@ export const productSchema = z.object({
   description: z.string().nullable().optional(),
   type: z.enum(['Product', 'Service']),
   unit: z.string().min(1, 'Unit is required'),
-  standardRate: z.number().min(0, 'Standard Rate must be a positive number'),
+  standardRate: zodNumeric('Standard Rate is required', 0),
   hsnSac: z.string().nullable().optional(),
   hsnDescription: z.string().nullable().optional(),
   gstRate: z.string().min(1, 'GST Rate is required'),

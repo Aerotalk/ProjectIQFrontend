@@ -13,7 +13,7 @@ export const useProductForm = (defaultValues?: Partial<ProductFormValues>) => {
       gstRate: '18%',
       ...defaultValues
     },
-    mode: 'onChange'
+    mode: 'onTouched'
   });
 
   return form;

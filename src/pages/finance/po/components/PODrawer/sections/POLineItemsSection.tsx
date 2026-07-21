@@ -4,6 +4,7 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/useProducts';
+import { getQuantityInputConfig } from '@/utils/unit';
 
 interface Props {
   readOnly?: boolean;
@@ -94,7 +95,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
             {fields.map((field, index) => {
               const unit = lineItems?.[index]?.unit || '';
-              const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes(unit.toLowerCase());
+              const unitConfig = getQuantityInputConfig(unit);
               const currentTotal = lineItems?.[index]?.totalAmount || 0;
               const lineErrors = (errors.lineItems as any)?.[index];
 
@@ -136,11 +137,11 @@ export default function POLineItemsSection({ readOnly }: Props) {
                   <td className="px-3 py-2 align-top">
                     <input 
                       type="number" 
-                      step={isWholeNumberUnit ? "1" : "0.01"} 
-                      min={isWholeNumberUnit ? "1" : "0.01"} 
+                      step={unitConfig.step} 
+                      min={unitConfig.min} 
                       {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} 
                       onKeyDown={(e) => {
-                        if (isWholeNumberUnit && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
+                        if (unitConfig.isDiscrete && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
                           e.preventDefault();
                         }
                       }}

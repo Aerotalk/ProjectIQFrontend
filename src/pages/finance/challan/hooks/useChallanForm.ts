@@ -18,7 +18,7 @@ export const useChallanForm = (defaultValues?: Partial<ChallanFormValues>) => {
       remarks: '',
       ...defaultValues,
     },
-    mode: 'onChange',
+    mode: 'onTouched',
   });
 
   return form;

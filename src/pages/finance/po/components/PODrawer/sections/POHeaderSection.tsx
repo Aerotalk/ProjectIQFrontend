@@ -3,9 +3,9 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
-import { VendorService } from '@/services/vendor.service';
 import { useProjects } from '@/hooks/useProjects';
-import type { Vendor } from '@/types/vendor.types';
+import { useVendors } from '@/hooks/useVendors';
+import { useAuth } from '@/contexts/AuthContext';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
@@ -22,9 +22,9 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
     control,
   } = useFormContext();
 
+  const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const { vendors } = useVendors({ companyId: selectedCompanyId });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedProjectId = watch('projectId');
@@ -38,43 +38,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
     if (selectedProject) setValue('projectName', selectedProject.projectName, { shouldValidate: false });
   }, [selectedProject, setValue]);
 
-  // Load only assigned vendors
-  useEffect(() => {
-    if (!selectedProjectId || !selectedProject?.assignedVendors?.length) {
-      setVendors([]);
-      setIsLoadingVendors(false);
-      return;
-    }
 
-    let isMounted = true;
-    setIsLoadingVendors(true);
-
-    const fetchAssignedVendors = async () => {
-      try {
-        const vendorPromises = selectedProject.assignedVendors!.map(id => 
-          VendorService.getVendor(id).catch(() => null)
-        );
-        const results = await Promise.all(vendorPromises);
-        const validVendors = results.filter(Boolean) as Vendor[];
-        
-        if (isMounted) {
-          setVendors(validVendors);
-          setIsLoadingVendors(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch assigned vendors", error);
-        if (isMounted) {
-          setIsLoadingVendors(false);
-        }
-      }
-    };
-
-    fetchAssignedVendors();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedProjectId, selectedProject]);
 
   // Reset selected vendor if not in new project's vendors
   useEffect(() => {
@@ -117,11 +81,18 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
   const vendorOptions = useMemo(() => {
-    return vendors.map(v => ({ 
+    if (!selectedProject || !selectedProject.assignedVendors || selectedProject.assignedVendors.length === 0) {
+      return [];
+    }
+    
+    // Show only assigned vendors for this project
+    const assigned = vendors.filter(v => selectedProject.assignedVendors?.includes(v.id));
+    
+    return assigned.map(v => ({ 
       label: v.displayName || v.companyName || v.firstName || v.id, 
       value: v.id 
     }));
-  }, [vendors]);
+  }, [selectedProject, vendors]);
 
   return (
     <div className="space-y-4">
@@ -178,7 +149,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
             Vendor <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className="relative">
-            <div className={readOnly || isLoadingVendors ? 'opacity-80 pointer-events-none' : ''}>
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
               <Controller
                 name="vendorId"
                 control={control}
@@ -194,9 +165,6 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                 }}
               />
             </div>
-            {isLoadingVendors && (
-              <Loader2 className="absolute right-3 top-2.5 w-4 h-4 animate-spin text-gray-400" />
-            )}
           </div>
           {errors.vendorId && (
             <p className="text-red-500 text-xs mt-1">{errors.vendorId.message as string}</p>

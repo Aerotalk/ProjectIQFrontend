@@ -20,7 +20,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       taxType: 'CGST_SGST',
       ...defaultValues
     },
-    mode: 'onChange'
+    mode: 'onTouched'
   });
 
   const { control, setValue } = form;
@@ -33,7 +33,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     let subTotal = 0;
     
     // First pass: calculate subtotal
-    lineItems.forEach(item => {
+    lineItems.forEach((item: any) => {
       const qty = item.quantity || 0;
       const rate = item.rate || 0;
       subTotal += (qty * rate);
@@ -45,7 +45,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     let grandTotal = 0;
 
     // Second pass: apply proportional order discount and calculate taxes
-    lineItems.forEach((item, index) => {
+    lineItems.forEach((item: any, index: number) => {
       const qty = item.quantity || 0;
       const rate = item.rate || 0;
       const discountValue = item.discount || 0;

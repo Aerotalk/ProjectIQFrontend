@@ -13,8 +13,8 @@ import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
 
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
-import { VendorService } from '../../services/vendor.service';
 import type { Vendor } from '../../types/vendor.types';
+import { useVendors } from '../../hooks/useVendors';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -52,8 +52,8 @@ export default function POManagement() {
   const navigate = useNavigate();
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
+  const { vendors } = useVendors({ companyId: selectedCompanyId });
   const [pos, setPos] = useState<PurchaseOrder[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
 
   useBreadcrumbs([
     { label: 'Finance', path: '/companydashboard/finance' },
@@ -92,12 +92,8 @@ export default function POManagement() {
     setIsLoading(true);
     try {
       if (!selectedCompanyId) return;
-      const [poData, vendorData] = await Promise.all([
-        POService.getAll(selectedCompanyId),
-        VendorService.getVendors(selectedCompanyId),
-      ]);
+      const poData = await POService.getAll(selectedCompanyId);
       setPos(poData);
-      setVendors(vendorData);
     } catch {
       toast.error('Failed to load purchase orders');
     } finally {

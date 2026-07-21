@@ -18,6 +18,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const getOptionLabel = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.label;
@@ -97,11 +98,22 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
           {icon}
         </div>
       )}
-      <div 
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen);
+      <div
+        ref={triggerRef}
+        tabIndex={disabled ? -1 : 0}
+        onClick={(e) => {
+          if (!disabled) {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
         }}
-        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} flex items-center justify-between shadow-sm`}
+        onKeyDown={(e) => {
+          if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
+        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed outline-none' : 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#792359]/50'} flex items-center justify-between shadow-sm`}
       >
         <span className="truncate pr-4">{displayLabel}</span>
         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -141,10 +153,17 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
                 return (
                   <div 
                     key={`${optValue}-${index}`}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevents focus loss from input before click fires
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       onChange(optValue);
                       setSearchQuery('');
                       setIsOpen(false);
+                      // Restore focus to trigger to prevent scroll jump
+                      setTimeout(() => triggerRef.current?.focus(), 0);
                     }}
                     className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
                       isSelected 

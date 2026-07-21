@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { zodNumeric, zodNumericOptional } from '@/utils/validation';
+import { validateQuantity } from '@/utils/unit';
 
 export const quotationLineItemSchema = z.object({
   id: z.string().nullable().optional(),
@@ -6,22 +8,22 @@ export const quotationLineItemSchema = z.object({
   itemName: z.string().min(1, 'Item Name is required'),
   hsnSac: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
+  quantity: zodNumeric('Quantity is required', 1),
   unit: z.string().min(1, 'Unit is required'),
-  rate: z.number().min(0, 'Rate must be positive'),
-  discount: z.coerce.number().min(0, 'Discount cannot be negative').optional().default(0),
+  rate: zodNumeric('Rate is required', 0),
+  discount: zodNumericOptional(0).default(0),
   discountType: z.enum(['PERCENTAGE', 'FLAT']).optional().default('FLAT'),
-  gstRate: z.number().min(0, 'GST Rate must be positive'),
-  taxableAmount: z.number().min(0),
-  gstAmount: z.number().min(0),
-  totalAmount: z.number().min(0)
+  gstRate: zodNumeric('GST Rate is required', 0),
+  taxableAmount: zodNumeric('Taxable Amount is required', 0),
+  gstAmount: zodNumeric('GST Amount is required', 0),
+  totalAmount: zodNumeric('Total Amount is required', 0)
 }).superRefine((data, ctx) => {
-  const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes((data.unit || '').toLowerCase());
-  if (isWholeNumberUnit && !Number.isInteger(data.quantity)) {
+  const validationResult = validateQuantity(data.quantity, data.unit);
+  if (validationResult !== true) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['quantity'],
-      message: `Quantity must be a whole number for ${data.unit}`,
+      message: validationResult,
     });
   }
 });
@@ -42,12 +44,12 @@ export const quotationSchema = z.object({
 
   lineItems: z.array(quotationLineItemSchema).min(1, 'At least one line item is required'),
 
-  subTotal: z.number().min(0),
-  totalDiscount: z.number().min(0),
-  totalTaxableAmount: z.number().min(0),
-  totalGstAmount: z.number().min(0),
-  deliveryCost: z.number().min(0).nullable().optional(),
-  grandTotal: z.number().min(0),
+  subTotal: zodNumeric('SubTotal is required', 0),
+  totalDiscount: zodNumeric('Total Discount is required', 0),
+  totalTaxableAmount: zodNumeric('Total Taxable Amount is required', 0),
+  totalGstAmount: zodNumeric('Total GST Amount is required', 0),
+  deliveryCost: zodNumericOptional(0).nullable(),
+  grandTotal: zodNumeric('Grand Total is required', 0),
 
   notes: z.string().nullable().optional(),
   termsAndConditions: z.string().nullable().optional(),

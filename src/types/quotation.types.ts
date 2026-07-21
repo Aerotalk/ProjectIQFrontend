@@ -10,6 +10,7 @@ export interface QuotationLineItem {
   unit: string;
   rate: number;
   discount: number;
+  discountType?: 'PERCENTAGE' | 'FLAT';
   gstRate: number; // e.g., 18 for 18%
   
   // Calculated fields (often useful to keep for quick access, or calculated on the fly)

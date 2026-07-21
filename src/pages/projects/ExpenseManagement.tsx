@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { ExpenseService } from '../../services/expense.service';
 import type { Expense } from '../../types/expense.types';
 import ExpenseDrawer from './expense/components/ExpenseDrawer';
+import ExpenseProfileView from './expense/components/ExpenseProfileView';
 import type { ExpenseFormValues } from './expense/validators/expenseValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -169,6 +170,17 @@ export default function ExpenseManagement() {
   };
 
   if (isDrawerOpen) {
+    if (drawerMode === 'view' && selectedExpense) {
+      return (
+        <div className="max-w-[1400px] mx-auto pb-12">
+          <ExpenseProfileView
+            expense={selectedExpense}
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => openDrawer('edit', selectedExpense)}
+          />
+        </div>
+      );
+    }
     return (
       <div className="max-w-[1400px] mx-auto pb-12">
         <ExpenseDrawer

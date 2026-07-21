@@ -6,6 +6,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { ProductService } from '../../../../../../services/product.service';
 import type { Product } from '../../../../../../types/product.types';
 import { useAuth } from '../../../../../../contexts/AuthContext';
+import { getQuantityInputConfig } from '@/utils/unit';
 
 interface Props {
   readOnly?: boolean;
@@ -94,7 +95,7 @@ export default function LineItemsSection({ readOnly }: Props) {
               const disc = lineItems?.[index]?.discount || 0;
               const currentTotal = Math.max(0, qty * rate - disc);
               const unit = lineItems?.[index]?.unit || '';
-              const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes(unit.toLowerCase());
+              const unitConfig = getQuantityInputConfig(unit);
               return (
                 <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
                   <td className="px-3 py-2 align-top">
@@ -131,7 +132,19 @@ export default function LineItemsSection({ readOnly }: Props) {
                     </div>
                   </td>
                   <td className="px-3 py-2 align-top">
-                    <input type="number" step={isWholeNumberUnit ? "1" : "0.01"} min={isWholeNumberUnit ? "1" : "0.01"} {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <input 
+                      type="number" 
+                      step={unitConfig.step} 
+                      min={unitConfig.min} 
+                      {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} 
+                      onKeyDown={(e) => {
+                        if (unitConfig.isDiscrete && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
+                          e.preventDefault();
+                        }
+                      }}
+                      disabled={readOnly} 
+                      className={cellClass} 
+                    />
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
