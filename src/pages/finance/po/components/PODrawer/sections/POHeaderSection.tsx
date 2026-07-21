@@ -1,8 +1,8 @@
 "use no memo";
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useEffect, useRef, useMemo } from 'react';
+import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
+import { Paperclip, X as XIcon } from 'lucide-react';
 import { useProjects } from '@/hooks/useProjects';
 import { useVendors } from '@/hooks/useVendors';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,41 +17,50 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const {
     register,
     formState: { errors },
-    watch,
     setValue,
     control,
   } = useFormContext();
 
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
-  const { vendors } = useVendors({ companyId: selectedCompanyId });
+  const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedProjectId = watch('projectId');
-  const selectedVendorId = watch('vendorId');
-  const attachmentName = watch('attachmentName');
+  const selectedProjectId = useWatch({ control, name: 'projectId' });
+  const attachmentName = useWatch({ control, name: 'attachmentName' });
 
   const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
+
+  const vendorOptions = useMemo(() => {
+    if (!selectedProject?.assignedVendors?.length) return [];
+    const av = selectedProject.assignedVendors;
+    return vendors
+      .filter(v =>
+        av.includes(v.id) ||
+        (v.vendorNo !== undefined && av.includes(v.vendorNo)) ||
+        (v.vendorNo !== undefined && av.some(a => a.toLowerCase() === v.vendorNo!.toLowerCase()))
+      )
+      .map(v => ({ label: v.displayName || v.companyName || v.firstName || v.id, value: v.id }));
+  }, [selectedProject, vendors]);
+
 
   // Sync project name
   useEffect(() => {
     if (selectedProject) setValue('projectName', selectedProject.projectName, { shouldValidate: false });
   }, [selectedProject, setValue]);
 
-
-
-  // Reset selected vendor if not in new project's vendors
+  // Clear vendor selection whenever the project changes
+  const prevProjectIdRef = useRef<string | undefined>(selectedProjectId);
   useEffect(() => {
-    if (selectedProjectId && selectedVendorId && selectedProject) {
-      const isStillValid = selectedProject.assignedVendors?.includes(selectedVendorId);
-      if (!isStillValid) {
-        setValue('vendorId', '');
-        setValue('vendorName', '');
-      }
+    if (prevProjectIdRef.current !== selectedProjectId) {
+      prevProjectIdRef.current = selectedProjectId;
+      setValue('vendorId', '', { shouldValidate: false });
+      setValue('vendorName', '', { shouldValidate: false });
     }
-  }, [selectedProjectId, selectedProject, selectedVendorId, setValue]);
+  }, [selectedProjectId, setValue]);
 
-  // Sync vendor name
+  // Sync vendor name whenever the selected vendor changes
+  const selectedVendorId = useWatch({ control, name: 'vendorId' });
   useEffect(() => {
     const vendor = vendors.find(v => v.id === selectedVendorId);
     if (vendor) setValue('vendorName', vendor.displayName || vendor.companyName || vendor.firstName || '', { shouldValidate: false });
@@ -80,19 +89,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
-  const vendorOptions = useMemo(() => {
-    if (!selectedProject || !selectedProject.assignedVendors || selectedProject.assignedVendors.length === 0) {
-      return [];
-    }
-    
-    // Show only assigned vendors for this project
-    const assigned = vendors.filter(v => selectedProject.assignedVendors?.includes(v.id));
-    
-    return assigned.map(v => ({ 
-      label: v.displayName || v.companyName || v.firstName || v.id, 
-      value: v.id 
-    }));
-  }, [selectedProject, vendors]);
+
 
   return (
     <div className="space-y-4">
@@ -159,7 +156,10 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                       value={field.value || ''}
                       onChange={field.onChange}
                       options={vendorOptions}
-                      disabled={readOnly || !selectedProjectId}
+                      disabled={readOnly || !selectedProjectId || isVendorsLoading}
+                      isLoading={isVendorsLoading}
+                      loadingText="Loading assigned vendors..."
+                      emptyText="No vendors assigned to this project."
                     />
                   );
                 }}

@@ -64,13 +64,9 @@ export const useVendors = ({ companyId }: UseVendorsOptions) => {
   }, [companyId]);
 
   useEffect(() => {
-    let isMounted = true;
     fetchVendors().then(() => {
       // Intentionally left blank, fetchVendors handles its own state updates safely
     });
-    return () => {
-      isMounted = false;
-    };
   }, [fetchVendors]);
 
   const createVendor = async (data: Omit<Vendor, 'id' | 'vendorNo'>) => {
@@ -92,8 +88,8 @@ export const useVendors = ({ companyId }: UseVendorsOptions) => {
     setIsSaveLoading(true);
     try {
       const updatedVendor = await VendorService.updateVendor(id, data);
-      if (vendorCache[companyId]) {
-        vendorCache[companyId] = vendorCache[companyId].map(v => v.id === id ? updatedVendor : v);
+      if (companyId && vendorCache[companyId]) {
+        vendorCache[companyId] = vendorCache[companyId].map((v: Vendor) => v.id === id ? updatedVendor : v);
       }
       setVendors(prev => prev.map(v => v.id === id ? updatedVendor : v));
       return updatedVendor;

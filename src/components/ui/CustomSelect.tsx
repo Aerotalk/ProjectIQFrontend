@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, CheckCircle2, Search } from 'lucide-react';
+import { ChevronDown, CheckCircle2, Search, Loader2 } from 'lucide-react';
 
 export type SelectOption = string | { label: string; value: string; subtitle?: React.ReactNode; description?: React.ReactNode; subLabel?: React.ReactNode };
 
@@ -10,9 +10,12 @@ interface CustomSelectProps {
   options: SelectOption[];
   icon?: React.ReactNode;
   disabled?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+  emptyText?: string;
 }
 
-export default function CustomSelect({ value, onChange, options, icon, disabled }: CustomSelectProps) {
+export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -26,7 +29,9 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
 
   // Find the currently selected label based on the value
   const selectedLabel = options.find(opt => getOptionValue(opt) === value);
-  const displayLabel = selectedLabel ? getOptionLabel(selectedLabel) : (value || "Select...");
+  const displayLabel = selectedLabel 
+    ? getOptionLabel(selectedLabel) 
+    : (isLoading ? (loadingText || "Loading...") : (value || "Select..."));
 
   const updatePosition = () => {
     if (dropdownRef.current) {
@@ -72,7 +77,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus({ preventScroll: true });
     }
   }, [isOpen]);
 
@@ -140,8 +145,13 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
             </div>
           </div>
           <div className="overflow-y-auto custom-scrollbar py-1 flex-1">
-            {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500 text-center">No results found</div>
+            {isLoading ? (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center flex flex-col items-center gap-2">
+                <Loader2 size={16} className="animate-spin text-[#792359]" />
+                <span>{loadingText || 'Loading...'}</span>
+              </div>
+            ) : filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">{emptyText || 'No results found'}</div>
             ) : (
               filteredOptions.map((option, index) => {
                 const optValue = getOptionValue(option);
@@ -163,7 +173,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
                       setSearchQuery('');
                       setIsOpen(false);
                       // Restore focus to trigger to prevent scroll jump
-                      setTimeout(() => triggerRef.current?.focus(), 0);
+                      setTimeout(() => triggerRef.current?.focus({ preventScroll: true }), 0);
                     }}
                     className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
                       isSelected 

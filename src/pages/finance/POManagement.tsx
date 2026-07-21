@@ -13,7 +13,7 @@ import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
 
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
-import type { Vendor } from '../../types/vendor.types';
+
 import { useVendors } from '../../hooks/useVendors';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
