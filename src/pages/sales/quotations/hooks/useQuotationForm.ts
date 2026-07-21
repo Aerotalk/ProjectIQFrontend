@@ -29,8 +29,6 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
 
   const lineItems = useWatch({ control, name: 'lineItems', defaultValue: [] });
   const deliveryCost = useWatch({ control, name: 'deliveryCost', defaultValue: 0 });
-  const discountType = useWatch({ control, name: 'discountType', defaultValue: '₹' });
-  const discountValue = useWatch({ control, name: 'discountValue', defaultValue: 0 });
 
   // Calculate totals whenever lineItems, deliveryCost, or order discount changes
   useEffect(() => {
@@ -43,15 +41,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       subTotal += (qty * rate);
     });
 
-    const val = Number(discountValue) || 0;
-    let orderDiscountAmount = 0;
-    if (discountType === '%') {
-      orderDiscountAmount = subTotal * (val / 100);
-    } else {
-      orderDiscountAmount = val;
-    }
-
-    let totalDiscount = orderDiscountAmount;
+    let totalDiscount = 0;
     let totalTaxableAmount = 0;
     let totalGstAmount = 0;
     let grandTotal = 0;
@@ -67,8 +57,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       const rowSubTotal = qty * rate;
       const itemDiscountAmount = discountType === 'PERCENTAGE' ? (rowSubTotal * discountValue / 100) : discountValue;
       
-      const rowProportionalOrderDiscount = subTotal > 0 ? (rowSubTotal / subTotal) * orderDiscountAmount : 0;
-      const rowTotalDiscount = itemDiscountAmount + rowProportionalOrderDiscount;
+      const rowTotalDiscount = itemDiscountAmount;
       const rowTaxableAmount = Math.max(0, rowSubTotal - rowTotalDiscount);
       const rowGstAmount = rowTaxableAmount * (gstRate / 100);
       const rowTotalAmount = rowTaxableAmount + rowGstAmount;
@@ -92,7 +81,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     setValue('totalGstAmount', totalGstAmount, { shouldValidate: false });
     setValue('grandTotal', grandTotal, { shouldValidate: false });
 
-  }, [lineItems, deliveryCost, discountType, discountValue, setValue]);
+  }, [lineItems, deliveryCost, setValue]);
 
   return form;
 };
