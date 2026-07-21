@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, CheckCircle2, Search } from 'lucide-react';
 
-export type SelectOption = string | { label: string; value: string; subLabel?: React.ReactNode };
+export type SelectOption = string | { label: string; value: string; subtitle?: React.ReactNode; description?: React.ReactNode; subLabel?: React.ReactNode };
 
 interface CustomSelectProps {
   value: string;
@@ -16,6 +17,8 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const getOptionLabel = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.label;
   const getOptionValue = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.value;
@@ -24,9 +27,22 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
   const selectedLabel = options.find(opt => getOptionValue(opt) === value);
   const displayLabel = selectedLabel ? getOptionLabel(selectedLabel) : (value || "Select...");
 
+  const updatePosition = () => {
+    if (dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 6, // 6px mt-1.5 equivalent
+        left: rect.left,
+        width: rect.width,
+        zIndex: 999999
+      });
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchQuery('');
       }
@@ -34,6 +50,24 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updatePosition();
+      const handleScroll = (e: Event) => {
+        if (menuRef.current && menuRef.current.contains(e.target as Node)) {
+          return;
+        }
+        updatePosition();
+      };
+      window.addEventListener('scroll', handleScroll, true);
+      window.addEventListener('resize', updatePosition);
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true);
+        window.removeEventListener('resize', updatePosition);
+      };
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -44,7 +78,16 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
   const filteredOptions = useMemo(() => {
     if (!searchQuery) return options;
     const lowerQuery = searchQuery.toLowerCase();
-    return options.filter(opt => getOptionLabel(opt).toLowerCase().includes(lowerQuery));
+    return options.filter(opt => {
+      const labelMatch = getOptionLabel(opt).toLowerCase().includes(lowerQuery);
+      let subtitleMatch = false;
+      let descMatch = false;
+      if (typeof opt !== 'string') {
+         subtitleMatch = typeof opt.subtitle === 'string' && opt.subtitle.toLowerCase().includes(lowerQuery);
+         descMatch = typeof opt.description === 'string' && opt.description.toLowerCase().includes(lowerQuery);
+      }
+      return labelMatch || subtitleMatch || descMatch;
+    });
   }, [options, searchQuery]);
 
   return (
@@ -64,9 +107,13 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </div>
 
-      {isOpen && (
-        <div className="absolute z-[200] w-full mt-1.5 bg-white dark:bg-[#1f2228] border border-gray-100 dark:border-white/10 rounded-md shadow-2xl max-h-60 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#1f2228] z-10">
+      {isOpen && createPortal(
+        <div 
+          ref={menuRef}
+          style={dropdownStyle}
+          className="bg-white dark:bg-[#1f2228] border border-gray-100 dark:border-white/10 rounded-md shadow-2xl max-h-60 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200"
+        >
+          <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#1f2228] z-10 rounded-t-md">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               <input
@@ -88,7 +135,8 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
                 const optValue = getOptionValue(option);
                 const optLabel = getOptionLabel(option);
                 const isSelected = value === optValue;
-                const subLabel = typeof option === 'object' && 'subLabel' in option ? option.subLabel : undefined;
+                const isObj = typeof option !== 'string';
+                const subLabel = isObj && 'subLabel' in option ? option.subLabel : undefined;
 
                 return (
                   <div 
@@ -98,26 +146,34 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
                       setSearchQuery('');
                       setIsOpen(false);
                     }}
-                    className={`px-3 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
+                    className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
                       isSelected 
-                        ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-medium' 
+                        ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0]' 
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                     }`}
                   >
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="truncate">{optLabel}</span>
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className={isSelected ? 'font-medium truncate' : 'truncate'}>{optLabel}</span>
                       {subLabel && (
                         <span className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-[#792359]/80 dark:text-[#e6a8d0]/80' : 'text-gray-500 dark:text-gray-400'}`}>
                           {subLabel}
                         </span>
                       )}
+                      {isObj && (option as any).subtitle && !subLabel && (
+                        <span className="text-xs opacity-75 mt-0.5 block truncate">{(option as any).subtitle}</span>
+                      )}
+                      {isObj && (option as any).description && !subLabel && (
+                        <span className="text-xs opacity-50 mt-0.5 block line-clamp-2">{(option as any).description}</span>
+                      )}
                     </div>
                     {isSelected && <CheckCircle2 size={14} className="shrink-0" />}
                   </div>
                 );
-              }))}
+              })
+            )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

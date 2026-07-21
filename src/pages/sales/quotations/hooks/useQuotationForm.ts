@@ -5,15 +5,13 @@ import { quotationSchema, type QuotationFormValues } from '../validators/quotati
 
 export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) => {
   const form = useForm<QuotationFormValues>({
-    resolver: zodResolver(quotationSchema),
+    resolver: zodResolver(quotationSchema as any),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 15 days from now
       status: 'Draft',
       lineItems: [],
       subTotal: 0,
-      discountType: '₹',
-      discountValue: 0,
       totalDiscount: 0,
       totalTaxableAmount: 0,
       totalGstAmount: 0,
@@ -29,8 +27,6 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
 
   const lineItems = useWatch({ control, name: 'lineItems', defaultValue: [] });
   const deliveryCost = useWatch({ control, name: 'deliveryCost', defaultValue: 0 });
-  const discountType = useWatch({ control, name: 'discountType', defaultValue: '₹' });
-  const discountValue = useWatch({ control, name: 'discountValue', defaultValue: 0 });
 
   // Calculate totals whenever lineItems, deliveryCost, or order discount changes
   useEffect(() => {
@@ -43,15 +39,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       subTotal += (qty * rate);
     });
 
-    const val = Number(discountValue) || 0;
-    let orderDiscountAmount = 0;
-    if (discountType === '%') {
-      orderDiscountAmount = subTotal * (val / 100);
-    } else {
-      orderDiscountAmount = val;
-    }
-
-    let totalDiscount = orderDiscountAmount;
+    let totalDiscount = 0;
     let totalTaxableAmount = 0;
     let totalGstAmount = 0;
     let grandTotal = 0;
@@ -60,25 +48,14 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     lineItems.forEach((item, index) => {
       const qty = item.quantity || 0;
       const rate = item.rate || 0;
+      const discountValue = item.discount || 0;
+      const discountType = item.discountType || 'FLAT';
       const gstRate = item.gstRate || 0;
 
       const rowSubTotal = qty * rate;
-
-      // Calculate actual discount amount for this line item based on its type and value
-      const val = Number(item.discountValue) || 0;
-      let itemDiscount = 0;
-      if (item.discountType === '%') {
-        itemDiscount = rowSubTotal * (val / 100);
-      } else {
-        itemDiscount = val;
-      }
-
-      // Update the hidden/backend-sent `discount` field if it changed
-      if (item.discount !== itemDiscount) setValue(`lineItems.${index}.discount`, itemDiscount, { shouldValidate: false });
-
-      const rowProportionalOrderDiscount = subTotal > 0 ? (rowSubTotal / subTotal) * orderDiscountAmount : 0;
+      const itemDiscountAmount = discountType === 'PERCENTAGE' ? (rowSubTotal * discountValue / 100) : discountValue;
       
-      const rowTotalDiscount = itemDiscount + rowProportionalOrderDiscount;
+      const rowTotalDiscount = itemDiscountAmount;
       const rowTaxableAmount = Math.max(0, rowSubTotal - rowTotalDiscount);
       const rowGstAmount = rowTaxableAmount * (gstRate / 100);
       const rowTotalAmount = rowTaxableAmount + rowGstAmount;
@@ -88,7 +65,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       if (item.gstAmount !== rowGstAmount) setValue(`lineItems.${index}.gstAmount`, rowGstAmount, { shouldValidate: false });
       if (item.totalAmount !== rowTotalAmount) setValue(`lineItems.${index}.totalAmount`, rowTotalAmount, { shouldValidate: false });
 
-      totalDiscount += itemDiscount; // Since orderDiscountAmount is already in totalDiscount
+      totalDiscount += itemDiscountAmount;
       totalTaxableAmount += rowTaxableAmount;
       totalGstAmount += rowGstAmount;
       grandTotal += rowTotalAmount;
@@ -102,7 +79,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
     setValue('totalGstAmount', totalGstAmount, { shouldValidate: false });
     setValue('grandTotal', grandTotal, { shouldValidate: false });
 
-  }, [lineItems, deliveryCost, discountType, discountValue, setValue]);
+  }, [lineItems, deliveryCost, setValue]);
 
   return form;
 };

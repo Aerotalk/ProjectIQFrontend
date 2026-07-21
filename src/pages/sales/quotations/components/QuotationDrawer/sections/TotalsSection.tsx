@@ -8,28 +8,7 @@ import { ClientService } from '@/services/client.service';
 interface Props {
   readOnly?: boolean;
 }
-
-// Basic Indian Number System to Words converter
-function numberToWords(num: number): string {
-  if (num === 0) return 'Zero';
-  const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-  
-  const numStr = num.toString();
-  if (numStr.length > 9) return 'Amount too large';
-
-  const n = ('000000000' + numStr).slice(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-  if (!n) return '';
-
-  let str = '';
-  str += (n[1] != '00') ? (a[Number(n[1])] || b[n[1][0] as any] + ' ' + a[n[1][1] as any]) + 'Crore ' : '';
-  str += (n[2] != '00') ? (a[Number(n[2])] || b[n[2][0] as any] + ' ' + a[n[2][1] as any]) + 'Lakh ' : '';
-  str += (n[3] != '00') ? (a[Number(n[3])] || b[n[3][0] as any] + ' ' + a[n[3][1] as any]) + 'Thousand ' : '';
-  str += (n[4] != '0') ? (a[Number(n[4])] || b[n[4][0] as any] + ' ' + a[n[4][1] as any]) + 'Hundred ' : '';
-  str += (n[5] != '00') ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0] as any] + ' ' + a[n[5][1] as any]) : '';
-  
-  return str.trim() + ' Rupees Only';
-}
+import { numberToWords } from '@/lib/utils';
 
 export default function TotalsSection({ readOnly }: Props) {
   const { control } = useFormContext();
@@ -50,6 +29,7 @@ export default function TotalsSection({ readOnly }: Props) {
   }, [selectedCompanyId]);
 
   const subTotal = useWatch({ control, name: 'subTotal', defaultValue: 0 });
+  const totalDiscount = useWatch({ control, name: 'totalDiscount', defaultValue: 0 });
 
   const totalTaxableAmount = useWatch({ control, name: 'totalTaxableAmount', defaultValue: 0 });
   const grandTotal = useWatch({ control, name: 'grandTotal', defaultValue: 0 });
@@ -91,7 +71,7 @@ export default function TotalsSection({ readOnly }: Props) {
         <div>
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Amount in Words</h4>
           <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-            {numberToWords(Math.round(grandTotal))}
+            {numberToWords(grandTotal)}
           </p>
         </div>
       </div>
@@ -102,27 +82,9 @@ export default function TotalsSection({ readOnly }: Props) {
           <span className="text-gray-600 dark:text-gray-400">Sub Total</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Discount</span>
-          <div className="flex items-center">
-            <input 
-              type="number" 
-              {...useFormContext().register('discountValue', { valueAsNumber: true })}
-              disabled={readOnly}
-              className="w-20 px-2 py-1.5 text-right bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-l-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] hide-arrows" 
-              min="0"
-              step="0.01"
-              placeholder="0"
-            />
-            <select
-              {...useFormContext().register('discountType')}
-              disabled={readOnly}
-              className="px-2 py-1.5 bg-gray-50 dark:bg-white/[0.05] border border-l-0 border-gray-300 dark:border-white/10 rounded-r-sm text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] cursor-pointer"
-            >
-              <option value="%">%</option>
-              <option value="₹">₹</option>
-            </select>
-          </div>
+          <span className="font-medium text-gray-900 dark:text-white">-₹{totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Taxable Amount</span>
