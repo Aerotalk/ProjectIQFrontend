@@ -61,7 +61,7 @@ export default function TicketDashboard() {
     realId: t.id,
     subject: t.shortDescription || 'No Subject',
     client: t.customerCompany || 'N/A',
-    priority: t.priority || 'Low',
+    priority: t.priority || 'P4',
     status: t.state || 'Open',
     assigned: t.assignedTo || 'Unassigned',
     updated: t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'
@@ -195,12 +195,15 @@ export default function TicketDashboard() {
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
-                      t.priority === 'High' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
-                      t.priority === 'Medium' ? 'text-orange-700 bg-orange-50 dark:bg-orange-500/10' :
+                    <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-md ${
+                      t.priority === 'P1' || t.priority === 'Critical' || t.priority === 'High' ? 'text-red-700 bg-red-50 dark:bg-red-500/10' :
+                      t.priority === 'P2' ? 'text-orange-700 bg-orange-50 dark:bg-orange-500/10' :
+                      t.priority === 'P3' || t.priority === 'Medium' ? 'text-yellow-700 bg-yellow-50 dark:bg-yellow-500/10' :
                       'text-green-700 bg-green-50 dark:bg-green-500/10'
                     }`}>
-                      {t.priority}
+                      {t.priority === 'P1' || t.priority === 'Critical' || t.priority === 'High' ? 'P1' :
+                       t.priority === 'P2' ? 'P2' :
+                       t.priority === 'P3' || t.priority === 'Medium' ? 'P3' : 'P4'}
                     </span>
                   </td>
                   <td className="px-6 py-4">

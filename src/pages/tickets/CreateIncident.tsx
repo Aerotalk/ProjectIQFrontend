@@ -9,6 +9,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Building2, UserCircle, Briefcase, FileText, IndianRupee } from 'lucide-react';
+import { rolesService, type Role } from '../../services/roles.service';
+import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function CreateIncident() {
@@ -23,12 +25,14 @@ export default function CreateIncident() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectData, setSelectedProjectData] = useState<Project | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
 
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<TicketFormValues>({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
       state: 'New',
-      priority: 'Low',
+      priority: 'P4',
       impact: 'Low',
       urgency: 'Low'
     }
@@ -37,11 +41,18 @@ export default function CreateIncident() {
   const watchProjectId = watch('projectId');
   const watchImpact = watch('impact');
   const watchUrgency = watch('urgency');
+  const watchAssignmentGroup = watch('assignmentGroup');
 
   useEffect(() => {
     if (companyId) {
       ProjectService.getAll(companyId).then(data => setProjects(data)).catch(console.error);
     }
+    rolesService.getAllRoles().then((data: any) => {
+      setRoles(Array.isArray(data) ? data : (data?.content || []));
+    }).catch(console.error);
+    api.get('/admin/users').then((data: any) => {
+      setUsers(Array.isArray(data) ? data : (data?.content || []));
+    }).catch(console.error);
   }, [companyId]);
 
   useEffect(() => {
@@ -55,10 +66,10 @@ export default function CreateIncident() {
 
   // Auto-calculate priority based on impact and urgency
   useEffect(() => {
-    if (watchImpact === 'High' && watchUrgency === 'High') setValue('priority', 'Critical');
-    else if (watchImpact === 'High' || watchUrgency === 'High') setValue('priority', 'High');
-    else if (watchImpact === 'Medium' || watchUrgency === 'Medium') setValue('priority', 'Medium');
-    else setValue('priority', 'Low');
+    if (watchImpact === 'High' && watchUrgency === 'High') setValue('priority', 'P1');
+    else if (watchImpact === 'High' || watchUrgency === 'High') setValue('priority', 'P2');
+    else if (watchImpact === 'Medium' || watchUrgency === 'Medium') setValue('priority', 'P3');
+    else setValue('priority', 'P4');
   }, [watchImpact, watchUrgency, setValue]);
 
   const onSubmit = async (data: TicketFormValues) => {
@@ -77,6 +88,35 @@ export default function CreateIncident() {
   };
 
   const projectOptions = projects.map(p => ({ label: `${p.projectCode} - ${p.projectName}`, value: p.id }));
+
+  const roleOptions = roles.map(r => {
+    const rawName = r.roleName || r.description || '';
+    const cleanLabel = rawName.replace(/^ROLE_/, '').replace(/_/g, ' ');
+    return { label: cleanLabel, value: rawName };
+  });
+
+  const assignmentGroupOptions = roleOptions.length > 0 ? roleOptions : [
+    { label: 'L1 Support', value: 'L1 Support' },
+    { label: 'L2 Support', value: 'L2 Support' },
+    { label: 'Development', value: 'Development' },
+    { label: 'Database Admin', value: 'Database Admin' }
+  ];
+
+  const filteredUsers = users.filter(u => {
+    if (!watchAssignmentGroup) return true;
+    const userRoles = u.userRoles || u.roles || [];
+    return userRoles.some((ur: any) => {
+      const rName = typeof ur === 'string' ? ur : (ur.role?.roleName || ur.roleName || ur.name || '');
+      const rId = typeof ur === 'object' ? (ur.role?.id || ur.id) : '';
+      return rName === watchAssignmentGroup || 
+             rId === watchAssignmentGroup ||
+             rName.replace(/^ROLE_/, '') === watchAssignmentGroup ||
+             rName.replace(/^ROLE_/, '').replace(/_/g, ' ').toLowerCase() === watchAssignmentGroup.toLowerCase();
+    });
+  });
+
+  const targetUsers = (watchAssignmentGroup && filteredUsers.length > 0) ? filteredUsers : users;
+  const assignToOptions = targetUsers.map(u => ({ label: u.username || u.email, value: u.username || u.id }));
 
   return (
     <div className="max-w-[1400px] mx-auto pb-12">
@@ -274,18 +314,13 @@ export default function CreateIncident() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Assignment Group</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Assignment Group (Role)</label>
                   <Controller
                     name="assignmentGroup"
                     control={control}
                     render={({ field }) => (
                       <CustomSelect
-                        options={[
-                          { label: 'L1 Support', value: 'L1 Support' },
-                          { label: 'L2 Support', value: 'L2 Support' },
-                          { label: 'Development', value: 'Development' },
-                          { label: 'Database Admin', value: 'Database Admin' }
-                        ]}
+                        options={[{ label: 'Select Group / Role', value: '' }, ...assignmentGroupOptions]}
                         value={field.value || ''}
                         onChange={field.onChange}
                       />
@@ -299,10 +334,7 @@ export default function CreateIncident() {
                     control={control}
                     render={({ field }) => (
                       <CustomSelect
-                        options={[
-                          { label: 'Rahul Sharma (Support)', value: 'Rahul Sharma' },
-                          { label: 'Priya Patel (Dev)', value: 'Priya Patel' }
-                        ]}
+                        options={[{ label: 'Unassigned', value: '' }, ...assignToOptions]}
                         value={field.value || ''}
                         onChange={field.onChange}
                       />

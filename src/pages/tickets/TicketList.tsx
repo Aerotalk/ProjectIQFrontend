@@ -89,16 +89,21 @@ export default function TicketList() {
     switch (priority?.toUpperCase()) {
       case 'P1':
       case 'CRITICAL':
-      case 'HIGH':
-      case '1 - HIGH': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">{priority}</span>;
+      case '1 - HIGH': 
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400">P1</span>;
       case 'P2':
-      case 'MEDIUM':
-      case '2 - MEDIUM': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">{priority}</span>;
-      case 'P3': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">{priority}</span>;
+      case 'HIGH':
+      case '2 - MEDIUM': 
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-400">P2</span>;
+      case 'P3':
+      case 'MEDIUM': 
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-400">P3</span>;
       case 'P4':
       case 'LOW':
-      case '3 - LOW': return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">{priority}</span>;
-      default: return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">{priority || 'N/A'}</span>;
+      case '3 - LOW': 
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400">P4</span>;
+      default: 
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-500/20 dark:text-gray-400">{priority || 'N/A'}</span>;
     }
   };
 
@@ -143,16 +148,16 @@ export default function TicketList() {
           />
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect
               value={filterPriority}
               onChange={setFilterPriority}
               options={[
                 { label: 'All Priorities', value: 'All' },
-                { label: 'Critical', value: 'Critical' },
-                { label: 'High', value: 'High' },
-                { label: 'Medium', value: 'Medium' },
-                { label: 'Low', value: 'Low' }
+                { label: 'P1 - Critical', value: 'P1' },
+                { label: 'P2 - High', value: 'P2' },
+                { label: 'P3 - Medium', value: 'P3' },
+                { label: 'P4 - Low', value: 'P4' }
               ]}
             />
           </div>

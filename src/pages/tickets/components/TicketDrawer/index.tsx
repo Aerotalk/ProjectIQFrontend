@@ -25,7 +25,7 @@ export default function TicketDrawer({ isOpen, onClose, onSave, mode, initialDat
         projectId: '',
         shortDescription: '',
         state: 'Open',
-        priority: 'Low',
+        priority: 'P4',
         description: '',
         ...initialData
       });

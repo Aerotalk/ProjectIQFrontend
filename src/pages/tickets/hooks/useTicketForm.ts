@@ -9,7 +9,7 @@ export const useTicketForm = (defaultValues?: Partial<TicketFormValues>) => {
       projectId: '',
       shortDescription: '',
       state: 'Open',
-      priority: 'Low',
+      priority: 'P4',
       description: '',
       ...defaultValues,
     },

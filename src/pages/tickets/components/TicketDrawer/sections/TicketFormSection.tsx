@@ -9,12 +9,14 @@ import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { api } from '@/lib/api';
 
+import { rolesService, type Role } from '@/services/roles.service';
+
 interface Props {
   readOnly?: boolean;
 }
 
 export default function TicketFormSection({ readOnly }: Props) {
-  const { register, formState: { errors }, control } = useFormContext();
+  const { register, formState: { errors }, control, watch } = useFormContext();
   const [activeTab, setActiveTab] = useState('General');
 
   const { projects } = useProjects();
@@ -22,6 +24,9 @@ export default function TicketFormSection({ readOnly }: Props) {
   
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  const selectedAssignmentGroup = watch('assignmentGroup');
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -29,11 +34,42 @@ export default function TicketFormSection({ readOnly }: Props) {
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
     });
+    rolesService.getAllRoles().then((data: any) => {
+      setRoles(Array.isArray(data) ? data : (data?.content || []));
+    }).catch(console.error);
   }, [selectedCompanyId]);
 
   const PROJECT_OPTIONS = projects.map(p => ({ label: `${p.projectCode} - ${p.projectName}`, value: p.id }));
   const CLIENT_OPTIONS = clients.map(c => ({ label: c.displayName, value: c.id }));
-  const USER_OPTIONS = users.map(u => ({ label: u.username || u.email, value: u.id }));
+
+  const ROLE_OPTIONS = roles.map(r => {
+    const rawName = r.roleName || r.description || '';
+    const cleanLabel = rawName.replace(/^ROLE_/, '').replace(/_/g, ' ');
+    return { label: cleanLabel, value: rawName };
+  });
+
+  const ASSIGNMENT_GROUP_OPTIONS = ROLE_OPTIONS.length > 0 ? ROLE_OPTIONS : [
+    { label: 'L1 Support', value: 'L1 Support' },
+    { label: 'L2 Support', value: 'L2 Support' },
+    { label: 'Development', value: 'Development' },
+    { label: 'Database Admin', value: 'Database Admin' }
+  ];
+
+  const filteredUsers = users.filter(u => {
+    if (!selectedAssignmentGroup) return true;
+    const userRoles = u.userRoles || u.roles || [];
+    return userRoles.some((ur: any) => {
+      const rName = typeof ur === 'string' ? ur : (ur.role?.roleName || ur.roleName || ur.name || '');
+      const rId = typeof ur === 'object' ? (ur.role?.id || ur.id) : '';
+      return rName === selectedAssignmentGroup || 
+             rId === selectedAssignmentGroup ||
+             rName.replace(/^ROLE_/, '') === selectedAssignmentGroup ||
+             rName.replace(/^ROLE_/, '').replace(/_/g, ' ').toLowerCase() === selectedAssignmentGroup.toLowerCase();
+    });
+  });
+
+  const targetUsers = (selectedAssignmentGroup && filteredUsers.length > 0) ? filteredUsers : users;
+  const USER_OPTIONS = targetUsers.map(u => ({ label: u.username || u.email, value: u.id || u.username }));
 
   const tabs = ['General', 'Categorization', 'Resolution', 'System Info'];
 
@@ -143,7 +179,22 @@ export default function TicketFormSection({ readOnly }: Props) {
             <div><label className={labelClass}>Module</label><Input type="text" {...register('module')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Category</label><Input type="text" {...register('category')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Sub Category</label><Input type="text" {...register('subCategory')} disabled={readOnly} /></div>
-            <div><label className={labelClass}>Assignment Group</label><Input type="text" {...register('assignmentGroup')} disabled={readOnly} /></div>
+            <div>
+              <label className={labelClass}>Assignment Group (Role)</label>
+              <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="assignmentGroup"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect 
+                      value={field.value || ''} 
+                      onChange={field.onChange} 
+                      options={[{label: 'Select Role / Group', value: ''}, ...ASSIGNMENT_GROUP_OPTIONS]} 
+                    />
+                  )}
+                />
+              </div>
+            </div>
             <div>
               <label className={labelClass}>Assigned To</label>
               <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
