@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar } from 'lucide-react';
+import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar, Users, AlertCircle } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';
 import type { Project, ProjectFormValues } from '../../types/project.types';
 import ProjectDrawer from './components/ProjectDrawer';
+import ProjectQuickGlance from './components/ProjectQuickGlance';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -19,6 +20,10 @@ export default function ProjectDashboard() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
+  
+  // Quick Glance state
+  const [isQuickGlanceOpen, setIsQuickGlanceOpen] = useState(false);
+  const [glanceProject, setGlanceProject] = useState<Project | undefined>();
   
   // Dropdown ref
   const dropdownRef = useRef<HTMLTableCellElement>(null);
@@ -131,6 +136,11 @@ export default function ProjectDashboard() {
     );
   }
 
+  const handleQuickGlance = (project: Project) => {
+    setGlanceProject(project);
+    setIsQuickGlanceOpen(true);
+  };
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
       {/* ── Page Header ── */}
@@ -184,7 +194,7 @@ export default function ProjectDashboard() {
           {filteredProjects.map((p) => (
             <div 
               key={p.id} 
-              onClick={() => handleView(p)}
+              onClick={() => handleQuickGlance(p)}
               className="bg-white dark:bg-[#181a1f] border border-[#792359]/30 dark:border-[#e6a8d0]/30 hover:border-[#792359] dark:hover:border-[#e6a8d0] rounded-sm hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
             >
               <div className="p-5 flex flex-col h-full relative space-y-4">
@@ -192,7 +202,7 @@ export default function ProjectDashboard() {
                 {/* Top row: Project Name & Status & Action */}
                 <div className="flex justify-between items-start">
                   <h3 
-                    onClick={() => handleView(p)}
+                    onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }}
                     className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide cursor-pointer hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors line-clamp-2 pr-2"
                   >
                     {p.projectName || p.projectCode || 'Unnamed Project'}
@@ -239,6 +249,14 @@ export default function ProjectDashboard() {
                     <FolderKanban size={14} className="text-gray-400" />
                     VENDORS: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.assignedVendors?.length ? `${p.assignedVendors.length} Assigned` : 'None'}</span>
                   </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <Users size={14} className="text-gray-400" />
+                    ENTITIES (EMPLOYEES): <span className="text-gray-800 dark:text-gray-200 ml-1">{p.assignedEntities?.length ? `${p.assignedEntities.length} Assigned` : 'None'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <AlertCircle size={14} className="text-gray-400" />
+                    INCIDENTS: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.linkedIncidents?.length ? `${p.linkedIncidents.length} Reported` : 'None'}</span>
+                  </div>
                 </div>
 
                 <hr className="border-gray-100 dark:border-white/5" />
@@ -246,7 +264,7 @@ export default function ProjectDashboard() {
                 {/* Project Scope & Avatars */}
                 <div className="flex justify-between items-end">
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Project Scope</div>
+                    <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Budget</div>
                     <div className="text-base font-bold text-gray-900 dark:text-white">
                       ₹{(p.expectedRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
@@ -266,8 +284,8 @@ export default function ProjectDashboard() {
                     <Calendar size={14} className="text-gray-400" />
                     <span>Due: {p.expectedEndDate ? new Date(p.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
                   </div>
-                  <button onClick={() => handleView(p)} className="text-xs font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-                    View Details
+                  <button onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }} className="text-xs font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                    Quick Glance
                   </button>
                 </div>
 
@@ -282,6 +300,14 @@ export default function ProjectDashboard() {
         </div>
       )}
 
+      {glanceProject && selectedCompanyId && (
+        <ProjectQuickGlance
+          project={glanceProject}
+          companyId={selectedCompanyId}
+          isOpen={isQuickGlanceOpen}
+          onClose={() => setIsQuickGlanceOpen(false)}
+        />
+      )}
     </div>
   );
 }
