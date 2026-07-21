@@ -14,6 +14,15 @@ export const poLineItemSchema = z.object({
   gstRate: z.number().min(0).optional(),
   gstAmount: z.number().min(0).optional(),
   totalAmount: z.number().min(0),
+}).superRefine((data, ctx) => {
+  const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes((data.unit || '').toLowerCase());
+  if (isWholeNumberUnit && !Number.isInteger(data.quantity)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['quantity'],
+      message: `Quantity must be a whole number for ${data.unit}`,
+    });
+  }
 });
 
 export const poSchema = z.object({

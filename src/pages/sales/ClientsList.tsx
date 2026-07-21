@@ -195,10 +195,10 @@ export default function ClientsList() {
               ) : (
                 currentItems.map((client) => (
                   <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                    <td className="px-6 py-4 text-sm font-medium">
+                    <td className="px-6 py-4">
                       <button 
                         onClick={() => handleOpenDrawer('view', client)}
-                        className="text-[#792359] dark:text-[#e6a8d0] hover:underline text-left focus:outline-none"
+                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none"
                       >
                         {client.displayName}
                       </button>

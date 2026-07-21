@@ -151,8 +151,8 @@ export default function VendorsList() {
                         {vendor.displayName || vendor.companyName || vendor.firstName}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-black dark:text-white">{vendor.primaryContactPerson}</td>
-                    <td className="px-6 py-4 text-sm text-black dark:text-white">{vendor.email}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{vendor.primaryContactPerson}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{vendor.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{vendor.phone}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{vendor.billingCity}</td>
                     <td className="px-6 py-4">

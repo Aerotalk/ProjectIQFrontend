@@ -25,32 +25,75 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   const { projects } = useProjects();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [isLoadingVendors, setIsLoadingVendors] = useState(true);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { selectedCompanyId: companyId } = useAuth();
 
-  useEffect(() => {
-    if (!companyId) return;
-    VendorService.getVendors(companyId).then((data) => {
-      setVendors(data);
-      setIsLoadingVendors(false);
-    });
-  }, [companyId]);
-
-  // Sync display names when selection changes
   const selectedProjectId = watch('projectId');
   const selectedVendorId = watch('vendorId');
   const attachmentName = watch('attachmentName');
 
-  useEffect(() => {
-    const project = projects.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
-  }, [selectedProjectId, setValue, projects]);
+  const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
 
+  // Sync project name
+  useEffect(() => {
+    if (selectedProject) setValue('projectName', selectedProject.projectName, { shouldValidate: false });
+  }, [selectedProject, setValue]);
+
+  // Load only assigned vendors
+  useEffect(() => {
+    if (!selectedProjectId || !selectedProject?.assignedVendors?.length) {
+      setVendors([]);
+      setIsLoadingVendors(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingVendors(true);
+
+    const fetchAssignedVendors = async () => {
+      try {
+        const vendorPromises = selectedProject.assignedVendors!.map(id => 
+          VendorService.getVendor(id).catch(() => null)
+        );
+        const results = await Promise.all(vendorPromises);
+        const validVendors = results.filter(Boolean) as Vendor[];
+        
+        if (isMounted) {
+          setVendors(validVendors);
+          setIsLoadingVendors(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assigned vendors", error);
+        if (isMounted) {
+          setIsLoadingVendors(false);
+        }
+      }
+    };
+
+    fetchAssignedVendors();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedProjectId, selectedProject]);
+
+  // Reset selected vendor if not in new project's vendors
+  useEffect(() => {
+    if (selectedProjectId && selectedVendorId && selectedProject) {
+      const isStillValid = selectedProject.assignedVendors?.includes(selectedVendorId);
+      if (!isStillValid) {
+        setValue('vendorId', '');
+        setValue('vendorName', '');
+      }
+    }
+  }, [selectedProjectId, selectedProject, selectedVendorId, setValue]);
+
+  // Sync vendor name
   useEffect(() => {
     const vendor = vendors.find(v => v.id === selectedVendorId);
-    if (vendor) setValue('vendorName', vendor.displayName, { shouldValidate: false });
+    if (vendor) setValue('vendorName', vendor.displayName || vendor.companyName || vendor.firstName || '', { shouldValidate: false });
   }, [selectedVendorId, vendors, setValue]);
 
   // File selection handler — stores just the name (no real upload in this mock)
@@ -76,16 +119,12 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
-  const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
-  
   const vendorOptions = useMemo(() => {
-    if (!selectedProjectId || !selectedProject?.assignedVendors?.length) return [];
-    
-    // Use Set for O(1) lookup
-    const assignedSet = new Set(selectedProject.assignedVendors);
-    const filtered = vendors.filter(v => assignedSet.has(v.id));
-    return filtered.map(v => ({ label: v.displayName || v.id, value: v.id }));
-  }, [selectedProjectId, selectedProject, vendors]);
+    return vendors.map(v => ({ 
+      label: v.displayName || v.companyName || v.firstName || v.id, 
+      value: v.id 
+    }));
+  }, [vendors]);
 
   return (
     <div className="space-y-4">

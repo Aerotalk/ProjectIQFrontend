@@ -295,7 +295,7 @@ export default function ExpenseManagement() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => openDrawer('view', ex)}
-                        className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
                         {`EXP-${ex.id.substring(0, 6).toUpperCase()}`}
                       </button>

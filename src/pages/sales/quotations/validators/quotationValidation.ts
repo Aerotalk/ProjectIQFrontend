@@ -15,6 +15,15 @@ export const quotationLineItemSchema = z.object({
   taxableAmount: z.number().min(0),
   gstAmount: z.number().min(0),
   totalAmount: z.number().min(0)
+}).superRefine((data, ctx) => {
+  const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes((data.unit || '').toLowerCase());
+  if (isWholeNumberUnit && !Number.isInteger(data.quantity)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['quantity'],
+      message: `Quantity must be a whole number for ${data.unit}`,
+    });
+  }
 });
 
 export const quotationSchema = z.object({

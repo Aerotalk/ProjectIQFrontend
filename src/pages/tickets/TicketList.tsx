@@ -210,7 +210,7 @@ export default function TicketList() {
                       onClick={() => navigate(t.id || '')}
                       className="hover:bg-gray-50 cursor-pointer transition-colors group"
                     >
-                      <td className="px-6 py-3.5 font-medium text-[#792359]">
+                      <td className="px-6 py-3.5 text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">
                         {t.ticketNo || t.id?.substring(0,10).toUpperCase()}
                       </td>
                       <td className="px-6 py-3.5 text-gray-900 font-medium truncate max-w-[200px]">

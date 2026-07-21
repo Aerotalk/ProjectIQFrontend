@@ -5,6 +5,7 @@ import { ProjectService } from '../../services/project.service';
 import type { Project, ProjectFormValues } from '../../types/project.types';
 import ProjectDrawer from './components/ProjectDrawer';
 import ProjectQuickGlance from './components/ProjectQuickGlance';
+import ProjectProfileView from './components/ProjectProfileView';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -125,13 +126,21 @@ export default function ProjectDashboard() {
   if (isDrawerOpen) {
     return (
       <div className="max-w-[1400px] mx-auto pb-12">
-        <ProjectDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSaveProject}
-          mode={drawerMode}
-          initialData={selectedProject}
-        />
+        {drawerMode === 'view' && selectedProject ? (
+          <ProjectProfileView 
+            project={selectedProject} 
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => setDrawerMode('edit')}
+          />
+        ) : (
+          <ProjectDrawer
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            onSave={handleSaveProject}
+            mode={drawerMode}
+            initialData={selectedProject}
+          />
+        )}
       </div>
     );
   }

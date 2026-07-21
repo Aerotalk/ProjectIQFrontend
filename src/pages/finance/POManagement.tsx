@@ -342,7 +342,7 @@ export default function POManagement() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
-                        className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
                         {po.poNumber || '—'}
                       </button>

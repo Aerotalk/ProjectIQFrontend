@@ -144,7 +144,7 @@ export default function ProductsList() {
                     <td className="px-6 py-4">
                       <button 
                         onClick={() => openDrawer('view', product)}
-                        className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline text-left focus:outline-none block"
+                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
                         {product.itemName}
                       </button>
