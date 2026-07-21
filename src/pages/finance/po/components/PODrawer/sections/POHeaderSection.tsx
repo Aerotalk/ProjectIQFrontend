@@ -6,7 +6,6 @@ import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { VendorService } from '@/services/vendor.service';
 import { useProjects } from '@/hooks/useProjects';
 import type { Vendor } from '@/types/vendor.types';
-import { useAuth } from '@/contexts/AuthContext';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 
 interface Props {
@@ -27,8 +26,6 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoadingVendors, setIsLoadingVendors] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { selectedCompanyId: companyId } = useAuth();
 
   const selectedProjectId = watch('projectId');
   const selectedVendorId = watch('vendorId');
