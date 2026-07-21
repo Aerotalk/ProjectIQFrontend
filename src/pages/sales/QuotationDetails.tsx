@@ -285,7 +285,7 @@ export default function QuotationDetails() {
               qty: item.quantity || 1,
               rate: item.rate || 0,
               gst: item.gstRate || 0,
-              amount: item.totalAmount || 0
+              amount: item.taxableAmount ?? ((item.rate || 0) * (item.quantity || 1))
             })));
           } else {
             setLineItems([]); // Clear dummy data if no items
@@ -293,9 +293,10 @@ export default function QuotationDetails() {
         })
         .catch((err: any) => {
           console.error('Failed to fetch quotation', err);
-          toast.error('Failed to load quotation details');
         })
-        .finally(() => setIsApiLoading(false));
+        .finally(() => {
+          setIsApiLoading(false);
+        });
     }
   }, [id, isNew, clients.length, users.length]);
 
@@ -318,6 +319,7 @@ export default function QuotationDetails() {
   const selectedClient = clients.find(c => c.id === quotation.clientId);
   const clientState = selectedClient?.billingState?.trim().toLowerCase() || '';
   const isSameState = companyState && clientState && companyState === clientState;
+  const isIgst = quotation.taxType === 'IGST' || (!isSameState);
 
   const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
   lineItems.forEach(item => {
@@ -332,12 +334,14 @@ export default function QuotationDetails() {
   Object.keys(taxGroups).forEach(rateStr => {
     const rate = Number(rateStr);
     const group = taxGroups[rate];
-    const halfRate = rate / 2;
-    const halfAmount = group.taxAmount / 2;
-    
-    uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
-    uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
-    uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: isSameState ? 0 : group.taxAmount });
+    if (isIgst) {
+      uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: group.taxAmount });
+    } else {
+      const halfRate = rate / 2;
+      const halfAmount = group.taxAmount / 2;
+      uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: halfAmount });
+      uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: halfAmount });
+    }
   });
 
   const handlePreview = async () => {
@@ -406,11 +410,20 @@ export default function QuotationDetails() {
         }
       });
 
+      const isIgstPreview = quotation.taxType === 'IGST' || (!isSameState);
+
       const taxBreakdown: any[] = [];
       Object.keys(taxGroups).forEach(rateStr => {
         const rate = Number(rateStr);
         const group = taxGroups[rate];
-        if (isSameState) {
+        if (isIgstPreview) {
+          taxBreakdown.push({
+            tax_type: 'IGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: rate,
+            tax_amount: group.taxAmount.toFixed(2)
+          });
+        } else {
           const halfRate = rate / 2;
           const halfAmount = (group.taxAmount / 2).toFixed(2);
           taxBreakdown.push({
@@ -424,13 +437,6 @@ export default function QuotationDetails() {
             taxable_amount: group.taxable.toFixed(2),
             tax_rate: halfRate,
             tax_amount: halfAmount
-          });
-        } else {
-          taxBreakdown.push({
-            tax_type: 'IGST',
-            taxable_amount: group.taxable.toFixed(2),
-            tax_rate: rate,
-            tax_amount: group.taxAmount.toFixed(2)
           });
         }
       });
@@ -456,6 +462,7 @@ export default function QuotationDetails() {
         place_of_supply: client?.billingState || '',
         items: lineItems.map((item, index) => {
           const product = products.find(p => p.id === item.productId || p.id === item.id);
+          const lineTaxable = item.rate * item.qty;
           return {
             item_index: index + 1,
             item_name: item.name,
@@ -464,7 +471,7 @@ export default function QuotationDetails() {
             item_quantity: item.qty,
             item_unit: 'Unit',
             item_price: item.rate.toFixed(2),
-            item_amount: item.amount.toFixed(2)
+            item_amount: lineTaxable.toFixed(2)
           };
         }),
         sub_total: subTotal.toFixed(2),

@@ -36,18 +36,23 @@ export default function TotalsSection({ readOnly }: Props) {
   
   const clientId = useWatch({ control, name: 'clientId' });
   const lineItems = useWatch({ control, name: 'lineItems', defaultValue: [] });
+  const taxType = useWatch({ control, name: 'taxType' });
 
   const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
   const selectedClient = clients.find(c => c.id === clientId);
   const clientState = selectedClient?.billingState?.trim().toLowerCase() || '';
   const isSameState = companyState && clientState && companyState === clientState;
+  const isIgst = taxType === 'IGST' || (taxType !== 'CGST_SGST' && !isSameState);
 
   const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
   lineItems.forEach((item: any) => {
-    if (item.gstRate > 0) {
-      if (!taxGroups[item.gstRate]) taxGroups[item.gstRate] = { taxable: 0, taxAmount: 0 };
-      taxGroups[item.gstRate].taxable += (item.rate * item.quantity);
-      taxGroups[item.gstRate].taxAmount += (item.gstAmount);
+    const gstRate = item.gstRate || 0;
+    if (gstRate > 0) {
+      if (!taxGroups[gstRate]) taxGroups[gstRate] = { taxable: 0, taxAmount: 0 };
+      const taxable = item.taxableAmount ?? (item.rate * (item.quantity || 1));
+      const gstAmount = item.gstAmount ?? (taxable * gstRate / 100);
+      taxGroups[gstRate].taxable += taxable;
+      taxGroups[gstRate].taxAmount += gstAmount;
     }
   });
 
@@ -55,12 +60,14 @@ export default function TotalsSection({ readOnly }: Props) {
   Object.keys(taxGroups).forEach(rateStr => {
     const rate = Number(rateStr);
     const group = taxGroups[rate];
-    const halfRate = rate / 2;
-    const halfAmount = group.taxAmount / 2;
-    
-    uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
-    uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: isSameState ? halfAmount : 0 });
-    uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: isSameState ? 0 : group.taxAmount });
+    if (isIgst) {
+      uiTaxBreakdown.push({ type: 'IGST', rate: rate, amount: group.taxAmount });
+    } else {
+      const halfRate = rate / 2;
+      const halfAmount = group.taxAmount / 2;
+      uiTaxBreakdown.push({ type: 'CGST', rate: halfRate, amount: halfAmount });
+      uiTaxBreakdown.push({ type: 'SGST', rate: halfRate, amount: halfAmount });
+    }
   });
 
   return (

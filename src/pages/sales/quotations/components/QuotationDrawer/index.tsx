@@ -120,16 +120,21 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         }
       }
 
+      const lineItems = data.lineItems || [];
       const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
       const clientState = client?.billingState?.trim().toLowerCase() || '';
       const isSameState = companyState && clientState && companyState === clientState;
+      const isIgst = data.taxType === 'IGST' || (data.taxType !== 'CGST_SGST' && !isSameState);
 
       const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
-      data.lineItems?.forEach((item: any) => {
-        if (item.gstRate > 0) {
-          if (!taxGroups[item.gstRate]) taxGroups[item.gstRate] = { taxable: 0, taxAmount: 0 };
-          taxGroups[item.gstRate].taxable += (item.rate * item.quantity);
-          taxGroups[item.gstRate].taxAmount += (item.gstAmount);
+      lineItems.forEach((item: any) => {
+        const gstRate = item.gstRate || 0;
+        const taxable = item.taxableAmount ?? (item.rate * (item.quantity || 1));
+        const gstAmount = item.gstAmount ?? (taxable * gstRate / 100);
+        if (gstRate > 0) {
+          if (!taxGroups[gstRate]) taxGroups[gstRate] = { taxable: 0, taxAmount: 0 };
+          taxGroups[gstRate].taxable += taxable;
+          taxGroups[gstRate].taxAmount += gstAmount;
         }
       });
 
@@ -137,27 +142,29 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
       Object.keys(taxGroups).forEach(rateStr => {
         const rate = Number(rateStr);
         const group = taxGroups[rate];
-        const halfRate = rate / 2;
-        const halfAmount = (group.taxAmount / 2).toFixed(2);
-        
-        taxBreakdown.push({
-          tax_type: 'CGST',
-          taxable_amount: group.taxable.toFixed(2),
-          tax_rate: halfRate,
-          tax_amount: isSameState ? halfAmount : '0.00'
-        });
-        taxBreakdown.push({
-          tax_type: 'SGST',
-          taxable_amount: group.taxable.toFixed(2),
-          tax_rate: halfRate,
-          tax_amount: isSameState ? halfAmount : '0.00'
-        });
-        taxBreakdown.push({
-          tax_type: 'IGST',
-          taxable_amount: group.taxable.toFixed(2),
-          tax_rate: rate,
-          tax_amount: isSameState ? '0.00' : group.taxAmount.toFixed(2)
-        });
+        if (isIgst) {
+          taxBreakdown.push({
+            tax_type: 'IGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: rate,
+            tax_amount: group.taxAmount.toFixed(2)
+          });
+        } else {
+          const halfRate = rate / 2;
+          const halfAmount = (group.taxAmount / 2).toFixed(2);
+          taxBreakdown.push({
+            tax_type: 'CGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+          taxBreakdown.push({
+            tax_type: 'SGST',
+            taxable_amount: group.taxable.toFixed(2),
+            tax_rate: halfRate,
+            tax_amount: halfAmount
+          });
+        }
       });
 
       const previewPayload = {
@@ -179,34 +186,30 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         estimate_number: data.quotationNo || data.id,
         estimate_date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         place_of_supply: client?.billingState || '',
-        items: data.lineItems?.map((item: any, idx: number) => ({
-          item_index: idx + 1,
-          item_name: item.itemName,
-          item_description: item.description || '',
-          item_hsn: item.hsnSac || '',
-          item_quantity: item.quantity,
-          item_unit: item.unit || 'Unit',
-          item_price: item.rate.toFixed(2),
-          item_amount: item.totalAmount.toFixed(2)
-        })) || [],
+        items: lineItems.map((item: any, idx: number) => {
+          const lineTaxable = item.taxableAmount ?? (item.rate * (item.quantity || 1));
+          return {
+            item_index: idx + 1,
+            item_name: item.itemName,
+            item_description: item.description || '',
+            item_hsn: item.hsnSac || '',
+            item_quantity: item.quantity,
+            item_unit: item.unit || 'Unit',
+            item_price: item.rate.toFixed(2),
+            item_amount: lineTaxable.toFixed(2)
+          };
+        }),
         sub_total: data.subTotal.toFixed(2),
         total_tax: data.totalGstAmount.toFixed(2),
         grand_total: data.grandTotal.toFixed(2),
         amount_in_words: numberToWords(data.grandTotal),
-        terms_and_conditions: data.termsAndConditions || 'Terms and conditions apply',
+        terms_and_conditions: data.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
         bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: data.totalGstAmount > 0,
-        taxes: data.totalGstAmount > 0 ? (
-          data.taxType === 'IGST'
-            ? [{ tax_type: 'IGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: data.totalGstAmount.toFixed(2) }]
-            : [
-              { tax_type: 'CGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: (data.totalGstAmount / 2).toFixed(2) },
-              { tax_type: 'SGST', taxable_amount: data.totalTaxableAmount.toFixed(2), tax_rate: 'VARIOUS', tax_amount: (data.totalGstAmount / 2).toFixed(2) }
-            ]
-        ) : []
+        taxes: taxBreakdown
       };
 
       setPreviewTemplate(templateRes);
