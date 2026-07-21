@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, CheckCircle2, Search } from 'lucide-react';
 
-export type SelectOption = string | { label: string; value: string };
+export type SelectOption = string | { label: string; value: string; subLabel?: React.ReactNode };
 
 interface CustomSelectProps {
   value: string;
@@ -87,27 +87,35 @@ export default function CustomSelect({ value, onChange, options, icon, disabled 
               filteredOptions.map((option, index) => {
                 const optValue = getOptionValue(option);
                 const optLabel = getOptionLabel(option);
-            const isSelected = value === optValue;
+                const isSelected = value === optValue;
+                const subLabel = typeof option === 'object' && 'subLabel' in option ? option.subLabel : undefined;
 
-            return (
-              <div 
-                key={`${optValue}-${index}`}
-                onClick={() => {
-                  onChange(optValue);
-                  setSearchQuery('');
-                  setIsOpen(false);
-                }}
-                className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-2 ${
-                  isSelected 
-                    ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-medium' 
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
-                }`}
-              >
-                {optLabel}
-                {isSelected && <CheckCircle2 size={14} className="ml-auto shrink-0" />}
-              </div>
-            );
-          }))}
+                return (
+                  <div 
+                    key={`${optValue}-${index}`}
+                    onClick={() => {
+                      onChange(optValue);
+                      setSearchQuery('');
+                      setIsOpen(false);
+                    }}
+                    className={`px-3 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
+                      isSelected 
+                        ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-medium' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="truncate">{optLabel}</span>
+                      {subLabel && (
+                        <span className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-[#792359]/80 dark:text-[#e6a8d0]/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {subLabel}
+                        </span>
+                      )}
+                    </div>
+                    {isSelected && <CheckCircle2 size={14} className="shrink-0" />}
+                  </div>
+                );
+              }))}
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy } from 'lucide-react';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -142,7 +142,20 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                 />
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Shipping Address</h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">Shipping Address</h4>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setValue('shippingAddress', getValues('billingAddress'), { shouldDirty: true })}
+                      className="text-[10px] uppercase tracking-wider font-semibold text-[#792359] hover:text-[#792359]/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
+                      title="Copy from Billing Address"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy Billing
+                    </button>
+                  )}
+                </div>
                 <textarea
                   {...register('shippingAddress')}
                   disabled={readOnly}

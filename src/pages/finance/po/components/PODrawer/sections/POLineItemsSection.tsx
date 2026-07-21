@@ -99,8 +99,13 @@ export default function POLineItemsSection({ readOnly }: Props) {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
             {fields.map((field, index) => {
-              const currentTotal = lineItems?.[index]?.totalAmount || 0;
+              const qty = lineItems?.[index]?.quantity || 0;
+              const rate = lineItems?.[index]?.rate || 0;
+              const disc = lineItems?.[index]?.discount || 0;
+              const currentTotal = Math.max(0, qty * rate - disc);
               const lineErrors = (errors.lineItems as any)?.[index];
+              const unit = lineItems?.[index]?.unit || '';
+              const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes(unit.toLowerCase());
 
               return (
                 <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
@@ -123,7 +128,11 @@ export default function POLineItemsSection({ readOnly }: Props) {
                                 setValue(`lineItems.${index}.gstRate`, parseFloat(prod.gstRate) || 0);
                               }
                             }}
-                            options={products.map(p => ({ label: p.itemName, value: p.id }))}
+                            options={products.map(p => ({ 
+                              label: p.itemName, 
+                              value: p.id,
+                              subLabel: `Rate: ₹${(p.standardRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}${p.description ? ` • ${p.description}` : ''}`
+                            }))}
                           />
                         )}
                       />
@@ -139,8 +148,8 @@ export default function POLineItemsSection({ readOnly }: Props) {
                   <td className="px-3 py-2">
                     <input
                       type="number"
-                      step="0.01"
-                      min="0.01"
+                      step={isWholeNumberUnit ? "1" : "0.01"}
+                      min={isWholeNumberUnit ? "1" : "0.01"}
                       {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })}
                       disabled={readOnly}
                       className={`${cellClass} ${lineErrors?.quantity ? 'border-red-400' : ''}`}

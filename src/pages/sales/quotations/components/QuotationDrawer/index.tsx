@@ -39,7 +39,11 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         date: new Date().toISOString().split('T')[0],
         validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         status: 'Draft',
-        lineItems: [],
+        lineItems: initialData?.lineItems?.map(item => ({
+          ...item,
+          discountValue: item.discountValue !== undefined ? item.discountValue : (item.discount || 0),
+          discountType: item.discountType || '₹'
+        })) || [],
         subTotal: 0,
         totalDiscount: 0,
         totalTaxableAmount: 0,

@@ -47,6 +47,8 @@ export default function LineItemsSection({ readOnly }: Props) {
       setValue(`lineItems.${index}.gstRate`, parseFloat(product.gstRate) || 0); // e.g., "18%" -> 18
       setValue(`lineItems.${index}.quantity`, 1);
       setValue(`lineItems.${index}.discount`, 0);
+      setValue(`lineItems.${index}.discountValue`, 0);
+      setValue(`lineItems.${index}.discountType`, '₹');
     }
   };
 
@@ -63,7 +65,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         {!readOnly && (
           <button 
             type="button" 
-            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
+            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, discountValue: 0, discountType: '₹', gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
             className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3]"
           >
             <Plus size={14} /> Add Item
@@ -79,7 +81,7 @@ export default function LineItemsSection({ readOnly }: Props) {
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Disc (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[14%]">Discount</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
               {!readOnly && <th className="px-3 py-2.5 w-10"></th>}
@@ -87,7 +89,12 @@ export default function LineItemsSection({ readOnly }: Props) {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
             {fields.map((field, index) => {
-              const currentTotal = lineItems?.[index]?.totalAmount || 0;
+              const qty = lineItems?.[index]?.quantity || 0;
+              const rate = lineItems?.[index]?.rate || 0;
+              const disc = lineItems?.[index]?.discount || 0;
+              const currentTotal = Math.max(0, qty * rate - disc);
+              const unit = lineItems?.[index]?.unit || '';
+              const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes(unit.toLowerCase());
               return (
                 <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
                   <td className="px-3 py-2">
@@ -102,7 +109,11 @@ export default function LineItemsSection({ readOnly }: Props) {
                               field.onChange(val);
                               handleProductChange(index, val);
                             }}
-                            options={products.map(p => ({ label: p.itemName, value: p.id }))}
+                            options={products.map(p => ({ 
+                              label: p.itemName, 
+                              value: p.id,
+                              subLabel: `Rate: ₹${(p.standardRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}${p.description ? ` • ${p.description}` : ''}`
+                            }))}
                           />
                         )}
                       />
@@ -110,7 +121,7 @@ export default function LineItemsSection({ readOnly }: Props) {
                     </div>
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <input type="number" step={isWholeNumberUnit ? "1" : "0.01"} min={isWholeNumberUnit ? "1" : "0.01"} {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2">
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
@@ -119,7 +130,13 @@ export default function LineItemsSection({ readOnly }: Props) {
                     <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-3 py-2">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <div className="flex items-center">
+                      <input type="number" step="0.01" {...register(`lineItems.${index}.discountValue`, { valueAsNumber: true })} disabled={readOnly} className={`${cellClass} rounded-r-none border-r-0 z-10 focus:z-20`} />
+                      <select {...register(`lineItems.${index}.discountType`)} disabled={readOnly} className={`${cellClass} !w-[42px] !px-1 rounded-l-none text-center bg-gray-50 dark:bg-white/[0.02] border-l-gray-200 dark:border-l-white/5`}>
+                        <option value="₹">₹</option>
+                        <option value="%">%</option>
+                      </select>
+                    </div>
                   </td>
                   <td className="px-3 py-2">
                     <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />

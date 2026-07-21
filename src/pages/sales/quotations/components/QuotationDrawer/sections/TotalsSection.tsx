@@ -102,9 +102,27 @@ export default function TotalsSection({ readOnly }: Props) {
           <span className="text-gray-600 dark:text-gray-400">Sub Total</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Total Discount</span>
-          <span className="font-medium text-gray-900 dark:text-white">₹{totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Discount</span>
+          <div className="flex items-center">
+            <input 
+              type="number" 
+              {...useFormContext().register('discountValue', { valueAsNumber: true })}
+              disabled={readOnly}
+              className="w-20 px-2 py-1.5 text-right bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-l-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] hide-arrows" 
+              min="0"
+              step="0.01"
+              placeholder="0"
+            />
+            <select
+              {...useFormContext().register('discountType')}
+              disabled={readOnly}
+              className="px-2 py-1.5 bg-gray-50 dark:bg-white/[0.05] border border-l-0 border-gray-300 dark:border-white/10 rounded-r-sm text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] cursor-pointer"
+            >
+              <option value="%">%</option>
+              <option value="₹">₹</option>
+            </select>
+          </div>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Taxable Amount</span>

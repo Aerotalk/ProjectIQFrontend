@@ -9,6 +9,7 @@ export interface Product {
   unit: string;
   standardRate: number;
   hsnSac?: string;
+  hsnDescription?: string;
   gstRate: string;
   status: 'Active' | 'Inactive';
 }
