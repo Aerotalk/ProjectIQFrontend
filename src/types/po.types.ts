@@ -9,6 +9,7 @@ export interface POLineItem {
   unit: string;
   rate: number;
   discount?: number;
+  discountType?: 'FLAT' | 'PERCENTAGE';
   taxableAmount?: number;
   gstRate?: number;
   gstAmount?: number;
@@ -28,7 +29,11 @@ export interface PurchaseOrder {
   lineItems: POLineItem[];
 
   // Totals
-  discountPercentage?: number; // Global discount %
+  subTotal?: number;
+  totalDiscount?: number;
+  totalTaxableAmount?: number;
+  totalGstAmount?: number;
+  deliveryCost?: number;
   grandTotal: number;     // sum of all line item totals after discount
 
   status: POStatus;

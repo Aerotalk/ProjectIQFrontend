@@ -143,7 +143,7 @@ export default function PODetails() {
               poDate: foundPo.poDate ? foundPo.poDate.split('T')[0] : '',
               expectedDelivery: foundPo.expectedDelivery ? foundPo.expectedDelivery.split('T')[0] : '',
               description: foundPo.description || '',
-              discount: foundPo.discountPercentage || 0,
+              discount: foundPo.totalDiscount || 0,
               grandTotal: foundPo.grandTotal || 0,
               status: foundPo.status || 'Draft',
               internalNotes: foundPo.internalNotes || ''

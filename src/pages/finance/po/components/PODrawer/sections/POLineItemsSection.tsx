@@ -12,7 +12,7 @@ interface Props {
 export default function POLineItemsSection({ readOnly }: Props) {
   const { control, register, formState: { errors }, setValue } = useFormContext();
   const { selectedCompanyId } = useAuth();
-  const { products, isLoading: isLoadingProducts } = useProducts({ companyId: selectedCompanyId });
+  const { products, isListLoading: isLoadingProducts } = useProducts({ companyId: selectedCompanyId });
 
   const { fields, append, remove } = useFieldArray({
     control,
