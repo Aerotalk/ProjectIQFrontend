@@ -66,7 +66,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         {!readOnly && (
           <button 
             type="button" 
-            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: '' as any, discountValue: 0, discountType: 'FLAT', gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
+            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, discountValue: 0, discountType: 'FLAT', gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
             className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3]"
           >
             <Plus size={14} /> Add Item

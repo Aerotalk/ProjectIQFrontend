@@ -33,27 +33,63 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
   const [previewData, setPreviewData] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
-  // Reset form when drawer opens/closes or initialData changes
+  // Reset form when drawer opens or selected quotation changes
+  const initialId = initialData?.id;
   React.useEffect(() => {
     if (isOpen) {
-      form.reset({
-        date: new Date().toISOString().split('T')[0],
-        validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'Draft',
-        lineItems: initialData?.lineItems?.map(item => ({
-          ...item,
-          discount: item.discount || 0,
-          discountType: item.discountType || 'FLAT'
-        })) || [],
-        subTotal: 0,
-        totalDiscount: 0,
-        totalTaxableAmount: 0,
-        totalGstAmount: 0,
-        grandTotal: 0,
-        ...initialData
-      });
+      if (initialData && (initialData.id || initialData.clientId || initialData.lineItems?.length)) {
+        form.reset({
+          date: initialData.date || new Date().toISOString().split('T')[0],
+          validUntil: initialData.validUntil || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: initialData.status || 'Draft',
+          clientId: initialData.clientId || '',
+          clientName: initialData.clientName || '',
+          templateName: initialData.templateName || 'quotation.html',
+          subject: initialData.subject || '',
+          reference: initialData.reference || '',
+          salesperson: initialData.salesperson || '',
+          billingAddress: initialData.billingAddress || '',
+          shippingAddress: initialData.shippingAddress || '',
+          lineItems: initialData.lineItems?.map(item => ({
+            ...item,
+            discount: item.discount || 0,
+            discountType: item.discountType || 'FLAT'
+          })) || [],
+          subTotal: initialData.subTotal || 0,
+          totalDiscount: initialData.totalDiscount || 0,
+          totalTaxableAmount: initialData.totalTaxableAmount || 0,
+          totalGstAmount: initialData.totalGstAmount || 0,
+          deliveryCost: initialData.deliveryCost || 0,
+          grandTotal: initialData.grandTotal || 0,
+          notes: initialData.notes || '',
+          termsAndConditions: initialData.termsAndConditions || ''
+        });
+      } else {
+        form.reset({
+          date: new Date().toISOString().split('T')[0],
+          validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'Draft',
+          templateName: 'quotation.html',
+          clientId: '',
+          clientName: '',
+          subject: '',
+          reference: '',
+          salesperson: '',
+          billingAddress: '',
+          shippingAddress: '',
+          lineItems: [],
+          subTotal: 0,
+          totalDiscount: 0,
+          totalTaxableAmount: 0,
+          totalGstAmount: 0,
+          deliveryCost: 0,
+          grandTotal: 0,
+          notes: '',
+          termsAndConditions: ''
+        });
+      }
     }
-  }, [isOpen, initialData, form]);
+  }, [isOpen, initialId]);
 
   if (!isOpen) return null;
 
