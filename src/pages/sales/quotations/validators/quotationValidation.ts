@@ -9,7 +9,7 @@ export const quotationLineItemSchema = z.object({
   quantity: z.number().min(1, 'Quantity must be at least 1'),
   unit: z.string().min(1, 'Unit is required'),
   rate: z.number().min(0, 'Rate must be positive'),
-  discount: z.preprocess((val) => Number(val) || 0, z.number().min(0, 'Discount cannot be negative')),
+  discount: z.coerce.number().min(0, 'Discount cannot be negative').optional().default(0),
   discountType: z.enum(['PERCENTAGE', 'FLAT']).optional().default('FLAT'),
   gstRate: z.number().min(0, 'GST Rate must be positive'),
   taxableAmount: z.number().min(0),

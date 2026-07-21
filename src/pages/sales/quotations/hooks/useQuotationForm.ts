@@ -5,15 +5,13 @@ import { quotationSchema, type QuotationFormValues } from '../validators/quotati
 
 export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) => {
   const form = useForm<QuotationFormValues>({
-    resolver: zodResolver(quotationSchema),
+    resolver: zodResolver(quotationSchema as any),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 15 days from now
       status: 'Draft',
       lineItems: [],
       subTotal: 0,
-      discountType: '₹',
-      discountValue: 0,
       totalDiscount: 0,
       totalTaxableAmount: 0,
       totalGstAmount: 0,
