@@ -6,7 +6,7 @@ export const poLineItemSchema = z.object({
   id: z.string().optional(),
   productId: z.string().optional(),
   itemName: z.string().optional(),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().optional().nullable(),
   quantity: zodNumeric('Quantity is required', 0.01),
   unit: z.string().min(1, 'Unit is required'),
   rate: zodNumeric('Rate is required', 0),

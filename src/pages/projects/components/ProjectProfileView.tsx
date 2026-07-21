@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Edit, FolderKanban } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { api } from '../../../lib/api';
@@ -17,12 +18,14 @@ interface Props {
 
 export default function ProjectProfileView({ project, onClose, onEdit }: Props) {
   const { selectedCompanyId } = useAuth();
-  const { vendors } = useVendors({ companyId: selectedCompanyId || null });
+  const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId || null });
   const [users, setUsers] = useState<any[]>([]);
+  const [usersLoaded, setUsersLoaded] = useState(false);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [quotations, setQuotations] = useState<any[]>([]);
   const [pos, setPos] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
+  const [relationsLoaded, setRelationsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -30,6 +33,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
         const response: any = await api.get('/admin/users');
         const data = Array.isArray(response) ? response : (response.content || []);
         setUsers(data);
+        setUsersLoaded(true);
       } catch (err) {
         console.error('Failed to load users', err);
       }
@@ -47,6 +51,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
         setQuotations(allQuotations);
         setExpenses(allExpenses);
         setIncidents(allTickets.filter((t: any) => t.type?.toLowerCase() === 'incident' || !t.type));
+        setRelationsLoaded(true);
       } catch (err) {
         console.error('Failed to load relations', err);
       }
@@ -56,21 +61,45 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
     fetchRelations();
   }, [selectedCompanyId]);
 
-  const assignedVendorNames = project.assignedVendors?.map(id => vendors.find(v => v.id === id)?.displayName || id) || [];
-  const assignedEntityNames = project.assignedEntities?.map(id => {
-    const u = users.find(u => u.id === id);
-    return u ? `${u.firstName} ${u.lastName}` : id;
-  }) || [];
-  const linkedIncidentNames = project.linkedIncidents?.map(id => incidents.find(i => i.id === id)?.ticketNumber || incidents.find(i => i.id === id)?.subject || id) || [];
-  const linkedQuotationNames = project.linkedQuotations?.map(id => quotations.find(q => q.id === id)?.quotationNo || id) || [];
-  const linkedPONames = project.linkedPOs?.map(id => pos.find(p => p.id === id)?.poNumber || 'Draft PO') || [];
-  const linkedExpenseNames = project.linkedExpenses?.map(id => {
-    const ex = expenses.find(e => e.id === id);
-    return ex ? `${ex.description} (₹${ex.amount})` : id;
-  }) || [];
+  const assignedVendorNames = isVendorsLoading
+    ? null
+    : project.assignedVendors?.map(id => {
+        const v = vendors.find(v => v.id === id);
+        return v?.displayName || v?.companyName || v?.firstName || null;
+      }).filter(Boolean) || [];
 
-  const manager = users.find(u => u.id === project.projectManager);
-  const managerName = manager ? `${manager.firstName} ${manager.lastName}` : project.projectManager;
+  const assignedEntityNames = !usersLoaded
+    ? null
+    : project.assignedEntities?.map(id => {
+        const u = users.find(u => u.id === id);
+        return u ? (u.username || u.email || null) : null;
+      }).filter(Boolean) || [];
+  const linkedIncidentsList = !relationsLoaded ? null : project.linkedIncidents?.map(id => {
+    const item = incidents.find(i => i.id === id);
+    return { id, name: item?.ticketNo || item?.shortDescription || id, link: `/companydashboard/tickets/${item?.id || id}` };
+  }).filter(Boolean) || [];
+  
+  const linkedQuotationsList = !relationsLoaded ? null : project.linkedQuotations?.map(id => {
+    const item = quotations.find(q => q.id === id);
+    return { id, name: item?.quotationNo || id, link: `/companydashboard/sales/quotations/${id}` };
+  }).filter(Boolean) || [];
+
+  const linkedPOsList = !relationsLoaded ? null : project.linkedPOs?.map(id => {
+    const item = pos.find(p => p.id === id);
+    return { id, name: item?.poNumber || 'Draft PO', link: `/companydashboard/finance/pos/${id}` };
+  }).filter(Boolean) || [];
+
+  const linkedExpensesList = !relationsLoaded ? null : project.linkedExpenses?.map(id => {
+    const ex = expenses.find(e => e.id === id);
+    return { id, name: ex ? `${ex.description} (₹${ex.amount})` : id, link: `/companydashboard/projects/expenses` };
+  }).filter(Boolean) || [];
+
+  const manager = usersLoaded ? users.find(u => u.id === project.projectManager) : undefined;
+  const managerName = !usersLoaded
+    ? null
+    : manager
+      ? (manager.username || manager.email)
+      : (project.projectManager ? '-' : '-');
 
   return (
     <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
@@ -131,7 +160,11 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   <div className="text-gray-900 dark:text-gray-100 font-medium">{project.client || '-'}</div>
                   
                   <div className="text-gray-500 dark:text-gray-400">Project Manager</div>
-                  <div className="text-gray-900 dark:text-gray-100">{managerName || '-'}</div>
+                  <div className="text-gray-900 dark:text-gray-100">
+                    {managerName === null
+                      ? <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                      : managerName || '-'}
+                  </div>
                   
                   <div className="text-gray-500 dark:text-gray-400">Start Date</div>
                   <div className="text-gray-900 dark:text-gray-100">{project.startDate ? new Date(project.startDate).toLocaleDateString() : '-'}</div>
@@ -167,7 +200,9 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                 <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">Vendors</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {assignedVendorNames.length > 0 ? (
+                    {assignedVendorNames === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : assignedVendorNames.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
                         {assignedVendorNames.map((name, i) => <li key={i}>{name}</li>)}
                       </ul>
@@ -176,7 +211,9 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   
                   <div className="text-gray-500 dark:text-gray-400">Entities (Employees)</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {assignedEntityNames.length > 0 ? (
+                    {assignedEntityNames === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : assignedEntityNames.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
                         {assignedEntityNames.map((name, i) => <li key={i}>{name}</li>)}
                       </ul>
@@ -193,36 +230,68 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                 <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
                   <div className="text-gray-500 dark:text-gray-400">Incidents</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {linkedIncidentNames.length > 0 ? (
+                    {linkedIncidentsList === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : linkedIncidentsList.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
-                        {linkedIncidentNames.map((name, i) => <li key={i}>{name}</li>)}
+                        {linkedIncidentsList.map((item, i) => (
+                          <li key={i}>
+                            <Link to={item.link} className="text-[#792359] dark:text-[#c44997] hover:underline font-medium">
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                     ) : '-'}
                   </div>
                   
                   <div className="text-gray-500 dark:text-gray-400">Quotations</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {linkedQuotationNames.length > 0 ? (
+                    {linkedQuotationsList === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : linkedQuotationsList.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
-                        {linkedQuotationNames.map((name, i) => <li key={i}>{name}</li>)}
+                        {linkedQuotationsList.map((item, i) => (
+                          <li key={i}>
+                            <Link to={item.link} className="text-[#792359] dark:text-[#c44997] hover:underline font-medium">
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                     ) : '-'}
                   </div>
 
                   <div className="text-gray-500 dark:text-gray-400">Purchase Orders</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {linkedPONames.length > 0 ? (
+                    {linkedPOsList === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : linkedPOsList.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
-                        {linkedPONames.map((name, i) => <li key={i}>{name}</li>)}
+                        {linkedPOsList.map((item, i) => (
+                          <li key={i}>
+                            <Link to={item.link} className="text-[#792359] dark:text-[#c44997] hover:underline font-medium">
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                     ) : '-'}
                   </div>
 
                   <div className="text-gray-500 dark:text-gray-400">Expenses</div>
                   <div className="text-gray-900 dark:text-gray-100">
-                    {linkedExpenseNames.length > 0 ? (
+                    {linkedExpensesList === null ? (
+                      <span className="text-gray-400 dark:text-gray-500 italic text-xs">Loading...</span>
+                    ) : linkedExpensesList.length > 0 ? (
                       <ul className="list-disc pl-4 space-y-1">
-                        {linkedExpenseNames.map((name, i) => <li key={i}>{name}</li>)}
+                        {linkedExpensesList.map((item, i) => (
+                          <li key={i}>
+                            <Link to={item.link} className="text-[#792359] dark:text-[#c44997] hover:underline font-medium">
+                              {item.name}
+                            </Link>
+                          </li>
+                        ))}
                       </ul>
                     ) : '-'}
                   </div>

@@ -3,6 +3,8 @@ export const DISCRETE_UNITS = [
   'Boxes',
   'Piece',
   'Pieces',
+  'Piece (Nos)',
+  'Pieces (Nos)',
   'Carton',
   'Packet',
   'Pair',

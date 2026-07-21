@@ -46,14 +46,14 @@ export default function POLineItemsSection({ readOnly }: Props) {
   const handleProductChange = (index: number, productId: string) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      setValue(`lineItems.${index}.itemName`, product.itemName);
-      setValue(`lineItems.${index}.description`, product.description || '');
-      setValue(`lineItems.${index}.unit`, product.unit || 'Pieces');
-      setValue(`lineItems.${index}.rate`, product.standardRate || 0);
-      setValue(`lineItems.${index}.gstRate`, parseFloat(product.gstRate) || 0);
-      setValue(`lineItems.${index}.quantity`, 1);
-      setValue(`lineItems.${index}.discount`, '');
-      setValue(`lineItems.${index}.discountType`, 'FLAT');
+      setValue(`lineItems.${index}.itemName`, product.itemName, { shouldValidate: false });
+      setValue(`lineItems.${index}.description`, product.description || '', { shouldValidate: false });
+      setValue(`lineItems.${index}.unit`, product.unit || 'Pieces', { shouldValidate: false });
+      setValue(`lineItems.${index}.rate`, product.standardRate || 0, { shouldValidate: false });
+      setValue(`lineItems.${index}.gstRate`, parseFloat(product.gstRate) || 0, { shouldValidate: false });
+      setValue(`lineItems.${index}.quantity`, 1, { shouldValidate: false });
+      setValue(`lineItems.${index}.discount`, '', { shouldValidate: false });
+      setValue(`lineItems.${index}.discountType`, 'FLAT', { shouldValidate: false });
     }
   };
 
