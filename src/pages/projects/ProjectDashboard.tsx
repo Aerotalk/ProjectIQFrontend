@@ -95,11 +95,11 @@ export default function ProjectDashboard() {
 
       if (drawerMode === 'create') {
         const newProject = await ProjectService.create(selectedCompanyId, data);
-        setProjects([newProject, ...projects]);
+        setProjects([{ ...data, ...newProject }, ...projects]);
         toast.success('Project created successfully');
       } else if (selectedProject) {
         const updated = await ProjectService.update(selectedProject.id, data);
-        setProjects(projects.map(p => p.id === selectedProject.id ? updated : p));
+        setProjects(projects.map(p => p.id === selectedProject.id ? { ...p, ...data, ...updated } : p));
         toast.success('Project updated successfully');
       }
       setIsDrawerOpen(false);
@@ -182,7 +182,11 @@ export default function ProjectDashboard() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredProjects.map((p) => (
-            <div key={p.id} className="bg-white dark:bg-[#181a1f] border border-[#792359]/30 dark:border-[#e6a8d0]/30 hover:border-[#792359] dark:hover:border-[#e6a8d0] rounded-sm hover:shadow-md transition-all flex flex-col group relative">
+            <div 
+              key={p.id} 
+              onClick={() => handleView(p)}
+              className="bg-white dark:bg-[#181a1f] border border-[#792359]/30 dark:border-[#e6a8d0]/30 hover:border-[#792359] dark:hover:border-[#e6a8d0] rounded-sm hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
+            >
               <div className="p-5 flex flex-col h-full relative space-y-4">
                 
                 {/* Top row: Project Name & Status & Action */}

@@ -47,6 +47,8 @@ export default function LineItemsSection({ readOnly }: Props) {
       setValue(`lineItems.${index}.gstRate`, parseFloat(product.gstRate) || 0); // e.g., "18%" -> 18
       setValue(`lineItems.${index}.quantity`, 1);
       setValue(`lineItems.${index}.discount`, 0);
+      setValue(`lineItems.${index}.discountValue`, 0);
+      setValue(`lineItems.${index}.discountType`, '₹');
     }
   };
 
@@ -63,7 +65,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         {!readOnly && (
           <button 
             type="button" 
-            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
+            onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, discountValue: 0, discountType: '₹', gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
             className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3]"
           >
             <Plus size={14} /> Add Item
@@ -79,7 +81,7 @@ export default function LineItemsSection({ readOnly }: Props) {
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Disc</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[14%]">Discount</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
               {!readOnly && <th className="px-3 py-2.5 w-10"></th>}
@@ -87,83 +89,69 @@ export default function LineItemsSection({ readOnly }: Props) {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
             {fields.map((field, index) => {
-              const currentTotal = lineItems?.[index]?.totalAmount || 0;
+              const qty = lineItems?.[index]?.quantity || 0;
+              const rate = lineItems?.[index]?.rate || 0;
+              const disc = lineItems?.[index]?.discount || 0;
+              const currentTotal = Math.max(0, qty * rate - disc);
+              const unit = lineItems?.[index]?.unit || '';
+              const isWholeNumberUnit = ['boxes', 'pieces', 'carton', 'packet', 'pair', 'set', 'roll', 'bundle', 'bag', 'bottle', 'can', 'unit', 'nos'].includes(unit.toLowerCase());
               return (
                 <tr key={field.id} className="group relative" style={{ zIndex: 100 - index }}>
-                  <td className="px-3 py-2 align-top">
-                    <div className={`flex flex-col gap-2 ${readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none' : ''}`}>
-                      <div className="relative">
-                        <Controller
-                          name={`lineItems.${index}.productId`}
-                          control={control}
-                          render={({ field }) => (
-                            <CustomSelect
-                              value={field.value || ''}
-                              onChange={(val) => {
-                                field.onChange(val);
-                                handleProductChange(index, val);
-                              }}
-                              options={products.map(p => ({ 
-                                label: p.itemName, 
-                                value: p.id,
-                                subtitle: `Rate: ₹${p.standardRate}`,
-                                description: p.description
-                              }))}
-                            />
-                          )}
-                        />
-                        {isLoadingProducts && <Loader2 className="absolute right-8 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
-                      </div>
-                      
-                      <input 
-                        type="text" 
-                        placeholder="Item Name..." 
-                        {...register(`lineItems.${index}.itemName`)} 
-                        disabled={readOnly} 
-                        className={cellClass} 
+                  <td className="px-3 py-2">
+                    <div className={`relative ${readOnly || isLoadingProducts ? 'opacity-80 pointer-events-none' : ''}`}>
+                      <Controller
+                        name={`lineItems.${index}.productId`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(val) => {
+                              field.onChange(val);
+                              handleProductChange(index, val);
+                            }}
+                            options={products.map(p => ({ 
+                              label: p.itemName, 
+                              value: p.id,
+                              subLabel: `Rate: ₹${(p.standardRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}${p.description ? ` • ${p.description}` : ''}`
+                            }))}
+                          />
+                        )}
                       />
-                      
-                      <textarea 
-                        placeholder="Description (optional)..." 
-                        {...register(`lineItems.${index}.description`)} 
-                        disabled={readOnly} 
-                        rows={2}
-                        className={`${cellClass} resize-y min-h-[40px] text-xs`} 
-                      />
+                      {isLoadingProducts && <Loader2 className="absolute right-8 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
                     </div>
                   </td>
-                  <td className="px-3 py-2 align-top">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                  <td className="px-3 py-2">
+                    <input type="number" step={isWholeNumberUnit ? "1" : "0.01"} min={isWholeNumberUnit ? "1" : "0.01"} {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2">
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2">
                     <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
-                  <td className="px-3 py-2 align-top">
-                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-200 dark:border-white/10 overflow-hidden focus-within:border-[#792359] focus-within:ring-1 focus-within:ring-[#792359]">
+                  <td className="px-3 py-2">
+                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-300 dark:border-white/10 overflow-hidden focus-within:border-[#792359] focus-within:ring-1 focus-within:ring-[#792359]">
+                      <select 
+                        {...register(`lineItems.${index}.discountType`)}
+                        disabled={readOnly}
+                        className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1.5 border-r border-gray-300 dark:border-white/10 outline-none cursor-pointer"
+                      >
+                        <option value="FLAT">₹</option>
+                        <option value="PERCENTAGE">%</option>
+                      </select>
                       <input 
                         type="number" 
                         step="0.01" 
                         {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} 
                         disabled={readOnly} 
-                        className="w-full px-2 py-1.5 text-sm bg-transparent outline-none text-gray-900 dark:text-white min-w-0"
+                        className="w-full px-2 py-1.5 text-sm bg-white dark:bg-[#0f1115] outline-none text-gray-900 dark:text-white min-w-0"
                       />
-                      <select 
-                        {...register(`lineItems.${index}.discountType`)}
-                        disabled={readOnly}
-                        className="bg-gray-50 dark:bg-black/20 text-sm text-gray-700 dark:text-gray-300 px-1 border-l border-gray-200 dark:border-white/10 outline-none cursor-pointer"
-                      >
-                        <option value="FLAT">₹</option>
-                        <option value="PERCENTAGE">%</option>
-                      </select>
                     </div>
                   </td>
-                  <td className="px-3 py-2 align-top">
+                  <td className="px-3 py-2">
                     <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
-                  <td className="px-3 py-2 text-right align-top">
+                  <td className="px-3 py-2 text-right">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white block mt-2">
                       {currentTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>

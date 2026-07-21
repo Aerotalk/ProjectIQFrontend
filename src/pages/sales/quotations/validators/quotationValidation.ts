@@ -34,6 +34,8 @@ export const quotationSchema = z.object({
   lineItems: z.array(quotationLineItemSchema).min(1, 'At least one line item is required'),
 
   subTotal: z.number().min(0),
+  discountType: z.enum(['%', '₹']).optional(),
+  discountValue: z.number().min(0).optional(),
   totalDiscount: z.number().min(0),
   totalTaxableAmount: z.number().min(0),
   totalGstAmount: z.number().min(0),
