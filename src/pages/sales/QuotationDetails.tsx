@@ -1302,41 +1302,10 @@ export default function QuotationDetails() {
               <div className="bg-gray-50/50 dark:bg-white/[0.02] p-5 rounded-sm border border-gray-200 dark:border-white/5">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">Related Documents</h3>
-                  <button className="text-xs text-[#792359] dark:text-[#e6a8d0] font-medium hover:underline">View All</button>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs group cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <FileText size={14} className="text-red-500" />
-                      <span className="text-gray-700 dark:text-gray-300 group-hover:text-[#792359] transition-colors">QTN-100245_v2.pdf</span>
-                    </div>
-                    <span className="text-gray-400">125 KB</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs group cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <FileText size={14} className="text-red-500" />
-                      <span className="text-gray-700 dark:text-gray-300 group-hover:text-[#792359] transition-colors">QTN-100245_v1.pdf</span>
-                    </div>
-                    <span className="text-gray-400">120 KB</span>
-                  </div>
-                  {currentStage >= 6 && (
-                    <div className="flex items-center justify-between text-xs group cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <FileText size={14} className="text-gray-500" />
-                        <span className="text-gray-700 dark:text-gray-300 group-hover:text-[#792359] transition-colors">Acceptance Mail.pdf</span>
-                      </div>
-                      <span className="text-gray-400">76 KB</span>
-                    </div>
-                  )}
-                  {currentStage >= 6 && (
-                    <div className="flex items-center justify-between text-xs mt-4 pt-4 border-t border-gray-200 dark:border-white/10">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-emerald-500" />
-                        <span className="font-semibold text-gray-900 dark:text-white">Project Created</span>
-                      </div>
-                      <span className="font-semibold text-[#792359] dark:text-[#e6a8d0]">PRJ-100245</span>
-                    </div>
-                  )}
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <FileText size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">No documents attached yet.</p>
                 </div>
               </div>
             )}
