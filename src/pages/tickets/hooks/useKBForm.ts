@@ -8,7 +8,11 @@ export const useKBForm = (defaultValues?: Partial<KBFormValues>) => {
     defaultValues: {
       title: '',
       category: '',
-      content: '',
+      symptoms: '',
+      cause: '',
+      workaround: '',
+      ci: '',
+      errorCode: '',
       status: 'Draft',
       ...defaultValues,
     },
