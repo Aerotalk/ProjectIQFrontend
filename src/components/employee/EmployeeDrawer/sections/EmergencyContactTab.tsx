@@ -15,38 +15,50 @@ export default function EmergencyContactTab({ readOnly }: Props) {
     <div className="space-y-6 animate-in fade-in duration-300">
       <FormSection title="Emergency Contact" className="pt-0 border-t-0">
         <FormGrid>
-        <FormRow>
-          <label className={formStyles.label}>Contact Name</label>
-          <Input type="text" {...register('emergencyContactName')} disabled={readOnly} />
-          {errors.emergencyContactName && <p className="text-red-500 text-xs mt-1">{errors.emergencyContactName.message as string}</p>}
-        </FormRow>
-        <FormRow>
-          <label className={formStyles.label}>Relationship</label>
-          <Input type="text" {...register('emergencyRelationship')} disabled={readOnly} />
-          {errors.emergencyRelationship && <p className="text-red-500 text-xs mt-1">{errors.emergencyRelationship.message as string}</p>}
-        </FormRow>
-        <FormRow>
-          <label className={formStyles.label}>Phone</label>
-          <SharedPhoneInput name="emergencyPhone" disabled={readOnly} />
-          {errors.emergencyPhone && <p className="text-red-500 text-xs mt-1">{errors.emergencyPhone.message as string}</p>}
-        </FormRow>
-        <FormRow>
-          <label className={formStyles.label}>Alternate Phone</label>
-          <SharedPhoneInput name="emergencyAlternatePhone" disabled={readOnly} />
-        </FormRow>
-        <FormRow>
-          <label className={formStyles.label}>Email</label>
-          <Input type="email" {...register('emergencyEmail')} disabled={readOnly} />
-        </FormRow>
-        <FormRow className="md:col-span-2">
-          <label className={formStyles.label}>Address</label>
-          <Input type="text" {...register('emergencyAddress')} disabled={readOnly} />
-        </FormRow>
-        <FormRow className="md:col-span-2 flex flex-row items-center gap-2">
-          <input type="checkbox" id="emergencyPrimaryContact" {...register('emergencyPrimaryContact')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-          <label htmlFor="emergencyPrimaryContact" className="text-sm text-gray-700 dark:text-gray-300 mb-0">Primary Contact</label>
-        </FormRow>
-      </FormGrid>
+          {/* Row: Contact Name | Relationship */}
+          <div>
+            <label className={formStyles.label}>Contact Name</label>
+            <Input type="text" {...register('emergencyContactName')} disabled={readOnly} />
+            {errors.emergencyContactName && <p className="text-red-500 text-xs mt-1">{errors.emergencyContactName.message as string}</p>}
+          </div>
+          <div>
+            <label className={formStyles.label}>Relationship</label>
+            <Input type="text" {...register('emergencyRelationship')} disabled={readOnly} />
+            {errors.emergencyRelationship && <p className="text-red-500 text-xs mt-1">{errors.emergencyRelationship.message as string}</p>}
+          </div>
+
+          {/* Row: Phone | Alternate Phone */}
+          <div>
+            <label className={formStyles.label}>Phone</label>
+            <SharedPhoneInput name="emergencyPhone" disabled={readOnly} />
+            {errors.emergencyPhone && <p className="text-red-500 text-xs mt-1">{errors.emergencyPhone.message as string}</p>}
+          </div>
+          <div>
+            <label className={formStyles.label}>Alternate Phone</label>
+            <SharedPhoneInput name="emergencyAlternatePhone" disabled={readOnly} />
+          </div>
+
+          {/* Row: Email | (spacer) */}
+          <div>
+            <label className={formStyles.label}>Email</label>
+            <Input type="email" {...register('emergencyEmail')} disabled={readOnly} />
+          </div>
+          <div /> {/* intentional spacer */}
+
+          {/* Address — full width */}
+          <FormRow>
+            <label className={formStyles.label}>Address</label>
+            <Input type="text" {...register('emergencyAddress')} disabled={readOnly} />
+          </FormRow>
+
+          {/* Primary Contact checkbox — full width */}
+          <FormRow>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="emergencyPrimaryContact" {...register('emergencyPrimaryContact')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+              <label htmlFor="emergencyPrimaryContact" className="text-sm text-gray-700 dark:text-gray-300">Primary Contact</label>
+            </div>
+          </FormRow>
+        </FormGrid>
       </FormSection>
     </div>
   );

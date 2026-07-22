@@ -34,7 +34,7 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
           </button>
         )}
       </div>
-      
+
       {fields.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 dark:bg-black/10 rounded-lg border border-dashed border-gray-200 dark:border-white/10">
           No family members added yet. Click 'Add Member' to include a record.
@@ -55,55 +55,63 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
             )}
 
             <FormGrid>
-              <FormRow>
+              {/* Row: Name | Relationship */}
+              <div>
                 <label className={formStyles.label}>Name</label>
                 <Input type="text" {...register(`families.${index}.name`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+              <div>
                 <label className={formStyles.label}>Relationship</label>
                 <Input type="text" {...register(`families.${index}.relationship`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+
+              {/* Row: Date of Birth | Gender */}
+              <div>
                 <label className={formStyles.label}>Date of Birth</label>
-                <CustomDatePicker name="families.${index}.dateOfBirth" disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+                <CustomDatePicker name={`families.${index}.dateOfBirth`} disabled={readOnly} />
+              </div>
+              <div>
                 <label className={formStyles.label}>Gender</label>
                 <Controller
-            name={`families.${index}.gender`}
-            control={control}
-            render={({ field }) => (
-              <CustomSelect
-                value={field.value || ''}
-                onChange={field.onChange}
-                options={[
-                  { label: 'Select', value: '' },
-                  { label: 'Male', value: 'Male' },
-                  { label: 'Female', value: 'Female' },
-                  { label: 'Other', value: 'Other' }
-                ]}
-                disabled={readOnly}
-              />
-            )}
-          />
-              </FormRow>
-              <FormRow>
+                  name={`families.${index}.gender`}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={[
+                        { label: 'Select', value: '' },
+                        { label: 'Male', value: 'Male' },
+                        { label: 'Female', value: 'Female' },
+                        { label: 'Other', value: 'Other' }
+                      ]}
+                      disabled={readOnly}
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Row: Phone | Nominee % */}
+              <div>
                 <label className={formStyles.label}>Phone</label>
                 <SharedPhoneInput name={`families.${index}.phone`} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+              <div>
                 <label className={formStyles.label}>Nominee %</label>
                 <Input type="number" step="1" max="100" min="0" {...register(`families.${index}.nomineePercentage`, { valueAsNumber: true })} disabled={readOnly} />
-              </FormRow>
-              
-              <FormRow className="md:col-span-2 flex flex-row gap-4 items-center mt-2">
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id={`families.${index}.dependent`} {...register(`families.${index}.dependent`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-                  <label htmlFor={`families.${index}.dependent`} className="text-sm text-gray-700 dark:text-gray-300 mb-0">Is Dependent</label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id={`families.${index}.nominee`} {...register(`families.${index}.nominee`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-                  <label htmlFor={`families.${index}.nominee`} className="text-sm text-gray-700 dark:text-gray-300 mb-0">Is Nominee</label>
+              </div>
+
+              {/* Checkboxes — full width */}
+              <FormRow>
+                <div className="flex flex-row gap-6 items-center mt-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id={`families.${index}.dependent`} {...register(`families.${index}.dependent`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+                    <label htmlFor={`families.${index}.dependent`} className="text-sm text-gray-700 dark:text-gray-300">Is Dependent</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id={`families.${index}.nominee`} {...register(`families.${index}.nominee`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+                    <label htmlFor={`families.${index}.nominee`} className="text-sm text-gray-700 dark:text-gray-300">Is Nominee</label>
+                  </div>
                 </div>
               </FormRow>
             </FormGrid>

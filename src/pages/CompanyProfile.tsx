@@ -38,7 +38,7 @@ interface AccountData {
   logoFileId?: string;
   invoiceLogoId?: string;
   stampFileId?: string;
-  
+
   addressType: string;
   addressLine1: string;
   addressLine2: string;
@@ -46,26 +46,28 @@ interface AccountData {
   state: string;
   country: string;
   postalCode: string;
-  
+
   banks: BankData[];
 }
 
-
-
-const InputField = ({ 
-  label, 
-  type = "text", 
-  required = false, 
-  value, 
-  onChange 
-}: { 
-  label: string, 
-  type?: string, 
-  required?: boolean, 
-  value: string, 
-  onChange: (val: string) => void 
+/**
+ * A plain field group (label + input) with no grid-span logic.
+ * The parent FormGrid decides how many columns this occupies.
+ */
+const Field = ({
+  label,
+  type = "text",
+  required = false,
+  value,
+  onChange
+}: {
+  label: string,
+  type?: string,
+  required?: boolean,
+  value: string,
+  onChange: (val: string) => void
 }) => (
-  <FormRow>
+  <div>
     <label className={formStyles.label}>
       {label} {required && <span className="text-red-500">*</span>}
     </label>
@@ -76,7 +78,7 @@ const InputField = ({
       onChange={(e) => onChange(e.target.value)}
       className={formStyles.field()}
     />
-  </FormRow>
+  </div>
 );
 
 export default function CompanyProfile() {
@@ -91,7 +93,7 @@ export default function CompanyProfile() {
   const countries = Country.getAllCountries();
   const selectedCountryCode = countries.find(c => c.name === (formData.country || 'India'))?.isoCode || 'IN';
   const statesList = State.getStatesOfCountry(selectedCountryCode);
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
@@ -192,7 +194,7 @@ export default function CompanyProfile() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const res = await api.post('/admin/files/upload', formData);
       return res.id || null;
     } catch (err) {
@@ -245,10 +247,10 @@ export default function CompanyProfile() {
           isPrimary: !!b.isPrimaryBank
         }))
       };
-      
+
       await api.put('/admin/company/profile', payload);
       await refetchUser();
-      
+
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (err) {
@@ -263,9 +265,50 @@ export default function CompanyProfile() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Reusable file upload field
+  const FileUploadField = ({
+    label,
+    fileId,
+    file,
+    onChange
+  }: {
+    label: string;
+    fileId?: string;
+    file: File | null;
+    onChange: (f: File | null) => void;
+  }) => (
+    <div>
+      <label className={`${formStyles.label} flex items-center justify-between`}>
+        <span>{label}</span>
+        {fileId && (
+          <a href={`${API_BASE_URL}/admin/files/${fileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+            <Eye size={12} /> View Current
+          </a>
+        )}
+      </label>
+      <div className="flex flex-col gap-2">
+        {file ? (
+          <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+            <img src={URL.createObjectURL(file)} alt={`${label} Preview`} className="max-h-full max-w-full object-contain" />
+          </div>
+        ) : fileId && (
+          <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
+            <img src={`${API_BASE_URL}/admin/files/${fileId}`} alt={label} className="max-h-full max-w-full object-contain" />
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => onChange(e.target.files?.[0] || null)}
+          className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative">
-      
+
       {/* Toast Notification */}
       <div className={`fixed bottom-6 right-6 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-3 rounded-sm shadow-lg transition-all duration-300 transform z-50 ${showToast ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
         <CheckCircle2 size={20} />
@@ -296,177 +339,131 @@ export default function CompanyProfile() {
       </div>
 
       <form id="profile-form" onSubmit={handleSubmit} className="space-y-6 pb-12">
-        
-        {/* Basic Details */}
-        <FormSection title="Company Details" >
-          <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
-              <InputField label="Company Name" required value={formData.companyName as string || ''} onChange={(val) => updateField('companyName', val)} />
-              <InputField label="Legal Name" value={formData.legalName as string || ''} onChange={(val) => updateField('legalName', val)} />
-              <InputField label="GST Number" value={formData.gstNumber as string || ''} onChange={(val) => updateField('gstNumber', val)} />
-              
-              <InputField label="PAN Number" required value={formData.panNumber as string || ''} onChange={(val) => updateField('panNumber', val)} />
-              <InputField label="TAN Number" value={formData.tanNumber as string || ''} onChange={(val) => updateField('tanNumber', val)} />
-              <InputField label="CIN Number" value={formData.cinNumber as string || ''} onChange={(val) => updateField('cinNumber', val)} />
-              
-              <InputField label="MSME Number" value={formData.msmeNumber as string || ''} onChange={(val) => updateField('msmeNumber', val)} />
-              <InputField label="IEC Code" value={formData.iecCode as string || ''} onChange={(val) => updateField('iecCode', val)} />
-              <InputField label="Email Address" type="email" required value={formData.email as string || ''} onChange={(val) => updateField('email', val)} />
-              
-              <FormRow>
-                <label className={formStyles.label}>
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <SharedPhoneInput
-                  value={formData.phone as string || ''}
-                  onChange={(val) => updateField('phone', val)}
-                  defaultCountry="IN"
-                />
-              </FormRow>
-              <InputField label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
-              <div className="col-span-1 hidden lg:block"></div>
-              
-              <FormRow>
-                <label className={`${formStyles.label} flex items-center justify-between`}>
-                  <span>Company Logo</span>
-                  {formData.logoFileId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
-                      <Eye size={12} /> View Current
-                    </a>
-                  )}
-                </label>
-                <div className="flex flex-col gap-2">
-                  {logoFile ? (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  ) : formData.logoFileId && (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} alt="Logo" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                  <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
-                </div>
-              </FormRow>
-              <FormRow>
-                <label className={`${formStyles.label} flex items-center justify-between`}>
-                  <span>Invoice Logo</span>
-                  {formData.invoiceLogoId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
-                      <Eye size={12} /> View Current
-                    </a>
-                  )}
-                </label>
-                <div className="flex flex-col gap-2">
-                  {invoiceLogoFile ? (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={URL.createObjectURL(invoiceLogoFile)} alt="Invoice Logo Preview" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  ) : formData.invoiceLogoId && (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} alt="Invoice Logo" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                  <input type="file" accept="image/*" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
-                </div>
-              </FormRow>
-              <FormRow>
-                <label className={`${formStyles.label} flex items-center justify-between`}>
-                  <span>Company Stamp</span>
-                  {formData.stampFileId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
-                      <Eye size={12} /> View Current
-                    </a>
-                  )}
-                </label>
-                <div className="flex flex-col gap-2">
-                  {stampFile ? (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={URL.createObjectURL(stampFile)} alt="Stamp Preview" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  ) : formData.stampFileId && (
-                    <div className="h-14 w-auto max-w-[120px] bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm p-1.5 flex items-center justify-center">
-                      <img src={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} alt="Stamp" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                  <input type="file" accept="image/*" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
-                </div>
-              </FormRow>
-              
-              <FormRow>
-                <label className={formStyles.label}>Primary Color</label>
-                <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
-                  <input type="color" value={formData.primaryColor || '#792359'} onChange={(e) => updateField('primaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.primaryColor || '#792359'}</span>
-                </div>
-              </FormRow>
-              <FormRow>
-                <label className={formStyles.label}>Secondary Color</label>
-                <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
-                  <input type="color" value={formData.secondaryColor || '#E6A8D0'} onChange={(e) => updateField('secondaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
-                </div>
-              </FormRow>
+
+        {/* ── Company Details ── 3-col grid */}
+        <FormSection title="Company Details">
+          <FormGrid columns={3}>
+            {/* Row 1: Company Name | Legal Name | GST Number */}
+            <Field label="Company Name" required value={formData.companyName as string || ''} onChange={(val) => updateField('companyName', val)} />
+            <Field label="Legal Name" value={formData.legalName as string || ''} onChange={(val) => updateField('legalName', val)} />
+            <Field label="GST Number" value={formData.gstNumber as string || ''} onChange={(val) => updateField('gstNumber', val)} />
+
+            {/* Row 2: PAN Number | TAN Number | CIN Number */}
+            <Field label="PAN Number" required value={formData.panNumber as string || ''} onChange={(val) => updateField('panNumber', val)} />
+            <Field label="TAN Number" value={formData.tanNumber as string || ''} onChange={(val) => updateField('tanNumber', val)} />
+            <Field label="CIN Number" value={formData.cinNumber as string || ''} onChange={(val) => updateField('cinNumber', val)} />
+
+            {/* Row 3: MSME Number | IEC Code | Email */}
+            <Field label="MSME Number" value={formData.msmeNumber as string || ''} onChange={(val) => updateField('msmeNumber', val)} />
+            <Field label="IEC Code" value={formData.iecCode as string || ''} onChange={(val) => updateField('iecCode', val)} />
+            <Field label="Email Address" type="email" required value={formData.email as string || ''} onChange={(val) => updateField('email', val)} />
+
+            {/* Row 4: Phone | Website | (spacer) */}
+            <div>
+              <label className={formStyles.label}>Phone Number <span className="text-red-500">*</span></label>
+              <SharedPhoneInput
+                value={formData.phone as string || ''}
+                onChange={(val) => updateField('phone', val)}
+                defaultCountry="IN"
+              />
+            </div>
+            <Field label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
+            <div /> {/* intentional spacer */}
+
+            {/* Row 5: Company Logo | Invoice Logo | Company Stamp */}
+            <FileUploadField
+              label="Company Logo"
+              fileId={formData.logoFileId}
+              file={logoFile}
+              onChange={setLogoFile}
+            />
+            <FileUploadField
+              label="Invoice Logo"
+              fileId={formData.invoiceLogoId}
+              file={invoiceLogoFile}
+              onChange={setInvoiceLogoFile}
+            />
+            <FileUploadField
+              label="Company Stamp"
+              fileId={formData.stampFileId}
+              file={stampFile}
+              onChange={setStampFile}
+            />
+
+            {/* Row 6: Primary Color | Secondary Color | (spacer) */}
+            <div>
+              <label className={formStyles.label}>Primary Color</label>
+              <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
+                <input type="color" value={formData.primaryColor || '#792359'} onChange={(e) => updateField('primaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.primaryColor || '#792359'}</span>
+              </div>
+            </div>
+            <div>
+              <label className={formStyles.label}>Secondary Color</label>
+              <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
+                <input type="color" value={formData.secondaryColor || '#E6A8D0'} onChange={(e) => updateField('secondaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
+              </div>
+            </div>
+            <div /> {/* intentional spacer */}
           </FormGrid>
         </FormSection>
 
-        {/* Address Details */}
-        <FormSection title="Address Details" >
-          <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
-              <FormRow>
-                <label className={formStyles.label}>Address Type</label>
-                <CustomSelect
-                  value={formData.addressType || 'Registered'}
-                  onChange={(val) => updateField('addressType', val)}
-                  options={[
-                    { label: 'Registered', value: 'Registered' },
-                    { label: 'Corporate', value: 'Corporate' }
-                  ]}
-                />
-              </FormRow>
-              
-              <div className="md:col-span-2">
-                <InputField label="Address Line 1" required value={formData.addressLine1 as string || ''} onChange={(val) => updateField('addressLine1', val)} />
-              </div>
-              
-              <div className="md:col-span-1 lg:col-span-1">
-                <InputField label="Address Line 2" value={formData.addressLine2 as string || ''} onChange={(val) => updateField('addressLine2', val)} />
-              </div>
-              
-              <div className="md:col-span-1 lg:col-span-1">
-                <InputField label="City" required value={formData.city as string || ''} onChange={(val) => updateField('city', val)} />
-              </div>
-              
-              <FormRow className="md:col-span-1 lg:col-span-1">
-                <label className={formStyles.label}>State <span className="text-red-500">*</span></label>
-                <CustomSelect
-                  value={formData.state || ''}
-                  onChange={(val) => updateField('state', val)}
-                  options={statesList.map((s: any) => ({ label: s.name, value: s.name }))}
-                />
-              </FormRow>
-              
-              <FormRow>
-                <label className={formStyles.label}>Country <span className="text-red-500">*</span></label>
-                <CustomSelect
-                  value={formData.country || ''}
-                  onChange={(val) => {
-                    updateField('country', val);
-                    updateField('state', '');
-                  }}
-                  options={countries.map((c: any) => ({ label: c.name, value: c.name }))}
-                />
-              </FormRow>
-              <div className="md:col-span-1">
-                <InputField label="Postal Code" required value={formData.postalCode as string || ''} onChange={(val) => updateField('postalCode', val)} />
-              </div>
+        {/* ── Address Details ── 3-col grid */}
+        <FormSection title="Address Details">
+          <FormGrid columns={3}>
+            {/* Address Type — full width */}
+            <FormRow>
+              <label className={formStyles.label}>Address Type</label>
+              <CustomSelect
+                value={formData.addressType || 'Registered'}
+                onChange={(val) => updateField('addressType', val)}
+                options={[
+                  { label: 'Registered', value: 'Registered' },
+                  { label: 'Corporate', value: 'Corporate' }
+                ]}
+              />
+            </FormRow>
+
+            {/* Address Line 1 — full width */}
+            <FormRow>
+              <Field label="Address Line 1" required value={formData.addressLine1 as string || ''} onChange={(val) => updateField('addressLine1', val)} />
+            </FormRow>
+
+            {/* Row: Address Line 2 | City | (spacer) */}
+            <Field label="Address Line 2" value={formData.addressLine2 as string || ''} onChange={(val) => updateField('addressLine2', val)} />
+            <Field label="City" required value={formData.city as string || ''} onChange={(val) => updateField('city', val)} />
+            <div /> {/* intentional spacer to keep 3-col alignment */}
+
+            {/* Row: State | Country | Postal Code */}
+            <div>
+              <label className={formStyles.label}>State <span className="text-red-500">*</span></label>
+              <CustomSelect
+                value={formData.state || ''}
+                onChange={(val) => updateField('state', val)}
+                options={statesList.map((s: any) => ({ label: s.name, value: s.name }))}
+              />
+            </div>
+            <div>
+              <label className={formStyles.label}>Country <span className="text-red-500">*</span></label>
+              <CustomSelect
+                value={formData.country || ''}
+                onChange={(val) => {
+                  updateField('country', val);
+                  updateField('state', '');
+                }}
+                options={countries.map((c: any) => ({ label: c.name, value: c.name }))}
+              />
+            </div>
+            <Field label="Postal Code" required value={formData.postalCode as string || ''} onChange={(val) => updateField('postalCode', val)} />
           </FormGrid>
         </FormSection>
 
-        {/* Bank Details */}
+        {/* ── Bank Details ── 3-col grid */}
         <FormSection title="Bank Details">
           <div className="mb-4 text-right">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={addBank}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#792359] bg-[#792359]/10 hover:bg-[#792359]/20 rounded-sm transition-colors"
             >
@@ -476,14 +473,14 @@ export default function CompanyProfile() {
           <div className="space-y-8">
             {banks.map((bank, index) => (
               <div key={bank.id} className="pb-4">
-                
+
                 <div className="flex justify-between items-center mb-5">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
                     Bank Account {index + 1}
                   </h4>
                   {banks.length > 1 && (
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => removeBank(bank.id)}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-sm transition-colors dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400"
                     >
@@ -491,45 +488,51 @@ export default function CompanyProfile() {
                     </button>
                   )}
                 </div>
-                
-                <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
-                  <FormRow>
+
+                <FormGrid columns={3}>
+                  {/* Row: Bank Name | Account Holder | Account Number */}
+                  <div>
                     <label className={formStyles.label}>Bank Name <span className="text-red-500">*</span></label>
                     <input type="text" value={bank.bankName} onChange={(e) => handleBankChange(bank.id, 'bankName', e.target.value)} required className={formStyles.field()} />
-                  </FormRow>
-                  <FormRow>
+                  </div>
+                  <div>
                     <label className={formStyles.label}>Account Holder Name <span className="text-red-500">*</span></label>
                     <input type="text" value={bank.accountHolderName} onChange={(e) => handleBankChange(bank.id, 'accountHolderName', e.target.value)} required className={formStyles.field()} />
-                  </FormRow>
-                  <FormRow>
+                  </div>
+                  <div>
                     <label className={formStyles.label}>Account Number <span className="text-red-500">*</span></label>
                     <input type="text" value={bank.accountNumber} onChange={(e) => handleBankChange(bank.id, 'accountNumber', e.target.value)} required className={formStyles.field()} />
-                  </FormRow>
-                  <FormRow>
+                  </div>
+
+                  {/* Row: IFSC Code | SWIFT Code | UPI ID */}
+                  <div>
                     <label className={formStyles.label}>IFSC Code <span className="text-red-500">*</span></label>
                     <input type="text" value={bank.ifscCode} onChange={(e) => handleBankChange(bank.id, 'ifscCode', e.target.value)} required className={formStyles.field()} />
-                  </FormRow>
-                  <FormRow>
+                  </div>
+                  <div>
                     <label className={formStyles.label}>SWIFT Code</label>
                     <input type="text" value={bank.swiftCode} onChange={(e) => handleBankChange(bank.id, 'swiftCode', e.target.value)} className={formStyles.field()} />
-                  </FormRow>
-                  <FormRow>
+                  </div>
+                  <div>
                     <label className={formStyles.label}>UPI ID</label>
                     <input type="text" value={bank.upiId} onChange={(e) => handleBankChange(bank.id, 'upiId', e.target.value)} className={formStyles.field()} />
-                  </FormRow>
-                  
-                  <div className="flex items-center pt-4 lg:col-span-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name={`primaryBank-${index}`}
-                        checked={bank.isPrimaryBank}
-                        onChange={() => handleBankChange(bank.id, 'isPrimaryBank', true)}
-                        className="w-4 h-4 text-[#792359] border-gray-300 rounded-full focus:ring-[#792359] dark:bg-black/20 dark:border-white/10" 
-                      />
-                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Set as Primary Bank</span>
-                    </label>
                   </div>
+
+                  {/* Primary Bank checkbox — full width */}
+                  <FormRow>
+                    <div className="flex items-center pt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name={`primaryBank-${index}`}
+                          checked={bank.isPrimaryBank}
+                          onChange={() => handleBankChange(bank.id, 'isPrimaryBank', true)}
+                          className="w-4 h-4 text-[#792359] border-gray-300 rounded-full focus:ring-[#792359] dark:bg-black/20 dark:border-white/10"
+                        />
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Set as Primary Bank</span>
+                      </label>
+                    </div>
+                  </FormRow>
                 </FormGrid>
               </div>
             ))}

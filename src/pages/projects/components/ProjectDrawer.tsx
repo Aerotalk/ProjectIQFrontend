@@ -77,7 +77,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         console.error('Failed to load relations', err);
       }
     };
-    
+
     if (isOpen) {
       fetchUsers();
       fetchRelations();
@@ -134,7 +134,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
       onClose();
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       await onSave(formData);
@@ -145,76 +145,118 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
 
   const isReadOnly = mode === 'view';
 
+  // Reusable multi-select checkbox list
+  const CheckboxList = ({
+    label,
+    items,
+    getValue,
+    getLabel,
+    selectedIds,
+    onToggle,
+  }: {
+    label: string;
+    items: any[];
+    getValue: (item: any) => string;
+    getLabel: (item: any) => string;
+    selectedIds: string[];
+    onToggle: (id: string, checked: boolean) => void;
+  }) => (
+    <div>
+      <label className={formStyles.label}>{label}</label>
+      <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+        {items.length === 0 ? (
+          <span className="text-gray-400 italic">No {label.toLowerCase()} found</span>
+        ) : (
+          items.map(item => (
+            <label key={getValue(item)} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+              <input
+                type="checkbox"
+                disabled={isReadOnly}
+                checked={selectedIds.includes(getValue(item))}
+                onChange={(e) => onToggle(getValue(item), e.target.checked)}
+                className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+              />
+              {getLabel(item)}
+            </label>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
-        
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0]">
-              <FolderKanban size={16} />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {mode === 'create' ? 'Create Project' : mode === 'edit' ? 'Edit Project' : 'Project Details'}
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {mode === 'create' ? 'Add a new project' : initialData?.projectCode}
-              </p>
-            </div>
+
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0]">
+            <FolderKanban size={16} />
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {mode === 'create' ? 'Create Project' : mode === 'edit' ? 'Edit Project' : 'Project Details'}
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {mode === 'create' ? 'Add a new project' : initialData?.projectCode}
+            </p>
+          </div>
         </div>
+        <button
+          onClick={onClose}
+          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        {/* Form Content */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-          <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
-            
-            <FormSection title="Project Details" className="pt-0 border-t-0">
-              <FormGrid>
-                <FormRow>
-                  <label className={formStyles.label}>Project Code</label>
-                  <input
-                    type="text"
-                    disabled={true}
-                    value={formData.projectCode}
-                    className={formStyles.field(false, true)}
-                    placeholder={mode === 'create' ? "Auto-generated upon save" : ""}
+      {/* Form Content */}
+      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
+
+          <FormSection title="Project Details" className="pt-0 border-t-0">
+            <FormGrid>
+
+              {/* Row: Project Code | Status */}
+              <div>
+                <label className={formStyles.label}>Project Code</label>
+                <input
+                  type="text"
+                  disabled={true}
+                  value={formData.projectCode}
+                  className={formStyles.field(false, true)}
+                  placeholder={mode === 'create' ? "Auto-generated upon save" : ""}
+                />
+              </div>
+
+              <div>
+                <label className={formStyles.label}>Status</label>
+                {isReadOnly ? (
+                  <CustomSelect
+                    value={formData.status}
+                    onChange={(val) => {
+                      const newData = { ...formData, status: val };
+                      setFormData(newData);
+                      onSave(newData); // quick save in view mode
+                    }}
+                    options={[
+                      { label: 'Pending Approval', value: 'Pending Approval' },
+                      { label: 'Active', value: 'Active' },
+                      { label: 'In Progress', value: 'In Progress' },
+                      { label: 'On Hold', value: 'On Hold' },
+                      { label: 'Completed', value: 'Completed' },
+                      { label: 'Cancelled', value: 'Cancelled' }
+                    ]}
                   />
-                </FormRow>
+                ) : (
+                  <div className={cn(formStyles.field(false, true), "flex items-center")}>
+                    {formData.status}
+                  </div>
+                )}
+              </div>
 
-                <FormRow>
-                  <label className={formStyles.label}>Status</label>
-                  {isReadOnly ? (
-                    <CustomSelect
-                      value={formData.status}
-                      onChange={(val) => {
-                        const newData = { ...formData, status: val };
-                        setFormData(newData);
-                        onSave(newData); // quick save in view mode
-                      }}
-                      options={[
-                        { label: 'Pending Approval', value: 'Pending Approval' },
-                        { label: 'Active', value: 'Active' },
-                        { label: 'In Progress', value: 'In Progress' },
-                        { label: 'On Hold', value: 'On Hold' },
-                        { label: 'Completed', value: 'Completed' },
-                        { label: 'Cancelled', value: 'Cancelled' }
-                      ]}
-                    />
-                  ) : (
-                    <div className={cn(formStyles.field(false, true), "flex items-center")}>
-                      {formData.status}
-                    </div>
-                  )}
-                </FormRow>
-
-              <FormRow className="md:col-span-2">
+              {/* Project Name — full width */}
+              <FormRow>
                 <label className={formStyles.label}>Project Name *</label>
                 <input
                   required
@@ -227,18 +269,8 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 />
               </FormRow>
 
-              <FormRow>
-                <label className={formStyles.label}>Linked Quotation</label>
-                <input
-                  type="text"
-                  disabled={isReadOnly}
-                  value={formData.linkedQuotation}
-                  onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
-                  className={formStyles.field(false, isReadOnly)}
-                  placeholder="Quotation number"
-                />
-              </FormRow>
-              <FormRow>
+              {/* Row: Client | Linked Quotation */}
+              <div>
                 <label className={formStyles.label}>Client</label>
                 <input
                   type="text"
@@ -248,17 +280,32 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   className={formStyles.field(false, isReadOnly)}
                   placeholder="Client name"
                 />
-              </FormRow>
-              
-              <FormRow>
+              </div>
+
+              <div>
+                <label className={formStyles.label}>Linked Quotation</label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  value={formData.linkedQuotation}
+                  onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
+                  className={formStyles.field(false, isReadOnly)}
+                  placeholder="Quotation number"
+                />
+              </div>
+
+              {/* Row: Start Date | Expected End Date */}
+              <div>
                 <label className={formStyles.label}>Start Date *</label>
                 <CustomDatePicker value={formData.startDate} onChange={(val) => setFormData({ ...formData, startDate: val })} disabled={isReadOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+
+              <div>
                 <label className={formStyles.label}>Expected End Date</label>
                 <CustomDatePicker value={formData.expectedEndDate} onChange={(val) => setFormData({ ...formData, expectedEndDate: val })} disabled={isReadOnly} />
-              </FormRow>
+              </div>
 
+              {/* Project Manager — full width */}
               <FormRow>
                 <label className={formStyles.label}>Project Manager *</label>
                 <div className={isReadOnly ? 'opacity-80 pointer-events-none' : ''}>
@@ -273,6 +320,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 </div>
               </FormRow>
 
+              {/* Assigned Vendors — full width */}
               <FormRow>
                 <label className={formStyles.label}>Assigned Vendors</label>
                 <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
@@ -281,7 +329,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   ) : (
                     vendors.map(vendor => (
                       <label key={vendor.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
+                        <input
                           type="checkbox"
                           disabled={isReadOnly}
                           checked={(formData.assignedVendors || []).includes(vendor.id)}
@@ -302,6 +350,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 </div>
               </FormRow>
 
+              {/* Assigned Entities — full width */}
               <FormRow>
                 <label className={formStyles.label}>Assigned Entities (Employees)</label>
                 <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
@@ -310,7 +359,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   ) : (
                     users.map(user => (
                       <label key={user.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
+                        <input
                           type="checkbox"
                           disabled={isReadOnly}
                           checked={(formData.assignedEntities || []).includes(user.id)}
@@ -331,123 +380,58 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 </div>
               </FormRow>
 
-              <FormRow>
-                <label className={formStyles.label}>Linked Incidents</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-                  {incidents.length === 0 ? (
-                    <span className="text-gray-400 italic">No incidents found</span>
-                  ) : (
-                    incidents.map(inc => (
-                      <label key={inc.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.linkedIncidents || []).includes(inc.id)}
-                          onChange={(e) => {
-                            const current = formData.linkedIncidents || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, linkedIncidents: [...current, inc.id] });
-                            } else {
-                              setFormData({ ...formData, linkedIncidents: current.filter(id => id !== inc.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {inc.ticketNumber || inc.subject}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </FormRow>
+              {/* Row: Linked Incidents | Linked Quotations */}
+              <CheckboxList
+                label="Linked Incidents"
+                items={incidents}
+                getValue={(i) => i.id}
+                getLabel={(i) => i.ticketNumber || i.subject}
+                selectedIds={formData.linkedIncidents || []}
+                onToggle={(id, checked) => {
+                  const current = formData.linkedIncidents || [];
+                  setFormData({ ...formData, linkedIncidents: checked ? [...current, id] : current.filter(x => x !== id) });
+                }}
+              />
 
-              <FormRow>
-                <label className={formStyles.label}>Linked Quotations</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-                  {quotations.length === 0 ? (
-                    <span className="text-gray-400 italic">No quotations found</span>
-                  ) : (
-                    quotations.map(q => (
-                      <label key={q.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.linkedQuotations || []).includes(q.id)}
-                          onChange={(e) => {
-                            const current = formData.linkedQuotations || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, linkedQuotations: [...current, q.id] });
-                            } else {
-                              setFormData({ ...formData, linkedQuotations: current.filter(id => id !== q.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {q.quotationNo}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </FormRow>
+              <CheckboxList
+                label="Linked Quotations"
+                items={quotations}
+                getValue={(q) => q.id}
+                getLabel={(q) => q.quotationNo}
+                selectedIds={formData.linkedQuotations || []}
+                onToggle={(id, checked) => {
+                  const current = formData.linkedQuotations || [];
+                  setFormData({ ...formData, linkedQuotations: checked ? [...current, id] : current.filter(x => x !== id) });
+                }}
+              />
 
-              <FormRow>
-                <label className={formStyles.label}>Linked POs</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-                  {pos.length === 0 ? (
-                    <span className="text-gray-400 italic">No POs found</span>
-                  ) : (
-                    pos.map(po => (
-                      <label key={po.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.linkedPOs || []).includes(po.id)}
-                          onChange={(e) => {
-                            const current = formData.linkedPOs || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, linkedPOs: [...current, po.id] });
-                            } else {
-                              setFormData({ ...formData, linkedPOs: current.filter(id => id !== po.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {po.poNumber || 'Draft PO'}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </FormRow>
+              {/* Row: Linked POs | Linked Expenses */}
+              <CheckboxList
+                label="Linked POs"
+                items={pos}
+                getValue={(p) => p.id}
+                getLabel={(p) => p.poNumber || 'Draft PO'}
+                selectedIds={formData.linkedPOs || []}
+                onToggle={(id, checked) => {
+                  const current = formData.linkedPOs || [];
+                  setFormData({ ...formData, linkedPOs: checked ? [...current, id] : current.filter(x => x !== id) });
+                }}
+              />
 
-              <FormRow>
-                <label className={formStyles.label}>Linked Expenses</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-                  {expenses.length === 0 ? (
-                    <span className="text-gray-400 italic">No expenses found</span>
-                  ) : (
-                    expenses.map(ex => (
-                      <label key={ex.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.linkedExpenses || []).includes(ex.id)}
-                          onChange={(e) => {
-                            const current = formData.linkedExpenses || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, linkedExpenses: [...current, ex.id] });
-                            } else {
-                              setFormData({ ...formData, linkedExpenses: current.filter(id => id !== ex.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {ex.description} (₹{ex.amount})
-                      </label>
-                    ))
-                  )}
-                </div>
-              </FormRow>
+              <CheckboxList
+                label="Linked Expenses"
+                items={expenses}
+                getValue={(e) => e.id}
+                getLabel={(e) => `${e.description} (₹${e.amount})`}
+                selectedIds={formData.linkedExpenses || []}
+                onToggle={(id, checked) => {
+                  const current = formData.linkedExpenses || [];
+                  setFormData({ ...formData, linkedExpenses: checked ? [...current, id] : current.filter(x => x !== id) });
+                }}
+              />
 
-              <FormRow className="md:col-span-2">
+              {/* Description — full width */}
+              <FormRow>
                 <label className={formStyles.label}>Description</label>
                 <textarea
                   disabled={isReadOnly}
@@ -458,40 +442,41 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   rows={3}
                 />
               </FormRow>
+
             </FormGrid>
           </FormSection>
         </form>
       </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3">
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm transition-colors"
+        >
+          {mode === 'view' ? 'Close' : 'Cancel'}
+        </button>
+        {mode !== 'view' && (
           <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm transition-colors"
+            type="submit"
+            form="project-form"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2"
           >
-            {mode === 'view' ? 'Close' : 'Cancel'}
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                {mode === 'create' ? 'Create Project' : 'Save Changes'}
+              </>
+            )}
           </button>
-          {mode !== 'view' && (
-            <button
-              type="submit"
-              form="project-form"
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  {mode === 'create' ? 'Create Project' : 'Save Changes'}
-                </>
-              )}
-            </button>
-          )}
+        )}
       </div>
     </div>
   );

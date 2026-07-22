@@ -2,7 +2,7 @@ import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2 } from 'lucide-react';
 import { formStyles } from '@/components/ui/form-styles';
-import { FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { FormGrid } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -31,7 +31,7 @@ export default function EducationTab({ readOnly }: Props) {
           </button>
         )}
       </div>
-      
+
       {fields.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 dark:bg-black/10 rounded-lg border border-dashed border-gray-200 dark:border-white/10">
           No education records added yet. Click 'Add Education' to include a record.
@@ -52,34 +52,42 @@ export default function EducationTab({ readOnly }: Props) {
             )}
 
             <FormGrid>
-              <FormRow>
+              {/* Row: Degree | Qualification */}
+              <div>
                 <label className={formStyles.label}>Degree</label>
                 <Input type="text" {...register(`educations.${index}.degree`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+              <div>
                 <label className={formStyles.label}>Qualification</label>
                 <Input type="text" {...register(`educations.${index}.qualification`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+
+              {/* Row: Institution | Field of Study */}
+              <div>
                 <label className={formStyles.label}>Institution</label>
                 <Input type="text" {...register(`educations.${index}.institution`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+              <div>
                 <label className={formStyles.label}>Field of Study</label>
                 <Input type="text" {...register(`educations.${index}.fieldOfStudy`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+
+              {/* Row: Start Year | End Year */}
+              <div>
                 <label className={formStyles.label}>Start Year</label>
                 <Input type="text" placeholder="YYYY" {...register(`educations.${index}.startYear`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+              <div>
                 <label className={formStyles.label}>End Year</label>
                 <Input type="text" placeholder="YYYY" {...register(`educations.${index}.endYear`)} disabled={readOnly} />
-              </FormRow>
-              <FormRow>
+              </div>
+
+              {/* Row: Grade / CGPA | (spacer) */}
+              <div>
                 <label className={formStyles.label}>Grade / CGPA</label>
                 <Input type="text" {...register(`educations.${index}.grade`)} disabled={readOnly} />
-              </FormRow>
+              </div>
+              <div /> {/* intentional spacer */}
             </FormGrid>
           </div>
         ))}

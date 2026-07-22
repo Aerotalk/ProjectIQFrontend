@@ -17,7 +17,8 @@ export default function TaxationSection({ readOnly }: Props) {
   return (
     <FormSection title="Step 3 — Taxation & Status">
       <FormGrid>
-        <FormRow>
+        {/* Row: HSN/SAC | GST Rate */}
+        <div>
           <label className={formStyles.label}>HSN / SAC Code</label>
           <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
             <Controller
@@ -33,9 +34,9 @@ export default function TaxationSection({ readOnly }: Props) {
             />
           </div>
           {errors.hsnSac && <p className="text-red-500 text-xs mt-1">{errors.hsnSac.message as string}</p>}
-        </FormRow>
+        </div>
 
-        <FormRow>
+        <div>
           <label className={formStyles.label}>GST Rate *</label>
           <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
             <Controller
@@ -51,11 +52,12 @@ export default function TaxationSection({ readOnly }: Props) {
             />
           </div>
           {errors.gstRate && <p className="text-red-500 text-xs mt-1">{errors.gstRate.message as string}</p>}
-        </FormRow>
+        </div>
 
-        <FormRow className="mt-4">
+        {/* Status — full width (radio group) */}
+        <FormRow>
           <label className={formStyles.label}>Status</label>
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-2">
             <label htmlFor="status-active" className="flex items-center gap-2 cursor-pointer">
               <input id="status-active" type="radio" value="Active" {...register('status')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Active</span>
