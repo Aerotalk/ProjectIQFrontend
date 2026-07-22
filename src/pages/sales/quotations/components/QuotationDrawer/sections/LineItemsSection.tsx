@@ -170,16 +170,17 @@ export default function LineItemsSection({ readOnly }: Props) {
                         name={`lineItems.${index}.discountType`}
                         control={control}
                         render={({ field }) => (
-                          <CustomSelect
+                          <select
                             value={field.value || 'FLAT'}
                             onChange={field.onChange}
                             disabled={readOnly}
-                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1 border-0 border-r border-gray-300 dark:border-white/10 outline-none h-full min-h-0 w-14 rounded-r-none shadow-none focus:ring-0"
-                            options={[
-                              { label: '₹', value: 'FLAT' },
-                              { label: '%', value: 'PERCENTAGE' }
-                            ]}
-                          />
+                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1 border-0 border-r border-gray-300 dark:border-white/10 outline-none h-full min-h-0 w-12 rounded-l-sm rounded-r-none shadow-none focus:ring-0 cursor-pointer appearance-none text-center"
+                            style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+                          >
+                            <option value="FLAT">₹</option>
+                            <option value="PERCENTAGE">%</option>
+                          </select>
+
                         )}
                       />
                       <input 
