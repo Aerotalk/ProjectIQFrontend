@@ -72,9 +72,8 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     ? vendors 
     : [];
 
-  // Filter POs based on selected project and vendor
+  // Filter POs based on selected vendor
   const filteredPOs = purchaseOrders.filter(po => {
-    if (selectedProjectId && po.projectId !== selectedProjectId) return false;
     if (selectedVendorId && po.vendorId !== selectedVendorId) return false;
     return true;
   });
@@ -147,6 +146,9 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     return filteredVendors.map(v => ({ label: v.displayName, value: v.id }));
   }, [filteredVendors]);
 
+  const PO_OPTIONS = useMemo(() => {
+    return filteredPOs.map(po => ({ label: po.poNumber, value: po.id }));
+  }, [filteredPOs]);
 
   return (
     <div className="space-y-6">
@@ -244,6 +246,28 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             )}
           </div>
           
+          {/* Linked Vendor PO */}
+          <div>
+            <label className={labelClass}>
+              Linked Vendor PO
+              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
+            </label>
+            <div className="relative">
+              <div className={readOnly || isLoadingData || !selectedProjectId || !selectedVendorId ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="linkedVendorPoId"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={PO_OPTIONS}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* E-Way Bill Number */}
           <div>

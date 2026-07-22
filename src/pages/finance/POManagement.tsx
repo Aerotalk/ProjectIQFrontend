@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Search, MoreVertical, ShoppingCart,
   ChevronLeft, ChevronRight, Loader2, FileText,
@@ -173,10 +173,18 @@ export default function POManagement() {
     return matchSearch && matchProject && matchVendor && matchStatus;
   });
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const sortedPOs = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.poDate || 0).getTime();
+      const dateB = new Date(b.createdAt || b.poDate || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [filtered]);
+
+  const totalPages = Math.ceil(sortedPOs.length / itemsPerPage);
   const idxLast = currentPage * itemsPerPage;
   const idxFirst = idxLast - itemsPerPage;
-  const currentItems = filtered.slice(idxFirst, idxLast);
+  const currentItems = sortedPOs.slice(idxFirst, idxLast);
 
   const resetPage = () => setCurrentPage(1);
 
