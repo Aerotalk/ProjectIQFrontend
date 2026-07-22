@@ -3,10 +3,8 @@ import { X, Save, FolderKanban } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { api } from '../../../lib/api';
-import { POService } from '../../../services/po.service';
-import { QuotationService } from '../../../services/quotation.service';
-import { ExpenseService } from '../../../services/expense.service';
-import { TicketService } from '../../../services/ticket.service';
+import { ClientService } from '../../../services/client.service';
+import type { Client } from '../../../types/client.types';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 
@@ -22,10 +20,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const { selectedCompanyId } = useAuth();
   const { vendors } = useVendors({ companyId: selectedCompanyId || null });
   const [users, setUsers] = useState<any[]>([]);
-  const [incidents, setIncidents] = useState<any[]>([]);
-  const [quotations, setQuotations] = useState<any[]>([]);
-  const [pos, setPos] = useState<any[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
 
   const [formData, setFormData] = useState<ProjectFormValues>({
     projectCode: '',
@@ -47,6 +42,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
     const fetchUsers = async () => {
       try {
         const response: any = await api.get('/admin/users');
@@ -56,28 +52,17 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         console.error('Failed to load users', err);
       }
     };
-    const fetchRelations = async () => {
+    const fetchClients = async () => {
       if (!selectedCompanyId) return;
       try {
-        const [allPos, allQuotations, allExpenses, allTickets] = await Promise.all([
-          POService.getAll(selectedCompanyId).catch(() => []),
-          QuotationService.getQuotations(selectedCompanyId).catch(() => []),
-          ExpenseService.getAll(selectedCompanyId).catch(() => []),
-          TicketService.getAll(selectedCompanyId).catch(() => [])
-        ]);
-        setPos(allPos);
-        setQuotations(allQuotations);
-        setExpenses(allExpenses);
-        setIncidents(allTickets.filter((t: any) => t.type?.toLowerCase() === 'incident' || !t.type));
+        const data = await ClientService.getClients(selectedCompanyId);
+        setClients(data);
       } catch (err) {
-        console.error('Failed to load relations', err);
+        console.error('Failed to load clients', err);
       }
     };
-    
-    if (isOpen) {
-      fetchUsers();
-      fetchRelations();
-    }
+    fetchUsers();
+    fetchClients();
   }, [isOpen, selectedCompanyId]);
 
   useEffect(() => {
@@ -237,14 +222,21 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Client</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Client *
+                    <span className="ml-1 text-[10px] text-gray-400 normal-case font-normal tracking-normal">(required)</span>
+                  </label>
+                  <CustomSelect
                     disabled={isReadOnly}
-                    value={formData.client}
-                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                    placeholder="Client name"
+                    value={formData.client || ''}
+                    onChange={(val) => setFormData({ ...formData, client: val })}
+                    options={[
+                      { label: 'Select a client...', value: '' },
+                      ...clients.map(c => ({
+                        label: c.displayName || c.companyName || `${c.firstName || ''} ${c.lastName || ''}`.trim(),
+                        value: c.id
+                      }))
+                    ]}
                   />
                 </div>
               </div>
@@ -344,125 +336,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Incidents</label>
-                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
-                    {incidents.length === 0 ? (
-                      <span className="text-gray-400 italic">No incidents found</span>
-                    ) : (
-                      incidents.map(inc => (
-                        <label key={inc.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                          <input 
-                            type="checkbox"
-                            disabled={isReadOnly}
-                            checked={(formData.linkedIncidents || []).includes(inc.id)}
-                            onChange={(e) => {
-                              const current = formData.linkedIncidents || [];
-                              if (e.target.checked) {
-                                setFormData({ ...formData, linkedIncidents: [...current, inc.id] });
-                              } else {
-                                setFormData({ ...formData, linkedIncidents: current.filter(id => id !== inc.id) });
-                              }
-                            }}
-                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                          />
-                          {inc.ticketNumber || inc.subject}
-                        </label>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Quotations</label>
-                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
-                    {quotations.length === 0 ? (
-                      <span className="text-gray-400 italic">No quotations found</span>
-                    ) : (
-                      quotations.map(q => (
-                        <label key={q.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                          <input 
-                            type="checkbox"
-                            disabled={isReadOnly}
-                            checked={(formData.linkedQuotations || []).includes(q.id)}
-                            onChange={(e) => {
-                              const current = formData.linkedQuotations || [];
-                              if (e.target.checked) {
-                                setFormData({ ...formData, linkedQuotations: [...current, q.id] });
-                              } else {
-                                setFormData({ ...formData, linkedQuotations: current.filter(id => id !== q.id) });
-                              }
-                            }}
-                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                          />
-                          {q.quotationNo}
-                        </label>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked POs</label>
-                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
-                    {pos.length === 0 ? (
-                      <span className="text-gray-400 italic">No POs found</span>
-                    ) : (
-                      pos.map(po => (
-                        <label key={po.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                          <input 
-                            type="checkbox"
-                            disabled={isReadOnly}
-                            checked={(formData.linkedPOs || []).includes(po.id)}
-                            onChange={(e) => {
-                              const current = formData.linkedPOs || [];
-                              if (e.target.checked) {
-                                setFormData({ ...formData, linkedPOs: [...current, po.id] });
-                              } else {
-                                setFormData({ ...formData, linkedPOs: current.filter(id => id !== po.id) });
-                              }
-                            }}
-                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                          />
-                          {po.poNumber || 'Draft PO'}
-                        </label>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Expenses</label>
-                  <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
-                    {expenses.length === 0 ? (
-                      <span className="text-gray-400 italic">No expenses found</span>
-                    ) : (
-                      expenses.map(ex => (
-                        <label key={ex.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                          <input 
-                            type="checkbox"
-                            disabled={isReadOnly}
-                            checked={(formData.linkedExpenses || []).includes(ex.id)}
-                            onChange={(e) => {
-                              const current = formData.linkedExpenses || [];
-                              if (e.target.checked) {
-                                setFormData({ ...formData, linkedExpenses: [...current, ex.id] });
-                              } else {
-                                setFormData({ ...formData, linkedExpenses: current.filter(id => id !== ex.id) });
-                              }
-                            }}
-                            className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                          />
-                          {ex.description} (₹{ex.amount})
-                        </label>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
+              {/* Linked Incidents, Quotations, POs and Expenses are managed from inside the project profile */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
