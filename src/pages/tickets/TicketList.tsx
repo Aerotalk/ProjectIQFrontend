@@ -92,7 +92,7 @@ export default function TicketList() {
       case 'P1':
       case 'CRITICAL':
       case '1 - HIGH': 
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400">P1</span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400">P1 - Critical</span>;
       case 'P2':
       case 'HIGH':
       case '2 - MEDIUM': 

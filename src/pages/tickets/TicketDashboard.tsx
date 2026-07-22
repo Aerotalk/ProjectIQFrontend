@@ -201,8 +201,8 @@ export default function TicketDashboard() {
                       t.priority === 'P3' || t.priority === 'Medium' ? 'text-yellow-700 bg-yellow-50 dark:bg-yellow-500/10' :
                       'text-green-700 bg-green-50 dark:bg-green-500/10'
                     }`}>
-                      {t.priority === 'P1' || t.priority === 'Critical' || t.priority === 'High' ? 'P1' :
-                       t.priority === 'P2' ? 'P2' :
+                      {t.priority === 'P1' || t.priority === 'Critical' || t.priority === 'High' ? 'P1 - Critical' :
+                       t.priority === 'P2' || t.priority === 'Medium' ? 'P2' :
                        t.priority === 'P3' || t.priority === 'Medium' ? 'P3' : 'P4'}
                     </span>
                   </td>

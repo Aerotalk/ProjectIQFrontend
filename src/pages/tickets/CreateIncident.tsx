@@ -271,7 +271,7 @@ export default function CreateIncident() {
                     render={({ field }) => (
                       <CustomSelect
                         options={[
-                          { label: 'P1', value: 'P1' },
+                          { label: 'P1 - Critical', value: 'P1' },
                           { label: 'P2', value: 'P2' },
                           { label: 'P3', value: 'P3' },
                           { label: 'P4', value: 'P4' }
