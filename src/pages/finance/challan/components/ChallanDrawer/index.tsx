@@ -17,7 +17,7 @@ interface Props {
   nextNumber?: number;
 }
 
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialData, challanNumber, isSubmitting, nextNumber }: Props) {
   const form = useChallanForm();
@@ -72,7 +72,7 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
 
   const readOnly = mode === 'view';
 
-  const onSubmit = async (data: ChallanFormValues) => {
+  const onSubmit = async (data: any) => {
     await onSave(data);
   };
 
