@@ -1,8 +1,9 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
-import { useState, useEffect } from 'react';
-import { X, Save, FolderKanban } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Save, FolderKanban, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
+import { useClients } from '../../../hooks/useClients';
 import { api } from '../../../lib/api';
 import { POService } from '../../../services/po.service';
 import { QuotationService } from '../../../services/quotation.service';
@@ -25,6 +26,7 @@ interface ProjectDrawerProps {
 export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialData }: ProjectDrawerProps) {
   const { selectedCompanyId } = useAuth();
   const { vendors } = useVendors({ companyId: selectedCompanyId || null });
+  const { clients } = useClients({ companyId: selectedCompanyId || null });
   const [_users, setUsers] = useState<any[]>([]);
   const [_incidents, setIncidents] = useState<any[]>([]);
   const [_quotations, setQuotations] = useState<any[]>([]);
@@ -145,6 +147,11 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const isReadOnly = mode === 'view';
 
   const statusOptions = [
+    // status options below
+  ];
+  // reassign to avoid duplicate
+  statusOptions.length = 0;
+  statusOptions.push(
     { label: 'Planning', value: 'Planning' },
     { label: 'Pending Approval', value: 'Pending Approval' },
     { label: 'Active', value: 'Active' },
@@ -152,6 +159,16 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
     { label: 'On Hold', value: 'On Hold' },
     { label: 'Completed', value: 'Completed' },
     { label: 'Cancelled', value: 'Cancelled' },
+  ];
+
+  const clientOptions = [
+    { label: 'Select Client', value: '' },
+    ...clients.map((c) => ({ label: c.displayName || c.id, value: c.id })),
+  ];
+
+  const vendorOptions = [
+    { label: 'Select Vendors', value: '' },
+    ...vendors.map((v) => ({ label: v.displayName || v.id, value: v.id })),
   ];
 
   return (
@@ -214,50 +231,24 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 />
               </FormRow>
 
-              {/* Row: Client | Vendors */}
+              {/* Row: Client dropdown | Vendors dropdown */}
               <div>
                 <label className={formStyles.label}>CLIENT *</label>
-                <input
-                  type="text"
-                  disabled={isReadOnly}
+                <CustomSelect
                   value={formData.client}
-                  onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                  className={formStyles.field(false, isReadOnly)}
-                  placeholder="Select Client"
+                  onChange={(val) => setFormData({ ...formData, client: val })}
+                  options={clientOptions}
                 />
               </div>
 
               <div>
                 <label className={formStyles.label}>VENDORS *</label>
-                <div className={cn(formStyles.field(false, isReadOnly), 'max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2')}>
-                  {vendors.length === 0 ? (
-                    <span className="text-gray-400 italic text-sm">Select Vendors</span>
-                  ) : (
-                    vendors.map((vendor) => (
-                      <label
-                        key={vendor.id}
-                        className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.assignedVendors || []).includes(vendor.id)}
-                          onChange={(e) => {
-                            const current = formData.assignedVendors || [];
-                            setFormData({
-                              ...formData,
-                              assignedVendors: e.target.checked
-                                ? [...current, vendor.id]
-                                : current.filter((id) => id !== vendor.id),
-                            });
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {vendor.displayName}
-                      </label>
-                    ))
-                  )}
-                </div>
+                <VendorMultiSelect
+                  vendors={vendors}
+                  selected={formData.assignedVendors || []}
+                  disabled={isReadOnly}
+                  onChange={(updated) => setFormData({ ...formData, assignedVendors: updated })}
+                />
               </div>
 
               {/* Row: Due Date | Initial Status */}
