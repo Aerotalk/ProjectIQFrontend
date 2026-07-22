@@ -10,10 +10,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ChallanService } from '../../services/challan.service';
 import { VendorService } from '../../services/vendor.service';
 import { ProjectService } from '../../services/project.service';
+import { ProductService } from '../../services/product.service';
 import { api } from '../../lib/api';
 import type { DeliveryChallan } from '../../types/challan.types';
 import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
+import type { Product } from '../../types/product.types';
 import ChallanPreviewPanel from './challan/components/ChallanPreviewPanel';
 import FunkyLoader from '@/components/ui/FunkyLoader';
 
@@ -25,6 +27,7 @@ export default function ChallanDetails() {
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   
   const isNew = id === 'new';
   const [isEditing, setIsEditing] = useState(isNew);
@@ -64,25 +67,17 @@ export default function ChallanDetails() {
         const pData = Array.isArray(data) ? data : (data?.data || data?.content || []);
         setProjects(pData);
       }).catch(console.error);
+      ProductService.getProducts(companyId).then(setProducts).catch(console.error);
     }
   }, [companyId]);
 
-  const getStageFromStatus = (status?: string) => {
-    switch (status) {
-      case 'Draft': return 1;
-      case 'Issued': return 2;
-      case 'Dispatched': return 3;
-      case 'Delivered': return 4;
-      default: return 1;
-    }
-  };
+
 
   const handleStatusUpdate = async (newStatus: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered', successMessage: string, newStage: number) => {
     if (!id || isNew) return;
     setIsApiLoading(true);
     try {
-      // Assuming update is supported. We mock it in UI if backend fails.
-      await api.put(`/admin/finance/delivery-challans/${id}/status`, { status: newStatus }).catch(() => {});
+      await ChallanService.update(id, { ...challan, status: newStatus });
       setCurrentStage(newStage);
       setChallan(prev => ({ ...prev, status: newStatus }));
       toast.success(successMessage);
@@ -101,11 +96,18 @@ export default function ChallanDetails() {
           const safeData = Array.isArray(data) ? data : (data?.data || data?.content || []);
           const found = safeData.find((p: any) => p.id === id || p.challanNumber === id);
           if (found) {
-            setCurrentStage(getStageFromStatus(found.status || 'Issued'));
             setChallan({
               ...found,
-              status: found.status || 'Issued'
+              status: found.status || 'Draft'
             });
+            // Update stage based on status
+            switch (found.status?.toLowerCase()) {
+              case 'draft': setCurrentStage(1); break;
+              case 'issued': setCurrentStage(2); break;
+              case 'dispatched': setCurrentStage(3); break;
+              case 'delivered': setCurrentStage(4); break;
+              default: setCurrentStage(1); // Default to draft if unknown
+            }
           }
         })
         .catch(console.error)
@@ -116,6 +118,8 @@ export default function ChallanDetails() {
   const handlePreview = async () => {
     try {
       setIsLoadingPreview(true);
+      
+      const currentChallan = challan;
       
       const templateRes = await api.get(`/admin/templates/delivery_challan.html`);
       
@@ -153,7 +157,7 @@ export default function ChallanDetails() {
         }
       }
       
-      const vendor = vendors.find(v => v.id === challan.vendorId);
+      const vendor = vendors.find(v => v.id === currentChallan.vendorId);
       
       const payload = {
         primary_color_hex: '#792359',
@@ -166,31 +170,30 @@ export default function ChallanDetails() {
         company_gstin: company?.gstNumber || '',
         company_pan: company?.panNumber || '',
         
-        client_name: vendor?.displayName || vendor?.companyName || challan.vendorName || 'Client Name',
-        client_address_line1: vendor?.billingAddressLine1 || '',
-        client_address_line2: vendor?.billingCity || '',
+        client_name: vendor?.displayName || vendor?.companyName || currentChallan.vendorName || '',
+        client_address_line1: vendor?.billingAddressLine1 || vendor?.shippingAddressLine1 || '',
+        client_address_line2: vendor?.billingCity || vendor?.shippingCity || '',
         client_gstin: vendor?.gstin || '',
-        client_state: vendor?.billingState || '',
-        client_phone: vendor?.phone || '',
-        client_email: vendor?.email || '',
+        client_state: vendor?.billingState || vendor?.shippingState || '',
         
-        ship_to_name: vendor?.displayName || vendor?.companyName || challan.vendorName || 'Client Name',
-        ship_to_address_line1: vendor?.shippingAddressLine1 || vendor?.billingAddressLine1 || '',
-        ship_to_address_line2: vendor?.shippingCity || vendor?.billingCity || '',
-        ship_to_state: vendor?.shippingState || vendor?.billingState || '',
+        has_shipping: !!vendor?.shippingAddressLine1,
+        ship_to_name: vendor?.displayName || vendor?.companyName || currentChallan.vendorName || '',
+        ship_to_address_line1: vendor?.shippingAddressLine1 || '',
+        ship_to_address_line2: vendor?.shippingCity || '',
+        ship_to_state: vendor?.shippingState || '',
         
-        transport_mode: challan.transportMode || 'By Road',
-        delivery_location: challan.deliveryLocation || vendor?.shippingCity || vendor?.billingCity || '',
-        po_number: challan.poNumber || challan.linkedVendorPoNumber || 'N/A',
-        po_date: challan.poDate || '',
+        transport_mode: currentChallan.transportMode || '',
+        delivery_location: currentChallan.deliveryLocation || '',
+        po_number: currentChallan.poNumber || currentChallan.linkedVendorPoNumber || '',
+        po_date: currentChallan.poDate || '',
         
-        challan_number: challan.challanNumber || 'Draft',
+        challan_number: challan.challanNumber || '',
         challan_date: challan.challanDate || new Date().toLocaleDateString('en-GB'),
         place_of_supply: challan.placeOfSupply || vendor?.billingState || '',
         
         contact_name: challan.contactName || '',
-        contact_email: challan.contactEmail || '',
-        contact_mobile: challan.contactMobile || '',
+        contact_email: challan.contactEmail || company?.email || '',
+        contact_mobile: challan.contactMobile || company?.phone || '',
         
         items: challan.lineItems?.length ? challan.lineItems.map((item, index) => ({
           item_index: index + 1,
@@ -594,17 +597,27 @@ export default function ChallanDetails() {
                             <tr key={item.id || idx} className="border-b border-gray-200 dark:border-white/10 last:border-0">
                               <td className="p-3">
                                 {isEditing ? (
-                                  <input 
-                                    type="text" 
-                                    value={item.itemName || ''} 
-                                    onChange={e => {
-                                      const newItems = [...(challan.lineItems || [])];
-                                      newItems[idx].itemName = e.target.value;
-                                      setChallan({ ...challan, lineItems: newItems });
-                                    }}
-                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm"
-                                    placeholder="Item name"
-                                  />
+                                  <div className="relative">
+                                    <CustomSelect
+                                      value={item.itemName || ''}
+                                      onChange={val => {
+                                        const newItems = [...(challan.lineItems || [])];
+                                        newItems[idx].itemName = val;
+                                        const product = products.find(p => p.itemName === val);
+                                        if (product) {
+                                          newItems[idx].itemHsn = product.hsnSac || '';
+                                          newItems[idx].description = product.description || '';
+                                          newItems[idx].unit = product.unit || 'Nos';
+                                        }
+                                        setChallan({ ...challan, lineItems: newItems });
+                                      }}
+                                      options={products.map(p => ({
+                                        label: p.itemName,
+                                        value: p.itemName,
+                                        subLabel: p.description ? p.description : ''
+                                      }))}
+                                    />
+                                  </div>
                                 ) : (
                                   <span className="text-sm text-gray-900 dark:text-white">{item.itemName}</span>
                                 )}
