@@ -459,12 +459,19 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             <label className={formStyles.label}>
               Description <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <textarea
-              {...register('description')}
-              disabled={readOnly}
-              placeholder="Specify what was delivered or what milestone was completed..."
-              rows={4}
-              className={formStyles.textarea(!!errors.description, readOnly)}
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <textarea
+                  {...field}
+                  value={field.value || ''}
+                  disabled={readOnly}
+                  placeholder="Specify what was delivered or what milestone was completed..."
+                  rows={4}
+                  className={formStyles.textarea(!!errors.description, readOnly)}
+                />
+              )}
             />
             {errors.description && (
               <p className="text-red-500 text-xs mt-1">{errors.description.message as string}</p>
@@ -477,12 +484,19 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               Remarks
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
-            <textarea
-              {...register('remarks')}
-              disabled={readOnly}
-              placeholder="Any internal remarks or additional notes..."
-              rows={3}
-              className={formStyles.textarea(false, readOnly)}
+            <Controller
+              name="remarks"
+              control={control}
+              render={({ field }) => (
+                <textarea
+                  {...field}
+                  value={field.value || ''}
+                  disabled={readOnly}
+                  placeholder="Any internal remarks or additional notes..."
+                  rows={3}
+                  className={formStyles.textarea(false, readOnly)}
+                />
+              )}
             />
           </FormRow>
         </FormGrid>
