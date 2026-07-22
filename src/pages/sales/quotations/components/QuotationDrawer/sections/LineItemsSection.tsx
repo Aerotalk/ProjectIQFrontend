@@ -49,7 +49,7 @@ export default function LineItemsSection({ readOnly }: Props) {
       setValue(`lineItems.${index}.quantity`, 1);
       setValue(`lineItems.${index}.discount`, 0);
       setValue(`lineItems.${index}.discountValue`, 0);
-      setValue(`lineItems.${index}.discountType`, '₹');
+      setValue(`lineItems.${index}.discountType`, 'FLAT');
     }
   };
 
@@ -78,12 +78,13 @@ export default function LineItemsSection({ readOnly }: Props) {
         <table className="w-full text-left min-w-[800px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[25%]">Product/Service</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[20%]">Product/Service</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">HSN/SAC</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[14%]">Discount</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Unit</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Rate (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Discount</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[8%]">GST (%)</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
               {!readOnly && <th className="px-3 py-2.5 w-10"></th>}
             </tr>
@@ -130,6 +131,15 @@ export default function LineItemsSection({ readOnly }: Props) {
                         className={`${cellClass} resize-y min-h-[40px] text-xs`} 
                       />
                     </div>
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <input 
+                      type="text" 
+                      placeholder="HSN" 
+                      {...register(`lineItems.${index}.hsnSac`)} 
+                      disabled={readOnly} 
+                      className={cellClass} 
+                    />
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input 

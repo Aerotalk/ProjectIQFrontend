@@ -41,8 +41,8 @@ export default function SalesDashboard() {
     { label: 'Sent for Approval', statusMatches: ['Pending Approval', 'Sent for Approval'], icon: UserCheck },
     { label: 'Approved', statusMatches: ['Approved'], icon: CheckCircle2 },
     { label: 'Sent to Client', statusMatches: ['Sent to Client'], icon: Send },
-    { label: 'Revisions Requested', statusMatches: ['Rejected', 'Changes Requested'], icon: FileText },
-    { label: 'Converted', statusMatches: ['Accepted'], icon: Trophy },
+    { label: 'Revisions Requested', statusMatches: ['Rejected', 'Changes Requested', 'Under Negotiation'], icon: FileText },
+    { label: 'Confirmed Lead', statusMatches: ['Accepted', 'Confirmed Lead'], icon: Trophy },
   ].map(stage => {
     const stageQuots = quotations.filter(q => {
       if (!stage.statusMatches.includes(q.status)) return false;

@@ -12,8 +12,29 @@ export interface DeliveryChallan {
   attachmentName?: string;    // Optional uploaded file name
   remarks?: string;           // Optional internal remarks
   status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
-  lineItems?: any[];
+
+  transportMode?: string;
+  deliveryLocation?: string;
+  placeOfSupply?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactMobile?: string;
+  poNumber?: string;
+  poDate?: string;
+
+  lineItems?: ChallanLineItem[];
   
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ChallanLineItem {
+  id?: string;
+  itemName?: string;
+  itemHsn?: string;
+  description?: string;
+  dispatchedQuantity?: number;
+  qty?: number; // legacy alias
+  quantity?: number; // legacy alias
+  unit?: string;
 }

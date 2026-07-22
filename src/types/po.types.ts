@@ -4,6 +4,7 @@ export interface POLineItem {
   id?: string;
   productId?: string;
   itemName?: string;
+  hsnSac?: string;
   description: string;
   quantity: number;
   unit: string;

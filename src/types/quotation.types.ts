@@ -53,4 +53,6 @@ export interface Quotation {
   approvedBy?: string;
   approvalDate?: string;
   woPoDocumentUrl?: string;
+
+  createdAt?: string;
 }

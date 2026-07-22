@@ -43,12 +43,13 @@ export interface QuotationDto {
   approvedBy?: string;
   approvalDate?: string;
   woPoDocumentUrl?: string;
+  createdAt?: string;
 }
 
 export const mapToQuotation = (dto: QuotationDto): Quotation => {
   return {
     ...dto,
-    status: dto.status as any,
+    status: (dto.status === 'Converted' ? 'Confirmed Lead' : dto.status) as any,
     salesperson: dto.salesperson,
     lineItems: dto.lineItems.map(item => ({
       ...item
