@@ -45,18 +45,6 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
   const handleDownload = async () => {
     if (!iframeRef.current || !iframeRef.current.contentDocument) return;
     setIsGeneratingPdf(true);
-    
-    // TEMPORARY WORKAROUND: Remove main document stylesheets to prevent html2canvas from crashing on oklch()
-    const parentStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
-    const placeholders: { el: Element, parent: Node, nextSibling: Node | null }[] = [];
-    
-    parentStyles.forEach(style => {
-      const isStyleSheet = style.tagName.toLowerCase() === 'style' || (style as HTMLLinkElement).href?.includes('.css');
-      if (isStyleSheet) {
-        placeholders.push({ el: style, parent: style.parentNode!, nextSibling: style.nextSibling });
-        style.remove();
-      }
-    });
 
     try {
       const element = iframeRef.current.contentDocument.documentElement;
@@ -66,7 +54,8 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
-          useCORS: true
+          useCORS: true,
+          window: iframeRef.current.contentWindow
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
@@ -74,10 +63,6 @@ export default function QuotationPreviewPanel({ isOpen, onClose, templateContent
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
-      // Restore styles immediately
-      placeholders.forEach(({ el, parent, nextSibling }) => {
-        parent.insertBefore(el, nextSibling);
-      });
       setIsGeneratingPdf(false);
     }
   };
