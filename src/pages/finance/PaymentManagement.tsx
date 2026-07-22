@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Search, MoreVertical, Banknote,
-  ChevronLeft, ChevronRight, Loader2, CheckCircle2,
+  ChevronLeft, ChevronRight, CheckCircle2,
   Clock, XCircle, FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { getNextSequenceNumber } from '../../utils/sequence';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 const STATUS_STYLES: Record<PaymentRecord['status'], string> = {
   Completed: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
@@ -243,9 +244,7 @@ export default function PaymentManagement() {
 
         <div className="overflow-x-auto min-h-[320px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-24">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Retrieving transaction registry..." />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-gray-400">
               <Banknote size={48} className="mb-4 opacity-20" />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Loader2 } from 'lucide-react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
@@ -9,6 +9,7 @@ import VendorDrawer from './vendors/components/VendorDrawer';
 import VendorProfileView from './vendors/components/VendorProfileView';
 import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 export default function VendorsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -117,9 +118,7 @@ export default function VendorsList() {
 
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Fetching vendor records..." />
           ) : filteredVendors.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-gray-500">
               <Store size={48} className="mb-4 opacity-20" />

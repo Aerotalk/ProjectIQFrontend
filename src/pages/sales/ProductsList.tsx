@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Loader2 } from 'lucide-react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
@@ -10,6 +10,7 @@ import type { ProductFormValues } from './products/validators/productValidation'
 import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { getNextSequenceNumber } from '../../utils/sequence';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 export default function ProductsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -117,9 +118,7 @@ export default function ProductsList() {
 
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Loading catalog inventory..." />
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-gray-500">
               <Package size={48} className="mb-4 opacity-20" />

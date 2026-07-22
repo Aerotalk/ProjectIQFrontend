@@ -10,6 +10,69 @@ body {
   font-family: Inter, system-ui, sans-serif;
 }
 
+@keyframes spinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes progressIndeterminate {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(30%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.8;
+    filter: brightness(1);
+    box-shadow: 0 0 15px 2px rgba(121, 35, 89, 0.15);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.1);
+    box-shadow: 0 0 25px 8px rgba(121, 35, 89, 0.35);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spinReverse 1.5s linear infinite;
+}
+
+.animate-progress-indeterminate {
+  animation: progressIndeterminate 1.8s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(229, 231, 235, 0.6) 25%,
+    rgba(243, 244, 246, 0.9) 37%,
+    rgba(229, 231, 235, 0.6) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(31, 41, 55, 0.5) 25%,
+    rgba(55, 65, 81, 0.8) 37%,
+    rgba(31, 41, 55, 0.5) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s infinite ease-in-out;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;

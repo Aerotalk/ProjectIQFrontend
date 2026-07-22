@@ -7,6 +7,7 @@ import ProjectDrawer from './components/ProjectDrawer';
 import ProjectQuickGlance from './components/ProjectQuickGlance';
 import ProjectProfileView from './components/ProjectProfileView';
 import toast from 'react-hot-toast';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProjectDashboard() {
@@ -232,9 +233,7 @@ export default function ProjectDashboard() {
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-20 text-gray-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
-        </div>
+        <FunkyLoader fullScreen={false} message="Fetching project workspaces & analytics..." />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredProjects.map((p) => (
