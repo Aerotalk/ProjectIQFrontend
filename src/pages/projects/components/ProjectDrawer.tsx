@@ -25,11 +25,11 @@ interface ProjectDrawerProps {
 export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialData }: ProjectDrawerProps) {
   const { selectedCompanyId } = useAuth();
   const { vendors } = useVendors({ companyId: selectedCompanyId || null });
-  const [users, setUsers] = useState<any[]>([]);
-  const [incidents, setIncidents] = useState<any[]>([]);
-  const [quotations, setQuotations] = useState<any[]>([]);
-  const [pos, setPos] = useState<any[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [_users, setUsers] = useState<any[]>([]);
+  const [_incidents, setIncidents] = useState<any[]>([]);
+  const [_quotations, setQuotations] = useState<any[]>([]);
+  const [_pos, setPos] = useState<any[]>([]);
+  const [_expenses, setExpenses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState<ProjectFormValues>({
     projectCode: '',
@@ -46,7 +46,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
     linkedIncidents: [],
     linkedQuotations: [],
     linkedPOs: [],
-    linkedExpenses: []
+    linkedExpenses: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,7 +67,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           POService.getAll(selectedCompanyId).catch(() => []),
           QuotationService.getQuotations(selectedCompanyId).catch(() => []),
           ExpenseService.getAll(selectedCompanyId).catch(() => []),
-          TicketService.getAll(selectedCompanyId).catch(() => [])
+          TicketService.getAll(selectedCompanyId).catch(() => []),
         ]);
         setPos(allPos);
         setQuotations(allQuotations);
@@ -102,7 +102,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedIncidents: initialData.linkedIncidents || [],
           linkedQuotations: initialData.linkedQuotations || [],
           linkedPOs: initialData.linkedPOs || [],
-          linkedExpenses: initialData.linkedExpenses || []
+          linkedExpenses: initialData.linkedExpenses || [],
         });
       } else {
         setFormData({
@@ -120,7 +120,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedIncidents: [],
           linkedQuotations: [],
           linkedPOs: [],
-          linkedExpenses: []
+          linkedExpenses: [],
         });
       }
     }
@@ -134,7 +134,6 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
       onClose();
       return;
     }
-
     setIsSubmitting(true);
     try {
       await onSave(formData);
@@ -145,44 +144,15 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
 
   const isReadOnly = mode === 'view';
 
-  // Reusable multi-select checkbox list
-  const CheckboxList = ({
-    label,
-    items,
-    getValue,
-    getLabel,
-    selectedIds,
-    onToggle,
-  }: {
-    label: string;
-    items: any[];
-    getValue: (item: any) => string;
-    getLabel: (item: any) => string;
-    selectedIds: string[];
-    onToggle: (id: string, checked: boolean) => void;
-  }) => (
-    <div>
-      <label className={formStyles.label}>{label}</label>
-      <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-        {items.length === 0 ? (
-          <span className="text-gray-400 italic">No {label.toLowerCase()} found</span>
-        ) : (
-          items.map(item => (
-            <label key={getValue(item)} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-              <input
-                type="checkbox"
-                disabled={isReadOnly}
-                checked={selectedIds.includes(getValue(item))}
-                onChange={(e) => onToggle(getValue(item), e.target.checked)}
-                className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-              />
-              {getLabel(item)}
-            </label>
-          ))
-        )}
-      </div>
-    </div>
-  );
+  const statusOptions = [
+    { label: 'Planning', value: 'Planning' },
+    { label: 'Pending Approval', value: 'Pending Approval' },
+    { label: 'Active', value: 'Active' },
+    { label: 'In Progress', value: 'In Progress' },
+    { label: 'On Hold', value: 'On Hold' },
+    { label: 'Completed', value: 'Completed' },
+    { label: 'Cancelled', value: 'Cancelled' },
+  ];
 
   return (
     <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
@@ -195,10 +165,10 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {mode === 'create' ? 'Create Project' : mode === 'edit' ? 'Edit Project' : 'Project Details'}
+              {mode === 'create' ? 'Add New Project' : mode === 'edit' ? 'Edit Project' : 'Project Details'}
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {mode === 'create' ? 'Add a new project' : initialData?.projectCode}
+              {mode === 'create' ? 'Fill in the project details below' : initialData?.projectCode}
             </p>
           </div>
         </div>
@@ -212,52 +182,14 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
 
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-        <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
+        <form id="project-form" onSubmit={handleSubmit} className="space-y-5">
 
-          <FormSection title="Project Details" className="pt-0 border-t-0">
+          <FormSection title="" className="pt-0 border-t-0">
             <FormGrid>
-
-              {/* Row: Project Code | Status */}
-              <div>
-                <label className={formStyles.label}>Project Code</label>
-                <input
-                  type="text"
-                  disabled={true}
-                  value={formData.projectCode}
-                  className={formStyles.field(false, true)}
-                  placeholder={mode === 'create' ? "Auto-generated upon save" : ""}
-                />
-              </div>
-
-              <div>
-                <label className={formStyles.label}>Status</label>
-                {isReadOnly ? (
-                  <CustomSelect
-                    value={formData.status}
-                    onChange={(val) => {
-                      const newData = { ...formData, status: val };
-                      setFormData(newData);
-                      onSave(newData); // quick save in view mode
-                    }}
-                    options={[
-                      { label: 'Pending Approval', value: 'Pending Approval' },
-                      { label: 'Active', value: 'Active' },
-                      { label: 'In Progress', value: 'In Progress' },
-                      { label: 'On Hold', value: 'On Hold' },
-                      { label: 'Completed', value: 'Completed' },
-                      { label: 'Cancelled', value: 'Cancelled' }
-                    ]}
-                  />
-                ) : (
-                  <div className={cn(formStyles.field(false, true), "flex items-center")}>
-                    {formData.status}
-                  </div>
-                )}
-              </div>
 
               {/* Project Name — full width */}
               <FormRow>
-                <label className={formStyles.label}>Project Name *</label>
+                <label className={formStyles.label}>PROJECT NAME *</label>
                 <input
                   required
                   type="text"
@@ -265,81 +197,59 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                   value={formData.projectName}
                   onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
                   className={formStyles.field(false, isReadOnly)}
-                  placeholder="e.g. ERP Implementation"
+                  placeholder="e.g. Website Redesign"
                 />
               </FormRow>
 
-              {/* Row: Client | Linked Quotation */}
+              {/* Description — full width */}
+              <FormRow>
+                <label className={formStyles.label}>DESCRIPTION</label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className={formStyles.field(false, isReadOnly)}
+                  placeholder="Brief project scope (optional)"
+                />
+              </FormRow>
+
+              {/* Row: Client | Vendors */}
               <div>
-                <label className={formStyles.label}>Client</label>
+                <label className={formStyles.label}>CLIENT *</label>
                 <input
                   type="text"
                   disabled={isReadOnly}
                   value={formData.client}
                   onChange={(e) => setFormData({ ...formData, client: e.target.value })}
                   className={formStyles.field(false, isReadOnly)}
-                  placeholder="Client name"
+                  placeholder="Select Client"
                 />
               </div>
 
               <div>
-                <label className={formStyles.label}>Linked Quotation</label>
-                <input
-                  type="text"
-                  disabled={isReadOnly}
-                  value={formData.linkedQuotation}
-                  onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
-                  className={formStyles.field(false, isReadOnly)}
-                  placeholder="Quotation number"
-                />
-              </div>
-
-              {/* Row: Start Date | Expected End Date */}
-              <div>
-                <label className={formStyles.label}>Start Date *</label>
-                <CustomDatePicker value={formData.startDate} onChange={(val) => setFormData({ ...formData, startDate: val })} disabled={isReadOnly} />
-              </div>
-
-              <div>
-                <label className={formStyles.label}>Expected End Date</label>
-                <CustomDatePicker value={formData.expectedEndDate} onChange={(val) => setFormData({ ...formData, expectedEndDate: val })} disabled={isReadOnly} />
-              </div>
-
-              {/* Project Manager — full width */}
-              <FormRow>
-                <label className={formStyles.label}>Project Manager *</label>
-                <div className={isReadOnly ? 'opacity-80 pointer-events-none' : ''}>
-                  <CustomSelect
-                    value={formData.projectManager || ''}
-                    onChange={(val) => setFormData({ ...formData, projectManager: val })}
-                    options={[
-                      { label: 'Select Manager...', value: '' },
-                      ...users.map(u => ({ label: u.username || u.email, value: u.id }))
-                    ]}
-                  />
-                </div>
-              </FormRow>
-
-              {/* Assigned Vendors — full width */}
-              <FormRow>
-                <label className={formStyles.label}>Assigned Vendors</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                <label className={formStyles.label}>VENDORS *</label>
+                <div className={cn(formStyles.field(false, isReadOnly), 'max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2')}>
                   {vendors.length === 0 ? (
-                    <span className="text-gray-400 italic">No vendors found</span>
+                    <span className="text-gray-400 italic text-sm">Select Vendors</span>
                   ) : (
-                    vendors.map(vendor => (
-                      <label key={vendor.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                    vendors.map((vendor) => (
+                      <label
+                        key={vendor.id}
+                        className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm"
+                      >
                         <input
                           type="checkbox"
                           disabled={isReadOnly}
                           checked={(formData.assignedVendors || []).includes(vendor.id)}
                           onChange={(e) => {
                             const current = formData.assignedVendors || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, assignedVendors: [...current, vendor.id] });
-                            } else {
-                              setFormData({ ...formData, assignedVendors: current.filter(id => id !== vendor.id) });
-                            }
+                            setFormData({
+                              ...formData,
+                              assignedVendors: e.target.checked
+                                ? [...current, vendor.id]
+                                : current.filter((id) => id !== vendor.id),
+                            });
                           }}
                           className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
                         />
@@ -348,103 +258,34 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                     ))
                   )}
                 </div>
-              </FormRow>
+              </div>
 
-              {/* Assigned Entities — full width */}
-              <FormRow>
-                <label className={formStyles.label}>Assigned Entities (Employees)</label>
-                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
-                  {users.length === 0 ? (
-                    <span className="text-gray-400 italic">No employees found</span>
-                  ) : (
-                    users.map(user => (
-                      <label key={user.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.assignedEntities || []).includes(user.id)}
-                          onChange={(e) => {
-                            const current = formData.assignedEntities || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, assignedEntities: [...current, user.id] });
-                            } else {
-                              setFormData({ ...formData, assignedEntities: current.filter(id => id !== user.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {user.firstName} {user.lastName} ({user.email})
-                      </label>
-                    ))
-                  )}
-                </div>
-              </FormRow>
-
-              {/* Row: Linked Incidents | Linked Quotations */}
-              <CheckboxList
-                label="Linked Incidents"
-                items={incidents}
-                getValue={(i) => i.id}
-                getLabel={(i) => i.ticketNumber || i.subject}
-                selectedIds={formData.linkedIncidents || []}
-                onToggle={(id, checked) => {
-                  const current = formData.linkedIncidents || [];
-                  setFormData({ ...formData, linkedIncidents: checked ? [...current, id] : current.filter(x => x !== id) });
-                }}
-              />
-
-              <CheckboxList
-                label="Linked Quotations"
-                items={quotations}
-                getValue={(q) => q.id}
-                getLabel={(q) => q.quotationNo}
-                selectedIds={formData.linkedQuotations || []}
-                onToggle={(id, checked) => {
-                  const current = formData.linkedQuotations || [];
-                  setFormData({ ...formData, linkedQuotations: checked ? [...current, id] : current.filter(x => x !== id) });
-                }}
-              />
-
-              {/* Row: Linked POs | Linked Expenses */}
-              <CheckboxList
-                label="Linked POs"
-                items={pos}
-                getValue={(p) => p.id}
-                getLabel={(p) => p.poNumber || 'Draft PO'}
-                selectedIds={formData.linkedPOs || []}
-                onToggle={(id, checked) => {
-                  const current = formData.linkedPOs || [];
-                  setFormData({ ...formData, linkedPOs: checked ? [...current, id] : current.filter(x => x !== id) });
-                }}
-              />
-
-              <CheckboxList
-                label="Linked Expenses"
-                items={expenses}
-                getValue={(e) => e.id}
-                getLabel={(e) => `${e.description} (₹${e.amount})`}
-                selectedIds={formData.linkedExpenses || []}
-                onToggle={(id, checked) => {
-                  const current = formData.linkedExpenses || [];
-                  setFormData({ ...formData, linkedExpenses: checked ? [...current, id] : current.filter(x => x !== id) });
-                }}
-              />
-
-              {/* Description — full width */}
-              <FormRow>
-                <label className={formStyles.label}>Description</label>
-                <textarea
+              {/* Row: Due Date | Initial Status */}
+              <div>
+                <label className={formStyles.label}>DUE DATE *</label>
+                <CustomDatePicker
+                  value={formData.expectedEndDate}
+                  onChange={(val) => setFormData({ ...formData, expectedEndDate: val })}
                   disabled={isReadOnly}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className={formStyles.textarea(false, isReadOnly)}
-                  placeholder="Project details and scope..."
-                  rows={3}
                 />
-              </FormRow>
+              </div>
+
+              <div>
+                <label className={formStyles.label}>INITIAL STATUS</label>
+                <CustomSelect
+                  value={formData.status}
+                  onChange={(val) => {
+                    const newData = { ...formData, status: val };
+                    setFormData(newData);
+                    if (isReadOnly) onSave(newData);
+                  }}
+                  options={statusOptions}
+                />
+              </div>
 
             </FormGrid>
           </FormSection>
+
         </form>
       </div>
 
