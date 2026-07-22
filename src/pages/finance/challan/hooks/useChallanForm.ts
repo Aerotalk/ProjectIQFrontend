@@ -16,6 +16,7 @@ export const useChallanForm = (defaultValues?: Partial<ChallanFormValues>) => {
       attachmentName: '',
       ewayBillNo: '',
       remarks: '',
+      lineItems: [],
       ...defaultValues,
     },
     mode: 'onTouched',
