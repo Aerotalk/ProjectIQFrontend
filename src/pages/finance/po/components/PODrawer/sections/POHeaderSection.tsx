@@ -170,7 +170,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                         }
                       }}
                       options={vendorOptions}
-                      disabled={readOnly || !selectedProjectId || isVendorsLoading}
+                      disabled={readOnly || isVendorsLoading}
                       isLoading={isVendorsLoading}
                       loadingText="Loading assigned vendors..."
                       emptyText="No vendors assigned to this project."

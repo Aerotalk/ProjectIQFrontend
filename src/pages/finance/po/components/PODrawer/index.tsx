@@ -1,6 +1,7 @@
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePOForm } from '../../hooks/usePOForm';
 import type { POFormValues } from '../../validators/poValidation';
 import POHeaderSection from './sections/POHeaderSection';
@@ -127,8 +128,18 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit as any, (errors) => {
           console.error('PO Form Validation Errors:', errors);
-          const firstError = Object.values(errors)[0] as any;
-          import('sonner').then(m => m.toast.error(firstError?.message || 'Please fill in all required fields correctly.'));
+          // Find the first actual string error message in the nested object
+          const getFirstError = (obj: any): string | undefined => {
+            for (const key in obj) {
+              if (obj[key]?.message) return obj[key].message;
+              if (typeof obj[key] === 'object') {
+                const nested = getFirstError(obj[key]);
+                if (nested) return nested;
+              }
+            }
+          };
+          const errorMessage = getFirstError(errors);
+          toast.error(errorMessage || 'Please fill in all required fields correctly.');
         })} className="flex flex-col flex-1 min-h-0">
           
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
