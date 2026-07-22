@@ -108,45 +108,44 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <FormProvider {...form}>
-          <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <FormProvider {...form}>
+        <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit, (err) => console.log('Challan Form Validation Errors:', err))} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <ChallanFormSection readOnly={readOnly} nextNumber={nextNumber} />
-          </form>
-        </FormProvider>
-      </div>
+          </div>
 
-      {/* Drawer Footer */}
-      <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
-        >
-          {mode === 'view' ? 'Close' : 'Cancel'}
-        </button>
+          {/* Drawer Footer */}
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              {mode === 'view' ? 'Close' : 'Cancel'}
+            </button>
 
-        {!readOnly && (
-          <button
-            type="submit"
-            form="challan-drawer-form"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                {mode === 'create' ? 'Save Challan' : 'Update Challan'}
-              </>
+            {!readOnly && (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {mode === 'create' ? 'Save Challan' : 'Update Challan'}
+                  </>
+                )}
+              </button>
             )}
-          </button>
-        )}
-      </div>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }
