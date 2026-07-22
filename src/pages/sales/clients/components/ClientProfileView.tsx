@@ -104,7 +104,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <span className="text-gray-500 dark:text-gray-400">Alt Phone</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{client.altPhone || '—'}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{client.alternatePhone || '—'}</span>
                 </div>
               </div>
             </div>
