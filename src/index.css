@@ -442,3 +442,31 @@ td.relative div.absolute {
 /* ===========================
    Reset react-day-picker
 =========================== */
+
+[data-slot="calendar"] table,
+[data-slot="calendar"] thead,
+[data-slot="calendar"] tbody,
+[data-slot="calendar"] tr,
+[data-slot="calendar"] th,
+[data-slot="calendar"] td {
+  width: auto !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+[data-slot="calendar"] th {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  color: inherit !important;
+}
+
+[data-slot="calendar"] td {
+  vertical-align: top !important;
+}
