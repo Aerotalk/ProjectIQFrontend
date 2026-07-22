@@ -349,10 +349,13 @@ export default function ChallanDetails() {
             <button
               onClick={handlePreview}
               disabled={isLoadingPreview}
-              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
-              {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-              {isLoadingPreview ? 'Preparing PDF...' : 'Download PDF'}
+              {isLoadingPreview ? (
+                <><Loader2 size={16} className="animate-spin" /> Preparing PDF...</>
+              ) : (
+                <><Download size={16} /> Download PDF</>
+              )}
             </button>
           )}
           {!isNew && currentStage === 1 && (

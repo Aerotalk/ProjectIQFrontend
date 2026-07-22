@@ -5,10 +5,12 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { useProjects } from '../../hooks/useProjects';
 
 export default function TicketList() {
   const navigate = useNavigate();
   const { selectedCompanyId: companyId } = useAuth();
+  const { projects } = useProjects();
   const [tickets, setTickets] = useState<TicketFormValues[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -222,8 +224,12 @@ export default function TicketList() {
                         {t.shortDescription || 'No description provided'}
                       </td>
                       <td className="px-6 py-3.5">
-                        <div className="text-gray-900 font-medium">{t.projectId?.substring(0,8) || 'Unknown Project'}</div>
-                        <div className="text-gray-500 text-[11px] mt-0.5">{t.customerCompany || 'N/A'}</div>
+                        <div className="text-gray-900 font-medium truncate max-w-[150px]">
+                          {t.projectId 
+                            ? (projects.find(p => p.id === t.projectId)?.projectName || t.projectId.substring(0, 8))
+                            : 'Unknown Project'}
+                        </div>
+                        <div className="text-gray-500 text-[11px] mt-0.5 truncate max-w-[150px]">{t.customerCompany || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-3.5">
                         {getPriorityBadge(t.priority)}

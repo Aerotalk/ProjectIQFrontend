@@ -45,6 +45,20 @@ export default function POPreviewPanel({ isOpen, onClose, templateContent, data,
   const handleDownload = async () => {
     if (!iframeRef.current || !iframeRef.current.contentDocument) return;
     setIsGeneratingPdf(true);
+
+    // Create a full-screen overlay to mask the unstyled page during PDF generation
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #f3f4f6; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;';
+    overlay.innerHTML = `
+      <div style="width: 40px; height: 40px; border: 4px solid #792359; border-bottom-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-bottom: 16px;"></div>
+      <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+      <div style="color: #111827; font-size: 16px; font-weight: 500;">Generating PDF Document...</div>
+      <div style="color: #6b7280; font-size: 14px; margin-top: 8px;">Please wait while we prepare your file.</div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Wait a brief moment for the overlay to render before removing styles
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     const parentStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
     const placeholders: { el: Element, parent: Node, nextSibling: Node | null }[] = [];
@@ -65,7 +79,8 @@ export default function POPreviewPanel({ isOpen, onClose, templateContent, data,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { 
           scale: 2, 
-          useCORS: true
+          useCORS: true,
+          window: iframeRef.current.contentWindow
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
@@ -73,10 +88,28 @@ export default function POPreviewPanel({ isOpen, onClose, templateContent, data,
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
+      // Restore styles immediately
       placeholders.forEach(({ el, parent, nextSibling }) => {
-        parent.insertBefore(el, nextSibling);
+        if (parent) {
+          try {
+            if (nextSibling && nextSibling.parentNode === parent) {
+              parent.insertBefore(el, nextSibling);
+            } else {
+              parent.appendChild(el);
+            }
+          } catch (e) {
+            console.error('Failed to restore style:', e);
+          }
+        }
       });
-      setIsGeneratingPdf(false);
+      
+      // Remove overlay after a short delay to ensure styles are applied
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          document.body.removeChild(overlay);
+        }
+        setIsGeneratingPdf(false);
+      }, 100);
     }
   };
 

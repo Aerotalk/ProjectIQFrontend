@@ -362,13 +362,34 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 );
               })
             ) : (
-              expandedMenu && (
+              activeModuleName ? (
                 <>
                   <ChevronRight size={14} className="mx-2 shrink-0" />
-                  <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
-                    {expandedMenu}
-                  </span>
+                  {activePageName ? (
+                    <>
+                      <span className="text-gray-500 dark:text-gray-400 shrink-0">
+                        {activeModuleName}
+                      </span>
+                      <ChevronRight size={14} className="mx-2 shrink-0" />
+                      <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                        {activePageName}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                      {activeModuleName}
+                    </span>
+                  )}
                 </>
+              ) : (
+                expandedMenu && (
+                  <>
+                    <ChevronRight size={14} className="mx-2 shrink-0" />
+                    <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                      {expandedMenu}
+                    </span>
+                  </>
+                )
               )
             )}
           </div>

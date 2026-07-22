@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Edit, Download, Info,
+  ChevronRight, Edit, Download, Info, Loader2,
   CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -855,7 +855,8 @@ export default function QuotationDetails() {
             onClick={handlePreview}
             className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
           >
-            <Download size={16} /> Download PDF
+            {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            {isLoadingPreview ? 'Preparing PDF...' : 'Download PDF'}
           </button>
 
         </div>
