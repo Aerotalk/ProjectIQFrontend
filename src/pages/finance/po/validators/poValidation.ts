@@ -33,6 +33,8 @@ export const poSchema = z.object({
   projectName: z.string().nullable().optional(),
   vendorId: z.string().min(1, 'Vendor is required'),
   vendorName: z.string().nullable().optional(),
+  billingAddress: z.string().nullable().optional(),
+  shippingAddress: z.string().nullable().optional(),
   poDate: z.string().min(1, 'PO Date is required'),
   // TechSpec §4.2: Description is Required ("What is being procured. Clear description required.")
   description: z.string().min(1, 'Description is required — specify what is being procured'),

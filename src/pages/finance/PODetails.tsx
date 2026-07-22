@@ -16,6 +16,7 @@ import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
 import POPreviewPanel from './po/components/POPreviewPanel';
 import { ToWords } from 'to-words';
+import { Stepper } from '@/components/ui/Stepper';
 
 const toWords = new ToWords({
   localeCode: 'en-IN',
@@ -546,36 +547,14 @@ export default function PODetails() {
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
         {/* Stepper */}
         <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-          <div className="relative flex justify-between">
-            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 dark:bg-white/10 -translate-y-1/2 z-0"></div>
-            <div
-              className="absolute top-1/2 left-0 h-[2px] bg-[#792359] dark:bg-[#e6a8d0] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
-              style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
-            ></div>
-            {stages.map((stage) => {
-              const isActive = stage.id === currentStage;
-              const isPast = stage.id < currentStage;
-              const isConverted = stage.id === 6 && currentStage === 6;
-
-              return (
-                <div key={stage.id} className="relative z-10 flex flex-col items-center gap-3 bg-gray-50/50 dark:bg-transparent px-2">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 border-2
-                      ${isPast || isActive ? 'bg-[#792359] border-[#792359] text-white' : 'bg-white dark:bg-[#181a1f] border-gray-300 dark:border-gray-600 text-gray-400'}
-                      ${isConverted ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
-                    `}
-                  >
-                    {(isPast || isConverted) ? <CheckCircle2 size={16} /> : stage.id}
-                  </div>
-                  <span className={`text-xs font-semibold uppercase tracking-wider
-                    ${isActive ? 'text-[#792359] dark:text-[#e6a8d0]' : isPast || isConverted ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400'}
-                  `}>
-                    {stage.name}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          <Stepper 
+            steps={stages.map(stage => ({
+              id: stage.id,
+              label: stage.name,
+            }))}
+            currentStep={currentStage - 1} // currentStage is 1-indexed, Stepper expects 0-indexed
+            size="md"
+          />
         </div>
 
         <div className="p-6 border-b border-gray-200 dark:border-white/5">

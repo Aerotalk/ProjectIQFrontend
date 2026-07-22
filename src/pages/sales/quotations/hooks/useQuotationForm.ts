@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { quotationSchema, type QuotationFormValues } from '../validators/quotationValidation';
+import { calculateQuotationTotals } from '@/utils/quotationCalculations';
 
 export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) => {
   const form = useForm<QuotationFormValues>({
@@ -30,54 +31,27 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
 
   // Calculate totals whenever lineItems, deliveryCost, or order discount changes
   useEffect(() => {
-    let subTotal = 0;
-    
-    // First pass: calculate subtotal
-    lineItems.forEach((item: any) => {
-      const qty = item.quantity || 0;
-      const rate = item.rate || 0;
-      subTotal += (qty * rate);
+    const totals = calculateQuotationTotals(lineItems as any, 0, Number(deliveryCost) || 0);
+
+    // Update row level calculated fields silently if they changed
+    totals.calculatedLines.forEach((calculatedLine, index) => {
+      const item = lineItems[index] as any;
+      if (item.taxableAmount !== calculatedLine.rowTaxableAmount) {
+        setValue(`lineItems.${index}.taxableAmount`, calculatedLine.rowTaxableAmount, { shouldValidate: false });
+      }
+      if (item.gstAmount !== calculatedLine.rowGstAmount) {
+        setValue(`lineItems.${index}.gstAmount`, calculatedLine.rowGstAmount, { shouldValidate: false });
+      }
+      if (item.totalAmount !== calculatedLine.rowTotalAmount) {
+        setValue(`lineItems.${index}.totalAmount`, calculatedLine.rowTotalAmount, { shouldValidate: false });
+      }
     });
 
-    let totalDiscount = 0;
-    let totalTaxableAmount = 0;
-    let totalGstAmount = 0;
-    let grandTotal = 0;
-
-    // Second pass: apply proportional order discount and calculate taxes
-    lineItems.forEach((item: any, index: number) => {
-      const qty = item.quantity || 0;
-      const rate = item.rate || 0;
-      const discountValue = item.discount || 0;
-      const discountType = item.discountType || 'FLAT';
-      const gstRate = item.gstRate || 0;
-
-      const rowSubTotal = qty * rate;
-      const itemDiscountAmount = discountType === 'PERCENTAGE' ? (rowSubTotal * discountValue / 100) : discountValue;
-      
-      const rowTotalDiscount = itemDiscountAmount;
-      const rowTaxableAmount = Math.max(0, rowSubTotal - rowTotalDiscount);
-      const rowGstAmount = rowTaxableAmount * (gstRate / 100);
-      const rowTotalAmount = rowTaxableAmount + rowGstAmount;
-
-      // Update row level calculated fields silently if they changed
-      if (item.taxableAmount !== rowTaxableAmount) setValue(`lineItems.${index}.taxableAmount`, rowTaxableAmount, { shouldValidate: false });
-      if (item.gstAmount !== rowGstAmount) setValue(`lineItems.${index}.gstAmount`, rowGstAmount, { shouldValidate: false });
-      if (item.totalAmount !== rowTotalAmount) setValue(`lineItems.${index}.totalAmount`, rowTotalAmount, { shouldValidate: false });
-
-      totalDiscount += itemDiscountAmount;
-      totalTaxableAmount += rowTaxableAmount;
-      totalGstAmount += rowGstAmount;
-      grandTotal += rowTotalAmount;
-    });
-
-    grandTotal += Number(deliveryCost) || 0;
-
-    setValue('subTotal', subTotal, { shouldValidate: false });
-    setValue('totalDiscount', totalDiscount, { shouldValidate: false });
-    setValue('totalTaxableAmount', totalTaxableAmount, { shouldValidate: false });
-    setValue('totalGstAmount', totalGstAmount, { shouldValidate: false });
-    setValue('grandTotal', grandTotal, { shouldValidate: false });
+    setValue('subTotal', totals.subTotal, { shouldValidate: false });
+    setValue('totalDiscount', totals.totalDiscount, { shouldValidate: false });
+    setValue('totalTaxableAmount', totals.totalTaxableAmount, { shouldValidate: false });
+    setValue('totalGstAmount', totals.totalGstAmount, { shouldValidate: false });
+    setValue('grandTotal', totals.grandTotal, { shouldValidate: false });
 
   }, [lineItems, deliveryCost, setValue]);
 
