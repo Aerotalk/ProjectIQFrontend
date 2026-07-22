@@ -1056,7 +1056,7 @@ export default function QuotationDetails() {
                             <td className="px-4 py-3 text-xs font-medium text-gray-900 dark:text-white">{item.name}</td>
                             <td className="px-4 py-3 text-xs text-gray-500">{item.category}</td>
                             <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">
-                              {isEditing || currentStage === 1 ? (
+                              {isEditing ? (
                                 <input
                                   type="number"
                                   min="1"
@@ -1069,7 +1069,7 @@ export default function QuotationDetails() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">
-                              {isEditing || currentStage === 1 ? (
+                              {isEditing ? (
                                 <input
                                   type="number"
                                   min="0"
@@ -1082,7 +1082,7 @@ export default function QuotationDetails() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-xs text-gray-900 dark:text-white">
-                              {isEditing || currentStage === 1 ? (
+                              {isEditing ? (
                                 <input
                                   type="number"
                                   min="0"
@@ -1103,7 +1103,7 @@ export default function QuotationDetails() {
                   </div>
 
                   <div className="flex justify-between items-start">
-                    {isEditing || currentStage === 1 ? (
+                    {isEditing ? (
                       <button
                         onClick={() => setIsProductModalOpen(true)}
                         className="flex items-center gap-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium border border-[#792359]/20 px-3 py-1.5 rounded-sm hover:bg-[#792359]/5 transition-colors"
