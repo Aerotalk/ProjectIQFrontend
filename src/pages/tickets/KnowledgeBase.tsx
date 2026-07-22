@@ -1,6 +1,7 @@
 import { Search, Filter, Plus, MoreHorizontal, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
@@ -12,21 +13,11 @@ export default function KnowledgeBase() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
-  const [openActionId, setOpenActionId] = useState<string | null>(null);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
-
-  // Click outside to close action menu
-  if (typeof window !== 'undefined') {
-    window.onclick = (e: any) => {
-      if (!e.target.closest('.action-menu-btn') && !e.target.closest('.action-menu-dropdown')) {
-        setOpenActionId(null);
-      }
-    };
-  }
 
   // Fetch articles from backend
   const fetchArticles = async () => {
@@ -194,26 +185,25 @@ export default function KnowledgeBase() {
                   </td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.author || 'System'}</td>
                   <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'Just now'}</td>
-                  <td className={`px-6 py-4 text-center ${openActionId === a.id ? 'relative z-50' : 'relative z-10'}`}>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); if (a.id) setOpenActionId(openActionId === a.id ? null : a.id); }}
-                      className="action-menu-btn text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1"
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
-                    {openActionId === a.id && (
-                      <div className="action-menu-dropdown absolute right-12 top-10 w-40 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm">
-                        <button onClick={(e) => { e.stopPropagation(); handleView(a); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
+                  <td className="px-6 py-4 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1 outline-none">
+                          <MoreHorizontal size={16} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 border border-gray-100 dark:border-white/10 shadow-xl rounded-sm py-1 bg-white dark:bg-[#1f2229]">
+                        <DropdownMenuItem onClick={() => handleView(a)} className="cursor-pointer text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
                           Read Article
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); handleEdit(a); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5">
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(a)} className="cursor-pointer text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
                           Edit Article
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); if (a.id) handleDelete(a.id); setOpenActionId(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10">
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => a.id && handleDelete(a.id)} className="cursor-pointer text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10 py-2 px-4 rounded-none" variant="destructive">
                           Delete Article
-                        </button>
-                      </div>
-                    )}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
