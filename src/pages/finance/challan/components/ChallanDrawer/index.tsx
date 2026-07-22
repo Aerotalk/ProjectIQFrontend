@@ -17,6 +17,8 @@ interface Props {
   nextNumber?: number;
 }
 
+import { toast } from 'sonner';
+
 export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialData, challanNumber, isSubmitting, nextNumber }: Props) {
   const form = useChallanForm();
 
@@ -74,6 +76,12 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
     await onSave(data);
   };
 
+  const handleValidationError = (errors: any) => {
+    console.error('Challan Form Validation Errors:', errors);
+    const firstError = Object.values(errors)[0] as any;
+    toast.error(firstError?.message || 'Please fill in all required fields correctly.');
+  };
+
   const drawerTitle = mode === 'create'
     ? 'Add Delivery Challan'
     : mode === 'edit'
@@ -109,7 +117,7 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
 
       {/* Scrollable Content */}
       <FormProvider {...form}>
-        <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit, (err) => console.log('Challan Form Validation Errors:', err))} className="flex flex-col flex-1 overflow-hidden">
+        <form id="challan-drawer-form" onSubmit={form.handleSubmit(onSubmit, handleValidationError)} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <ChallanFormSection readOnly={readOnly} nextNumber={nextNumber} />
           </div>
