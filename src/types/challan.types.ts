@@ -1,9 +1,13 @@
 export interface ChallanLineItem {
   id?: string;
   itemName?: string;
+  name?: string;
   hsnSac?: string;
+  itemHsn?: string;
+  hsn?: string;
   description?: string;
   dispatchedQuantity?: number;
+  qty?: number;
   quantity?: number;
   unit?: string;
 }
@@ -23,6 +27,16 @@ export interface DeliveryChallan {
   ewayBillNo?: string;        // Optional E-way bill number
   remarks?: string;           // Optional internal remarks
   status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
+
+  transportMode?: string;
+  deliveryLocation?: string;
+  placeOfSupply?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactMobile?: string;
+  poNumber?: string;
+  poDate?: string;
+
   lineItems?: ChallanLineItem[];
   
   createdAt?: string;

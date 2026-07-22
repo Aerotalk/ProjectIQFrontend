@@ -18,7 +18,7 @@ export function calculateQuotationTotals(
   let grandTotal = 0;
 
   const calculatedLines = lineItems.map((item) => {
-    const qty = Number(item.qty) || 0;
+    const qty = Number(item.qty ?? (item as any).quantity) || 0;
     const rate = Number(item.rate) || 0;
     const discountValue = Number(item.discount) || 0;
     const gstRate = Number(item.gstRate ?? (item as any).gst) || 0;

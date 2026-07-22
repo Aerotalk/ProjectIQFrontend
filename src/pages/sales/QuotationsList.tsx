@@ -192,7 +192,7 @@ export default function QuotationsList() {
                         ${quotation.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : ''}
                         ${quotation.status === 'Sent to Client' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' : ''}
                         ${quotation.status === 'Changes Requested' || quotation.status === 'Under Negotiation' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20' : ''}
-                        ${quotation.status === 'Accepted' || quotation.status === 'Converted' ? 'bg-[#792359]/5 text-[#792359] border-[#792359]/20 dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] dark:border-[#e6a8d0]/20' : ''}
+                        ${quotation.status === 'Accepted' || quotation.status === 'Confirmed Lead' ? 'bg-[#792359]/5 text-[#792359] border-[#792359]/20 dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] dark:border-[#e6a8d0]/20' : ''}
                         ${quotation.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' : ''}
                       `}>
                         {quotation.status === 'Approved' && <CheckCircle2 size={12} />}

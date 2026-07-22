@@ -99,7 +99,7 @@ export default function QuotationDetails() {
     { id: 3, name: 'Sent to Client' },
     { id: 4, name: 'Under Negotiation' },
     { id: 5, name: 'Accepted' },
-    { id: 6, name: 'Converted' },
+    { id: 6, name: 'Confirmed Lead' },
   ];
 
   const [quotation, setQuotation] = useState({
@@ -202,7 +202,7 @@ export default function QuotationDetails() {
       case 'Under Negotiation': return 4;
       case 'Rejected': return 1;
       case 'Accepted': return 5;
-      case 'Converted': return 6;
+      case 'Confirmed Lead': return 6;
       default: return 1;
     }
   };
@@ -446,7 +446,7 @@ export default function QuotationDetails() {
             item_index: index + 1,
             item_name: item.name,
             item_description: '',
-            item_hsn: item.hsn || product?.hsn || '',
+            item_hsn: (item as any).hsnSac || (item as any).hsn || product?.hsnSac || (product as any)?.hsn || '',
             item_quantity: item.qty,
             item_unit: 'Unit',
             item_price: item.rate.toFixed(2),
@@ -454,11 +454,12 @@ export default function QuotationDetails() {
           };
         }),
         sub_total: subTotal.toFixed(2),
+        discount: totalDiscount.toFixed(2),
+        has_discount: totalDiscount > 0,
+        taxable_amount: (subTotal - totalDiscount).toFixed(2),
         total_tax: totalGst.toFixed(2),
         delivery_cost: (Number(quotation.deliveryCost) || 0).toFixed(2),
         has_delivery_cost: Number(quotation.deliveryCost) > 0,
-        discount: totalDiscount.toFixed(2),
-        has_discount: totalDiscount > 0,
         grand_total: grandTotal.toFixed(2),
         amount_in_words: numberToWords(grandTotal),
         terms_and_conditions: quotation.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
@@ -466,7 +467,7 @@ export default function QuotationDetails() {
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
-        bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: totalGst > 0,
         taxes: taxBreakdown
       };
@@ -497,7 +498,7 @@ export default function QuotationDetails() {
               <button
                 disabled={isApiLoading}
                 onClick={async () => {
-                  if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
+                  if (!quotation.client || !quotation.project || !grandTotal || !quotation.validTill) {
                     toast.error('Please fill all mandatory fields before saving draft');
                     return;
                   }
@@ -513,6 +514,7 @@ export default function QuotationDetails() {
                       quotationNo: '',
                       clientId: '',
                       clientName: quotation.client,
+                      salesperson: quotation.owner || user?.username || user?.email || '',
                       date: new Date().toISOString().split('T')[0],
                       validUntil: quotation.validTill,
                       subject: quotation.project,
@@ -555,7 +557,7 @@ export default function QuotationDetails() {
               <button
                 disabled={isApiLoading}
                 onClick={() => {
-                  if (!quotation.client || !quotation.amount || !quotation.validTill) {
+                  if (!quotation.client || !grandTotal || !quotation.validTill) {
                     toast.error('Please fill all mandatory fields before sending for approval');
                     return;
                   }
@@ -645,7 +647,7 @@ export default function QuotationDetails() {
             </div>
             <button
               disabled={isApiLoading}
-              onClick={() => handleStatusUpdate('Converted', 'Quotation converted to project!', 6)}
+              onClick={() => handleStatusUpdate('Confirmed Lead', 'Lead confirmed, finance team will proceed with project creation', 6)}
               className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
             >
               Upload WO / PO
@@ -657,7 +659,7 @@ export default function QuotationDetails() {
           <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-sm flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="text-emerald-600 dark:text-emerald-500" size={20} />
-              <p className="text-sm text-emerald-800 dark:text-emerald-200">Quotation has been converted into project. You can view the project or go to finance module.</p>
+              <p className="text-sm text-emerald-800 dark:text-emerald-200">Lead confirmed, finance team will proceed with project creation.</p>
             </div>
           </div>
         );
@@ -890,16 +892,12 @@ export default function QuotationDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Quotation Value</p>
                   {isEditing ? (
-                    <input
-                      type="number"
-                      value={quotation.amount}
-                      onChange={(e) => setQuotation({ ...quotation, amount: e.target.value })}
-                      className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
-                      placeholder="e.g. 100000"
-                    />
+                    <div className="w-full px-2 py-1 text-sm bg-gray-50 dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm text-gray-500">
+                      {`${quotation.currency === 'INR' ? '₹' : quotation.currency === 'USD' ? '$' : quotation.currency === 'EUR' ? '€' : '£'} ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </div>
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {quotation.amount ? `${quotation.currency === 'INR' ? '₹' : quotation.currency === 'USD' ? '$' : quotation.currency === 'EUR' ? '€' : '£'} ${Number(quotation.amount).toLocaleString('en-IN')}` : ''}
+                      {`${quotation.currency === 'INR' ? '₹' : quotation.currency === 'USD' ? '$' : quotation.currency === 'EUR' ? '€' : '£'} ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </p>
                   )}
                 </div>
