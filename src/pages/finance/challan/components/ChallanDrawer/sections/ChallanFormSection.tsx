@@ -147,9 +147,6 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     return filteredVendors.map(v => ({ label: v.displayName, value: v.id }));
   }, [filteredVendors]);
 
-  const PO_OPTIONS = useMemo(() => {
-    return filteredPOs.map(po => ({ label: po.poNumber, value: po.id }));
-  }, [filteredPOs]);
 
   return (
     <div className="space-y-6">

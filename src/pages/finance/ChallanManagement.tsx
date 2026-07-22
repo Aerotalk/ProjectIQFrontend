@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Search, MoreVertical, Truck,
   ChevronLeft, ChevronRight, Loader2, Package,
@@ -314,7 +314,7 @@ export default function ChallanManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {currentItems.map(ch => (
+                {currentItems.map((ch: DeliveryChallan) => (
                   <tr
                     key={ch.id}
                     className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"
