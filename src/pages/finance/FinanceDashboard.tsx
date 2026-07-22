@@ -36,12 +36,22 @@ export default function FinanceDashboard() {
     const fetchDashboardData = async () => {
       try {
         if (!companyId) return;
-        const [pos, expenses, challans, projs] = await Promise.all([
+        const results = await Promise.allSettled([
           POService.getAll(companyId),
           ExpenseService.getAll(companyId),
           ChallanService.getAll(companyId),
           import('../../services/project.service').then(m => m.ProjectService.getAll(companyId))
         ]);
+
+        const pos = results[0].status === 'fulfilled' ? results[0].value : [];
+        const expenses = results[1].status === 'fulfilled' ? results[1].value : [];
+        const challans = results[2].status === 'fulfilled' ? results[2].value : [];
+        const projs = results[3].status === 'fulfilled' ? results[3].value : [];
+
+        if (results[0].status === 'rejected') console.error('Failed to load POs:', results[0].reason);
+        if (results[1].status === 'rejected') console.error('Failed to load Expenses:', results[1].reason);
+        if (results[2].status === 'rejected') console.error('Failed to load Challans:', results[2].reason);
+        if (results[3].status === 'rejected') console.error('Failed to load Projects:', results[3].reason);
 
         setAllPOs(pos);
         setAllExpenses(expenses);
