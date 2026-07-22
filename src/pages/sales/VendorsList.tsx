@@ -21,7 +21,7 @@ export default function VendorsList() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   useBreadcrumbs([

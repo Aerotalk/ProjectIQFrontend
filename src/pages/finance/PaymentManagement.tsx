@@ -54,7 +54,7 @@ export default function PaymentManagement() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   // Dropdown
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);

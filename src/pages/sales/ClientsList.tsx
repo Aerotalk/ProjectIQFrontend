@@ -34,7 +34,7 @@ export default function ClientsList() {
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
