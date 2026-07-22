@@ -29,6 +29,8 @@ export interface DeliveryChallan {
   status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
 
   transportMode?: string;
+  billingAddress?: string;
+  shippingAddress?: string;
   deliveryLocation?: string;
   placeOfSupply?: string;
   contactName?: string;

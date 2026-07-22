@@ -11,6 +11,8 @@ import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
 import { ProductService } from '@/services/product.service';
 import type { Product } from '@/types/product.types';
+import { ClientService } from '@/services/client.service';
+import type { Client } from '@/types/client.types';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
@@ -34,6 +36,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { projects } = useProjects();
@@ -51,11 +54,13 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     Promise.all([
       VendorService.getVendors(companyId),
       POService.getAll(companyId),
-      ProductService.getProducts(companyId)
-    ]).then(([vendorData, poData, productData]) => {
+      ProductService.getProducts(companyId),
+      ClientService.getClients(companyId).catch(() => [])
+    ]).then(([vendorData, poData, productData, clientData]) => {
       setVendors(vendorData);
       setPurchaseOrders(poData);
       setProducts(productData);
+      setClients(clientData);
       setIsLoadingData(false);
     });
   }, [companyId]);
@@ -81,7 +86,59 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   // Sync display names when selection changes
   useEffect(() => {
     const project = projects.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
+    if (project) {
+      setValue('projectName', project.projectName, { shouldValidate: false });
+      
+      // Auto-fetch client billing & shipping address
+      const clientNameOrId = project.client;
+      if (clientNameOrId) {
+        const client = clients.find(c => c.id === clientNameOrId || c.displayName === clientNameOrId || c.companyName === clientNameOrId);
+        if (client) {
+          const formatAddress = (
+            attn: string | undefined, 
+            line1: string, 
+            line2: string | undefined, 
+            city: string, 
+            state: string | undefined, 
+            zip: string | undefined, 
+            country: string | undefined
+          ) => {
+            const parts = [];
+            if (attn) parts.push(`Attn: ${attn}`);
+            if (line1) parts.push(line1);
+            if (line2) parts.push(line2);
+            parts.push(`${city}${state ? `, ${state}` : ''}${zip ? ` ${zip}` : ''}`);
+            parts.push(country || 'India');
+            return parts.join('\n');
+          };
+          
+          const billingAddr = formatAddress(
+            client.billingAttention,
+            client.billingAddressLine1,
+            client.billingAddressLine2,
+            client.billingCity,
+            client.billingState,
+            client.billingPinCode,
+            client.billingCountry
+          );
+          
+          const shippingAddr = client.sameAsBillingAddress 
+            ? billingAddr 
+            : formatAddress(
+                client.shippingAttention,
+                client.shippingAddressLine1 || client.billingAddressLine1,
+                client.shippingAddressLine2,
+                client.shippingCity || client.billingCity,
+                client.shippingState,
+                client.shippingPinCode,
+                client.shippingCountry
+              );
+              
+          setValue('billingAddress', billingAddr, { shouldValidate: true });
+          setValue('shippingAddress', shippingAddr, { shouldValidate: true });
+        }
+      }
+    }
     
     // If project changes, clear dependent fields if they don't match the new filters
     if (selectedProjectId) {
@@ -94,7 +151,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
         setValue('linkedVendorPoNumber', '');
       }
     }
-  }, [selectedProjectId, filteredVendors, filteredPOs, setValue, selectedVendorId, selectedPoId]);
+  }, [selectedProjectId, filteredVendors, filteredPOs, setValue, selectedVendorId, selectedPoId, projects, clients]);
 
   useEffect(() => {
     const vendor = vendors.find(v => v.id === selectedVendorId);
@@ -283,6 +340,21 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               className={fieldClass(!!errors.ewayBillNo)}
             />
           </div>
+
+          {/* Transportation Mode */}
+          <div>
+            <label className={labelClass}>
+              Transportation Mode
+              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
+            </label>
+            <input
+              type="text"
+              {...register('transportMode')}
+              disabled={readOnly}
+              placeholder="e.g. Road, Rail, Air"
+              className={fieldClass(!!errors.transportMode)}
+            />
+          </div>
           
           {/* Attachment */}
           <div>
@@ -336,6 +408,37 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             )}
           </div>
           
+        </div>
+      </div>
+
+      {/* ── Client Address Details ── */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
+          Client Address Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Billing Address */}
+          <div>
+            <label className={labelClass}>Billing Address</label>
+            <textarea
+              {...register('billingAddress')}
+              disabled={readOnly}
+              rows={4}
+              placeholder="Billing address of client (auto-populated when project selected)..."
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none disabled:opacity-60"
+            />
+          </div>
+          {/* Shipping Address */}
+          <div>
+            <label className={labelClass}>Shipping Address</label>
+            <textarea
+              {...register('shippingAddress')}
+              disabled={readOnly}
+              rows={4}
+              placeholder="Shipping address of client (auto-populated when project selected)..."
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none disabled:opacity-60"
+            />
+          </div>
         </div>
       </div>
       

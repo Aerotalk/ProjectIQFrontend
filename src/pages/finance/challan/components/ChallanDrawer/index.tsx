@@ -35,6 +35,9 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedVendorPoNumber: initialData.linkedVendorPoNumber || '',
           attachmentName: initialData.attachmentName || '',
           remarks: initialData.remarks || '',
+          transportMode: initialData.transportMode || '',
+          billingAddress: initialData.billingAddress || '',
+          shippingAddress: initialData.shippingAddress || '',
           lineItems: initialData.lineItems?.map(item => ({
             id: item.id,
             itemName: item.itemName || '',
@@ -54,6 +57,9 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedVendorPoId: '',
           attachmentName: '',
           remarks: '',
+          transportMode: '',
+          billingAddress: '',
+          shippingAddress: '',
           lineItems: [],
         });
       }

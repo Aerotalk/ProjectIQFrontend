@@ -23,6 +23,9 @@ export const challanSchema = z.object({
   attachmentName: z.string().nullable().optional(),
   ewayBillNo: z.string().nullable().optional(),
   remarks: z.string().nullable().optional(),
+  transportMode: z.string().nullable().optional(),
+  billingAddress: z.string().nullable().optional(),
+  shippingAddress: z.string().nullable().optional(),
   lineItems: z.array(challanLineItemSchema).optional(),
 });
 
