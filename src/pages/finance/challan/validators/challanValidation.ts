@@ -5,8 +5,8 @@ export const challanLineItemSchema = z.object({
   itemName: z.string().optional(),
   hsnSac: z.string().optional(),
   description: z.string().optional(),
-  dispatchedQuantity: z.preprocess((val: any) => (val === '' || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)), z.number().min(0, 'Quantity must be non-negative').optional()),
-  quantity: z.preprocess((val: any) => (val === '' || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)), z.number().min(0, 'Quantity must be non-negative').optional()),
+  dispatchedQuantity: z.preprocess((val: any) => (val === '' || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)), z.number().min(0, 'Quantity must be non-negative').optional()) as unknown as z.ZodOptional<z.ZodNumber>,
+  quantity: z.preprocess((val: any) => (val === '' || (typeof val === 'number' && Number.isNaN(val)) ? undefined : Number(val)), z.number().min(0, 'Quantity must be non-negative').optional()) as unknown as z.ZodOptional<z.ZodNumber>,
   unit: z.string().optional(),
 });
 
