@@ -41,4 +41,5 @@ export interface StepConnectorProps {
   isCompleted: boolean;
   orientation: NonNullable<StepperProps['orientation']>;
   animated: boolean;
+  size: NonNullable<StepperProps['size']>;
 }

@@ -2,37 +2,39 @@ import React from 'react';
 import type { StepConnectorProps } from './stepper.types';
 import { stepperTokens } from './stepper.tokens';
 
-export const StepConnector: React.FC<StepConnectorProps> = ({ isCompleted, orientation, animated }) => {
+export const StepConnector: React.FC<StepConnectorProps> = ({ isCompleted, orientation, animated, size }) => {
   const isHorizontal = orientation === 'horizontal';
-  const sizeClass = isHorizontal ? stepperTokens.sizes.md.connectorHorizontal : stepperTokens.sizes.md.connectorVertical;
+  const sizeClass = isHorizontal ? stepperTokens.sizes[size].connectorHorizontal : stepperTokens.sizes[size].connectorVertical;
+  
+  // Calculate center offsets based on the size
+  const centerOffset = size === 'sm' ? '12px' : size === 'md' ? '16px' : '20px';
   
   // Base classes for the track
-  const baseClasses = `relative ${sizeClass} ${stepperTokens.colors.connectorBg}`;
+  const baseClasses = `absolute z-0 ${sizeClass} ${stepperTokens.colors.connectorBg}`;
   
   // Classes for the filled portion
-  const fillClasses = `absolute ${stepperTokens.colors.connectorFill} ${animated ? stepperTokens.animation.transition : ''}`;
+  const fillClasses = `absolute top-0 left-0 ${stepperTokens.colors.connectorFill} ${animated ? stepperTokens.animation.transition : ''}`;
   
-  // Style for the fill based on orientation
-  const fillStyle = isHorizontal
-    ? {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        width: isCompleted ? '100%' : '0%',
-      }
-    : {
-        top: 0,
-        left: 0,
-        right: 0,
-        height: isCompleted ? '100%' : '0%',
-      };
+  if (isHorizontal) {
+    return (
+      <div 
+        className={baseClasses} 
+        style={{ top: `calc(${centerOffset} - 1.5px)`, left: '50%', right: '-50%', width: '100%' }}
+        aria-hidden="true"
+      >
+         <div className={`${fillClasses} h-full`} style={{ width: isCompleted ? '100%' : '0%' }} />
+      </div>
+    );
+  }
 
+  // Vertical orientation
   return (
-    <div
-      className={`${baseClasses} ${isHorizontal ? 'flex-1 mx-2' : 'flex-1 my-2'}`}
+    <div 
+      className={baseClasses} 
+      style={{ left: `calc(${centerOffset} - 1.5px)`, top: '50%', bottom: '-50%', height: '100%' }}
       aria-hidden="true"
     >
-      <div className={fillClasses} style={fillStyle} />
+       <div className={`${fillClasses} w-full`} style={{ height: isCompleted ? '100%' : '0%' }} />
     </div>
   );
 };
