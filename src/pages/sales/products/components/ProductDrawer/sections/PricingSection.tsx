@@ -28,10 +28,13 @@ export default function PricingSection({ readOnly }: Props) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Standard Rate (₹) *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
+            Standard Rate (₹) <span className="text-[10px] text-gray-400 normal-case font-normal">(optional)</span>
+          </label>
           <Input 
             type="number" 
             step="0.01"
+            placeholder="0.00"
             {...register('standardRate', { valueAsNumber: true })} 
             disabled={readOnly}
             className={`${errors.standardRate ? 'border-red-500' : ''}`} 
