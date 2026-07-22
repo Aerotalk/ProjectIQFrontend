@@ -211,14 +211,21 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Linked Quotation</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Vendor *
+                    <span className="ml-1 text-[10px] text-gray-400 normal-case font-normal tracking-normal">(required)</span>
+                  </label>
+                  <CustomSelect
                     disabled={isReadOnly}
-                    value={formData.linkedQuotation}
-                    onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                    placeholder="Quotation number"
+                    value={(formData.assignedVendors || [])[0] || ''}
+                    onChange={(val) => setFormData({ ...formData, assignedVendors: val ? [val] : [] })}
+                    options={[
+                      { label: 'Select a vendor...', value: '' },
+                      ...vendors.map(v => ({
+                        label: v.displayName,
+                        value: v.id
+                      }))
+                    ]}
                   />
                 </div>
                 <div>
@@ -278,34 +285,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Vendors</label>
-                <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
-                  {vendors.length === 0 ? (
-                    <span className="text-gray-400 italic">No vendors found</span>
-                  ) : (
-                    vendors.map(vendor => (
-                      <label key={vendor.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
-                        <input 
-                          type="checkbox"
-                          disabled={isReadOnly}
-                          checked={(formData.assignedVendors || []).includes(vendor.id)}
-                          onChange={(e) => {
-                            const current = formData.assignedVendors || [];
-                            if (e.target.checked) {
-                              setFormData({ ...formData, assignedVendors: [...current, vendor.id] });
-                            } else {
-                              setFormData({ ...formData, assignedVendors: current.filter(id => id !== vendor.id) });
-                            }
-                          }}
-                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
-                        />
-                        {vendor.displayName}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Entities (Employees)</label>
