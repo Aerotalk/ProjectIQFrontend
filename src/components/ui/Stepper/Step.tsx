@@ -41,7 +41,6 @@ export const Step: React.FC<StepProps> = ({
     textWeight = 'font-semibold';
     circleRing = 'ring-4 ring-[#792359]/10';
     circleShadow = 'shadow-sm';
-    circleScale = animated ? stepperTokens.animation.scale : '';
   } else if (interactive) {
     // If interactive and upcoming, it can be clickable
     circleColor = `hover:border-[#792359]/50 hover:bg-[#792359]/5 ${stepperTokens.colors.neutral}`;
@@ -69,7 +68,7 @@ export const Step: React.FC<StepProps> = ({
         aria-label={`${label} - ${ariaLabel}`}
         title={label}
         className={`
-          relative flex items-center justify-center font-bold rounded-full bg-white dark:bg-[#181a1f]
+          relative flex items-center justify-center font-bold rounded-full
           ${sizeTokens.circle} ${circleColor} ${transitionClass} ${circleRing} ${circleShadow} ${circleScale}
           ${interactive ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#792359] focus-visible:ring-offset-2' : 'cursor-default'}
         `}

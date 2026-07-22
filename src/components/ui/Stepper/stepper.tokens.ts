@@ -12,15 +12,6 @@ export const stepperTokens = {
   },
   sizes: {
     sm: {
-      circle: 'w-6 h-6 text-[11px] border-[2px]',
-      label: 'text-xs',
-      description: 'text-[10px]',
-      connectorHorizontal: 'h-[3px]',
-      connectorVertical: 'w-[3px]',
-      gap: 'gap-3',
-      containerHorizontal: 'min-w-[48px]',
-    },
-    md: {
       circle: 'w-8 h-8 text-xs border-[2px]',
       label: 'text-[13px]',
       description: 'text-[11px]',
@@ -29,14 +20,23 @@ export const stepperTokens = {
       gap: 'gap-3',
       containerHorizontal: 'min-w-[64px]',
     },
-    lg: {
-      circle: 'w-10 h-10 text-sm border-[2px]',
-      label: 'text-sm',
+    md: {
+      circle: 'w-10 h-10 text-sm border-[2.5px]',
+      label: 'text-[14px]',
       description: 'text-xs',
-      connectorHorizontal: 'h-[3px]',
-      connectorVertical: 'w-[3px]',
+      connectorHorizontal: 'h-[4px]',
+      connectorVertical: 'w-[4px]',
       gap: 'gap-4',
       containerHorizontal: 'min-w-[80px]',
+    },
+    lg: {
+      circle: 'w-12 h-12 text-base border-[3px]',
+      label: 'text-[15px]',
+      description: 'text-sm',
+      connectorHorizontal: 'h-[4px]',
+      connectorVertical: 'w-[4px]',
+      gap: 'gap-5',
+      containerHorizontal: 'min-w-[96px]',
     }
   },
   animation: {

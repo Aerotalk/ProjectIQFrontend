@@ -7,7 +7,7 @@ export const StepConnector: React.FC<StepConnectorProps> = ({ isCompleted, orien
   const sizeClass = isHorizontal ? stepperTokens.sizes[size].connectorHorizontal : stepperTokens.sizes[size].connectorVertical;
   
   // Calculate center offsets based on the size
-  const centerOffset = size === 'sm' ? '12px' : size === 'md' ? '16px' : '20px';
+  const centerOffset = size === 'sm' ? '16px' : size === 'md' ? '20px' : '24px';
   
   // Base classes for the track
   const baseClasses = `absolute z-0 ${sizeClass} ${stepperTokens.colors.connectorBg}`;
@@ -19,7 +19,7 @@ export const StepConnector: React.FC<StepConnectorProps> = ({ isCompleted, orien
     return (
       <div 
         className={baseClasses} 
-        style={{ top: `calc(${centerOffset} - 1.5px)`, left: '50%', right: '-50%', width: '100%' }}
+        style={{ top: `calc(${centerOffset} - ${size === 'sm' ? '1.5px' : '2px'})`, left: '50%', right: '-50%', width: '100%' }}
         aria-hidden="true"
       >
          <div className={`${fillClasses} h-full`} style={{ width: isCompleted ? '100%' : '0%' }} />
@@ -31,7 +31,7 @@ export const StepConnector: React.FC<StepConnectorProps> = ({ isCompleted, orien
   return (
     <div 
       className={baseClasses} 
-      style={{ left: `calc(${centerOffset} - 1.5px)`, top: '50%', bottom: '-50%', height: '100%' }}
+      style={{ left: `calc(${centerOffset} - ${size === 'sm' ? '1.5px' : '2px'})`, top: '50%', bottom: '-50%', height: '100%' }}
       aria-hidden="true"
     >
        <div className={`${fillClasses} w-full`} style={{ height: isCompleted ? '100%' : '0%' }} />
