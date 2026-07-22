@@ -103,26 +103,64 @@ export default function QuotationsList() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Quotations</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage and track customer sales estimates and quotation proposals</p>
         </div>
         <button
           onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2.5 text-sm font-medium rounded-md transition-all shadow-xs focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
         >
           <Plus size={16} />
           Create Quotation
         </button>
       </div>
 
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+      {/* Top Stat Cards */}
+      {!isLoading && quotations.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-[#792359]/10 text-[#792359] dark:text-[#c44997] flex items-center justify-center shrink-0">
+              <FileText size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Quotations</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-0.5">{quotations.length}</p>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Accepted / Confirmed</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-0.5">
+                {quotations.filter(q => q.status === 'Accepted' || q.status === 'Confirmed Lead' || q.status === 'Converted').length}
+              </p>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Clock size={22} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Proposal Value</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-0.5">
+                ₹{quotations.reduce((sum, q) => sum + (q.grandTotal || 0), 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.01]">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <Input
               type="text"
-              placeholder="Search quotations..."
+              placeholder="Search quotations by client, number or subject..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -139,19 +177,19 @@ export default function QuotationsList() {
             <div className="flex flex-col items-center justify-center h-full py-20 text-gray-500">
               <FileText size={48} className="mb-4 opacity-20" />
               <p className="text-lg font-medium text-gray-900 dark:text-white">No quotations found</p>
-              <p className="text-sm">Try adjusting your search or create a new quotation.</p>
+              <p className="text-sm mt-1">Try adjusting your search or create a new quotation.</p>
             </div>
           ) : (
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Quotation No</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Valid Until</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client Name</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider max-w-[150px]">Owner</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider text-right">Amount (₹)</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                <tr className="border-b border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.03]">
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Quotation No</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Valid Until</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Client Name</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider max-w-[150px]">Owner</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right">Amount (₹)</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-white/5">

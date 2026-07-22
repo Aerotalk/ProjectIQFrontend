@@ -217,10 +217,10 @@ export default function ChallanManagement() {
       <div className="bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col">
 
         {/* Filters row */}
-        <div className="p-4 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.02]">
+        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center bg-gray-50/50 dark:bg-white/[0.01]">
           <div className="flex flex-wrap gap-2">
             {/* Project filter */}
-            <div className="w-40 shrink-0">
+            <div className="w-44 shrink-0">
               <CustomSelect
                 value={filterProject}
                 onChange={val => { setFilterProject(val); resetPage(); }}
@@ -244,7 +244,7 @@ export default function ChallanManagement() {
             </div>
 
             {/* Status filter */}
-            <div className="w-48 shrink-0">
+            <div className="w-40 shrink-0">
               <CustomSelect
                 value={filterStatus}
                 onChange={val => { setFilterStatus(val); resetPage(); }}
@@ -258,13 +258,13 @@ export default function ChallanManagement() {
 
           {/* Search */}
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
             <input
               type="text"
               placeholder="Search challan no., vendor…"
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+              className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] focus:ring-2 focus:ring-[#792359]/20 transition-all shadow-xs"
             />
           </div>
         </div>

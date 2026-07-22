@@ -131,19 +131,19 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
             setIsOpen(!isOpen);
           }
         }}
-        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-gray-50 dark:bg-black/20 border ${isOpen ? 'border-[#792359]' : 'border-gray-200 dark:border-white/10'} rounded-sm text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed outline-none' : 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#792359]/50'} flex items-center justify-between shadow-sm`}
+        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-white dark:bg-[#0f1115] border ${isOpen ? 'border-[#792359] ring-2 ring-[#792359]/20' : 'border-gray-300 dark:border-white/10'} rounded-md text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed outline-none bg-gray-100 dark:bg-white/5' : 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359]'} flex items-center justify-between shadow-xs`}
       >
         <span className="truncate pr-4">{displayLabel}</span>
-        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#792359]' : ''}`} />
       </div>
 
       {isOpen && createPortal(
         <div 
           ref={menuRef}
           style={dropdownStyle}
-          className="bg-white dark:bg-[#1f2228] border border-gray-100 dark:border-white/10 rounded-md shadow-2xl max-h-60 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200"
+          className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
         >
-          <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#1f2228] z-10 rounded-t-md">
+          <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#181a1f] z-10 rounded-t-lg">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               <input
@@ -153,18 +153,18 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full pl-8 pr-3 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white"
+                className="w-full pl-8 pr-3 py-1.5 text-sm bg-gray-50 dark:bg-[#0f1115] border border-gray-200 dark:border-white/10 rounded-md focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white"
               />
             </div>
           </div>
           <div className="overflow-y-auto custom-scrollbar py-1 flex-1">
             {isLoading ? (
-              <div className="px-3 py-2 text-sm text-gray-500 text-center flex flex-col items-center gap-2">
+              <div className="px-3 py-3 text-sm text-gray-500 text-center flex flex-col items-center gap-2">
                 <Loader2 size={16} className="animate-spin text-[#792359]" />
                 <span>{loadingText || 'Loading...'}</span>
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500 text-center">{emptyText || 'No results found'}</div>
+              <div className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">{emptyText || 'No results found'}</div>
             ) : (
               filteredOptions.map((option, index) => {
                 const optValue = getOptionValue(option);
@@ -177,7 +177,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                   <div 
                     key={`${optValue}-${index}`}
                     onMouseDown={(e) => {
-                      e.preventDefault(); // Prevents focus loss from input before click fires
+                      e.preventDefault();
                     }}
                     onClick={(e) => {
                       e.preventDefault();
@@ -185,17 +185,16 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                       onChange(optValue);
                       setSearchQuery('');
                       setIsOpen(false);
-                      // Restore focus to trigger to prevent scroll jump
                       setTimeout(() => triggerRef.current?.focus({ preventScroll: true }), 0);
                     }}
-                    className={`px-3 py-2.5 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 ${
+                    className={`px-3 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 mx-1 rounded-md ${
                       isSelected 
-                        ? 'bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0]' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                        ? 'bg-[#792359]/10 text-[#792359] dark:bg-[#792359]/20 dark:text-[#e6a8d0] font-medium' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/70 dark:hover:bg-white/5'
                     }`}
                   >
                     <div className="flex flex-col flex-1 min-w-0">
-                      <span className={isSelected ? 'font-medium truncate' : 'truncate'}>{optLabel}</span>
+                      <span className={isSelected ? 'font-semibold truncate' : 'truncate'}>{optLabel}</span>
                       {subLabel && (
                         <span className={`text-[11px] truncate mt-0.5 ${isSelected ? 'text-[#792359]/80 dark:text-[#e6a8d0]/80' : 'text-gray-500 dark:text-gray-400'}`}>
                           {subLabel}
@@ -208,7 +207,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                         <span className="text-xs opacity-50 mt-0.5 block line-clamp-2">{(option as any).description}</span>
                       )}
                     </div>
-                    {isSelected && <CheckCircle2 size={14} className="shrink-0" />}
+                    {isSelected && <CheckCircle2 size={15} className="shrink-0 text-[#792359] dark:text-[#e6a8d0]" />}
                   </div>
                 );
               })
