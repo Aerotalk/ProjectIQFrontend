@@ -106,10 +106,7 @@ export default function POTotalsSection({ readOnly }: Props) {
           <span className="text-gray-600 dark:text-gray-400">Sub Total</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Discount</span>
-          <span className="font-medium text-gray-900 dark:text-white">-₹{totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-        </div>
+
         <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Taxable Amount</span>
           <span className="font-medium text-gray-900 dark:text-white">₹{totalTaxableAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>

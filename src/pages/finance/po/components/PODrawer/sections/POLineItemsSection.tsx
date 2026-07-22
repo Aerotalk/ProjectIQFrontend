@@ -91,7 +91,6 @@ export default function POLineItemsSection({ readOnly }: Props) {
               <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
               <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Unit</th>
               <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Rate (₹)</th>
-              <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Discount</th>
               <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[8%]">GST (%)</th>
               <th className="px-2 py-2 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
               {!readOnly && <th className="px-2 py-2 w-[5%]"></th>}
@@ -170,35 +169,6 @@ export default function POLineItemsSection({ readOnly }: Props) {
                   </td>
                   <td className="px-2 py-1.5 align-top">
                     <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={`${cellClass} ${lineErrors?.rate ? 'border-red-400' : ''}`} />
-                  </td>
-                  <td className="px-2 py-1.5 align-top">
-                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-300 dark:border-white/10 overflow-hidden focus-within:border-[#792359] focus-within:ring-1 focus-within:ring-[#792359]">
-                      <Controller
-                        name={`lineItems.${index}.discountType`}
-                        control={control}
-                        render={({ field }) => (
-                          <CustomSelect
-                            value={field.value || 'FLAT'}
-                            onChange={field.onChange}
-                            disabled={readOnly}
-                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1 border-0 border-r border-gray-300 dark:border-white/10 outline-none h-full min-h-0 w-14 rounded-r-none shadow-none focus:ring-0"
-                            options={[
-                              { label: '₹', value: 'FLAT' },
-                              { label: '%', value: 'PERCENTAGE' }
-                            ]}
-                          />
-                        )}
-                      />
-                      <input 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0"
-                        {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} 
-                        disabled={readOnly} 
-                        className="w-full min-w-0 px-2 py-1.5 bg-white dark:bg-[#0f1115] text-sm text-gray-900 dark:text-white outline-none disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-white/[0.02]" 
-                      />
-                    </div>
                   </td>
                   <td className="px-2 py-1.5 align-top">
                     <input type="number" step="0.01" min="0" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
