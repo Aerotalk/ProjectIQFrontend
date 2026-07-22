@@ -281,3 +281,160 @@ body {
     --sidebar-w: 260px;
   }
 }
+
+/* ── Global Premium Table & List Styling ──────────────────────── */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100%;
+}
+
+/* Rounded corners for the container card */
+.bg-white.dark\:bg-\[\#181a1f\].rounded-sm, 
+.bg-white.dark\:bg-\[\#181a1f\].rounded-xl,
+.bg-white.dark\:bg-\[\#181a1f\].border-gray-200 {
+  border-radius: 1rem !important; /* Make card containers rounded-2xl style */
+  box-shadow: 0 4px 20px -2px rgba(121, 35, 89, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  overflow: hidden !important;
+}
+
+.dark .bg-white.dark\:bg-\[\#181a1f\].rounded-sm, 
+.dark .bg-white.dark\:bg-\[\#181a1f\].rounded-xl,
+.dark .bg-white.dark\:bg-\[\#181a1f\].border-gray-200 {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Styling Table Headers */
+table thead tr th {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: #4b5563 !important; /* gray-600 */
+  background-color: rgba(249, 250, 251, 0.6) !important; /* gray-50 */
+  border-bottom: 2px solid rgba(229, 231, 235, 0.8) !important;
+  padding: 16px 24px !important;
+  transition: all 0.2s ease;
+}
+
+.dark table thead tr th {
+  color: #9ca3af !important; /* gray-400 */
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Align Action headers correctly with their buttons */
+table thead tr th.text-center, 
+table thead tr th:last-child {
+  text-align: center !important;
+}
+
+/* Align numeric headers correctly with values */
+table thead tr th.text-right {
+  text-align: right !important;
+}
+
+/* Styling Table Rows */
+table tbody tr {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+}
+
+table tbody tr:hover {
+  background-color: rgba(121, 35, 89, 0.025) !important; /* soft purple/pink brand tint */
+  transform: translateX(3px); /* Subtle premium slide-right effect */
+  box-shadow: inset 3px 0 0 0 #792359 !important; /* Left vertical accent bar! */
+}
+
+.dark table tbody tr:hover {
+  background-color: rgba(196, 56, 144, 0.035) !important;
+  box-shadow: inset 3px 0 0 0 #c43890 !important;
+}
+
+/* Cell padding and formatting */
+table tbody tr td {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid rgba(243, 244, 246, 0.8) !important;
+  vertical-align: middle;
+}
+
+.dark table tbody tr td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Remove bottom border on last row for neatness */
+table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Make primary ID columns/buttons look clickable and sleek */
+table tbody tr td button.text-\[\#792359\], 
+table tbody tr td a.text-\[\#792359\],
+table tbody tr td .font-semibold.text-\[\#792359\] {
+  color: #792359 !important;
+  font-weight: 700 !important;
+  transition: color 0.15s ease;
+}
+
+.dark table tbody tr td button.text-\[\#792359\], 
+.dark table tbody tr td a.text-\[\#792359\],
+.dark table tbody tr td .font-semibold.text-\[\#792359\] {
+  color: #e6a8d0 !important;
+}
+
+table tbody tr td button.text-\[\#792359\]:hover, 
+table tbody tr td a.text-\[\#792359\]:hover,
+table tbody tr td .font-semibold.text-\[\#792359\]:hover {
+  color: #c43890 !important;
+  text-decoration: underline !important;
+}
+
+/* Modern status pills */
+table tbody tr td span.border {
+  border-radius: 9999px !important; /* Pill style */
+  padding: 4px 12px !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.15s ease;
+}
+
+/* Add dynamic pulse dots in status pills */
+table tbody tr td span.border::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  animation: badge-pulse 1.8s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Styling custom dropdown menus inside tables */
+td.relative div.absolute {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(229, 231, 235, 0.7) !important;
+  overflow: hidden;
+  animation: dropdown-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark td.relative div.absolute {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+@keyframes dropdown-pop {
+  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
