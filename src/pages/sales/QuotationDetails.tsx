@@ -715,11 +715,7 @@ export default function QuotationDetails() {
         </div>
 
         <div className="flex items-center gap-2">
-          {currentStage === 6 && (
-            <button className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2">
-              View Project
-            </button>
-          )}
+
           {(currentStage === 1 || currentStage === 4) && (
             <button
               disabled={isApiLoading}
