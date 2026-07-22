@@ -49,7 +49,7 @@ export default function LineItemsSection({ readOnly }: Props) {
       setValue(`lineItems.${index}.quantity`, 1);
       setValue(`lineItems.${index}.discount`, 0);
       setValue(`lineItems.${index}.discountValue`, 0);
-      setValue(`lineItems.${index}.discountType`, '₹');
+      setValue(`lineItems.${index}.discountType`, 'FLAT');
     }
   };
 
