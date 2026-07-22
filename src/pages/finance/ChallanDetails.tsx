@@ -196,7 +196,7 @@ export default function ChallanDetails() {
           item_name: (item as any).itemName || (item as any).name || 'Item',
           item_description: item.description || '',
           item_hsn: (item as any).itemHsn || (item as any).hsnSac || (item as any).hsn || '',
-          item_quantity: item.dispatchedQuantity || item.quantity || item.qty || 1,
+          item_quantity: item.dispatchedQuantity ?? item.quantity ?? item.qty ?? 1,
           item_unit: item.unit || 'Unit'
         })) : [{
           item_index: 1,
@@ -206,7 +206,9 @@ export default function ChallanDetails() {
           item_quantity: 1,
           item_unit: 'Lot'
         }],
-        total_quantity: challan.lineItems?.reduce((sum, item) => sum + (Number(item.dispatchedQuantity) || Number(item.quantity) || Number(item.qty) || 1), 0) || 1,
+        total_quantity: challan.lineItems?.length
+          ? challan.lineItems.reduce((sum, item) => sum + (Number(item.dispatchedQuantity ?? item.quantity ?? item.qty) || 1), 0)
+          : 1,
         
         terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
         signature_url: signatureBase64
@@ -228,7 +230,7 @@ export default function ChallanDetails() {
     switch (currentStage) {
       case 1:
         return (
-          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="text-yellow-600 dark:text-yellow-500" size={20} />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -258,24 +260,24 @@ export default function ChallanDetails() {
                     setIsApiLoading(false);
                   }
                 }}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Save & Issue
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : 'Save & Issue'}
               </button>
             ) : (
               <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Issued', 'Challan Issued', 2)}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Issue Challan
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Issue Challan'}
               </button>
             )}
           </div>
         );
       case 2:
         return (
-          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Package className="text-blue-600 dark:text-blue-400" size={20} />
               <p className="text-sm text-blue-800 dark:text-blue-200">Challan is issued. Ready to be dispatched.</p>
@@ -283,15 +285,15 @@ export default function ChallanDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Dispatched', 'Marked as Dispatched', 3)}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              Mark as Dispatched
+              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Mark as Dispatched'}
             </button>
           </div>
         );
       case 3:
         return (
-          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Truck className="text-purple-600 dark:text-purple-400" size={20} />
               <p className="text-sm text-purple-800 dark:text-purple-200">Goods are dispatched. Waiting for delivery confirmation.</p>
@@ -299,18 +301,18 @@ export default function ChallanDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Delivered', 'Marked as Delivered', 4)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm font-medium rounded-sm transition-colors disabled:opacity-50"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              Confirm Delivery
+              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Confirming...</> : 'Confirm Delivery'}
             </button>
           </div>
         );
       case 4:
         return (
-          <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="text-emerald-600 dark:text-emerald-500" size={20} />
-              <p className="text-sm text-emerald-800 dark:text-emerald-200">Delivery Challan is complete and goods delivered.</p>
+              <p className="text-sm text-emerald-800 dark:text-emerald-200 font-medium">Delivery Challan is complete and goods delivered.</p>
             </div>
           </div>
         );
@@ -712,6 +714,55 @@ export default function ChallanDetails() {
 
               {activeTab === 'Overview' && (
                 <div className="space-y-6">
+                  {/* Delivered Items Table */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
+                      Delivered Items
+                    </h4>
+                    {challan.lineItems && challan.lineItems.length > 0 ? (
+                      <div className="overflow-x-auto rounded-md border border-gray-200 dark:border-white/10">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
+                            <tr>
+                              <th className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-300 uppercase">#</th>
+                              <th className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-300 uppercase">Item Name / Spec</th>
+                              <th className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-300 uppercase">HSN/SAC</th>
+                              <th className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-300 uppercase text-right">Quantity</th>
+                              <th className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-300 uppercase">Unit</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                            {challan.lineItems.map((item, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                                <td className="px-4 py-2.5 text-gray-500">{idx + 1}</td>
+                                <td className="px-4 py-2.5">
+                                  <span className="font-semibold text-gray-900 dark:text-white block">{item.itemName || 'Item'}</span>
+                                  {item.description && <span className="text-gray-400 dark:text-gray-500 block text-[11px] mt-0.5">{item.description}</span>}
+                                </td>
+                                <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300">{item.hsnSac || '—'}</td>
+                                <td className="px-4 py-2.5 font-medium text-gray-900 dark:text-white text-right">
+                                  {item.dispatchedQuantity ?? item.quantity ?? 1}
+                                </td>
+                                <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300">{item.unit || 'Unit'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot className="bg-gray-50 dark:bg-white/[0.02] font-bold border-t border-gray-200 dark:border-white/10 text-xs">
+                            <tr>
+                              <td colSpan={3} className="px-4 py-2.5 text-gray-900 dark:text-white">Total Quantity</td>
+                              <td className="px-4 py-2.5 text-right text-[#792359] dark:text-[#c44997]">
+                                {challan.lineItems.reduce((sum, i) => sum + (Number(i.dispatchedQuantity ?? i.quantity) || 1), 0)}
+                              </td>
+                              <td className="px-4 py-2.5"></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 italic">No structured line items. Delivered goods specified in general description.</p>
+                    )}
+                  </div>
+
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Remarks</p>
                     {isEditing ? (

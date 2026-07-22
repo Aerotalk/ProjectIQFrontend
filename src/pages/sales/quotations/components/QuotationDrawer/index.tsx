@@ -248,7 +248,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
-        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: data.totalGstAmount > 0,
         taxes: taxBreakdown
       };

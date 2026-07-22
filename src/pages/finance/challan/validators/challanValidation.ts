@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+export const challanLineItemSchema = z.object({
+  id: z.string().optional(),
+  itemName: z.string().optional(),
+  hsnSac: z.string().optional(),
+  description: z.string().optional(),
+  dispatchedQuantity: z.number().min(0, 'Quantity must be non-negative').optional(),
+  quantity: z.number().min(0, 'Quantity must be non-negative').optional(),
+  unit: z.string().optional(),
+});
+
 export const challanSchema = z.object({
   challanNumber: z.string().min(1, 'Challan Number is required'),
   projectId: z.string().min(1, 'Project is required'),
@@ -13,6 +23,7 @@ export const challanSchema = z.object({
   attachmentName: z.string().nullable().optional(),
   ewayBillNo: z.string().nullable().optional(),
   remarks: z.string().nullable().optional(),
+  lineItems: z.array(challanLineItemSchema).optional(),
 });
 
 export type ChallanFormValues = z.infer<typeof challanSchema>;

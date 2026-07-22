@@ -1,3 +1,17 @@
+export interface ChallanLineItem {
+  id?: string;
+  itemName?: string;
+  name?: string;
+  hsnSac?: string;
+  itemHsn?: string;
+  hsn?: string;
+  description?: string;
+  dispatchedQuantity?: number;
+  qty?: number;
+  quantity?: number;
+  unit?: string;
+}
+
 export interface DeliveryChallan {
   id: string;                 // System generated, e.g., DC-0001
   challanNumber: string;      // As printed on the physical document
@@ -10,6 +24,7 @@ export interface DeliveryChallan {
   linkedVendorPoId?: string;  // Optional trace to Vendor PO
   linkedVendorPoNumber?: string; // Hydrated for display
   attachmentName?: string;    // Optional uploaded file name
+  ewayBillNo?: string;        // Optional E-way bill number
   remarks?: string;           // Optional internal remarks
   status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
 
@@ -26,15 +41,4 @@ export interface DeliveryChallan {
   
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface ChallanLineItem {
-  id?: string;
-  itemName?: string;
-  itemHsn?: string;
-  description?: string;
-  dispatchedQuantity?: number;
-  qty?: number; // legacy alias
-  quantity?: number; // legacy alias
-  unit?: string;
 }

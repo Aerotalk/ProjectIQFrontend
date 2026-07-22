@@ -13,7 +13,7 @@ import { ProductService } from '../../services/product.service';
 import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
-import { formatQuotationId } from '../../lib/utils';
+import { formatQuotationId, numberToWords } from '../../lib/utils';
 import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
 import { Stepper } from '@/components/ui/Stepper';
 import { calculateQuotationTotals } from '@/utils/quotationCalculations';
@@ -23,18 +23,6 @@ interface UserData {
   username: string;
   email: string;
 }
-
-import { ToWords } from 'to-words';
-const toWords = new ToWords({
-  localeCode: 'en-IN',
-  converterOptions: {
-    currency: true,
-    ignoreDecimal: false,
-    ignoreZeroCurrency: false,
-    doNotAddOnly: false,
-    currencyOptions: { name: 'Rupee', plural: 'Rupees', symbol: '₹', fractionalUnit: { name: 'Paisa', plural: 'Paise', symbol: '' } }
-  }
-});
 
 export default function QuotationDetails() {
   const { id } = useParams();
@@ -452,7 +440,8 @@ export default function QuotationDetails() {
         place_of_supply: client?.billingState || '',
         items: lineItems.map((item, index) => {
           const product = products.find(p => p.id === item.productId || p.id === item.id);
-          const lineTaxable = item.rate * item.qty;
+          const calcLine = calculatedLines[index];
+          const lineTaxable = calcLine ? calcLine.rowTaxableAmount : (item.rate * item.qty);
           return {
             item_index: index + 1,
             item_name: item.name,
@@ -465,20 +454,20 @@ export default function QuotationDetails() {
           };
         }),
         sub_total: subTotal.toFixed(2),
-        discount: (Number(quotation.discount) || 0).toFixed(2),
-        has_discount: Number(quotation.discount) > 0,
-        taxable_amount: (subTotal - (Number(quotation.discount) || 0)).toFixed(2),
+        discount: totalDiscount.toFixed(2),
+        has_discount: totalDiscount > 0,
+        taxable_amount: (subTotal - totalDiscount).toFixed(2),
         total_tax: totalGst.toFixed(2),
         delivery_cost: (Number(quotation.deliveryCost) || 0).toFixed(2),
         has_delivery_cost: Number(quotation.deliveryCost) > 0,
         grand_total: grandTotal.toFixed(2),
-        amount_in_words: toWords.convert(grandTotal),
+        amount_in_words: numberToWords(grandTotal),
         terms_and_conditions: quotation.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
         company_signature_url: signatureBase64,
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
-        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || company?.bankAccounts?.[0]?.accountName || '',
         has_taxes: totalGst > 0,
         taxes: taxBreakdown
       };
@@ -488,6 +477,7 @@ export default function QuotationDetails() {
       setIsPreviewOpen(true);
     } catch (err: any) {
       toast.error('Failed to generate preview.');
+      console.error(err);
     } finally {
       setIsLoadingPreview(false);
     }
@@ -497,7 +487,7 @@ export default function QuotationDetails() {
     switch (currentStage) {
       case 1:
         return (
-          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="text-yellow-600 dark:text-yellow-500" size={20} />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -559,9 +549,9 @@ export default function QuotationDetails() {
                     setIsApiLoading(false);
                   }
                 }}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Save Draft
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : 'Save Draft'}
               </button>
             ) : (
               <button
@@ -573,16 +563,16 @@ export default function QuotationDetails() {
                   }
                   handleStatusUpdate('Pending Approval', 'Sent for approval', 2);
                 }}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Send for approval
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Send for approval'}
               </button>
             )}
           </div>
         );
       case 2:
         return (
-          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-[#fff9ea] dark:bg-yellow-500/10 border border-[#fde9a4] dark:border-yellow-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="text-yellow-600 dark:text-yellow-500" size={20} />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">Quotation is sent for internal approval. You will be notified once it is approved or rejected.</p>
@@ -592,16 +582,16 @@ export default function QuotationDetails() {
                 <button
                   disabled={isApiLoading}
                   onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
-                  className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                  className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
                 >
-                  Reject
+                  {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Rejecting...</> : 'Reject'}
                 </button>
                 <button
                   disabled={isApiLoading}
                   onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
-                  className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+                  className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
                 >
-                  Approve
+                  {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Approving...</> : 'Approve'}
                 </button>
               </div>
             )}
@@ -609,7 +599,7 @@ export default function QuotationDetails() {
         );
       case 3:
         return (
-          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="text-blue-600 dark:text-blue-400" size={20} />
               <p className="text-sm text-blue-800 dark:text-blue-200">Quotation has been sent to the client. You can track client view and follow-up.</p>
@@ -618,23 +608,23 @@ export default function QuotationDetails() {
               <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Changes Requested', 'Marked as Under Negotiation', 4)}
-                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Client Requested Changes
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Client Requested Changes'}
               </button>
               <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Accepted', 'Client Accepted Quotation!', 5)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-sm font-medium rounded-sm transition-colors disabled:opacity-50"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                Client Accepted
+                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Client Accepted'}
               </button>
             </div>
           </div>
         );
       case 4:
         return (
-          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 p-4 rounded-sm flex items-center justify-between">
+          <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Info className="text-purple-600 dark:text-purple-400" size={20} />
               <p className="text-sm text-purple-800 dark:text-purple-200">Client has requested changes. Edit the quotation to create a revision, then send it back for internal approval.</p>
@@ -642,9 +632,9 @@ export default function QuotationDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Pending Approval', 'Revision sent for internal approval.', 2)}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              Send Revision for Approval
+              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Send Revision for Approval'}
             </button>
           </div>
         );

@@ -35,6 +35,14 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedVendorPoNumber: initialData.linkedVendorPoNumber || '',
           attachmentName: initialData.attachmentName || '',
           remarks: initialData.remarks || '',
+          lineItems: initialData.lineItems?.map(item => ({
+            id: item.id,
+            itemName: item.itemName || '',
+            hsnSac: item.hsnSac || '',
+            description: item.description || '',
+            dispatchedQuantity: item.dispatchedQuantity ?? item.quantity ?? 1,
+            unit: item.unit || 'Unit',
+          })) || [],
         });
       } else {
         form.reset({
@@ -46,6 +54,7 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
           linkedVendorPoId: '',
           attachmentName: '',
           remarks: '',
+          lineItems: [],
         });
       }
     }

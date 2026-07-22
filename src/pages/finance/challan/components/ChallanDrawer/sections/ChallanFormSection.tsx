@@ -1,7 +1,7 @@
 "use no memo";
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useFormContext, useWatch, Controller } from 'react-hook-form';
-import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
+import { useFormContext, useWatch, Controller, useFieldArray } from 'react-hook-form';
+import { Loader2, Paperclip, X as XIcon, Plus } from 'lucide-react';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 import { VendorService } from '@/services/vendor.service';
 import { POService } from '@/services/po.service';
@@ -23,6 +23,11 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     control,
     setValue,
   } = useFormContext();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'lineItems'
+  });
 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
@@ -328,6 +333,107 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
         </div>
       </div>
       
+      {/* ── Line Items ── */}
+      <div>
+        <div className="flex justify-between items-center border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+            Delivered Line Items
+          </h3>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={() => append({ itemName: '', hsnSac: '', description: '', dispatchedQuantity: 1, unit: 'Unit' })}
+              className="flex items-center gap-1 text-xs font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
+            >
+              <Plus size={14} /> Add Line Item
+            </button>
+          )}
+        </div>
+
+        <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
+              <tr>
+                <th className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider w-[35%]">Item Name / Description</th>
+                <th className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider w-[20%]">HSN/SAC</th>
+                <th className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider w-[20%]">Quantity</th>
+                <th className="px-3 py-2 font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider w-[20%]">Unit</th>
+                {!readOnly && <th className="px-3 py-2 w-10"></th>}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+              {fields.map((field, index) => (
+                <tr key={field.id}>
+                  <td className="px-3 py-2 space-y-1">
+                    <input
+                      type="text"
+                      placeholder="Item name..."
+                      {...register(`lineItems.${index}.itemName`)}
+                      disabled={readOnly}
+                      className={fieldClass(false)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Item specification / description..."
+                      {...register(`lineItems.${index}.description`)}
+                      disabled={readOnly}
+                      className={fieldClass(false) + " text-xs"}
+                    />
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <input
+                      type="text"
+                      placeholder="e.g. 998313"
+                      {...register(`lineItems.${index}.hsnSac`)}
+                      disabled={readOnly}
+                      className={fieldClass(false)}
+                    />
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...register(`lineItems.${index}.dispatchedQuantity`, { valueAsNumber: true })}
+                      disabled={readOnly}
+                      className={fieldClass(false)}
+                    />
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <input
+                      type="text"
+                      placeholder="e.g. Box, Nos, Lot"
+                      {...register(`lineItems.${index}.unit`)}
+                      disabled={readOnly}
+                      className={fieldClass(false)}
+                    />
+                  </td>
+                  {!readOnly && (
+                    <td className="px-3 py-2 align-top text-center">
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="text-gray-400 hover:text-red-500 p-1.5 transition-colors"
+                        title="Remove item"
+                      >
+                        <XIcon size={14} />
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+              {fields.length === 0 && (
+                <tr>
+                  <td colSpan={readOnly ? 4 : 5} className="px-3 py-6 text-center text-xs text-gray-500">
+                    No individual line items added. Total quantity will default to description summary.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* ── Content & Remarks ── */}
       <div>
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
