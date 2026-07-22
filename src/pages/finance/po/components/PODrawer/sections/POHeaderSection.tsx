@@ -36,16 +36,12 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
 
   const vendorOptions = useMemo(() => {
-    if (!selectedProject?.assignedVendors?.length) return [];
-    const av = selectedProject.assignedVendors;
-    return vendors
-      .filter(v =>
-        av.includes(v.id) ||
-        (v.vendorNo !== undefined && av.includes(v.vendorNo)) ||
-        (v.vendorNo !== undefined && av.some(a => a.toLowerCase() === v.vendorNo!.toLowerCase()))
-      )
-      .map(v => ({ label: v.displayName || v.companyName || v.firstName || v.id, value: v.id }));
-  }, [selectedProject, vendors]);
+    if (!selectedProjectId) return [];
+    return vendors.map(v => ({ 
+      label: v.displayName || v.companyName || v.firstName || v.id, 
+      value: v.id 
+    }));
+  }, [selectedProjectId, vendors]);
 
 
   // Sync project name
