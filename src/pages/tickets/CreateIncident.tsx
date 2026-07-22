@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormValues, TicketService } from '../../services/ticket.service';
-import { ProjectService } from '../../services/project.service';
+// import { ProjectService } from '../../services/project.service';
 import type { Project } from '../../types/project.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
