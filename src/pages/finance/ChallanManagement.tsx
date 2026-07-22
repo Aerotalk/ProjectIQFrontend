@@ -112,6 +112,7 @@ export default function ChallanManagement() {
         ...data,
         vendorName: vendor?.displayName || data.vendorName || '',
         projectName: project?.projectName || '',
+        status: data.status || 'Draft'
       };
 
       if (drawerMode === 'create') {
