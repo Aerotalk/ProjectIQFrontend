@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Search, MoreVertical, Truck,
   ChevronLeft, ChevronRight, Loader2, Package,
@@ -155,10 +155,18 @@ export default function ChallanManagement() {
     return searchMatch && projectMatch && vendorMatch && statusMatch;
   });
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const sortedChallans = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.challanDate || 0).getTime();
+      const dateB = new Date(b.createdAt || b.challanDate || 0).getTime();
+      return dateB - dateA;
+    });
+  }, [filtered]);
+
+  const totalPages = Math.ceil(sortedChallans.length / itemsPerPage);
   const idxLast = currentPage * itemsPerPage;
   const idxFirst = idxLast - itemsPerPage;
-  const currentItems = filtered.slice(idxFirst, idxLast);
+  const currentItems = sortedChallans.slice(idxFirst, idxLast);
 
   const resetPage = () => setCurrentPage(1);
 
@@ -306,7 +314,7 @@ export default function ChallanManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {currentItems.map(ch => (
+                {currentItems.map((ch: DeliveryChallan) => (
                   <tr
                     key={ch.id}
                     className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm group"

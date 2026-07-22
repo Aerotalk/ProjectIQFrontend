@@ -99,7 +99,9 @@ export default function POLineItemsSection({ readOnly }: Props) {
             {fields.map((field, index) => {
               const unit = lineItems?.[index]?.unit || '';
               const unitConfig = getQuantityInputConfig(unit);
-              const currentTotal = lineItems?.[index]?.totalAmount || 0;
+              const qty = lineItems?.[index]?.quantity || 0;
+              const rate = lineItems?.[index]?.rate || 0;
+              const currentTotal = qty * rate;
               const lineErrors = (errors.lineItems as any)?.[index];
 
               return (
