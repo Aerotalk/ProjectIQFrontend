@@ -9,6 +9,8 @@ import { useProjects } from '@/hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
 import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
+import { ProductService } from '@/services/product.service';
+import type { Product } from '@/types/product.types';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
@@ -31,6 +33,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { projects } = useProjects();
@@ -47,10 +50,12 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     if (!companyId) return;
     Promise.all([
       VendorService.getVendors(companyId),
-      POService.getAll(companyId)
-    ]).then(([vendorData, poData]) => {
+      POService.getAll(companyId),
+      ProductService.getProducts(companyId)
+    ]).then(([vendorData, poData, productData]) => {
       setVendors(vendorData);
       setPurchaseOrders(poData);
+      setProducts(productData);
       setIsLoadingData(false);
     });
   }, [companyId]);
@@ -109,6 +114,8 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     const po = purchaseOrders.find(p => p.id === selectedPoId);
     if (po) setValue('linkedVendorPoNumber', po.poNumber, { shouldValidate: false });
   }, [selectedPoId, purchaseOrders, setValue]);
+
+
 
   // File selection handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,29 +247,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             )}
           </div>
           
-          {/* Linked Vendor PO */}
-          <div>
-            <label className={labelClass}>
-              Linked Vendor PO
-              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
-            </label>
-            <div className="relative">
-              <div className={readOnly || isLoadingData || !selectedProjectId || !selectedVendorId ? 'opacity-80 pointer-events-none' : ''}>
-                <Controller
-                  name="linkedVendorPoId"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomSelect
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      options={PO_OPTIONS}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-          
+
           {/* E-Way Bill Number */}
           <div>
             <label className={labelClass}>
@@ -342,7 +327,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
           {!readOnly && (
             <button
               type="button"
-              onClick={() => append({ itemName: '', hsnSac: '', description: '', dispatchedQuantity: 1, unit: 'Unit' })}
+              onClick={() => append({ productId: '', itemName: '', hsnSac: '', description: '', dispatchedQuantity: 1, unit: 'Unit' })}
               className="flex items-center gap-1 text-xs font-semibold text-[#792359] dark:text-[#c44997] hover:underline"
             >
               <Plus size={14} /> Add Line Item
@@ -364,20 +349,40 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {fields.map((field, index) => (
                 <tr key={field.id}>
-                  <td className="px-3 py-2 space-y-1">
-                    <input
-                      type="text"
-                      placeholder="Item name..."
-                      {...register(`lineItems.${index}.itemName`)}
-                      disabled={readOnly}
-                      className={fieldClass(false)}
-                    />
-                    <input
-                      type="text"
+                  <td className="px-3 py-2 space-y-2 align-top w-[35%]">
+                    <div className="relative">
+                      <Controller
+                        name={`lineItems.${index}.itemName`}
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            value={field.value || ''}
+                            onChange={(val) => {
+                              field.onChange(val);
+                              const product = products.find(p => p.itemName === val);
+                              if (product) {
+                                setValue(`lineItems.${index}.hsnSac`, product.hsnSac || '');
+                                setValue(`lineItems.${index}.description`, product.description || '');
+                                setValue(`lineItems.${index}.unit`, product.unit);
+                                setValue(`lineItems.${index}.dispatchedQuantity`, 1);
+                              }
+                            }}
+                            options={products.map(p => ({ 
+                              label: p.itemName, 
+                              value: p.itemName,
+                              subLabel: p.description ? p.description : ''
+                            }))}
+                          />
+                        )}
+                      />
+                      {isLoadingData && <Loader2 className="absolute right-8 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
+                    </div>
+                    <textarea
                       placeholder="Item specification / description..."
                       {...register(`lineItems.${index}.description`)}
                       disabled={readOnly}
-                      className={fieldClass(false) + " text-xs"}
+                      rows={2}
+                      className={fieldClass(false) + " resize-y min-h-[40px] text-xs"}
                     />
                   </td>
                   <td className="px-3 py-2 align-top">
