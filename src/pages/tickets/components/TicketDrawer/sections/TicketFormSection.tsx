@@ -19,7 +19,7 @@ export default function TicketFormSection({ readOnly }: Props) {
   const { register, formState: { errors }, control, watch } = useFormContext();
   const [activeTab, setActiveTab] = useState('General');
 
-  const { projects } = useProjects();
+  const { projects, loading: projectsLoading } = useProjects();
   const { selectedCompanyId } = useAuth();
   
   const [clients, setClients] = useState<Client[]>([]);
@@ -119,7 +119,13 @@ export default function TicketFormSection({ readOnly }: Props) {
                   name="projectId"
                   control={control}
                   render={({ field }) => (
-                    <CustomSelect value={field.value || ''} onChange={field.onChange} options={PROJECT_OPTIONS} />
+                    <CustomSelect 
+                      value={field.value || ''} 
+                      onChange={field.onChange} 
+                      options={PROJECT_OPTIONS} 
+                      isLoading={projectsLoading}
+                      loadingText="Loading projects..."
+                    />
                   )}
                 />
               </div>

@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormValues, TicketService } from '../../services/ticket.service';
-import { ProjectService } from '../../services/project.service';
+// import { ProjectService } from '../../services/project.service';
 import type { Project } from '../../types/project.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import { useProjects } from '../../hooks/useProjects';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Building2, UserCircle, Briefcase, FileText, IndianRupee } from 'lucide-react';
 import { rolesService, type Role } from '../../services/roles.service';
@@ -22,7 +23,7 @@ export default function CreateIncident() {
     { label: 'New Incident' }
   ]);
   
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects, loading: projectsLoading } = useProjects();
   const [selectedProjectData, setSelectedProjectData] = useState<Project | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -44,9 +45,6 @@ export default function CreateIncident() {
   const watchAssignmentGroup = watch('assignmentGroup');
 
   useEffect(() => {
-    if (companyId) {
-      ProjectService.getAll(companyId).then(data => setProjects(data)).catch(console.error);
-    }
     rolesService.getAllRoles().then((data: any) => {
       setRoles(Array.isArray(data) ? data : (data?.content || []));
     }).catch(console.error);
@@ -172,6 +170,8 @@ export default function CreateIncident() {
                     options={projectOptions}
                     value={field.value}
                     onChange={field.onChange}
+                    isLoading={projectsLoading}
+                    loadingText="Loading projects..."
                   />
                 )}
               />

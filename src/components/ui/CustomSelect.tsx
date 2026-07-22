@@ -36,9 +36,22 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
   const updatePosition = () => {
     if (dropdownRef.current) {
       const rect = dropdownRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      
+      let top: number | string = rect.bottom + 6;
+      let bottom: number | string = 'auto';
+
+      // If there is not enough space below (260px) and there is more space above, open upwards
+      if (spaceBelow < 260 && rect.top > spaceBelow) {
+        top = 'auto';
+        bottom = viewportHeight - rect.top + 6;
+      }
+
       setDropdownStyle({
         position: 'fixed',
-        top: rect.bottom + 6, // 6px mt-1.5 equivalent
+        top,
+        bottom,
         left: rect.left,
         width: rect.width,
         zIndex: 999999

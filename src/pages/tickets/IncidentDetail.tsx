@@ -6,10 +6,11 @@ import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import toast from 'react-hot-toast';
 import { 
   ArrowLeft, CheckCircle2, Paperclip, 
-  Clock, User, Info, 
+  Clock, User as UserIcon, Info, 
   Send, Briefcase, Plus,
   FileText
 } from 'lucide-react';
+import { useProjects } from '../../hooks/useProjects';
 
 const STAGES = ['New', 'Assigned', 'In Progress', 'Waiting for Client', 'Resolved', 'Closed'];
 
@@ -18,6 +19,7 @@ export default function IncidentDetail() {
   const navigate = useNavigate();
   const { selectedCompanyId: companyId } = useAuth();
   
+  const { projects } = useProjects();
   const [ticket, setTicket] = useState<TicketFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
@@ -51,7 +53,7 @@ export default function IncidentDetail() {
 
   useBreadcrumbs([
     { label: 'Support', path: '/companydashboard/tickets' },
-    { label: ticket ? (ticket.ticketNo || ticket.id?.substring(0,8).toUpperCase()) as string : 'Ticket Detail' }
+    { label: ticket ? (ticket.ticketNo || (ticket.id ? String(ticket.id).substring(0,8).toUpperCase() : 'Ticket Detail')) : 'Ticket Detail' }
   ]);
 
   useEffect(() => {
@@ -171,7 +173,7 @@ export default function IncidentDetail() {
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{ticket.shortDescription || 'Untitled Incident'}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{ticket.shortDescription || 'No description provided'}</h1>
               {getPriorityBadge(ticket.priority)}
             </div>
           </div>
@@ -266,11 +268,15 @@ export default function IncidentDetail() {
               <div className="p-4 space-y-4 text-sm">
                 <div className="flex justify-between border-b border-gray-100 pb-2">
                   <span className="text-gray-500">Project</span>
-                  
+                  <span className="font-medium text-gray-900">
+                    {ticket.projectId 
+                      ? (projects.find(p => p.id === ticket.projectId)?.projectName || ticket.projectId.substring(0, 8))
+                      : 'N/A'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Client</span>
-                  <span className="font-medium text-gray-900">{ticket.customerCompany || 'Acme Corp Ltd'}</span>
+                  <span className="font-medium text-gray-900">{ticket.customerCompany || 'N/A'}</span>
                 </div>
               </div>
             </div>
@@ -455,27 +461,21 @@ export default function IncidentDetail() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Assignment Group</span>
-                <span className="text-sm font-medium text-gray-900">{ticket.assignmentGroup || 'L2 Support'}</span>
+                <span className="text-sm font-medium text-gray-900">{ticket.assignmentGroup || 'N/A'}</span>
               </div>
             </div>
           </div>
 
-          {/* Assigned Team */}
           <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Assigned Team</h3>
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Assigned To</h3>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#792359]/10 text-[#792359] flex items-center justify-center font-bold text-xs">RS</div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">{ticket.assignedTo || 'Rahul Sharma'}</div>
-                  <div className="text-xs text-gray-500">Support Engineer</div>
+                <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
+                  {ticket.assignedTo ? ticket.assignedTo.substring(0, 1).toUpperCase() : <UserIcon size={14} />}
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">SJ</div>
                 <div>
-                  <div className="text-sm font-medium text-gray-900">Sarah Jenkins</div>
-                  <div className="text-xs text-gray-500">Project Manager</div>
+                  <div className="text-sm font-medium text-gray-900">{ticket.assignedTo || 'Unassigned'}</div>
+                  {ticket.assignedTo && <div className="text-xs text-gray-500">Assignee</div>}
                 </div>
               </div>
             </div>
@@ -484,20 +484,20 @@ export default function IncidentDetail() {
           {/* Customer Info */}
           <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-              <User size={14} /> Contact Details
+              <UserIcon size={14} /> Contact Details
             </h3>
             <div className="space-y-3 text-sm">
               <div>
                 <span className="text-gray-500 block text-xs">Contact Person</span>
-                <span className="font-medium text-gray-900">{ticket.reportedBy || 'John Doe'}</span>
+                <span className="font-medium text-gray-900">{ticket.reportedBy || 'System'}</span>
               </div>
               <div>
                 <span className="text-gray-500 block text-xs">Email</span>
-                <a href="#" className="font-medium text-[#792359] hover:underline">{ticket.contactEmail || 'john.doe@example.com'}</a>
+                <a href="#" className="font-medium text-[#792359] hover:underline">{ticket.contactEmail || 'N/A'}</a>
               </div>
               <div>
                 <span className="text-gray-500 block text-xs">Phone</span>
-                <span className="font-medium text-gray-900">{ticket.contactNumber || '+1 (555) 123-4567'}</span>
+                <span className="font-medium text-gray-900">{ticket.contactNumber || 'N/A'}</span>
               </div>
             </div>
           </div>

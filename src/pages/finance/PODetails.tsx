@@ -151,13 +151,13 @@ export default function PODetails() {
             if (foundPo.lineItems) {
               const mappedItems = foundPo.lineItems.map((item: any) => ({
                 id: Math.random().toString(),
-                description: item.description,
-                qty: item.quantity || 0,
+                description: item.description || '',
+                qty: Number(item.quantity || 0),
                 unit: item.unit || '',
-                unitPrice: item.rate !== undefined ? item.rate : (item.unitPrice || 0),
-                amount: item.totalAmount || 0,
-                gstRate: item.gstRate || 0,
-                gstAmount: item.gstAmount || 0
+                unitPrice: Number(item.rate ?? item.unitPrice ?? 0),
+                amount: Number(item.totalAmount || 0),
+                gstRate: Number(item.gstRate || 0),
+                gstAmount: Number(item.gstAmount || 0)
               }));
               setLineItems(mappedItems);
               
@@ -260,16 +260,16 @@ export default function PODetails() {
           item_hsn: '', 
           item_quantity: item.qty || 1,
           item_unit: item.unit || 'PCS',
-          item_price: item.unitPrice.toFixed(2),
-          item_amount: (item.qty * item.unitPrice).toFixed(2)
+          item_price: Number(item.unitPrice || 0).toFixed(2),
+          item_amount: (Number(item.qty || 1) * Number(item.unitPrice || 0)).toFixed(2)
         })),
         
-        sub_total: subTotal.toFixed(2),
-        total_tax: totalTax.toFixed(2),
-        grand_total: calculatedGrandTotal.toFixed(2),
-        advance_amount: advanceAmount.toFixed(2),
-        balance_amount: (calculatedGrandTotal - advanceAmount).toFixed(2),
-        amount_in_words: toWords.convert(calculatedGrandTotal),
+        sub_total: Number(subTotal || 0).toFixed(2),
+        total_tax: Number(totalTax || 0).toFixed(2),
+        grand_total: Number(calculatedGrandTotal || 0).toFixed(2),
+        advance_amount: Number(advanceAmount || 0).toFixed(2),
+        balance_amount: (Number(calculatedGrandTotal || 0) - Number(advanceAmount || 0)).toFixed(2),
+        amount_in_words: toWords.convert(Number(calculatedGrandTotal || 0)),
         
         terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
         signature_url: signatureBase64
@@ -479,7 +479,7 @@ export default function PODetails() {
           {!isNew && (
             <button
               onClick={handlePreview}
-              disabled={isLoadingPreview}
+              disabled={isLoadingPreview || isApiLoading}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
