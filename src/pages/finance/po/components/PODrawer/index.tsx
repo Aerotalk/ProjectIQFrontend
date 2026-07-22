@@ -122,49 +122,53 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
         </button>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <FormProvider {...form}>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
+      {/* Scrollable Content & Form */}
+      <FormProvider {...form}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <form id="po-drawer-form" onSubmit={form.handleSubmit(onSubmit as any, (errors) => {
+          console.error('PO Form Validation Errors:', errors);
+          const firstError = Object.values(errors)[0] as any;
+          import('sonner').then(m => m.toast.error(firstError?.message || 'Please fill in all required fields correctly.'));
+        })} className="flex flex-col flex-1 min-h-0">
+          
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <POHeaderSection readOnly={readOnly} nextNumber={nextNumber} />
             <POLineItemsSection readOnly={readOnly} />
             <POTotalsSection readOnly={readOnly} />
-          </form>
-        </FormProvider>
-      </div>
+          </div>
 
-      {/* Drawer Footer */}
-      <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
-        >
-          {mode === 'view' ? 'Close' : 'Cancel'}
-        </button>
+          {/* Drawer Footer */}
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              {mode === 'view' ? 'Close' : 'Cancel'}
+            </button>
 
-        {!readOnly && (
-          <button
-            type="submit"
-            form="po-drawer-form"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                {mode === 'create' ? 'Save Purchase Order' : 'Update Purchase Order'}
-              </>
+            {!readOnly && (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {mode === 'create' ? 'Save Purchase Order' : 'Update Purchase Order'}
+                  </>
+                )}
+              </button>
             )}
-          </button>
-        )}
-      </div>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

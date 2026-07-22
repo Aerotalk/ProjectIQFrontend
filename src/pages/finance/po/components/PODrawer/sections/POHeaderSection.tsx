@@ -322,12 +322,19 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
           <label className={formStyles.label}>
             Description <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <textarea
-            {...register('description')}
-            disabled={readOnly}
-            placeholder="Specify what is being procured — be clear and specific (e.g. 'Cloud storage infrastructure for Q3 data pipeline')"
-            rows={3}
-            className={formStyles.textarea(!!errors.description, readOnly)}
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <textarea
+                {...field}
+                value={field.value || ''}
+                disabled={readOnly}
+                placeholder="Specify what is being procured — be clear and specific (e.g. 'Cloud storage infrastructure for Q3 data pipeline')"
+                rows={3}
+                className={formStyles.textarea(!!errors.description, readOnly)}
+              />
+            )}
           />
           {errors.description && (
             <p className="text-red-500 text-xs mt-1">{errors.description.message as string}</p>
