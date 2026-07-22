@@ -115,7 +115,7 @@ export default function PODetails() {
     if (!id || isNew) return;
     setIsApiLoading(true);
     try {
-      await api.put(`/admin/finance/purchase-orders/${id}/status`, { status: newStatus }).catch(() => {});
+      await POService.update(id, { ...po, status: newStatus } as any);
       setCurrentStage(newStage);
       setPo(prev => ({ ...prev, status: newStatus }));
       toast.success(successMessage);
@@ -228,7 +228,68 @@ export default function PODetails() {
       
       const vendor = vendors.find(v => v.id === po.vendorId);
       const advanceAmount = 0;
+
+      const isInterState = (company?.state || company?.billingState || '').toLowerCase() !== (vendor?.billingState || '').toLowerCase();
       
+      const taxSplitsMap = new Map<string, { taxable: number, taxAmount: number, rate: number }>();
+      
+      let totalQuantity = 0;
+      let totalTaxable = 0;
+      let totalGstAmount = 0;
+      let totalItemsAmount = 0;
+      
+      lineItems.forEach(item => {
+        const qty = Number(item.qty || 0);
+        const price = Number(item.unitPrice || 0);
+        const taxable = qty * price;
+        const rate = Number(item.gstRate || 0);
+        const gstAmt = Number(item.gstAmount || (taxable * rate / 100));
+        
+        totalQuantity += qty;
+        totalTaxable += taxable;
+        totalGstAmount += gstAmt;
+        totalItemsAmount += (taxable + gstAmt);
+        
+        if (taxable > 0 && rate > 0) {
+          if (isInterState) {
+            const key = `IGST @ ${rate}%`;
+            const existing = taxSplitsMap.get(key) || { taxable: 0, taxAmount: 0, rate: rate };
+            taxSplitsMap.set(key, {
+              taxable: existing.taxable + taxable,
+              taxAmount: existing.taxAmount + gstAmt,
+              rate: rate
+            });
+          } else {
+            const halfRate = rate / 2;
+            const halfGst = gstAmt / 2;
+            
+            const cgstKey = `CGST`;
+            const sgstKey = `SGST`;
+            
+            const existingCgst = taxSplitsMap.get(cgstKey) || { taxable: 0, taxAmount: 0, rate: halfRate };
+            taxSplitsMap.set(cgstKey, {
+              taxable: existingCgst.taxable + taxable,
+              taxAmount: existingCgst.taxAmount + halfGst,
+              rate: halfRate
+            });
+            
+            const existingSgst = taxSplitsMap.get(sgstKey) || { taxable: 0, taxAmount: 0, rate: halfRate };
+            taxSplitsMap.set(sgstKey, {
+              taxable: existingSgst.taxable + taxable,
+              taxAmount: existingSgst.taxAmount + halfGst,
+              rate: halfRate
+            });
+          }
+        }
+      });
+      
+      const taxSplits = Array.from(taxSplitsMap.entries()).map(([type, data]) => ({
+        tax_type: type,
+        tax_taxable: data.taxable.toFixed(2),
+        tax_rate: data.rate,
+        tax_amount: data.taxAmount.toFixed(2)
+      }));
+
       const payload = {
         primary_color_hex: '#792359',
         company_name: company?.name || company?.companyName || 'Company Name',
@@ -255,22 +316,39 @@ export default function PODetails() {
         place_of_supply: vendor?.billingState || '',
         due_date: po.expectedDelivery ? new Date(po.expectedDelivery).toLocaleDateString('en-GB') : 'N/A',
         
-        items: lineItems.map((item, index) => ({
-          item_index: index + 1,
-          item_name: item.description || 'Item',
-          item_hsn: (item as any).hsnSac || '', 
-          item_quantity: item.qty || 1,
-          item_unit: item.unit || 'PCS',
-          item_price: Number(item.unitPrice || 0).toFixed(2),
-          item_amount: (Number(item.qty || 1) * Number(item.unitPrice || 0)).toFixed(2)
-        })),
+        items: lineItems.map((item, index) => {
+          const qty = Number(item.qty || 0);
+          const price = Number(item.unitPrice || 0);
+          const taxable = qty * price;
+          const rate = Number(item.gstRate || 0);
+          const gstAmt = Number(item.gstAmount || (taxable * rate / 100));
+          return {
+            item_index: index + 1,
+            item_name: item.description || 'Item',
+            item_hsn: (item as any).hsnSac || (item as any).itemHsn || '', 
+            item_quantity: qty,
+            item_unit: item.unit || 'Nos',
+            item_price: price.toFixed(2),
+            item_taxable: taxable.toFixed(2),
+            item_gst_rate: rate,
+            item_gst_amount: gstAmt.toFixed(2),
+            item_amount: (taxable + gstAmt).toFixed(2)
+          };
+        }),
         
-        sub_total: Number(subTotal || 0).toFixed(2),
-        total_tax: Number(totalTax || 0).toFixed(2),
-        grand_total: Number(calculatedGrandTotal || 0).toFixed(2),
+        tax_splits: taxSplits,
+        
+        total_quantity: totalQuantity,
+        total_taxable: totalTaxable.toFixed(2),
+        total_gst: totalGstAmount.toFixed(2),
+        total_amount: totalItemsAmount.toFixed(2),
+        
+        sub_total: totalItemsAmount.toFixed(2),
+        round_off: (Math.round(totalItemsAmount) - totalItemsAmount).toFixed(2),
+        grand_total: Math.round(totalItemsAmount).toFixed(2),
         advance_amount: Number(advanceAmount || 0).toFixed(2),
-        balance_amount: (Number(calculatedGrandTotal || 0) - Number(advanceAmount || 0)).toFixed(2),
-        amount_in_words: toWords.convert(Number(calculatedGrandTotal || 0)),
+        balance_amount: (Math.round(totalItemsAmount) - Number(advanceAmount || 0)).toFixed(2),
+        amount_in_words: toWords.convert(Math.round(totalItemsAmount)),
         
         terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
         signature_url: signatureBase64
