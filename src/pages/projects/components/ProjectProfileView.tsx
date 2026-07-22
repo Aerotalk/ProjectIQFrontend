@@ -3,7 +3,7 @@ import {
   ArrowLeft, Edit, FileText, Users, DollarSign, Plus, 
   Upload, Eye, CheckCircle2, MessageSquare, 
   Building2, X, ShoppingBag, Download, 
-  TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip
+  TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -13,6 +13,7 @@ import { POService } from '../../../services/po.service';
 import { QuotationService } from '../../../services/quotation.service';
 import { ExpenseService } from '../../../services/expense.service';
 import { TicketService } from '../../../services/ticket.service';
+import { ProjectService } from '../../../services/project.service';
 import type { Project } from '../../../types/project.types';
 import toast from 'react-hot-toast';
 
@@ -22,33 +23,63 @@ interface Props {
   onEdit: () => void;
 }
 
-export default function ProjectProfileView({ project, onClose, onEdit }: Props) {
+interface ParsedEntity {
+  id?: string;
+  name: string;
+  tag: string;
+  remarks?: string;
+  actionSource?: string;
+}
+
+interface ParsedNote {
+  id: string;
+  person: string;
+  text: string;
+  date: string;
+}
+
+interface ParsedDocument {
+  id: string;
+  name: string;
+  date: string;
+  size: string;
+  type: string;
+}
+
+export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
   const { selectedCompanyId } = useAuth();
   const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId || null });
   
+  const [currentProject, setCurrentProject] = useState<Project>(initialProject);
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoaded, setUsersLoaded] = useState(false);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [quotations, setQuotations] = useState<any[]>([]);
   const [pos, setPos] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Uploaded Invoices state
+  // Add Entity Modal State
+  const [isAddEntityModalOpen, setIsAddEntityModalOpen] = useState(false);
+  const [entityName, setEntityName] = useState('');
+  const [entityTag, setEntityTag] = useState('');
+  const [entityRemarks, setEntityRemarks] = useState('');
+
+  // Invoice Upload Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedInvoices, setUploadedInvoices] = useState<Array<{ id: string; name: string; date: string; size: string; type: string }>>([
-    { id: '1', name: 'Vendor_Invoice_INV-2026-004.pdf', date: new Date().toLocaleDateString('en-GB'), size: '420 KB', type: 'Vendor Invoice' }
-  ]);
 
-  // Project Notes state
+  // Project Notes Form State
   const [selectedPerson, setSelectedPerson] = useState('');
   const [noteContent, setNoteContent] = useState('');
-  const [savedNotes, setSavedNotes] = useState<Array<{ id: string; person: string; text: string; date: string }>>([
-    { id: '1', person: project.projectManager || 'Project Lead', text: 'Project initialized and kick-off meeting completed.', date: new Date().toLocaleDateString('en-GB') }
-  ]);
 
-  // Financial BI Dashboard Modal & Status state
+  // Financial BI Dashboard Modal & Status State
   const [isBiModalOpen, setIsBiModalOpen] = useState(false);
-  const [isProjectClosed, setIsProjectClosed] = useState(project.status === 'Completed' || project.status === 'Closed');
+  const [isProjectClosed, setIsProjectClosed] = useState(currentProject.status === 'Completed' || currentProject.status === 'Closed');
+
+  useEffect(() => {
+    setCurrentProject(initialProject);
+    setIsProjectClosed(initialProject.status === 'Completed' || initialProject.status === 'Closed');
+  }, [initialProject]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -84,92 +115,233 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
     fetchRelations();
   }, [selectedCompanyId]);
 
-  // Filter dynamic entities & items by projectId or linked IDs
+  // Filter dynamic entities & items by projectId or linked IDs strictly from backend data
   const projectQuotations = quotations.filter((q: any) => 
-    q.projectId === project.id || (project.linkedQuotations && project.linkedQuotations.includes(q.id))
+    q.projectId === currentProject.id || (currentProject.linkedQuotations && currentProject.linkedQuotations.includes(q.id))
   );
 
   const projectPOs = pos.filter((p: any) => 
-    p.projectId === project.id || (project.linkedPOs && project.linkedPOs.includes(p.id))
+    p.projectId === currentProject.id || (currentProject.linkedPOs && currentProject.linkedPOs.includes(p.id))
   );
 
   const projectIncidents = incidents.filter((t: any) => 
-    t.projectId === project.id || (project.linkedIncidents && project.linkedIncidents.includes(t.id)) ||
-    (t.subject && project.projectName && t.subject.toLowerCase().includes(project.projectName.toLowerCase()))
+    t.projectId === currentProject.id || (currentProject.linkedIncidents && currentProject.linkedIncidents.includes(t.id)) ||
+    (t.subject && currentProject.projectName && t.subject.toLowerCase().includes(currentProject.projectName.toLowerCase()))
   );
 
   const projectExpenses = expenses.filter((e: any) => 
-    e.projectId === project.id || (project.linkedExpenses && project.linkedExpenses.includes(e.id))
+    e.projectId === currentProject.id || (currentProject.linkedExpenses && currentProject.linkedExpenses.includes(e.id))
   );
 
   const assignedVendorsList = isVendorsLoading
     ? []
-    : (project.assignedVendors || []).map(id => vendors.find(v => v.id === id)).filter(Boolean);
+    : (currentProject.assignedVendors || []).map(id => vendors.find(v => v.id === id)).filter(Boolean);
 
   const assignedVendorNames = assignedVendorsList.map(v => v?.displayName || v?.companyName || v?.firstName).filter(Boolean);
 
-  const assignedEntitiesList = !usersLoaded
-    ? []
-    : (project.assignedEntities || []).map(id => users.find(u => u.id === id)).filter(Boolean);
+  const manager = usersLoaded ? users.find(u => u.id === currentProject.projectManager) : undefined;
+  const managerName = manager ? (manager.username || manager.email) : (currentProject.projectManager || 'Project Manager');
 
-  const manager = usersLoaded ? users.find(u => u.id === project.projectManager) : undefined;
-  const managerName = manager ? (manager.username || manager.email) : (project.projectManager || 'Project Manager');
+  // Parse structured entities from currentProject.assignedEntities
+  const parsedEntities: ParsedEntity[] = (currentProject.assignedEntities || []).map((rawStr, index) => {
+    try {
+      if (rawStr.startsWith('{') && rawStr.endsWith('}')) {
+        return JSON.parse(rawStr);
+      }
+    } catch (e) {
+      // Fallback if rawStr is user ID or vendor name
+    }
+    const matchedUser = usersLoaded ? users.find(u => u.id === rawStr) : null;
+    const matchedVendor = isVendorsLoading ? null : vendors.find(v => v.id === rawStr);
 
-  // Calculations for Financial BI Dashboard
+    if (matchedUser) {
+      return { id: rawStr, name: matchedUser.username || matchedUser.email, tag: 'Employee', actionSource: 'System' };
+    }
+    if (matchedVendor) {
+      return { id: rawStr, name: matchedVendor.displayName || matchedVendor.companyName, tag: 'Vendor', actionSource: 'System' };
+    }
+    return { id: `raw-${index}`, name: rawStr, tag: 'Other', actionSource: 'Manual' };
+  });
+
+  // Parse project notes from currentProject.projectNotes
+  const parsedNotes: ParsedNote[] = (currentProject.projectNotes || []).map((rawStr, index) => {
+    try {
+      if (rawStr.startsWith('{') && rawStr.endsWith('}')) {
+        return JSON.parse(rawStr);
+      }
+    } catch (e) {
+      // Fallback string
+    }
+    return { id: `note-${index}`, person: managerName, text: rawStr, date: new Date().toLocaleDateString('en-GB') };
+  });
+
+  // Parse project documents from currentProject.projectDocuments
+  const parsedDocuments: ParsedDocument[] = (currentProject.projectDocuments || []).map((rawStr, index) => {
+    try {
+      if (rawStr.startsWith('{') && rawStr.endsWith('}')) {
+        return JSON.parse(rawStr);
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return { id: `doc-${index}`, name: rawStr, date: new Date().toLocaleDateString('en-GB'), size: 'N/A', type: 'Invoice' };
+  });
+
+  // Financial BI Metrics derived strictly from backend data
   const totalInflows = projectQuotations.reduce((sum, q) => sum + (Number(q.grandTotal) || 0), 0);
   const totalPoOutflows = projectPOs.reduce((sum, p) => sum + (Number(p.totalAmount) || 0), 0);
   const totalExpenseOutflows = projectExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalOutflows = totalPoOutflows + totalExpenseOutflows;
   const netMargin = totalInflows - totalOutflows;
   const marginPercentage = totalInflows > 0 ? ((netMargin / totalInflows) * 100).toFixed(1) : '0.0';
-  const estimationDisplayValue = totalInflows > 0 ? totalInflows : 200000;
+  const estimationDisplayValue = currentProject.expectedRevenue || totalInflows;
 
-  // Invoice file upload handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Add Entity Submit Handler -> updates backend
+  const handleAddEntitySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!entityName.trim()) {
+      toast.error('Please enter Entity Name');
+      return;
+    }
+    if (!entityTag) {
+      toast.error('Please select Entity Tag');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const newEntityObj: ParsedEntity = {
+        id: Date.now().toString(),
+        name: entityName.trim(),
+        tag: entityTag,
+        remarks: entityRemarks.trim() || '—',
+        actionSource: 'Manual'
+      };
+
+      const updatedEntities = [...(currentProject.assignedEntities || []), JSON.stringify(newEntityObj)];
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        assignedEntities: updatedEntities
+      });
+
+      setCurrentProject(updatedProject);
+      setIsAddEntityModalOpen(false);
+      setEntityName('');
+      setEntityTag('');
+      setEntityRemarks('');
+      toast.success('Entity added and saved to backend');
+    } catch (err) {
+      toast.error('Failed to add entity to project');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Remove Entity Handler
+  const handleRemoveEntity = async (indexToRemove: number) => {
+    setIsSaving(true);
+    try {
+      const updatedEntities = (currentProject.assignedEntities || []).filter((_, idx) => idx !== indexToRemove);
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        assignedEntities: updatedEntities
+      });
+      setCurrentProject(updatedProject);
+      toast.success('Entity removed');
+    } catch (err) {
+      toast.error('Failed to remove entity');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Save Project Notes Handler -> updates backend
+  const handleSaveNotes = async () => {
+    if (!noteContent.trim()) {
+      toast.error('Please enter note text');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const newNoteObj: ParsedNote = {
+        id: Date.now().toString(),
+        person: selectedPerson || managerName || 'Internal User',
+        text: noteContent.trim(),
+        date: new Date().toLocaleDateString('en-GB')
+      };
+
+      const updatedNotes = [JSON.stringify(newNoteObj), ...(currentProject.projectNotes || [])];
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        projectNotes: updatedNotes
+      });
+
+      setCurrentProject(updatedProject);
+      setNoteContent('');
+      setSelectedPerson('');
+      toast.success('Project note saved to database');
+    } catch (err) {
+      toast.error('Failed to save project note');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Upload Invoice Document Handler -> updates backend
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const newInvoice = {
+    if (!file) return;
+
+    setIsSaving(true);
+    try {
+      const newDocObj: ParsedDocument = {
         id: Date.now().toString(),
         name: file.name,
         date: new Date().toLocaleDateString('en-GB'),
         size: (file.size / 1024).toFixed(0) + ' KB',
         type: file.name.toLowerCase().includes('po') ? 'PO Invoice' : 'Vendor Invoice'
       };
-      setUploadedInvoices([newInvoice, ...uploadedInvoices]);
-      toast.success(`Invoice "${file.name}" uploaded successfully`);
+
+      const updatedDocs = [JSON.stringify(newDocObj), ...(currentProject.projectDocuments || [])];
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        projectDocuments: updatedDocs
+      });
+
+      setCurrentProject(updatedProject);
+      toast.success(`Invoice "${file.name}" uploaded and saved to project`);
+    } catch (err) {
+      toast.error('Failed to save invoice document');
+    } finally {
+      setIsSaving(false);
+      e.target.value = '';
     }
-    e.target.value = '';
   };
 
-  const handleSaveNotes = () => {
-    if (!noteContent.trim()) {
-      toast.error('Please enter note content');
-      return;
+  // Toggle Project Status -> updates backend
+  const toggleProjectClosed = async () => {
+    const newStatus = isProjectClosed ? 'Active' : 'Completed';
+    try {
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        status: newStatus
+      });
+      setCurrentProject(updatedProject);
+      setIsProjectClosed(!isProjectClosed);
+      toast.success(newStatus === 'Completed' ? 'Project marked as Completed' : 'Project reopened');
+    } catch (err) {
+      toast.error('Failed to update project status');
     }
-    const newNote = {
-      id: Date.now().toString(),
-      person: selectedPerson || managerName || 'Internal User',
-      text: noteContent.trim(),
-      date: new Date().toLocaleDateString('en-GB')
-    };
-    setSavedNotes([newNote, ...savedNotes]);
-    setNoteContent('');
-    setSelectedPerson('');
-    toast.success('Project note saved');
-  };
-
-  const toggleProjectClosed = () => {
-    setIsProjectClosed(!isProjectClosed);
-    toast.success(!isProjectClosed ? 'Project marked as Completed' : 'Project reopened');
   };
 
   // One-click Export to Financial Excel Sheet (.csv)
   const exportToFinancialExcel = () => {
     const rows = [
       ['PROJECT FINANCIAL REPORT & BI SUMMARY'],
-      ['Project Name', project.projectName || 'Unnamed Project'],
-      ['Project Code', project.projectCode || project.id],
-      ['Client Name', project.client || 'N/A'],
+      ['Project Name', currentProject.projectName || 'Unnamed Project'],
+      ['Project Code', currentProject.projectCode || currentProject.id],
+      ['Client Name', currentProject.client || 'N/A'],
       ['Report Date', new Date().toLocaleDateString('en-GB')],
       [],
       ['FINANCIAL SUMMARY METRICS'],
@@ -183,37 +355,33 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
       ['Category', 'Reference / Name', 'Type', 'Amount (INR)', 'Status', 'Date']
     ];
 
-    // Append Inflows
     if (projectQuotations.length > 0) {
       projectQuotations.forEach((q: any) => {
         rows.push(['Inflow', q.quotationNo || q.id, 'Quotation Proposal', (Number(q.grandTotal) || 0).toFixed(2), q.status || 'Sent', q.date || '']);
       });
-    } else {
-      rows.push(['Inflow', 'QT-000001 (Estimated)', 'Quotation Proposal', '106400.00', 'Sent', new Date().toLocaleDateString('en-GB')]);
     }
 
-    // Append Outflows (POs & Expenses)
     if (projectPOs.length > 0) {
       projectPOs.forEach((p: any) => {
         rows.push(['Outflow', p.poNumber || p.id, 'Purchase Order', (Number(p.totalAmount) || 0).toFixed(2), p.status || 'Issued', p.createdOn || '']);
       });
-    } else {
-      rows.push(['Outflow', 'PO-2026-001 (Estimated)', 'Purchase Order', '50000.00', 'Issued', new Date().toLocaleDateString('en-GB')]);
     }
 
     if (projectExpenses.length > 0) {
       projectExpenses.forEach((e: any) => {
         rows.push(['Outflow', e.description || 'Expense', 'Operating Cost', (Number(e.amount) || 0).toFixed(2), 'Paid', e.date || '']);
       });
-    } else {
-      rows.push(['Outflow', 'Site Equipment Rental', 'Operating Cost', '250.00', 'Paid', new Date().toLocaleDateString('en-GB')]);
+    }
+
+    if (projectQuotations.length === 0 && projectPOs.length === 0 && projectExpenses.length === 0) {
+      rows.push(['N/A', 'No recorded transactions', 'N/A', '0.00', 'N/A', 'N/A']);
     }
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + rows.map(e => e.map(val => `"${val}"`).join(',')).join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Financial_Report_${(project.projectCode || 'PROJECT').replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+    link.setAttribute('download', `Financial_Report_${(currentProject.projectCode || 'PROJECT').replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -248,25 +416,25 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-              {project.projectName || 'Unnamed Project'}
+              {currentProject.projectName || 'Unnamed Project'}
             </h1>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
               isProjectClosed
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
             }`}>
-              • {isProjectClosed ? 'Completed' : (project.status || 'Active')}
+              • {isProjectClosed ? 'Completed' : (currentProject.status || 'Active')}
             </span>
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {project.description || 'No project description provided.'}
+            {currentProject.description || 'No project description provided.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-md text-gray-700 dark:text-gray-300 font-medium">
               <Building2 size={14} className="text-[#792359] dark:text-[#c44997]" />
-              <span>Client: <strong className="text-gray-900 dark:text-white">{project.client || 'N/A'}</strong></span>
+              <span>Client: <strong className="text-gray-900 dark:text-white">{currentProject.client || 'N/A'}</strong></span>
             </div>
 
             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-md text-gray-700 dark:text-gray-300 font-medium">
@@ -283,7 +451,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
             ₹{estimationDisplayValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Due: {project.expectedEndDate ? new Date(project.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Jun 30, 2026'}
+            Due: {currentProject.expectedEndDate ? new Date(currentProject.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
           </p>
         </div>
       </div>
@@ -339,7 +507,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                         {q.date ? new Date(q.date).toLocaleDateString('en-GB') : '—'}
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white text-right">
-                        ₹{(Number(q.grandTotal) || 106400).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        ₹{(Number(q.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-500/20">
@@ -357,16 +525,9 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                     </tr>
                   ))
                 ) : (
-                  <tr className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">QT-000005</td>
-                    <td className="px-4 py-3"><span className="text-[11px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded">[Quotation]</span></td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{new Date().toLocaleDateString('en-GB')}</td>
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white text-right">₹1,06,400.00</td>
-                    <td className="px-4 py-3"><span className="inline-flex items-center gap-1 text-[11px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200">Sent</span></td>
-                    <td className="px-4 py-3 text-center">
-                      <Link to="/companydashboard/sales/quotations" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 rounded hover:bg-[#792359]/5">
-                        <Eye size={12} /> View
-                      </Link>
+                  <tr>
+                    <td colSpan={6} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                      No linked quotations found for this project.
                     </td>
                   </tr>
                 )}
@@ -417,7 +578,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                         {po.vendorName || assignedVendorNames[0] || 'Vendor'}
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white text-right">
-                        ₹{(Number(po.totalAmount) || 50000).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        ₹{(Number(po.totalAmount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-4 py-3">
                         <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200">
@@ -435,15 +596,9 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                     </tr>
                   ))
                 ) : (
-                  <tr className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">PO-2026-001</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">{assignedVendorNames[0] || 'HibiscusDanceAcademy'}</td>
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white text-right">₹50,000.00</td>
-                    <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200">Issued</span></td>
-                    <td className="px-4 py-3 text-center">
-                      <Link to="/companydashboard/finance/pos" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 rounded hover:bg-[#792359]/5">
-                        <Eye size={12} /> View
-                      </Link>
+                  <tr>
+                    <td colSpan={5} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                      No purchase orders issued for this project.
                     </td>
                   </tr>
                 )}
@@ -491,11 +646,11 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                         {t.ticketNo || `INC-2026-00${idx + 1}`}
                       </td>
                       <td className="px-4 py-3 text-gray-900 dark:text-white truncate max-w-[150px]">
-                        {t.shortDescription || t.subject || 'Site Technical Inspection'}
+                        {t.shortDescription || t.subject || 'Incident'}
                       </td>
                       <td className="px-4 py-3">
                         <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300 border border-orange-200">
-                          {t.priority || 'High'}
+                          {t.priority || 'Medium'}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -514,15 +669,9 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                     </tr>
                   ))
                 ) : (
-                  <tr className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">INC-2026-001</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">Site Quality Assurance Inspection</td>
-                    <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300 border border-amber-200">Medium</span></td>
-                    <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200">Open</span></td>
-                    <td className="px-4 py-3 text-center">
-                      <Link to="/companydashboard/tickets" className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 rounded hover:bg-[#792359]/5">
-                        <Eye size={12} /> View
-                      </Link>
+                  <tr>
+                    <td colSpan={5} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                      No incidents or support tickets raised for this project.
                     </td>
                   </tr>
                 )}
@@ -544,7 +693,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
               </div>
             </div>
             <button
-              onClick={onEdit}
+              onClick={() => setIsAddEntityModalOpen(true)}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
             >
               <Plus size={14} /> Add Entity
@@ -562,57 +711,36 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {assignedVendorsList.length > 0 || assignedEntitiesList.length > 0 || manager ? (
-                  <>
-                    {assignedVendorsList.map((v: any, idx: number) => (
-                      <tr key={`v-${idx}`} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                          {v.displayName || v.companyName || v.firstName}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300 border border-purple-200">
-                            Vendor
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-400 dark:text-gray-500">—</td>
-                        <td className="px-4 py-3 text-center text-gray-400 dark:text-gray-500">System</td>
-                      </tr>
-                    ))}
-                    {assignedEntitiesList.map((u: any, idx: number) => (
-                      <tr key={`u-${idx}`} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                          {u.username || u.email}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200">
-                            Employee
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-400 dark:text-gray-500">Assigned Team</td>
-                        <td className="px-4 py-3 text-center text-gray-400 dark:text-gray-500">System</td>
-                      </tr>
-                    ))}
-                    {manager && (
-                      <tr className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                          {managerName}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300 border border-amber-200">
-                            Project Manager
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-400 dark:text-gray-500">Lead Owner</td>
-                        <td className="px-4 py-3 text-center text-gray-400 dark:text-gray-500">System</td>
-                      </tr>
-                    )}
-                  </>
+                {parsedEntities.length > 0 ? (
+                  parsedEntities.map((ent, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                        {ent.name}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300 border border-purple-200">
+                          {ent.tag || 'Vendor'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                        {ent.remarks || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleRemoveEntity(idx)}
+                          className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 p-1 transition-colors"
+                          title="Remove entity"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
-                  <tr className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">HibiscusDanceAcademy</td>
-                    <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300 border border-purple-200">Vendor</span></td>
-                    <td className="px-4 py-3 text-gray-400 dark:text-gray-500">—</td>
-                    <td className="px-4 py-3 text-center text-gray-400 dark:text-gray-500">System</td>
+                  <tr>
+                    <td colSpan={4} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                      No entities or personnel assigned to this project. Click "+ Add Entity" to add.
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -647,9 +775,12 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                 >
                   <option value="">Select Person...</option>
                   <option value={managerName}>{managerName} (Manager)</option>
-                  {project.client && <option value={project.client}>{project.client} (Client)</option>}
+                  {currentProject.client && <option value={currentProject.client}>{currentProject.client} (Client)</option>}
                   {assignedVendorNames.map((name, i) => (
                     <option key={i} value={name}>{name} (Vendor)</option>
+                  ))}
+                  {parsedEntities.map((ent, i) => (
+                    <option key={`ent-${i}`} value={ent.name}>{ent.name} ({ent.tag})</option>
                   ))}
                 </select>
               </div>
@@ -659,7 +790,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   NOTES COUNT
                 </label>
                 <div className="text-xs text-gray-600 dark:text-gray-300 py-2">
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{savedNotes.length} Logged Note(s)</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{parsedNotes.length} Logged Note(s)</span>
                 </div>
               </div>
             </div>
@@ -680,7 +811,8 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
             <div className="flex justify-end">
               <button
                 onClick={handleSaveNotes}
-                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs"
+                disabled={isSaving}
+                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
               >
                 <FileText size={14} /> Save Notes
               </button>
@@ -688,15 +820,19 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
 
             {/* Render Saved Notes */}
             <div className="mt-4 space-y-2 max-h-36 overflow-y-auto custom-scrollbar border-t border-gray-100 dark:border-white/5 pt-3">
-              {savedNotes.map(n => (
-                <div key={n.id} className="p-2.5 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-md text-xs space-y-1">
-                  <div className="flex justify-between font-semibold text-gray-900 dark:text-white">
-                    <span>{n.person}</span>
-                    <span className="text-[10px] text-gray-400">{n.date}</span>
+              {parsedNotes.length > 0 ? (
+                parsedNotes.map(n => (
+                  <div key={n.id} className="p-2.5 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-md text-xs space-y-1">
+                    <div className="flex justify-between font-semibold text-gray-900 dark:text-white">
+                      <span>{n.person}</span>
+                      <span className="text-[10px] text-gray-400">{n.date}</span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300">{n.text}</p>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300">{n.text}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-xs text-center text-gray-400 py-4">No project notes recorded yet.</p>
+              )}
             </div>
           </div>
         </div>
@@ -715,7 +851,8 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
+              disabled={isSaving}
+              className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs disabled:opacity-50"
             >
               <Upload size={14} /> Upload Invoice
             </button>
@@ -732,21 +869,29 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {uploadedInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Paperclip size={13} className="text-[#792359] dark:text-[#c44997]" />
-                      <span>{inv.name}</span>
+                {parsedDocuments.length > 0 ? (
+                  parsedDocuments.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Paperclip size={13} className="text-[#792359] dark:text-[#c44997]" />
+                        <span>{inv.name}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200">
+                          {inv.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.date}</td>
+                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.size}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                      No uploaded invoices or documents found for this project. Click "Upload Invoice" to attach.
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200">
-                        {inv.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.date}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.size}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -781,6 +926,94 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
           <Edit size={14} /> Edit Project
         </button>
       </div>
+
+      {/* ── Interactive Add Entity Modal ── */}
+      {isAddEntityModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-150 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <Users className="text-[#792359] dark:text-[#c44997]" size={20} />
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Add Entity to Project</h3>
+              </div>
+              <button
+                onClick={() => setIsAddEntityModalOpen(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddEntitySubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Entity Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe / Acme Services"
+                  value={entityName}
+                  onChange={(e) => setEntityName(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Tag / Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={entityTag}
+                  onChange={(e) => setEntityTag(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
+                >
+                  <option value="">Select type</option>
+                  <option value="Site Engineer">Site Engineer</option>
+                  <option value="Vendor">Vendor</option>
+                  <option value="Contractor">Contractor</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Consultant">Consultant</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Labour">Labour</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Remarks / Notes
+                </label>
+                <input
+                  type="text"
+                  placeholder="Optional notes or responsibility"
+                  value={entityRemarks}
+                  onChange={(e) => setEntityRemarks(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsAddEntityModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold rounded-md border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 text-xs font-semibold rounded-md bg-[#792359] text-white hover:bg-[#52173c] disabled:opacity-50"
+                >
+                  Save Entity
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ── Financial BI Dashboard & Excel Export Modal ── */}
       {isBiModalOpen && (
@@ -822,7 +1055,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <p className="text-xl font-extrabold text-emerald-900 dark:text-emerald-200 mt-2">
-                  ₹{(totalInflows > 0 ? totalInflows : 106400).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{totalInflows.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1">Quotations & Client Invoices</p>
               </div>
@@ -833,7 +1066,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
                 </div>
                 <p className="text-xl font-extrabold text-red-900 dark:text-red-200 mt-2">
-                  ₹{(totalOutflows > 0 ? totalOutflows : 50250).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{totalOutflows.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[11px] text-red-700 dark:text-red-400 mt-1">POs Issued + Site Expenses</p>
               </div>
@@ -844,7 +1077,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   <DollarSign size={16} className="text-[#792359] dark:text-[#c44997]" />
                 </div>
                 <p className="text-xl font-extrabold text-[#792359] dark:text-[#e6a8d0] mt-2">
-                  ₹{(totalInflows > 0 ? netMargin : 56150).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{netMargin.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-[11px] text-[#792359] dark:text-[#e6a8d0] mt-1">Net Margin Contribution</p>
               </div>
@@ -855,7 +1088,7 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   <PieChart size={16} className="text-blue-600 dark:text-blue-400" />
                 </div>
                 <p className="text-xl font-extrabold text-blue-900 dark:text-blue-200 mt-2">
-                  {totalInflows > 0 ? marginPercentage : '52.8'}%
+                  {marginPercentage}%
                 </p>
                 <p className="text-[11px] text-blue-700 dark:text-blue-400 mt-1">Profitability Percentage</p>
               </div>
@@ -880,28 +1113,47 @@ export default function ProjectProfileView({ project, onClose, onEdit }: Props) 
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                     {/* Inflows */}
-                    <tr className="bg-emerald-50/20 dark:bg-emerald-500/[0.02]">
-                      <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400">Inflow</td>
-                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">QT-000005</td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Sales Quotation</td>
-                      <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400 text-right">+ ₹1,06,400.00</td>
-                      <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">Approved</span></td>
-                    </tr>
+                    {projectQuotations.map((q: any, idx: number) => (
+                      <tr key={`in-${idx}`} className="bg-emerald-50/20 dark:bg-emerald-500/[0.02]">
+                        <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400">Inflow</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{q.quotationNo || q.id}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Sales Quotation</td>
+                        <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400 text-right">
+                          + ₹{(Number(q.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">{q.status || 'Sent'}</span></td>
+                      </tr>
+                    ))}
                     {/* Outflows */}
-                    <tr className="bg-red-50/20 dark:bg-red-500/[0.02]">
-                      <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400">Outflow</td>
-                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">PO-2026-001</td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Purchase Order</td>
-                      <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">- ₹50,000.00</td>
-                      <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">Issued</span></td>
-                    </tr>
-                    <tr className="bg-red-50/20 dark:bg-red-500/[0.02]">
-                      <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400">Outflow</td>
-                      <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Site Equipment Rental</td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Operating Expense</td>
-                      <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">- ₹250.00</td>
-                      <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">Paid</span></td>
-                    </tr>
+                    {projectPOs.map((po: any, idx: number) => (
+                      <tr key={`po-${idx}`} className="bg-red-50/20 dark:bg-red-500/[0.02]">
+                        <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400">Outflow</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{po.poNumber || po.id}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Purchase Order</td>
+                        <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">
+                          - ₹{(Number(po.totalAmount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">{po.status || 'Issued'}</span></td>
+                      </tr>
+                    ))}
+                    {projectExpenses.map((ex: any, idx: number) => (
+                      <tr key={`ex-${idx}`} className="bg-red-50/20 dark:bg-red-500/[0.02]">
+                        <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400">Outflow</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{ex.description || 'Expense'}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Operating Expense</td>
+                        <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">
+                          - ₹{(Number(ex.amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">Paid</span></td>
+                      </tr>
+                    ))}
+                    {projectQuotations.length === 0 && projectPOs.length === 0 && projectExpenses.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-xs text-gray-400">
+                          No financial transactions recorded for this project yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
