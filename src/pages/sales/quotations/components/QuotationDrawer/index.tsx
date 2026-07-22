@@ -236,14 +236,19 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           };
         }),
         sub_total: data.subTotal.toFixed(2),
+        discount: (Number(data.totalDiscount) || 0).toFixed(2),
+        has_discount: Number(data.totalDiscount) > 0,
+        taxable_amount: data.totalTaxableAmount.toFixed(2),
         total_tax: data.totalGstAmount.toFixed(2),
+        delivery_cost: (Number(data.deliveryCost) || 0).toFixed(2),
+        has_delivery_cost: Number(data.deliveryCost) > 0,
         grand_total: data.grandTotal.toFixed(2),
         amount_in_words: numberToWords(data.grandTotal),
         terms_and_conditions: data.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
-        bank_account_holder: company?.bankAccounts?.[0]?.accountName || '',
+        bank_account_holder: company?.bankAccounts?.[0]?.accountHolderName || '',
         has_taxes: data.totalGstAmount > 0,
         taxes: taxBreakdown
       };
