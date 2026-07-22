@@ -225,7 +225,7 @@ export default function TicketFormSection({ readOnly }: Props) {
                     value={field.value || ''} 
                     onChange={field.onChange} 
                     options={[
-                      {label: 'P1', value: 'P1'},
+                      {label: 'P1 - Critical', value: 'P1'},
                       {label: 'P2', value: 'P2'},
                       {label: 'P3', value: 'P3'},
                       {label: 'P4', value: 'P4'}
