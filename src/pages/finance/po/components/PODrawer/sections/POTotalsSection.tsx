@@ -30,7 +30,7 @@ export default function POTotalsSection({ readOnly }: Props) {
   }, [selectedCompanyId]);
 
   const subTotal = useWatch({ control, name: 'subTotal', defaultValue: 0 });
-  const totalDiscount = useWatch({ control, name: 'totalDiscount', defaultValue: 0 });
+
   const totalTaxableAmount = useWatch({ control, name: 'totalTaxableAmount', defaultValue: 0 });
   const grandTotal = useWatch({ control, name: 'grandTotal', defaultValue: 0 });
   
