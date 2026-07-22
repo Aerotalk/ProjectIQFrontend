@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { usePOForm } from '../../hooks/usePOForm';
 import type { POFormValues } from '../../validators/poValidation';
 import POHeaderSection from './sections/POHeaderSection';
