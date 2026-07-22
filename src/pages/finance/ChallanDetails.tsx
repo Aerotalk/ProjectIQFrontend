@@ -178,20 +178,25 @@ export default function ChallanDetails() {
         ship_to_address_line2: vendor?.shippingCity || vendor?.billingCity || '',
         ship_to_state: vendor?.shippingState || vendor?.billingState || '',
         
-        transport_mode: 'By Road', // Can be made dynamic if added to model
-        delivery_location: vendor?.shippingCity || vendor?.billingCity || '',
-        po_number: challan.linkedVendorPoNumber || 'N/A',
+        transport_mode: challan.transportMode || 'By Road',
+        delivery_location: challan.deliveryLocation || vendor?.shippingCity || vendor?.billingCity || '',
+        po_number: challan.poNumber || challan.linkedVendorPoNumber || 'N/A',
+        po_date: challan.poDate || '',
         
         challan_number: challan.challanNumber || 'Draft',
         challan_date: challan.challanDate || new Date().toLocaleDateString('en-GB'),
-        place_of_supply: vendor?.billingState || '',
+        place_of_supply: challan.placeOfSupply || vendor?.billingState || '',
+        
+        contact_name: challan.contactName || '',
+        contact_email: challan.contactEmail || '',
+        contact_mobile: challan.contactMobile || '',
         
         items: challan.lineItems?.length ? challan.lineItems.map((item, index) => ({
           item_index: index + 1,
           item_name: item.itemName || item.name || 'Item',
           item_description: item.description || '',
-          item_hsn: item.hsnSac || item.hsn || '',
-          item_quantity: item.quantity || item.qty || 1,
+          item_hsn: item.itemHsn || item.hsnSac || item.hsn || '',
+          item_quantity: item.dispatchedQuantity || item.quantity || item.qty || 1,
           item_unit: item.unit || 'Unit'
         })) : [{
           item_index: 1,
@@ -201,7 +206,7 @@ export default function ChallanDetails() {
           item_quantity: 1,
           item_unit: 'Lot'
         }],
-        total_quantity: challan.lineItems?.reduce((sum, item) => sum + (Number(item.quantity) || Number(item.qty) || 1), 0) || 1,
+        total_quantity: challan.lineItems?.reduce((sum, item) => sum + (Number(item.dispatchedQuantity) || Number(item.quantity) || Number(item.qty) || 1), 0) || 1,
         
         terms_and_conditions: company?.termsAndConditions || 'Terms and conditions apply',
         signature_url: signatureBase64
@@ -359,12 +364,38 @@ export default function ChallanDetails() {
             </button>
           )}
           {!isNew && currentStage === 1 && (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
-            >
-              {isEditing ? 'Cancel Edit' : 'Edit Challan'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+              >
+                {isEditing ? 'Cancel Edit' : 'Edit Challan'}
+              </button>
+              {isEditing && (
+                <button
+                  disabled={isApiLoading}
+                  onClick={async () => {
+                    if (!challan.vendorId || !challan.projectId) {
+                      toast.error('Please fill required fields');
+                      return;
+                    }
+                    setIsApiLoading(true);
+                    try {
+                      await ChallanService.update(companyId!, challan.id, challan as any);
+                      toast.success('Challan updated successfully');
+                      setIsEditing(false);
+                    } catch (err: any) {
+                      toast.error(err?.message || 'Failed to update Challan');
+                    } finally {
+                      setIsApiLoading(false);
+                    }
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50"
+                >
+                  Save Changes
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -451,14 +482,216 @@ export default function ChallanDetails() {
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.challanDate}</p>
                   )}
                 </div>
-              </div>
-              <div className="grid grid-cols-1 gap-6 mt-4">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Description / Items</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Transport Mode</p>
                   {isEditing ? (
-                    <textarea value={challan.description} onChange={e => setChallan({...challan, description: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" rows={3} />
+                    <input type="text" value={challan.transportMode || ''} onChange={e => setChallan({...challan, transportMode: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
-                    <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{challan.description || 'No description provided'}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.transportMode}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Delivery Location</p>
+                  {isEditing ? (
+                    <input type="text" value={challan.deliveryLocation || ''} onChange={e => setChallan({...challan, deliveryLocation: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.deliveryLocation}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Place of Supply</p>
+                  {isEditing ? (
+                    <input type="text" value={challan.placeOfSupply || ''} onChange={e => setChallan({...challan, placeOfSupply: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.placeOfSupply}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">PO Number (Ref)</p>
+                  {isEditing ? (
+                    <input type="text" value={challan.poNumber || ''} onChange={e => setChallan({...challan, poNumber: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.poNumber}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">PO Date</p>
+                  {isEditing ? (
+                    <input type="date" value={challan.poDate || ''} onChange={e => setChallan({...challan, poDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.poDate}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Contact Name</p>
+                  {isEditing ? (
+                    <input type="text" value={challan.contactName || ''} onChange={e => setChallan({...challan, contactName: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.contactName}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Contact Email</p>
+                  {isEditing ? (
+                    <input type="email" value={challan.contactEmail || ''} onChange={e => setChallan({...challan, contactEmail: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.contactEmail}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Contact Mobile</p>
+                  {isEditing ? (
+                    <input type="text" value={challan.contactMobile || ''} onChange={e => setChallan({...challan, contactMobile: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.contactMobile}</p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-6 mt-8 border-t border-gray-200 dark:border-white/10 pt-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">Line Items</p>
+                    {isEditing && (
+                      <button
+                        onClick={() => {
+                          const newItems = [...(challan.lineItems || [])];
+                          newItems.push({
+                            itemName: '',
+                            description: '',
+                            itemHsn: '',
+                            dispatchedQuantity: 1,
+                            unit: 'Nos'
+                          });
+                          setChallan({ ...challan, lineItems: newItems });
+                        }}
+                        className="text-xs bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-sm transition-colors"
+                      >
+                        + Add Item
+                      </button>
+                    )}
+                  </div>
+                  
+                  {(!challan.lineItems || challan.lineItems.length === 0) && !isEditing ? (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 italic">No line items added.</p>
+                  ) : (
+                    <div className="overflow-x-auto border border-gray-200 dark:border-white/10 rounded-sm">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
+                            <th className="p-3 text-xs font-semibold text-gray-500 uppercase">Item Name</th>
+                            <th className="p-3 text-xs font-semibold text-gray-500 uppercase">HSN/SAC</th>
+                            <th className="p-3 text-xs font-semibold text-gray-500 uppercase">Description</th>
+                            <th className="p-3 text-xs font-semibold text-gray-500 uppercase w-24">Qty</th>
+                            <th className="p-3 text-xs font-semibold text-gray-500 uppercase w-24">Unit</th>
+                            {isEditing && <th className="p-3 w-10"></th>}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(challan.lineItems || []).map((item, idx) => (
+                            <tr key={item.id || idx} className="border-b border-gray-200 dark:border-white/10 last:border-0">
+                              <td className="p-3">
+                                {isEditing ? (
+                                  <input 
+                                    type="text" 
+                                    value={item.itemName || ''} 
+                                    onChange={e => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems[idx].itemName = e.target.value;
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm"
+                                    placeholder="Item name"
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-900 dark:text-white">{item.itemName}</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                {isEditing ? (
+                                  <input 
+                                    type="text" 
+                                    value={item.itemHsn || ''} 
+                                    onChange={e => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems[idx].itemHsn = e.target.value;
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm"
+                                    placeholder="HSN"
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-900 dark:text-white">{item.itemHsn}</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                {isEditing ? (
+                                  <input 
+                                    type="text" 
+                                    value={item.description || ''} 
+                                    onChange={e => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems[idx].description = e.target.value;
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm"
+                                    placeholder="Description"
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-900 dark:text-white truncate max-w-xs block" title={item.description}>{item.description}</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                {isEditing ? (
+                                  <input 
+                                    type="number" 
+                                    value={item.dispatchedQuantity || item.qty || item.quantity || 0} 
+                                    onChange={e => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems[idx].dispatchedQuantity = Number(e.target.value);
+                                      newItems[idx].qty = Number(e.target.value);
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-right"
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-900 dark:text-white">{item.dispatchedQuantity || item.qty || item.quantity || 0}</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                {isEditing ? (
+                                  <input 
+                                    type="text" 
+                                    value={item.unit || ''} 
+                                    onChange={e => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems[idx].unit = e.target.value;
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm"
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-900 dark:text-white">{item.unit}</span>
+                                )}
+                              </td>
+                              {isEditing && (
+                                <td className="p-3 text-right">
+                                  <button
+                                    onClick={() => {
+                                      const newItems = [...(challan.lineItems || [])];
+                                      newItems.splice(idx, 1);
+                                      setChallan({ ...challan, lineItems: newItems });
+                                    }}
+                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
               </div>

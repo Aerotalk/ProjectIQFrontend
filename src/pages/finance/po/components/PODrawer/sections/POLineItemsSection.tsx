@@ -30,6 +30,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
     append({
       id: undefined,
       productId: undefined,
+      hsnSac: '',
       description: '',
       quantity: 1,
       unit: 'Pieces',
@@ -47,6 +48,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
     const product = products.find(p => p.id === productId);
     if (product) {
       setValue(`lineItems.${index}.itemName`, product.itemName, { shouldValidate: false });
+      setValue(`lineItems.${index}.hsnSac`, product.hsnSac || product.hsn || '', { shouldValidate: false });
       setValue(`lineItems.${index}.description`, product.description || '', { shouldValidate: false });
       setValue(`lineItems.${index}.unit`, product.unit || 'Pieces', { shouldValidate: false });
       setValue(`lineItems.${index}.rate`, product.standardRate || 0, { shouldValidate: false });
@@ -82,14 +84,15 @@ export default function POLineItemsSection({ readOnly }: Props) {
         <table className="w-full text-left min-w-[900px]">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[25%]">Product/Service</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[20%]">Product/Service</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">HSN/SAC</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Qty</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Unit</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Rate (₹)</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[14%]">Discount</th>
-              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">GST (%)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Unit</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[10%]">Rate (₹)</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[12%]">Discount</th>
+              <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-[8%]">GST (%)</th>
               <th className="px-3 py-2.5 text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider text-right w-[15%]">Amount (₹)</th>
-              {!readOnly && <th className="px-3 py-2.5 w-[6%]"></th>}
+              {!readOnly && <th className="px-3 py-2.5 w-[5%]"></th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -133,6 +136,15 @@ export default function POLineItemsSection({ readOnly }: Props) {
                         className={`${cellClass} resize-y min-h-[40px] text-xs ${lineErrors?.description ? 'border-red-400' : ''}`} 
                       />
                     </div>
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <input 
+                      type="text" 
+                      placeholder="HSN" 
+                      {...register(`lineItems.${index}.hsnSac`)} 
+                      disabled={readOnly} 
+                      className={`${cellClass} ${lineErrors?.hsnSac ? 'border-red-400' : ''}`} 
+                    />
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input 

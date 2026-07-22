@@ -467,7 +467,7 @@ export default function QuotationDetails() {
             item_index: index + 1,
             item_name: item.name,
             item_description: '',
-            item_hsn: item.hsn || product?.hsn || '',
+            item_hsn: item.hsnSac || item.hsn || product?.hsnSac || product?.hsn || '',
             item_quantity: item.qty,
             item_unit: 'Unit',
             item_price: item.rate.toFixed(2),
