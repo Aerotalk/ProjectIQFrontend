@@ -2,7 +2,7 @@
 import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Paperclip, X as XIcon } from 'lucide-react';
+import { Paperclip, X as XIcon, Copy } from 'lucide-react';
 import { useProjects } from '@/hooks/useProjects';
 import { useVendors } from '@/hooks/useVendors';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +19,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
     formState: { errors },
     setValue,
     control,
+    getValues,
   } = useFormContext();
 
   const { selectedCompanyId } = useAuth();
@@ -154,7 +155,32 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                   return (
                     <CustomSelect
                       value={field.value || ''}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        const vendor = vendors.find(v => v.id === val);
+                        if (vendor) {
+                          const formatAddress = (v: any, isShipping: boolean) => {
+                            if (isShipping && !v.sameAsBillingAddress) {
+                              return [
+                                v.companyName || v.displayName,
+                                v.shippingAddressLine1,
+                                v.shippingAddressLine2,
+                                `${v.shippingCity || ''}, ${v.shippingState || ''} ${v.shippingPinCode || ''}`.replace(/^, | ,$|^,|,$/g, '').trim(),
+                                v.shippingCountry
+                              ].filter(Boolean).join('\n');
+                            }
+                            return [
+                              v.companyName || v.displayName,
+                              v.billingAddressLine1,
+                              v.billingAddressLine2,
+                              `${v.billingCity || ''}, ${v.billingState || ''} ${v.billingPinCode || ''}`.replace(/^, | ,$|^,|,$/g, '').trim(),
+                              v.billingCountry
+                            ].filter(Boolean).join('\n');
+                          };
+                          setValue('billingAddress', formatAddress(vendor, false), { shouldDirty: true });
+                          setValue('shippingAddress', formatAddress(vendor, true), { shouldDirty: true });
+                        }
+                      }}
                       options={vendorOptions}
                       disabled={readOnly || !selectedProjectId || isVendorsLoading}
                       isLoading={isVendorsLoading}
@@ -170,6 +196,44 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
             <p className="text-red-500 text-xs mt-1">{errors.vendorId.message as string}</p>
           )}
         </div>
+
+        {selectedVendorId && (
+          <div className="md:col-span-2 mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
+                <textarea
+                  {...register('billingAddress')}
+                  disabled={readOnly}
+                  rows={5}
+                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">Shipping Address</h4>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setValue('shippingAddress', getValues('billingAddress'), { shouldDirty: true })}
+                      className="text-[10px] uppercase tracking-wider font-semibold text-[#792359] hover:text-[#792359]/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
+                      title="Copy from Billing Address"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy Billing
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  {...register('shippingAddress')}
+                  disabled={readOnly}
+                  rows={5}
+                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* -- PO Date -- */}
         <div>
@@ -201,31 +265,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
           />
         </div>
 
-        {/* -- Status -- */}
-        <div>
-          <label className={labelClass}>
-            Status <span className="text-red-500 normal-case font-normal">*</span>
-          </label>
-          <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  value={field.value || 'Draft'}
-                  onChange={field.onChange}
-                  options={[
-                    'Draft', 'Pending Approval', 'Approved', 'Ordered',
-                    'Partially Received', 'Completed', 'Cancelled'
-                  ]}
-                />
-              )}
-            />
-          </div>
-          {errors.status && (
-            <p className="text-red-500 text-xs mt-1">{errors.status.message as string}</p>
-          )}
-        </div>
+
 
         {/* -- Attachment (TechSpec §4.2 optional field) -- */}
         <div>

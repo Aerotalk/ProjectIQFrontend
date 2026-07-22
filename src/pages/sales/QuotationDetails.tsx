@@ -10,13 +10,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { QuotationService } from '../../services/quotation.service';
 import { ClientService } from '../../services/client.service';
 import { ProductService } from '../../services/product.service';
-import { ProjectService } from '../../services/project.service';
 import { api } from '../../lib/api';
 import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
-import type { Project } from '../../types/project.types';
 import { formatQuotationId } from '../../lib/utils';
 import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
+import { Stepper } from '@/components/ui/Stepper';
+import { calculateQuotationTotals } from '@/utils/quotationCalculations';
 
 interface UserData {
   id: string;
@@ -42,7 +42,6 @@ export default function QuotationDetails() {
   const { selectedCompanyId: companyId, user } = useAuth();
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
 
   const isNew = id === 'new';
@@ -64,7 +63,6 @@ export default function QuotationDetails() {
     if (!companyId) return;
     api.get(`/admin/companies/${companyId}`).then(res => setCompany(res)).catch(console.error);
     ClientService.getClients(companyId).then(data => setClients(data));
-    ProjectService.getAll(companyId).then(data => setProjects(data));
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
     });
@@ -311,24 +309,23 @@ export default function QuotationDetails() {
     }
   };
 
-  const subTotal = lineItems.reduce((sum, item) => sum + (item.rate * item.qty), 0);
-  const totalGst = lineItems.reduce((sum, item) => sum + (item.rate * item.qty * item.gst / 100), 0);
-  const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
+  const { 
+    subTotal, 
+    totalGstAmount: totalGst, 
+    grandTotal, 
+    calculatedLines,
+    taxGroups
+  } = calculateQuotationTotals(
+    lineItems,
+    Number(quotation.discount) || 0,
+    Number(quotation.deliveryCost) || 0
+  );
 
   const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
   const selectedClient = clients.find(c => c.id === quotation.clientId);
   const clientState = selectedClient?.billingState?.trim().toLowerCase() || '';
   const isSameState = companyState && clientState && companyState === clientState;
   const isIgst = quotation.taxType === 'IGST' || (!isSameState);
-
-  const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
-  lineItems.forEach(item => {
-    if (item.gst > 0) {
-      if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
-      taxGroups[item.gst].taxable += (item.rate * item.qty);
-      taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
-    }
-  });
 
   const uiTaxBreakdown: { type: string, rate: number, amount: number }[] = [];
   Object.keys(taxGroups).forEach(rateStr => {
@@ -400,15 +397,6 @@ export default function QuotationDetails() {
       const companyState = company?.addresses?.[0]?.state?.trim().toLowerCase() || '';
       const clientState = client?.billingState?.trim().toLowerCase() || '';
       const isSameState = companyState && clientState && companyState === clientState;
-
-      const taxGroups: Record<number, { taxable: number, taxAmount: number }> = {};
-      lineItems.forEach(item => {
-        if (item.gst > 0) {
-          if (!taxGroups[item.gst]) taxGroups[item.gst] = { taxable: 0, taxAmount: 0 };
-          taxGroups[item.gst].taxable += (item.rate * item.qty);
-          taxGroups[item.gst].taxAmount += (item.rate * item.qty * item.gst / 100);
-        }
-      });
 
       const isIgstPreview = quotation.taxType === 'IGST' || (!isSameState);
 
@@ -575,7 +563,7 @@ export default function QuotationDetails() {
               <button
                 disabled={isApiLoading}
                 onClick={() => {
-                  if (!quotation.client || !quotation.project || !quotation.amount || !quotation.validTill) {
+                  if (!quotation.client || !quotation.amount || !quotation.validTill) {
                     toast.error('Please fill all mandatory fields before sending for approval');
                     return;
                   }
@@ -753,7 +741,6 @@ export default function QuotationDetails() {
                         ...fullQuotation,
                         clientId: quotation.clientId,
                         clientName: quotation.client,
-                        subject: quotation.project,
                         salesperson: quotation.owner,
                         validUntil: quotation.validTill,
                         totalDiscount: Number(quotation.discount) || 0,
@@ -870,48 +857,15 @@ export default function QuotationDetails() {
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
         {/* Stepper */}
         <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-          <div className="relative flex justify-between">
-            {/* Background Line */}
-            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 dark:bg-white/10 -translate-y-1/2 z-0"></div>
-
-            {/* Progress Line */}
-            <div
-              className="absolute top-1/2 left-0 h-[2px] bg-[#792359] dark:bg-[#e6a8d0] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
-              style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
-            ></div>
-
-            {stages.map((stage) => {
-              const isActive = stage.id === currentStage;
-              const isPast = stage.id < currentStage;
-              const isConverted = stage.id === 6 && currentStage === 6;
-
-              return (
-                <div key={stage.id} className="relative z-10 flex flex-col items-center gap-3 bg-gray-50/50 dark:bg-transparent px-2">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 border-2
-                      ${isPast || isActive
-                        ? 'bg-[#792359] border-[#792359] text-white'
-                        : 'bg-white dark:bg-[#181a1f] border-gray-300 dark:border-gray-600 text-gray-400'
-                      }
-                      ${isConverted ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
-                    `}
-                  >
-                    {(isPast || isConverted) ? <CheckCircle2 size={16} /> : stage.id}
-                  </div>
-                  <span className={`text-xs font-semibold uppercase tracking-wider
-                    ${isActive
-                      ? 'text-[#792359] dark:text-[#e6a8d0]'
-                      : isPast || isConverted
-                        ? 'text-gray-900 dark:text-gray-300'
-                        : 'text-gray-400'
-                    }
-                  `}>
-                    {stage.name}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          <Stepper 
+            steps={stages.map(stage => ({
+              id: stage.id,
+              label: stage.name,
+              // Convert stage ID to 0-indexed for the stepper comparison (or we can just let Stepper handle it based on currentStep which is 0-indexed in the prop)
+            }))}
+            currentStep={currentStage - 1} // currentStage is 1-indexed, Stepper expects 0-indexed
+            size="md"
+          />
         </div>
 
         {/* Dynamic Banner */}
@@ -939,18 +893,6 @@ export default function QuotationDetails() {
                     />
                   ) : (
                     <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Project / Opportunity</p>
-                  {isEditing ? (
-                    <CustomSelect
-                      value={quotation.project}
-                      onChange={(val) => setQuotation({ ...quotation, project: val })}
-                      options={[{ label: 'Select Project', value: '' }, ...projects.map(p => ({ label: p.projectName, value: p.projectName }))]}
-                    />
-                  ) : (
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{quotation.project}</p>
                   )}
                 </div>
                 <div>
@@ -1100,7 +1042,9 @@ export default function QuotationDetails() {
                                 `${item.gst}%`
                               )}
                             </td>
-                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">{item.amount.toLocaleString('en-IN')}</td>
+                            <td className="px-4 py-3 text-xs text-gray-900 dark:text-white text-right">
+                              {calculatedLines[idx]?.rowSubTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1264,36 +1208,9 @@ export default function QuotationDetails() {
               <div className="bg-gray-50/50 dark:bg-white/[0.02] p-5 rounded-sm border border-gray-200 dark:border-white/5">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">Revision History</h3>
-                  <button className="text-xs text-[#792359] dark:text-[#e6a8d0] font-medium hover:underline">View All</button>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-xs font-bold text-gray-900 dark:text-white">Version 2.0</p>
-                      <p className="text-[10px] text-gray-500">16 May 2025</p>
-                    </div>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-semibold border ${currentStage >= 5 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-purple-50 text-purple-700 border-purple-200'}`}>
-                      {currentStage >= 5 ? 'Accepted' : 'Under Negotiation'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-xs font-bold text-gray-900 dark:text-white">Version 1.0</p>
-                      <p className="text-[10px] text-gray-500">12 May 2025</p>
-                    </div>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-semibold border bg-blue-50 text-blue-700 border-blue-200">
-                      Sent to Client
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-xs font-bold text-gray-900 dark:text-white">Version 0.1</p>
-                      <p className="text-[10px] text-gray-500">09 May 2025</p>
-                    </div>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-semibold border bg-gray-100 text-gray-700 border-gray-200">
-                      Draft
-                    </span>
-                  </div>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">No revisions yet.</p>
                 </div>
               </div>
             )}

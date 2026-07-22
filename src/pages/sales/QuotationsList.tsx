@@ -69,10 +69,20 @@ export default function QuotationsList() {
     q.subject?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const totalPages = Math.ceil(filteredQuotations.length / itemsPerPage);
+  const sortedQuotations = [...filteredQuotations].sort((a, b) => {
+    const timeA = new Date((a as any).createdAt || a.date).getTime();
+    const timeB = new Date((b as any).createdAt || b.date).getTime();
+    // Fallback to sorting by ID or quotationNo descending if timestamps are exactly the same
+    if (timeA === timeB) {
+      return (b.quotationNo || b.id).localeCompare(a.quotationNo || a.id);
+    }
+    return timeB - timeA;
+  });
+
+  const totalPages = Math.ceil(sortedQuotations.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredQuotations.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedQuotations.slice(indexOfFirstItem, indexOfLastItem);
 
   if (isDrawerOpen) {
     return (

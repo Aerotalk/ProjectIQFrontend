@@ -92,8 +92,8 @@ export default function LineItemsSection({ readOnly }: Props) {
             {fields.map((field, index) => {
               const qty = lineItems?.[index]?.quantity || 0;
               const rate = lineItems?.[index]?.rate || 0;
-              const disc = lineItems?.[index]?.discount || 0;
-              const currentTotal = Math.max(0, qty * rate - disc);
+              // Amount column shows pre-discount to mathematically align with SubTotal sum.
+              const currentTotal = qty * rate;
               const unit = lineItems?.[index]?.unit || '';
               const unitConfig = getQuantityInputConfig(unit);
               return (
