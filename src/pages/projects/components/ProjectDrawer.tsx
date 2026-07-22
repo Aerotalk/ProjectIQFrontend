@@ -1,6 +1,6 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect, useRef } from 'react';
-import { X, Save, FolderKanban, ChevronDown } from 'lucide-react';
+import { X, Save, FolderKanban, ChevronDown, Check } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { useClients } from '../../../hooks/useClients';
@@ -10,6 +10,7 @@ import { QuotationService } from '../../../services/quotation.service';
 import { ExpenseService } from '../../../services/expense.service';
 import { TicketService } from '../../../services/ticket.service';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
+import type { Vendor } from '../../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
@@ -22,6 +23,96 @@ interface ProjectDrawerProps {
   mode: 'create' | 'edit' | 'view';
   initialData?: Project;
 }
+
+// ── Inline multi-select dropdown for Vendors ─────────────────────────────────
+function VendorMultiSelect({
+  vendors,
+  selected,
+  disabled,
+  onChange,
+}: {
+  vendors: Vendor[];
+  selected: string[];
+  disabled?: boolean;
+  onChange: (ids: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const toggle = (id: string) => {
+    onChange(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  };
+
+  const label =
+    selected.length === 0
+      ? 'Select Vendors'
+      : vendors
+          .filter((v) => selected.includes(v.id))
+          .map((v) => v.displayName)
+          .join(', ');
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        className={cn(
+          formStyles.field(false, disabled),
+          'flex items-center justify-between cursor-pointer text-left w-full'
+        )}
+      >
+        <span className={selected.length === 0 ? 'text-gray-400' : ''}>{label}</span>
+        <ChevronDown
+          size={14}
+          className={cn('shrink-0 text-gray-400 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-[#1e2028] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg max-h-48 overflow-y-auto custom-scrollbar">
+          {vendors.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-gray-400 italic">No vendors found</p>
+          ) : (
+            vendors.map((vendor) => {
+              const isSelected = selected.includes(vendor.id);
+              return (
+                <button
+                  key={vendor.id}
+                  type="button"
+                  onClick={() => toggle(vendor.id)}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-gray-700 dark:text-gray-200"
+                >
+                  <span
+                    className={cn(
+                      'w-4 h-4 rounded-sm border flex items-center justify-center shrink-0',
+                      isSelected
+                        ? 'bg-[#792359] border-[#792359]'
+                        : 'border-gray-300 dark:border-white/20'
+                    )}
+                  >
+                    {isSelected && <Check size={10} className="text-white" />}
+                  </span>
+                  {vendor.displayName}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialData }: ProjectDrawerProps) {
   const { selectedCompanyId } = useAuth();
@@ -147,11 +238,6 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const isReadOnly = mode === 'view';
 
   const statusOptions = [
-    // status options below
-  ];
-  // reassign to avoid duplicate
-  statusOptions.length = 0;
-  statusOptions.push(
     { label: 'Planning', value: 'Planning' },
     { label: 'Pending Approval', value: 'Pending Approval' },
     { label: 'Active', value: 'Active' },
@@ -164,11 +250,6 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const clientOptions = [
     { label: 'Select Client', value: '' },
     ...clients.map((c) => ({ label: c.displayName || c.id, value: c.id })),
-  ];
-
-  const vendorOptions = [
-    { label: 'Select Vendors', value: '' },
-    ...vendors.map((v) => ({ label: v.displayName || v.id, value: v.id })),
   ];
 
   return (
@@ -231,13 +312,14 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 />
               </FormRow>
 
-              {/* Row: Client dropdown | Vendors dropdown */}
+              {/* Row: Client dropdown | Vendors multi-select dropdown */}
               <div>
                 <label className={formStyles.label}>CLIENT *</label>
                 <CustomSelect
                   value={formData.client}
                   onChange={(val) => setFormData({ ...formData, client: val })}
                   options={clientOptions}
+                  disabled={isReadOnly}
                 />
               </div>
 
