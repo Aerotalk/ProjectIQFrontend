@@ -379,14 +379,21 @@ export default function CreateIncident() {
                     <span className="text-gray-500 block text-xs">Client</span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Building2 size={14} className="text-gray-400" />
-                      <span className="font-medium text-gray-900">Acme Corp Ltd (Mocked)</span>
+                      <span className="font-medium text-gray-900">{selectedProjectData?.client || 'Not Assigned'}</span>
                     </div>
                   </div>
                   <div>
                     <span className="text-gray-500 block text-xs">Project Manager</span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <UserCircle size={14} className="text-gray-400" />
-                      <span className="text-gray-900">Sarah Jenkins (Mocked)</span>
+                      <span className="text-gray-900">
+                        {(() => {
+                          const pmId = selectedProjectData?.projectManager;
+                          if (!pmId) return 'Not Assigned';
+                          const pmUser = users.find(u => u.id === pmId);
+                          return pmUser ? (pmUser.username || pmUser.email) : pmId;
+                        })()}
+                      </span>
                     </div>
                   </div>
                 </div>
