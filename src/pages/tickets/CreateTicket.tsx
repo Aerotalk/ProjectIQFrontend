@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { api } from '@/lib/api';
+import { rolesService, type Role } from '@/services/roles.service';
 
 interface CreateTicketProps {
   onCancel?: () => void;
@@ -16,6 +17,8 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
   
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [assignmentGroup, setAssignmentGroup] = useState('');
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -23,10 +26,41 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
     });
+    rolesService.getAllRoles().then((data: any) => {
+      setRoles(Array.isArray(data) ? data : (data?.content || []));
+    }).catch(console.error);
   }, [selectedCompanyId]);
 
   const CLIENT_OPTIONS = [{ label: '-- Select Caller --', value: '' }, ...clients.map(c => ({ label: c.displayName, value: c.id }))];
-  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...users.map(u => ({ label: u.username || u.email, value: u.id }))];
+  
+  const ROLE_OPTIONS = roles.map(r => {
+    const rawName = r.roleName || r.description || '';
+    const cleanLabel = rawName.replace(/^ROLE_/, '').replace(/_/g, ' ');
+    return { label: cleanLabel, value: rawName };
+  });
+
+  const ASSIGNMENT_GROUP_OPTIONS = ROLE_OPTIONS.length > 0 ? ROLE_OPTIONS : [
+    { label: 'L1 Support', value: 'L1 Support' },
+    { label: 'L2 Support', value: 'L2 Support' },
+    { label: 'Development', value: 'Development' },
+    { label: 'Database Admin', value: 'Database Admin' }
+  ];
+
+  const filteredUsers = users.filter(u => {
+    if (!assignmentGroup) return true;
+    const userRoles = u.userRoles || u.roles || [];
+    return userRoles.some((ur: any) => {
+      const rName = typeof ur === 'string' ? ur : (ur.role?.roleName || ur.roleName || ur.name || '');
+      const rId = typeof ur === 'object' ? (ur.role?.id || ur.id) : '';
+      return rName === assignmentGroup || 
+             rId === assignmentGroup ||
+             rName.replace(/^ROLE_/, '') === assignmentGroup ||
+             rName.replace(/^ROLE_/, '').replace(/_/g, ' ').toLowerCase() === assignmentGroup.toLowerCase();
+    });
+  });
+
+  const targetUsers = (assignmentGroup && filteredUsers.length > 0) ? filteredUsers : users;
+  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...targetUsers.map(u => ({ label: u.username || u.email, value: u.id }))];
 
   const [caller, setCaller] = useState('');
   const [shortDesc, setShortDesc] = useState('');
@@ -245,8 +279,11 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assignment group</label>
               <div className="flex-1 flex">
-                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
-                <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
+                <CustomSelect 
+                  value={assignmentGroup} 
+                  onChange={setAssignmentGroup} 
+                  options={[{label: '-- Select Role / Group --', value: ''}, ...ASSIGNMENT_GROUP_OPTIONS]} 
+                />
               </div>
             </div>
 

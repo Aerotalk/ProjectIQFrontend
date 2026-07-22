@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { api } from '@/lib/api';
+import { rolesService, type Role } from '@/services/roles.service';
 
 const STATES = ['Open', 'In Progress', 'Closed'];
 
@@ -25,6 +26,7 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
   const { selectedCompanyId } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
     if (!selectedCompanyId) return;
@@ -32,10 +34,41 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
     api.get('/admin/users').then((data: any) => {
       setUsers(Array.isArray(data) ? data : (data?.content || []));
     });
+    rolesService.getAllRoles().then((data: any) => {
+      setRoles(Array.isArray(data) ? data : (data?.content || []));
+    }).catch(console.error);
   }, [selectedCompanyId]);
 
   const CLIENT_OPTIONS = [{ label: '-- Select Requester --', value: '' }, ...clients.map(c => ({ label: c.displayName, value: c.displayName }))];
-  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...users.map(u => ({ label: u.username || u.email, value: u.username || u.email }))];
+  
+  const ROLE_OPTIONS = roles.map(r => {
+    const rawName = r.roleName || r.description || '';
+    const cleanLabel = rawName.replace(/^ROLE_/, '').replace(/_/g, ' ');
+    return { label: cleanLabel, value: rawName };
+  });
+
+  const ASSIGNMENT_GROUP_OPTIONS = ROLE_OPTIONS.length > 0 ? ROLE_OPTIONS : [
+    { label: 'L1 Support', value: 'L1 Support' },
+    { label: 'L2 Support', value: 'L2 Support' },
+    { label: 'Development', value: 'Development' },
+    { label: 'Database Admin', value: 'Database Admin' }
+  ];
+
+  const filteredUsers = users.filter(u => {
+    if (!formData.assignmentGroup) return true;
+    const userRoles = u.userRoles || u.roles || [];
+    return userRoles.some((ur: any) => {
+      const rName = typeof ur === 'string' ? ur : (ur.role?.roleName || ur.roleName || ur.name || '');
+      const rId = typeof ur === 'object' ? (ur.role?.id || ur.id) : '';
+      return rName === formData.assignmentGroup || 
+             rId === formData.assignmentGroup ||
+             rName.replace(/^ROLE_/, '') === formData.assignmentGroup ||
+             rName.replace(/^ROLE_/, '').replace(/_/g, ' ').toLowerCase() === formData.assignmentGroup.toLowerCase();
+    });
+  });
+
+  const targetUsers = (formData.assignmentGroup && filteredUsers.length > 0) ? filteredUsers : users;
+  const USER_OPTIONS = [{ label: '-- Unassigned --', value: '' }, ...targetUsers.map(u => ({ label: u.username || u.email, value: u.username || u.email }))];
 
   const handleStateChange = (newState: string) => {
     setFormData({ ...formData, status: newState });
@@ -207,8 +240,13 @@ export default function ViewTicket({ ticket, onClose, onSave }: ViewTicketProps)
             <div className="flex items-center gap-4">
               <label className="w-40 text-right text-[#792359] dark:text-[#e6a8d0] font-medium shrink-0">* Assignment group</label>
               <div className="flex-1 flex gap-2">
-                <input type="text" defaultValue="IT DTV-ENGA" className="flex-1 px-3 py-2 bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/20 rounded-sm text-gray-900 dark:text-white focus:border-[#792359] focus:outline-none focus:ring-1 focus:ring-[#792359]" />
-                <button className="px-3 py-2 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-200 dark:hover:bg-white/20">🔍</button>
+                <div className="flex-1">
+                  <CustomSelect
+                    value={formData.assignmentGroup || ''}
+                    onChange={(val) => setFormData({...formData, assignmentGroup: val})}
+                    options={[{label: '-- Select Role / Group --', value: ''}, ...ASSIGNMENT_GROUP_OPTIONS]}
+                  />
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
