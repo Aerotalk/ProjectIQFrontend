@@ -26,7 +26,7 @@ interface Props {
 
 export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initialData, quotationNo, isSubmitting, nextNumber }: Props) {
   const form = useQuotationForm(initialData);
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId: companyId, user } = useAuth();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState('');
@@ -74,7 +74,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
           clientName: '',
           subject: '',
           reference: '',
-          salesperson: '',
+          salesperson: user?.username || '',
           billingAddress: '',
           shippingAddress: '',
           lineItems: [],
