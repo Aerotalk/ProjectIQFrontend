@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Info,
-  CheckCircle2, Truck, Package, Download, Loader2
+  CheckCircle2, Truck, Package, Download, Loader2, X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -193,9 +193,9 @@ export default function ChallanDetails() {
         
         items: challan.lineItems?.length ? challan.lineItems.map((item, index) => ({
           item_index: index + 1,
-          item_name: item.itemName || item.name || 'Item',
+          item_name: (item as any).itemName || (item as any).name || 'Item',
           item_description: item.description || '',
-          item_hsn: item.itemHsn || item.hsnSac || item.hsn || '',
+          item_hsn: (item as any).itemHsn || (item as any).hsnSac || (item as any).hsn || '',
           item_quantity: item.dispatchedQuantity || item.quantity || item.qty || 1,
           item_unit: item.unit || 'Unit'
         })) : [{
@@ -381,7 +381,7 @@ export default function ChallanDetails() {
                     }
                     setIsApiLoading(true);
                     try {
-                      await ChallanService.update(companyId!, challan.id, challan as any);
+                      await ChallanService.update(challan.id, challan as any);
                       toast.success('Challan updated successfully');
                       setIsEditing(false);
                     } catch (err: any) {

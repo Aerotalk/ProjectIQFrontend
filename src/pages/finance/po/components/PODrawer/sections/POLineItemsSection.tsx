@@ -48,7 +48,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
     const product = products.find(p => p.id === productId);
     if (product) {
       setValue(`lineItems.${index}.itemName`, product.itemName, { shouldValidate: false });
-      setValue(`lineItems.${index}.hsnSac`, product.hsnSac || product.hsn || '', { shouldValidate: false });
+      setValue(`lineItems.${index}.hsnSac`, product.hsnSac || (product as any).hsn || '', { shouldValidate: false });
       setValue(`lineItems.${index}.description`, product.description || '', { shouldValidate: false });
       setValue(`lineItems.${index}.unit`, product.unit || 'Pieces', { shouldValidate: false });
       setValue(`lineItems.${index}.rate`, product.standardRate || 0, { shouldValidate: false });

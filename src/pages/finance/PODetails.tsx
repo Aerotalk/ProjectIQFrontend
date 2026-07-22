@@ -258,7 +258,7 @@ export default function PODetails() {
         items: lineItems.map((item, index) => ({
           item_index: index + 1,
           item_name: item.description || 'Item',
-          item_hsn: item.hsnSac || '', 
+          item_hsn: (item as any).hsnSac || '', 
           item_quantity: item.qty || 1,
           item_unit: item.unit || 'PCS',
           item_price: Number(item.unitPrice || 0).toFixed(2),
