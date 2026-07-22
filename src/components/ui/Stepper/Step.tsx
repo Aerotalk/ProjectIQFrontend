@@ -26,16 +26,29 @@ export const Step: React.FC<StepProps> = ({
   // Determine colors based on state
   let circleColor = stepperTokens.colors.neutral;
   let textColor = stepperTokens.colors.neutralText;
+  let textWeight = 'font-medium';
+  let circleRing = '';
+  let circleScale = '';
+  let circleShadow = '';
   
   if (isCompleted) {
-    circleColor = `${stepperTokens.colors.brand} text-white shadow-sm shadow-[#792359]/20`;
+    circleColor = `${stepperTokens.colors.brand} text-white`;
     textColor = stepperTokens.colors.textCompleted;
+    textWeight = 'font-medium';
   } else if (isCurrent) {
-    circleColor = `${stepperTokens.colors.brand} text-white shadow-md shadow-[#792359]/30 ${animated ? stepperTokens.animation.scale : ''}`;
-    textColor = stepperTokens.colors.brandText;
+    circleColor = `${stepperTokens.colors.brand} text-white`;
+    textColor = stepperTokens.colors.textActive;
+    textWeight = 'font-semibold';
+    circleRing = 'ring-4 ring-[#792359]/10';
+    circleShadow = 'shadow-sm';
+    circleScale = animated ? stepperTokens.animation.scale : '';
   } else if (interactive) {
     // If interactive and upcoming, it can be clickable
     circleColor = `hover:border-[#792359]/50 hover:bg-[#792359]/5 ${stepperTokens.colors.neutral}`;
+    textWeight = 'font-medium';
+  } else {
+    // Upcoming
+    textWeight = 'font-medium';
   }
 
   // Animation classes
@@ -56,8 +69,8 @@ export const Step: React.FC<StepProps> = ({
         aria-label={`${label} - ${ariaLabel}`}
         title={label}
         className={`
-          relative flex items-center justify-center font-bold rounded-full
-          ${sizeTokens.circle} ${circleColor} ${transitionClass}
+          relative flex items-center justify-center font-bold rounded-full bg-white dark:bg-[#181a1f]
+          ${sizeTokens.circle} ${circleColor} ${transitionClass} ${circleRing} ${circleShadow} ${circleScale}
           ${interactive ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#792359] focus-visible:ring-offset-2' : 'cursor-default'}
         `}
       >
@@ -72,10 +85,10 @@ export const Step: React.FC<StepProps> = ({
 
       <div className={`flex flex-col ${isHorizontal ? 'items-center' : 'items-start pt-1'}`}>
         <span 
-          className={`font-medium capitalize ${sizeTokens.label} ${textColor} ${transitionClass}`}
+          className={`capitalize ${textWeight} ${sizeTokens.label} ${textColor} ${transitionClass}`}
           style={{ 
-            maxWidth: isHorizontal ? '80px' : 'none', 
-            lineHeight: 1.2,
+            maxWidth: isHorizontal ? '96px' : 'none', 
+            lineHeight: 1.3,
           }}
         >
           {label}
@@ -85,8 +98,8 @@ export const Step: React.FC<StepProps> = ({
           <span 
             className={`mt-1 text-gray-500 ${sizeTokens.description} ${transitionClass}`}
             style={{ 
-              maxWidth: isHorizontal ? '100px' : 'none',
-              lineHeight: 1.3,
+              maxWidth: isHorizontal ? '120px' : 'none',
+              lineHeight: 1.4,
             }}
           >
             {description}

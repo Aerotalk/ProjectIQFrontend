@@ -314,7 +314,9 @@ export default function QuotationDetails() {
     totalGstAmount: totalGst, 
     grandTotal, 
     calculatedLines,
-    taxGroups
+    taxGroups,
+    totalDiscount,
+    deliveryCost
   } = calculateQuotationTotals(
     lineItems,
     Number(quotation.discount) || 0,
@@ -1094,7 +1096,7 @@ export default function QuotationDetails() {
                             min="0"
                           />
                         ) : (
-                          <span className="font-medium text-gray-900 dark:text-white text-red-500">-{Number(quotation.discount || 0).toLocaleString('en-IN')}</span>
+                          <span className="font-medium text-gray-900 dark:text-white text-red-500">-{totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         )}
                       </div>
                       <div className="flex justify-between text-sm items-center">
@@ -1108,7 +1110,7 @@ export default function QuotationDetails() {
                             min="0"
                           />
                         ) : (
-                          <span className="font-medium text-gray-900 dark:text-white">{Number(quotation.deliveryCost || 0).toLocaleString('en-IN')}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{deliveryCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         )}
                       </div>
                       <div className="border-t border-gray-200 dark:border-white/10 pt-2 flex justify-between">

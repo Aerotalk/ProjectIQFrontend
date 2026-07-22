@@ -35,6 +35,7 @@ export function calculateQuotationTotals(
 
     return {
       ...item,
+      gstRate,
       rowSubTotal,
       itemDiscountAmount,
       rowTaxableAmount,

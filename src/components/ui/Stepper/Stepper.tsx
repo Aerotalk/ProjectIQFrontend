@@ -51,35 +51,41 @@ export const Stepper: React.FC<StepperProps> = ({
           const isLastStep = index === steps.length - 1;
 
           return (
-            <React.Fragment key={step.id}>
-              {/* Step Node */}
-              <Step
-                index={index}
-                label={step.label}
-                description={step.description}
-                icon={step.icon}
-                isCompleted={isCompleted}
-                isCurrent={isCurrent}
-                isUpcoming={isUpcoming}
-                size={size}
-                orientation={orientation}
-                showNumbers={showNumbers}
-                showCheckmarks={showCheckmarks}
-                showDescriptions={showDescriptions}
-                interactive={interactive}
-                onClick={() => onStepClick?.(index, step)}
-                animated={animated}
-              />
-
+            <div 
+              key={step.id} 
+              className={`relative flex ${isHorizontal ? 'flex-col items-center flex-1' : 'flex-row items-start min-h-[64px]'}`}
+            >
               {/* Connector Line (Not after the last step) */}
               {!isLastStep && (
                 <StepConnector
                   isCompleted={index < currentStep}
                   orientation={orientation}
                   animated={animated}
+                  size={size}
                 />
               )}
-            </React.Fragment>
+              
+              {/* Step Node */}
+              <div className={`relative z-10 w-full flex ${isHorizontal ? 'justify-center' : 'justify-start'}`}>
+                <Step
+                  index={index}
+                  label={step.label}
+                  description={step.description}
+                  icon={step.icon}
+                  isCompleted={isCompleted}
+                  isCurrent={isCurrent}
+                  isUpcoming={isUpcoming}
+                  size={size}
+                  orientation={orientation}
+                  showNumbers={showNumbers}
+                  showCheckmarks={showCheckmarks}
+                  showDescriptions={showDescriptions}
+                  interactive={interactive}
+                  onClick={() => onStepClick?.(index, step)}
+                  animated={animated}
+                />
+              </div>
+            </div>
           );
         })}
       </div>
