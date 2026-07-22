@@ -18,6 +18,8 @@ export interface Project {
   linkedQuotations?: string[];
   linkedPOs?: string[];
   linkedExpenses?: string[];
+  projectNotes?: string[];
+  projectDocuments?: string[];
 }
 
 export interface ProjectFormValues {
@@ -37,4 +39,6 @@ export interface ProjectFormValues {
   linkedQuotations?: string[];
   linkedPOs?: string[];
   linkedExpenses?: string[];
+  projectNotes?: string[];
+  projectDocuments?: string[];
 }

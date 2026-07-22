@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, ChevronLeft, ChevronRight, FileText, Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Search, Plus, ChevronLeft, ChevronRight, FileText, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useQuotations } from '../../hooks/useQuotations';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { formatQuotationId } from '../../lib/utils';
 import { getNextSequenceNumber } from '../../utils/sequence';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 export default function QuotationsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -170,9 +171,7 @@ export default function QuotationsList() {
 
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Loading client quotations..." />
           ) : filteredQuotations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-gray-500">
               <FileText size={48} className="mb-4 opacity-20" />

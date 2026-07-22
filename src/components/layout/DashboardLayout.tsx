@@ -87,6 +87,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       icon: Building2, // Changed from User to Building2 to match Company
       subItems: [
         { name: 'Overview', path: `${basePath}/account` },
+        ...(role === 'company' ? [{ name: 'Loaders Showcase', path: `${basePath}/loaders-showcase` }] : []),
         ...(role === 'org' ? [{ name: 'My Accounts', path: `${basePath}/my-accounts` }] : [])
       ]
     },

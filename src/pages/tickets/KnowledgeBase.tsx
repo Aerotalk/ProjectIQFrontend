@@ -6,6 +6,7 @@ import KBDrawer from './components/KBDrawer';
 import { KBService, type KBFormValues } from '../../services/kb.service';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 export default function KnowledgeBase() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -151,9 +152,7 @@ export default function KnowledgeBase() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-20 text-gray-500">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
-        </div>
+        <FunkyLoader variant="section" message="Loading Knowledge Base..." />
       ) : (
         <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">

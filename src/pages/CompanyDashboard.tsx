@@ -31,6 +31,7 @@ import ProjectDashboard from './projects/ProjectDashboard';
 import EmployeeDirectory from './EmployeeDirectory';
 import DepartmentDirectory from './DepartmentDirectory';
 import DesignationDirectory from './DesignationDirectory';
+import LoadersShowcase from './LoadersShowcase';
 
 function DefaultView() {
   return (
@@ -138,6 +139,7 @@ export default function CompanyDashboard() {
             <ProjectFinanceDetails />
           </PermissionGate>
         } />
+        <Route path="/loaders-showcase" element={<LoadersShowcase />} />
         <Route path="/account" element={<CompanyProfile />} />
         <Route path="/profile" element={<AdminProfile />} />
         <Route path="/roles" element={

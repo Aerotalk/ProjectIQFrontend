@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Search, MoreVertical, Truck,
-  ChevronLeft, ChevronRight, Loader2, Package,
+  ChevronLeft, ChevronRight, Package,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ChallanService } from '../../services/challan.service';
@@ -9,6 +9,7 @@ import type { DeliveryChallan } from '../../types/challan.types';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import ChallanDrawer from './challan/components/ChallanDrawer';
 import type { ChallanFormValues } from './challan/validators/challanValidation';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 import { VendorService } from '../../services/vendor.service';
 import { useProjects } from '../../hooks/useProjects';
 import type { Vendor } from '../../types/vendor.types';
@@ -281,9 +282,7 @@ export default function ChallanManagement() {
         {/* Table */}
         <div className="overflow-x-auto min-h-[320px] pb-32">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-24">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Syncing delivery challans..." />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
               <Truck size={48} className="mb-4 opacity-20" />

@@ -18,13 +18,16 @@ interface Props {
 export default function KBDrawer({ isOpen, onClose, onSave, mode, initialData, articleId, isSubmitting }: Props) {
   const form = useKBForm(initialData);
 
-  // Reset form when drawer opens/closes or initialData changes
   React.useEffect(() => {
     if (isOpen) {
       form.reset({
         title: '',
         category: '',
-        content: '',
+        symptoms: '',
+        cause: '',
+        workaround: '',
+        ci: '',
+        errorCode: '',
         status: 'Draft',
         ...initialData
       });

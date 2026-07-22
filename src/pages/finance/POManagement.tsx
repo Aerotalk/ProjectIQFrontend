@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus, Search, MoreVertical, ShoppingCart,
-  ChevronLeft, ChevronRight, Loader2, FileText,
+  ChevronLeft, ChevronRight, FileText,
   CheckCircle2, Clock, XCircle, Truck, Package, AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,6 +13,7 @@ import PODrawer from './po/components/PODrawer';
 import type { POFormValues } from './po/validators/poValidation';
 
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 import { useVendors } from '../../hooks/useVendors';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -302,9 +303,7 @@ export default function POManagement() {
         {/* Table */}
         <div className="overflow-x-auto min-h-[320px] pb-32">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full py-24">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
-            </div>
+            <FunkyLoader variant="section" message="Gathering purchase orders..." />
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
               <ShoppingCart size={48} className="mb-4 opacity-20" />

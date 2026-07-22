@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ChevronRight, Info,
-  CheckCircle2, Truck, Package, Download, Loader2, X
+  CheckCircle2, Truck, Package, Download, X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -17,6 +17,7 @@ import type { Vendor } from '../../types/vendor.types';
 import type { Project } from '../../types/project.types';
 import type { Product } from '../../types/product.types';
 import ChallanPreviewPanel from './challan/components/ChallanPreviewPanel';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 export default function ChallanDetails() {
   const { id } = useParams();
@@ -265,7 +266,7 @@ export default function ChallanDetails() {
                 }}
                 className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : 'Save & Issue'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Saving...</> : 'Save & Issue'}
               </button>
             ) : (
               <button
@@ -273,7 +274,7 @@ export default function ChallanDetails() {
                 onClick={() => handleStatusUpdate('Issued', 'Challan Issued', 2)}
                 className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Issue Challan'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Updating...</> : 'Issue Challan'}
               </button>
             )}
           </div>
@@ -290,7 +291,7 @@ export default function ChallanDetails() {
               onClick={() => handleStatusUpdate('Dispatched', 'Marked as Dispatched', 3)}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Mark as Dispatched'}
+              {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Updating...</> : 'Mark as Dispatched'}
             </button>
           </div>
         );
@@ -306,7 +307,7 @@ export default function ChallanDetails() {
               onClick={() => handleStatusUpdate('Delivered', 'Marked as Delivered', 4)}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Confirming...</> : 'Confirm Delivery'}
+              {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Confirming...</> : 'Confirm Delivery'}
             </button>
           </div>
         );
@@ -362,7 +363,7 @@ export default function ChallanDetails() {
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
-                <><Loader2 size={16} className="animate-spin" /> Preparing PDF...</>
+                <><FunkyLoader variant="inline" className="mr-2" /> Preparing PDF...</>
               ) : (
                 <><Download size={16} /> Download PDF</>
               )}

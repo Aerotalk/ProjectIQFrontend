@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ChevronRight, Edit, Download, Info, Loader2,
+  ChevronRight, Edit, Download, Info,
   CheckCircle2, FileText, Send, MessageSquare, Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ import { formatQuotationId, numberToWords } from '../../lib/utils';
 import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
 import { Stepper } from '@/components/ui/Stepper';
 import { calculateQuotationTotals } from '@/utils/quotationCalculations';
+import FunkyLoader from '@/components/ui/FunkyLoader';
 
 interface UserData {
   id: string;
@@ -551,7 +552,7 @@ export default function QuotationDetails() {
                 }}
                 className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : 'Save Draft'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Saving...</> : 'Save Draft'}
               </button>
             ) : (
               <button
@@ -565,7 +566,7 @@ export default function QuotationDetails() {
                 }}
                 className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Send for approval'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Sending...</> : 'Send for approval'}
               </button>
             )}
           </div>
@@ -584,14 +585,14 @@ export default function QuotationDetails() {
                   onClick={() => handleStatusUpdate('Rejected', 'Quotation rejected internally', 1)}
                   className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
                 >
-                  {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Rejecting...</> : 'Reject'}
+                  {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Rejecting...</> : 'Reject'}
                 </button>
                 <button
                   disabled={isApiLoading}
                   onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
                   className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
                 >
-                  {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Approving...</> : 'Approve'}
+                  {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Approving...</> : 'Approve'}
                 </button>
               </div>
             )}
@@ -610,14 +611,14 @@ export default function QuotationDetails() {
                 onClick={() => handleStatusUpdate('Changes Requested', 'Marked as Under Negotiation', 4)}
                 className="bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 px-4 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Client Requested Changes'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Updating...</> : 'Client Requested Changes'}
               </button>
               <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Accepted', 'Client Accepted Quotation!', 5)}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
-                {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Updating...</> : 'Client Accepted'}
+                {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Updating...</> : 'Client Accepted'}
               </button>
             </div>
           </div>
@@ -634,7 +635,7 @@ export default function QuotationDetails() {
               onClick={() => handleStatusUpdate('Pending Approval', 'Revision sent for internal approval.', 2)}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
-              {isApiLoading ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Send Revision for Approval'}
+              {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Sending...</> : 'Send Revision for Approval'}
             </button>
           </div>
         );
@@ -838,7 +839,7 @@ export default function QuotationDetails() {
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
-                <><Loader2 size={16} className="animate-spin" /> Preparing PDF...</>
+                <><FunkyLoader variant="inline" className="mr-2" /> Preparing PDF...</>
               ) : (
                 <><Download size={16} /> Download PDF</>
               )}
