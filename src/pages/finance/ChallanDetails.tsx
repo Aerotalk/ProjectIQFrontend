@@ -348,7 +348,7 @@ export default function ChallanDetails() {
           {!isNew && (
             <button
               onClick={handlePreview}
-              disabled={isLoadingPreview}
+              disabled={isLoadingPreview || isApiLoading}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (

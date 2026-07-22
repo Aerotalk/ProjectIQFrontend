@@ -850,14 +850,19 @@ export default function QuotationDetails() {
               Cancel
             </button>
           )}
-          <button
-            disabled={isLoadingPreview}
-            onClick={handlePreview}
-            className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
-          >
-            {isLoadingPreview ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-            {isLoadingPreview ? 'Preparing PDF...' : 'Download PDF'}
-          </button>
+          {!isNew && (
+            <button
+              onClick={handlePreview}
+              disabled={isLoadingPreview || isApiLoading}
+              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
+            >
+              {isLoadingPreview ? (
+                <><Loader2 size={16} className="animate-spin" /> Preparing PDF...</>
+              ) : (
+                <><Download size={16} /> Download PDF</>
+              )}
+            </button>
+          )}
 
         </div>
       </div>
