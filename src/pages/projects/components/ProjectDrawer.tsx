@@ -316,7 +316,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
               <div>
                 <label className={formStyles.label}>CLIENT *</label>
                 <CustomSelect
-                  value={formData.client}
+                  value={formData.client || ''}
                   onChange={(val) => setFormData({ ...formData, client: val })}
                   options={clientOptions}
                   disabled={isReadOnly}
