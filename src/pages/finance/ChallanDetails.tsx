@@ -70,15 +70,7 @@ export default function ChallanDetails() {
     }
   }, [companyId]);
 
-  const getStageFromStatus = (status?: string) => {
-    switch (status) {
-      case 'Draft': return 1;
-      case 'Issued': return 2;
-      case 'Dispatched': return 3;
-      case 'Delivered': return 4;
-      default: return 1;
-    }
-  };
+
 
   const handleStatusUpdate = async (newStatus: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered', successMessage: string, newStage: number) => {
     if (!id || isNew) return;
