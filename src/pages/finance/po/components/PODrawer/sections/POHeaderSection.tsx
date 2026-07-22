@@ -62,10 +62,11 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   // Sync vendor name whenever the selected vendor changes
   const selectedVendorId = useWatch({ control, name: 'vendorId' });
+  const selectedVendor = useMemo(() => vendors.find(v => v.id === selectedVendorId), [vendors, selectedVendorId]);
+  
   useEffect(() => {
-    const vendor = vendors.find(v => v.id === selectedVendorId);
-    if (vendor) setValue('vendorName', vendor.displayName || vendor.companyName || vendor.firstName || '', { shouldValidate: false });
-  }, [selectedVendorId, vendors, setValue]);
+    if (selectedVendor) setValue('vendorName', selectedVendor.displayName || selectedVendor.companyName || selectedVendor.firstName || '', { shouldValidate: false });
+  }, [selectedVendor, setValue]);
 
   // File selection handler — stores just the name (no real upload in this mock)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,9 +198,25 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
           )}
         </div>
 
-        {selectedVendorId && (
+        {/* -- PO Date -- */}
+        <div>
+          <label className={labelClass}>
+            PO Date <span className="text-red-500 normal-case font-normal">*</span>
+          </label>
+          <input
+            type="date"
+            {...register('poDate')}
+            disabled={readOnly}
+            className={fieldClass(!!errors.poDate)}
+          />
+          {errors.poDate && (
+            <p className="text-red-500 text-xs mt-1">{errors.poDate.message as string}</p>
+          )}
+        </div>
+
+        {selectedVendor && (
           <div className="md:col-span-2 mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
                 <textarea
@@ -232,24 +249,25 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                 />
               </div>
             </div>
+            <div className="flex flex-wrap gap-x-8 gap-y-2 pt-3 border-t border-gray-200 dark:border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400">GST Treatment:</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {selectedVendor.gstTreatment === 'business_gst' ? 'Registered Business' : 
+                   selectedVendor.gstTreatment === 'business_none' ? 'Unregistered Business' : 
+                   selectedVendor.gstTreatment === 'consumer' ? 'Consumer' : 
+                   selectedVendor.gstTreatment === 'sez' ? 'SEZ' : 'Overseas'}
+                </span>
+              </div>
+              {selectedVendor.gstin && (
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 dark:text-gray-400">GSTIN:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedVendor.gstin}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
-
-        {/* -- PO Date -- */}
-        <div>
-          <label className={labelClass}>
-            PO Date <span className="text-red-500 normal-case font-normal">*</span>
-          </label>
-          <input
-            type="date"
-            {...register('poDate')}
-            disabled={readOnly}
-            className={fieldClass(!!errors.poDate)}
-          />
-          {errors.poDate && (
-            <p className="text-red-500 text-xs mt-1">{errors.poDate.message as string}</p>
-          )}
-        </div>
 
         {/* -- Expected Delivery Date (TechSpec §4.2 optional field) -- */}
         <div>
