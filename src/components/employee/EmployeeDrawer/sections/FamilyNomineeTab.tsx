@@ -1,6 +1,11 @@
-import { useFormContext, useFieldArray } from 'react-hook-form';
+import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
+import CustomSelect from '@/components/ui/CustomSelect';
+import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2 } from 'lucide-react';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormGrid, FormRow } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -15,7 +20,7 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+      <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Family & Nominee Details
         </h3>
@@ -36,61 +41,72 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 pt-2 border-t border-gray-200 dark:border-white/10">
         {fields.map((item, index) => (
           <div key={item.id} className="p-4 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 relative group">
             {!readOnly && (
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
                 <Trash2 size={16} />
               </button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pr-8">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Name</label>
+            <FormGrid>
+              <FormRow>
+                <label className={formStyles.label}>Name</label>
                 <Input type="text" {...register(`families.${index}.name`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Relationship</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Relationship</label>
                 <Input type="text" {...register(`families.${index}.relationship`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Date of Birth</label>
-                <Input type="date" {...register(`families.${index}.dateOfBirth`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Gender</label>
-                <select {...register(`families.${index}.gender`)} disabled={readOnly} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-                  <option value="">Select</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Phone</label>
-                <Input type="text" {...register(`families.${index}.phone`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Nominee %</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Date of Birth</label>
+                <CustomDatePicker name="families.${index}.dateOfBirth" disabled={readOnly} />
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Gender</label>
+                <Controller
+            name={`families.${index}.gender`}
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                value={field.value || ''}
+                onChange={field.onChange}
+                options={[
+                  { label: 'Select', value: '' },
+                  { label: 'Male', value: 'Male' },
+                  { label: 'Female', value: 'Female' },
+                  { label: 'Other', value: 'Other' }
+                ]}
+                disabled={readOnly}
+              />
+            )}
+          />
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Phone</label>
+                <SharedPhoneInput name={`families.${index}.phone`} disabled={readOnly} />
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Nominee %</label>
                 <Input type="number" step="1" max="100" min="0" {...register(`families.${index}.nomineePercentage`, { valueAsNumber: true })} disabled={readOnly} />
-              </div>
+              </FormRow>
               
-              <div className="flex gap-4 items-center md:col-span-2 lg:col-span-3 mt-2">
+              <FormRow className="md:col-span-2 flex flex-row gap-4 items-center mt-2">
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id={`families.${index}.dependent`} {...register(`families.${index}.dependent`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-                  <label htmlFor={`families.${index}.dependent`} className="text-sm text-gray-700 dark:text-gray-300">Is Dependent</label>
+                  <label htmlFor={`families.${index}.dependent`} className="text-sm text-gray-700 dark:text-gray-300 mb-0">Is Dependent</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id={`families.${index}.nominee`} {...register(`families.${index}.nominee`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-                  <label htmlFor={`families.${index}.nominee`} className="text-sm text-gray-700 dark:text-gray-300">Is Nominee</label>
+                  <label htmlFor={`families.${index}.nominee`} className="text-sm text-gray-700 dark:text-gray-300 mb-0">Is Nominee</label>
                 </div>
-              </div>
-            </div>
+              </FormRow>
+            </FormGrid>
           </div>
         ))}
       </div>

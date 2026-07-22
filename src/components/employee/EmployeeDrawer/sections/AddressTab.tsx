@@ -1,5 +1,6 @@
 import { useFormContext } from 'react-hook-form';
 import { AddressFormGroup } from '@/components/shared/SharedAddressSection';
+import { FormSection } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -11,11 +12,7 @@ export default function AddressTab({ readOnly }: Props) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2">
-        Address Details
-      </h3>
-
-      <div className="space-y-6">
+      <FormSection title="Address Details" className="pt-0 border-t-0 space-y-6">
         <AddressFormGroup
           prefix="present"
           title="Present Address"
@@ -56,7 +53,7 @@ export default function AddressTab({ readOnly }: Props) {
           readOnly={readOnly}
           optionalFields={true}
         />
-      </div>
+      </FormSection>
     </div>
   );
 }

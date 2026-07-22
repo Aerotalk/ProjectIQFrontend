@@ -1,3 +1,4 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 "use no memo";
 import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, useWatch, Controller } from 'react-hook-form';
@@ -5,6 +6,9 @@ import { Paperclip, X as XIcon } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useProjects } from '@/hooks/useProjects';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 
 interface Props {
   readOnly?: boolean;
@@ -68,28 +72,16 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
     return projects.map(p => ({ label: `${p.projectCode} – ${p.projectName}`, value: p.id }));
   }, [projects]);
 
-  const fieldClass = (hasError: boolean) =>
-    `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-    `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
-    `disabled:opacity-60 disabled:cursor-not-allowed ` +
-    (hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10');
-
-  const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
-
   return (
     <div className="space-y-6">
       
       {/* ── Basic Details ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Basic Details
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormSection title="Basic Details" className="pt-0 border-t-0">
+        <FormGrid>
           
           {/* Expense Number */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Expense Number <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <AutoNumberInput
@@ -98,16 +90,16 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               placeholder="e.g. EXP/2026/001"
               defaultPrefix="EXP/2026/"
               nextNumber={nextNumber}
-              className={fieldClass(!!errors.expenseNo)}
+              className={formStyles.field(!!errors.expenseNo, readOnly)}
             />
             {errors.expenseNo && (
               <p className="text-red-500 text-xs mt-1">{errors.expenseNo.message as string}</p>
             )}
-          </div>
+          </FormRow>
 
           {/* Project */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Project <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
@@ -126,29 +118,24 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
             {errors.projectId && (
               <p className="text-red-500 text-xs mt-1">{errors.projectId.message as string}</p>
             )}
-          </div>
+          </FormRow>
 
           {/* Expense Date */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Expense Date <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className="relative">
-              <input
-                type="date"
-                {...register('expenseDate')}
-                disabled={readOnly}
-                className={fieldClass(!!errors.expenseDate) + " [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-3 [&::-webkit-calendar-picker-indicator]:top-1/2 [&::-webkit-calendar-picker-indicator]:-translate-y-1/2 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-datetime-edit]:pr-8 [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"}
-              />
+              <CustomDatePicker name="expenseDate" disabled={readOnly} />
             </div>
             {errors.expenseDate && (
               <p className="text-red-500 text-xs mt-1">{errors.expenseDate.message as string}</p>
             )}
-          </div>
+          </FormRow>
           
           {/* Category */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Category <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
@@ -167,11 +154,11 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
             {errors.category && (
               <p className="text-red-500 text-xs mt-1">{errors.category.message as string}</p>
             )}
-          </div>
+          </FormRow>
 
           {/* Paid By */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Paid By <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <input
@@ -179,27 +166,23 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               {...register('paidBy')}
               disabled={readOnly}
               placeholder="e.g. John Doe, Company Card"
-              className={fieldClass(!!errors.paidBy)}
+              className={formStyles.field(!!errors.paidBy, readOnly)}
             />
             {errors.paidBy && (
               <p className="text-red-500 text-xs mt-1">{errors.paidBy.message as string}</p>
             )}
-          </div>
+          </FormRow>
           
-        </div>
-      </div>
+        </FormGrid>
+      </FormSection>
 
       {/* ── Financial Details ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Financials
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+      <FormSection title="Financials">
+        <FormGrid>
           
           {/* Amount */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Amount (₹) <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <input
@@ -208,15 +191,15 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               {...register('amount', { valueAsNumber: true })}
               disabled={readOnly}
               placeholder="0.00"
-              className={fieldClass(!!errors.amount)}
+              className={cn(formStyles.field(!!errors.amount, readOnly), "hide-arrows")}
             />
             {errors.amount && (
               <p className="text-red-500 text-xs mt-1">{errors.amount.message as string}</p>
             )}
-          </div>
+          </FormRow>
 
-          <div>
-            <label className={labelClass}>&nbsp;</label>
+          <FormRow>
+            <label className={formStyles.label}>&nbsp;</label>
             <div className="flex flex-col gap-4 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50/50 dark:bg-white/[0.02]">
               {/* GST Applicable Toggle */}
             <label className="flex items-center gap-3 cursor-pointer">
@@ -243,8 +226,8 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
             {/* Conditional GST Fields */}
             {isGstApplicable && (
               <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 pt-2 border-t border-gray-200 dark:border-white/10">
-                <div>
-                  <label className={labelClass}>
+                <FormRow>
+                  <label className={formStyles.label}>
                     GST Amount (₹) <span className="text-red-500 normal-case font-normal">*</span>
                   </label>
                   <input
@@ -253,12 +236,12 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                     {...register('gstAmount', { valueAsNumber: true })}
                     disabled={readOnly}
                     placeholder="0.00"
-                    className={fieldClass(!!errors.gstAmount)}
+                    className={cn(formStyles.field(!!errors.gstAmount, readOnly), "hide-arrows")}
                   />
                   {errors.gstAmount && (
                     <p className="text-red-500 text-xs mt-1">{errors.gstAmount.message as string}</p>
                   )}
-                </div>
+                </FormRow>
 
                 <label className="flex items-center gap-2 cursor-pointer mt-2">
                   <input
@@ -272,21 +255,17 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               </div>
             )}
             </div>
-          </div>
+          </FormRow>
 
-        </div>
-      </div>
+        </FormGrid>
+      </FormSection>
       
       {/* ── Content & Receipt ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Details & Documentation
-        </h3>
-        
-        <div className="space-y-4">
+      <FormSection title="Details & Documentation">
+        <FormGrid>
           {/* Description */}
-          <div>
-            <label className={labelClass}>
+          <FormRow className="md:col-span-2">
+            <label className={formStyles.label}>
               Description <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <textarea
@@ -294,21 +273,16 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               disabled={readOnly}
               placeholder='Must be specific (E.g. "Cab fare to site, 12 July 2026")'
               rows={3}
-              className={
-                `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-                `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none ` +
-                `disabled:opacity-60 disabled:cursor-not-allowed ` +
-                (errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10')
-              }
+              className={formStyles.textarea(!!errors.description, readOnly)}
             />
             {errors.description && (
               <p className="text-red-500 text-xs mt-1">{errors.description.message as string}</p>
             )}
-          </div>
+          </FormRow>
           
           {/* Receipt Upload */}
-          <div>
-            <label className={labelClass}>
+          <FormRow className="md:col-span-2">
+            <label className={formStyles.label}>
               Receipt Upload
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
@@ -356,9 +330,9 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                 )}
               </div>
             )}
-          </div>
-        </div>
-      </div>
+          </FormRow>
+        </FormGrid>
+      </FormSection>
       
     </div>
   );

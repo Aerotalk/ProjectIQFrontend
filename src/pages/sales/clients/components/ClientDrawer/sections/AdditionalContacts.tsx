@@ -3,6 +3,8 @@ import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormGrid } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -52,42 +54,42 @@ export default function AdditionalContacts({ readOnly }: Props) {
                 </button>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-6">
+              <FormGrid className="pr-6">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Name *</label>
+                  <label className={formStyles.label}>Name *</label>
                   <input 
                     type="text" 
                     {...register(`additionalContacts.${index}.name`)} 
                     disabled={readOnly}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${fieldErrors?.name ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                    className={formStyles.field(!!fieldErrors?.name, readOnly)} 
                   />
                   {fieldErrors?.name && <p className="text-red-500 text-xs mt-1">{fieldErrors.name.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Designation</label>
+                  <label className={formStyles.label}>Designation</label>
                   <input 
                     type="text" 
                     {...register(`additionalContacts.${index}.designation`)} 
                     disabled={readOnly}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+                    className={formStyles.field(false, readOnly)} 
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Email *</label>
+                  <label className={formStyles.label}>Email *</label>
                   <input 
                     type="email" 
                     {...register(`additionalContacts.${index}.email`)} 
                     disabled={readOnly}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${fieldErrors?.email ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                    className={formStyles.field(!!fieldErrors?.email, readOnly)} 
                   />
                   {fieldErrors?.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email.message}</p>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Phone *</label>
+                    <label className={formStyles.label}>Phone *</label>
                     <SharedPhoneInput
                       name={`additionalContacts.${index}.phone`}
                       disabled={readOnly}
@@ -97,7 +99,7 @@ export default function AdditionalContacts({ readOnly }: Props) {
                     {fieldErrors?.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Role</label>
+                    <label className={formStyles.label}>Role</label>
                     <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
                       <Controller
                         name={`additionalContacts.${index}.role`}
@@ -118,7 +120,7 @@ export default function AdditionalContacts({ readOnly }: Props) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </FormGrid>
             </div>
           );
         })}

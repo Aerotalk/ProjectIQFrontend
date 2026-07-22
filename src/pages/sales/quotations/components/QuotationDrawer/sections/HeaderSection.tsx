@@ -1,3 +1,4 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 "use no memo";
 import { useEffect, useState } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
@@ -7,6 +8,9 @@ import { ClientService } from '@/services/client.service';
 import type { Client } from '@/types/client.types';
 import { useAuth } from '@/contexts/AuthContext';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 
 interface Props {
   readOnly?: boolean;
@@ -48,26 +52,16 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
     }
   }, [user, setValue, getValues]);
 
-  const fieldClass = (hasError: boolean) =>
-    `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-    `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
-    `disabled:opacity-60 disabled:cursor-not-allowed ` +
-    (hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10');
 
-  const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
   const selectedClientId = watch('clientId');
   const selectedClient = clients.find(c => c.id === selectedClientId);
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-2 border-b border-gray-200 dark:border-white/10 pb-2">
-        Header Information
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <FormSection title="Header Information">
+      <FormGrid>
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Quotation Number <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <AutoNumberInput
@@ -76,13 +70,13 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
             placeholder="e.g. QT/2026/001"
             defaultPrefix="QT/2026/"
             nextNumber={nextNumber}
-            className={fieldClass(!!errors.quotationNo)}
+            className={formStyles.field(!!errors.quotationNo, readOnly)}
           />
           {errors.quotationNo && <p className="text-red-500 text-xs mt-1">{errors.quotationNo.message as string}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Select Client <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className="relative">
@@ -130,7 +124,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
         </div>
 
         {selectedClient && (
-          <div className="md:col-span-2 mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
+          <FormRow className="mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
@@ -138,7 +132,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                   {...register('billingAddress')}
                   disabled={readOnly}
                   rows={5}
-                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                  className={formStyles.textarea(false, readOnly)}
                 />
               </div>
               <div>
@@ -160,7 +154,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                   {...register('shippingAddress')}
                   disabled={readOnly}
                   rows={5}
-                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                  className={formStyles.textarea(false, readOnly)}
                 />
               </div>
             </div>
@@ -181,11 +175,11 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                 </div>
               )}
             </div>
-          </div>
+          </FormRow>
         )}
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Subject / Reference <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
           </label>
           <input 
@@ -193,12 +187,12 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
             {...register('subject')} 
             disabled={readOnly}
             placeholder="Brief subject line"
-            className={fieldClass(!!errors.subject)}
+            className={formStyles.field(!!errors.subject, readOnly)}
           />
         </div>
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Document Template <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className="relative">
@@ -222,44 +216,34 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
         </div>
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Quotation Date <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <input 
-            type="date" 
-            {...register('date')} 
-            disabled={readOnly}
-            className={fieldClass(!!errors.date)}
-          />
+          <CustomDatePicker name="date" disabled={readOnly} />
           {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message as string}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Valid Until <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <input 
-            type="date" 
-            {...register('validUntil')} 
-            disabled={readOnly}
-            className={fieldClass(!!errors.validUntil)}
-          />
+          <CustomDatePicker name="validUntil" disabled={readOnly} />
           {errors.validUntil && <p className="text-red-500 text-xs mt-1">{errors.validUntil.message as string}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Salesperson <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <input 
             type="text" 
             {...register('salesperson')} 
             readOnly={true}
-            className={`${fieldClass(!!errors.salesperson)} bg-gray-50 dark:bg-white/5 text-gray-500 cursor-not-allowed`}
+            className={cn(formStyles.field(!!errors.salesperson, readOnly), "bg-gray-50 dark:bg-white/5 text-gray-500 cursor-not-allowed")}
           />
           {errors.salesperson && <p className="text-red-500 text-xs mt-1">{errors.salesperson.message as string}</p>}
         </div>
-      </div>
-    </div>
+      </FormGrid>
+    </FormSection>
   );
 }

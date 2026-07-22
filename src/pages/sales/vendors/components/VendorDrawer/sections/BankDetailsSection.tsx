@@ -1,6 +1,7 @@
 "use no memo";
 import { useFormContext } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -11,74 +12,72 @@ export default function BankDetailsSection({ readOnly }: Props) {
   const bankErrors = (errors as any)?.bankDetails;
 
   return (
-    <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-2 border-b border-gray-200 dark:border-white/10 pb-2">
-        Bank Details
-      </h3>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <FormSection title="Bank Details">
+      <FormGrid>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Account Name</label>
-          <Input 
+          <label className={formStyles.label}>Account Name</label>
+          <input 
             type="text" 
             {...register('bankDetails.accountName')} 
             disabled={readOnly}
-            className={`${bankErrors?.accountName ? 'border-red-500' : ''}`} 
+            className={formStyles.field(!!bankErrors?.accountName, readOnly)} 
           />
           {bankErrors?.accountName && <p className="text-red-500 text-xs mt-1">{bankErrors.accountName.message as string}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Account Number</label>
-          <Input 
+          <label className={formStyles.label}>Account Number</label>
+          <input 
             type="text" 
             {...register('bankDetails.accountNumber')} 
             disabled={readOnly}
-            className={`${bankErrors?.accountNumber ? 'border-red-500' : ''}`} 
+            className={formStyles.field(!!bankErrors?.accountNumber, readOnly)} 
           />
           {bankErrors?.accountNumber && <p className="text-red-500 text-xs mt-1">{bankErrors.accountNumber.message as string}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">IFSC Code</label>
-          <Input 
+          <label className={formStyles.label}>IFSC Code</label>
+          <input 
             type="text" 
             {...register('bankDetails.ifscCode')} 
             disabled={readOnly}
-            className={`${bankErrors?.ifscCode ? 'border-red-500' : ''}`} 
+            className={formStyles.field(!!bankErrors?.ifscCode, readOnly)} 
           />
           {bankErrors?.ifscCode && <p className="text-red-500 text-xs mt-1">{bankErrors.ifscCode.message as string}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Bank Name</label>
-          <Input 
+          <label className={formStyles.label}>Bank Name</label>
+          <input 
             type="text" 
             {...register('bankDetails.bankName')} 
             disabled={readOnly}
-            className={`${bankErrors?.bankName ? 'border-red-500' : ''}`} 
+            className={formStyles.field(!!bankErrors?.bankName, readOnly)} 
           />
           {bankErrors?.bankName && <p className="text-red-500 text-xs mt-1">{bankErrors.bankName.message as string}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Branch Name</label>
-          <Input 
+          <label className={formStyles.label}>Branch Name</label>
+          <input 
             type="text" 
             {...register('bankDetails.branchName')} 
             disabled={readOnly}
+            className={formStyles.field(false, readOnly)} 
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Swift Code</label>
-          <Input 
+          <label className={formStyles.label}>Swift Code</label>
+          <input 
             type="text" 
             {...register('bankDetails.swiftCode')} 
             disabled={readOnly}
+            className={formStyles.field(false, readOnly)} 
           />
         </div>
-      </div>
-    </div>
+      </FormGrid>
+    </FormSection>
   );
 }

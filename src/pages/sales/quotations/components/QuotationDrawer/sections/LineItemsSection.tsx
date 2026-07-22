@@ -7,6 +7,8 @@ import { ProductService } from '../../../../../../services/product.service';
 import type { Product } from '../../../../../../types/product.types';
 import { useAuth } from '../../../../../../contexts/AuthContext';
 import { getQuantityInputConfig } from '@/utils/unit';
+import { formStyles } from '@/components/ui/form-styles';
+import { cn } from '@/lib/utils';
 
 interface Props {
   readOnly?: boolean;
@@ -55,7 +57,7 @@ export default function LineItemsSection({ readOnly }: Props) {
 
   const lineItems = useWatch({ control, name: 'lineItems' });
 
-  const cellClass = `px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors w-full disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-white/[0.02]`;
+  const cellClass = cn(formStyles.field(false, readOnly), "px-2 py-1.5 h-auto");
 
   return (
     <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
@@ -168,15 +170,16 @@ export default function LineItemsSection({ readOnly }: Props) {
                         name={`lineItems.${index}.discountType`}
                         control={control}
                         render={({ field }) => (
-                          <select 
-                            {...field}
+                          <CustomSelect
                             value={field.value || 'FLAT'}
+                            onChange={field.onChange}
                             disabled={readOnly}
-                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1.5 border-r border-gray-300 dark:border-white/10 outline-none cursor-pointer"
-                          >
-                            <option value="FLAT">₹</option>
-                            <option value="PERCENTAGE">%</option>
-                          </select>
+                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1 border-0 border-r border-gray-300 dark:border-white/10 outline-none h-full min-h-0 w-14 rounded-r-none shadow-none focus:ring-0"
+                            options={[
+                              { label: '₹', value: 'FLAT' },
+                              { label: '%', value: 'PERCENTAGE' }
+                            ]}
+                          />
                         )}
                       />
                       <input 

@@ -2,6 +2,7 @@
 import { useFormContext, Controller } from 'react-hook-form';
 import { GST_TREATMENTS } from '../../../../clients/constants/gstTreatments';
 import { Card } from '@/components/ui/card';
+import { FormSection } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -11,11 +12,8 @@ export default function GSTTreatmentSection({ readOnly }: Props) {
   const { control } = useFormContext();
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-2 border-b border-gray-200 dark:border-white/10 pb-2">
-        Step 1 — GST Treatment
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+    <FormSection title="Step 1 — GST Treatment" className="pt-0 border-t-0">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 -mt-2">
         Select the GST treatment type. The form adapts instantly based on this selection.
       </p>
 
@@ -56,7 +54,7 @@ export default function GSTTreatmentSection({ readOnly }: Props) {
           </div>
         )}
       />
-    </div>
+    </FormSection>
   );
 }
 

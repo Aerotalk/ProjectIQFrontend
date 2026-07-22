@@ -1,3 +1,4 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 "use no memo";
 import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, Controller, useWatch } from 'react-hook-form';
@@ -7,6 +8,8 @@ import { useProjects } from '@/hooks/useProjects';
 import { useVendors } from '@/hooks/useVendors';
 import { useAuth } from '@/contexts/AuthContext';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { formStyles } from '@/components/ui/form-styles';
 
 interface Props {
   readOnly?: boolean;
@@ -83,27 +86,15 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const fieldClass = (hasError: boolean) =>
-    `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-    `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
-    `disabled:opacity-60 disabled:cursor-not-allowed ` +
-    (hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10');
-
-  const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
-
 
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2">
-        PO Details
-      </h3>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <FormSection title="PO Details">
+      <FormGrid>
 
         {/* -- PO Number -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             PO Number <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <AutoNumberInput
@@ -112,7 +103,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
             placeholder="e.g. PO-001"
             defaultPrefix="PO-"
             nextNumber={nextNumber}
-            className={fieldClass(!!errors.poNumber)}
+            className={formStyles.field(!!errors.poNumber, readOnly)}
           />
           {errors.poNumber && (
             <p className="text-red-500 text-xs mt-1">{errors.poNumber.message as string}</p>
@@ -121,7 +112,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
         {/* -- Project -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Project <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
@@ -144,7 +135,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
         {/* -- Vendor -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Vendor <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <div className="relative">
@@ -200,22 +191,17 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
         {/* -- PO Date -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             PO Date <span className="text-red-500 normal-case font-normal">*</span>
           </label>
-          <input
-            type="date"
-            {...register('poDate')}
-            disabled={readOnly}
-            className={fieldClass(!!errors.poDate)}
-          />
+          <CustomDatePicker name="poDate" disabled={readOnly} />
           {errors.poDate && (
             <p className="text-red-500 text-xs mt-1">{errors.poDate.message as string}</p>
           )}
         </div>
 
         {selectedVendor && (
-          <div className="md:col-span-2 mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
+          <FormRow className="mt-2 p-4 bg-gray-50 dark:bg-white/5 rounded-sm border border-gray-200 dark:border-white/10 text-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div>
                 <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">Billing Address</h4>
@@ -223,7 +209,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                   {...register('billingAddress')}
                   disabled={readOnly}
                   rows={5}
-                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                  className={formStyles.textarea(false, readOnly)}
                 />
               </div>
               <div>
@@ -245,7 +231,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                   {...register('shippingAddress')}
                   disabled={readOnly}
                   rows={5}
-                  className="w-full bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm p-2 text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] resize-none"
+                  className={formStyles.textarea(false, readOnly)}
                 />
               </div>
             </div>
@@ -266,28 +252,23 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                 </div>
               )}
             </div>
-          </div>
+          </FormRow>
         )}
 
         {/* -- Expected Delivery Date (TechSpec §4.2 optional field) -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Expected Delivery Date
             <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
           </label>
-          <input
-            type="date"
-            {...register('expectedDelivery')}
-            disabled={readOnly}
-            className={fieldClass(false)}
-          />
+          <CustomDatePicker name="expectedDelivery" disabled={readOnly} />
         </div>
 
 
 
         {/* -- Attachment (TechSpec §4.2 optional field) -- */}
         <div>
-          <label className={labelClass}>
+          <label className={formStyles.label}>
             Attachment
             <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(PDF / image, max 10 MB)</span>
           </label>
@@ -341,8 +322,8 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
         </div>
 
         {/* -- Description (TechSpec §4.2 Required textarea) -- */}
-        <div className="md:col-span-2">
-          <label className={labelClass}>
+        <FormRow>
+          <label className={formStyles.label}>
             Description <span className="text-red-500 normal-case font-normal">*</span>
           </label>
           <textarea
@@ -350,19 +331,14 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
             disabled={readOnly}
             placeholder="Specify what is being procured — be clear and specific (e.g. 'Cloud storage infrastructure for Q3 data pipeline')"
             rows={3}
-            className={
-              `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-              `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none ` +
-              `disabled:opacity-60 disabled:cursor-not-allowed ` +
-              (errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10')
-            }
+            className={formStyles.textarea(!!errors.description, readOnly)}
           />
           {errors.description && (
             <p className="text-red-500 text-xs mt-1">{errors.description.message as string}</p>
           )}
-        </div>
+        </FormRow>
 
-      </div>
-    </div>
+      </FormGrid>
+    </FormSection>
   );
 }

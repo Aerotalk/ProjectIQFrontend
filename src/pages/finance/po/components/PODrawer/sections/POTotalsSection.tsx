@@ -4,7 +4,8 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { VendorService } from '@/services/vendor.service';
-import { numberToWords } from '@/lib/utils';
+import { numberToWords, cn } from '@/lib/utils';
+import { formStyles } from '@/components/ui/form-styles';
 
 interface Props {
   readOnly?: boolean;
@@ -84,7 +85,7 @@ export default function POTotalsSection({ readOnly }: Props) {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-3 mt-6">
+          <h3 className={cn(formStyles.sectionTitle, "mb-3 mt-6")}>
             Internal Notes
           </h3>
           <div className="relative">
@@ -93,7 +94,7 @@ export default function POTotalsSection({ readOnly }: Props) {
               disabled={readOnly}
               placeholder="Add any internal notes, remarks or approval comments here (optional)..."
               rows={4}
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+              className={formStyles.textarea(false, readOnly)}
             />
           </div>
         </div>
@@ -136,7 +137,7 @@ export default function POTotalsSection({ readOnly }: Props) {
               type="number" 
               {...register('deliveryCost', { valueAsNumber: true })}
               disabled={readOnly}
-              className="w-24 px-2 py-1 text-right bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 hide-arrows" 
+              className={cn(formStyles.field(false, readOnly), "w-24 px-2 py-1 text-right hide-arrows h-8")}
               min="0"
               step="0.01"
               placeholder="0.00"

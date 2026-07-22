@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Search, Loader2, User, Shield } from 'lucide-react';
 import AssignRolesToEmployeeModal from '../components/roles/AssignRolesToEmployeeModal';
+import { formStyles } from '@/components/ui/form-styles';
 
 export default function AdminUsersList() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -47,7 +48,7 @@ export default function AdminUsersList() {
             placeholder="Search users by name or ID..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-800 dark:text-gray-200"
+            className={`${formStyles.field()} pl-10`}
           />
         </div>
       </div>

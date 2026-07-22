@@ -4,8 +4,7 @@ import { Plus, Building2, MapPin, CreditCard, ArrowLeft, Save, Trash2, Edit2, Ch
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
 import CustomSelect from '@/components/ui/CustomSelect';
-
-
+import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 type ViewState = 'list' | 'add' | 'edit';
 
 interface BankData {
@@ -314,7 +313,12 @@ const AccountForm = ({
               <InputField label="IEC Code" value={formData.iecCode as string || ''} onChange={(val) => updateField('iecCode', val)} />
               <InputField label="Email Address" type="email" required value={formData.email as string || ''} onChange={(val) => updateField('email', val)} />
               
-              <InputField label="Phone Number" type="tel" required value={formData.phone as string || ''} onChange={(val) => updateField('phone', val)} />
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <SharedPhoneInput value={formData.phone as string || ''} onChange={(val) => updateField('phone', val)} />
+              </div>
               <InputField label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
 
               {/* Admin Login Password - only for new accounts */}

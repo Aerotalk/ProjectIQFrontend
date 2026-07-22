@@ -1,3 +1,4 @@
+import { formStyles } from '@/components/ui/form-styles';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -161,7 +162,7 @@ export default function CreateIncident() {
               <h2 className="text-[15px] font-semibold text-gray-800">1. Select Project</h2>
             </div>
             <div className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Project <span className="text-red-500">*</span></label>
+              <label className={formStyles.label}>Project <span className="text-red-500">*</span></label>
               <Controller
                 name="projectId"
                 control={control}
@@ -187,7 +188,7 @@ export default function CreateIncident() {
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <label className={formStyles.label}>Category</label>
                   <Controller
                     name="category"
                     control={control}
@@ -206,7 +207,7 @@ export default function CreateIncident() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
+                  <label className={formStyles.label}>Subcategory</label>
                   <Controller
                     name="subCategory"
                     control={control}
@@ -228,7 +229,7 @@ export default function CreateIncident() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Impact</label>
+                  <label className={formStyles.label}>Impact</label>
                   <Controller
                     name="impact"
                     control={control}
@@ -246,7 +247,7 @@ export default function CreateIncident() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+                  <label className={formStyles.label}>Urgency</label>
                   <Controller
                     name="urgency"
                     control={control}
@@ -264,7 +265,7 @@ export default function CreateIncident() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority (Auto-calculated)</label>
+                  <label className={formStyles.label}>Priority (Auto-calculated)</label>
                   <Controller
                     name="priority"
                     control={control}
@@ -285,7 +286,7 @@ export default function CreateIncident() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description <span className="text-red-500">*</span></label>
+                <label className={formStyles.label}>Short Description <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   {...register('shortDescription')}
@@ -295,7 +296,7 @@ export default function CreateIncident() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
+                <label className={formStyles.label}>Detailed Description</label>
                 <textarea
                   {...register('description')}
                   rows={5}
@@ -314,7 +315,7 @@ export default function CreateIncident() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Assignment Group (Role)</label>
+                  <label className={formStyles.label}>Assignment Group (Role)</label>
                   <Controller
                     name="assignmentGroup"
                     control={control}
@@ -328,7 +329,7 @@ export default function CreateIncident() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+                  <label className={formStyles.label}>Assign To</label>
                   <Controller
                     name="assignedTo"
                     control={control}
@@ -342,7 +343,7 @@ export default function CreateIncident() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                  <label className={formStyles.label}>Due Date</label>
                   <input
                     type="datetime-local"
                     {...register('dueDate')}

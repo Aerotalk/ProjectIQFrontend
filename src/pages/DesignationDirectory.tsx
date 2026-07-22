@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Search, Plus, Trash2, Edit2, Loader2, Award, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { formStyles } from '@/components/ui/form-styles';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 interface Designation {
   id: string;
@@ -172,21 +174,12 @@ export default function DesignationDirectory() {
       <div className="bg-white dark:bg-[#181a1f] p-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
         {!isCompanyScopedUser && (
           <div className="relative w-full sm:w-64">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <select
+            <CustomSelect
               value={selectedCompanyId}
-              onChange={(e) => setSelectedCompanyId(e.target.value)}
-              className="w-full pl-10 pr-8 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] transition-all outline-none text-gray-800 dark:text-gray-200 appearance-none cursor-pointer"
-            >
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.companyName}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
+              onChange={setSelectedCompanyId}
+              options={companies.map((company) => ({ label: company.companyName, value: company.id }))}
+              icon={<Building2 size={16} className="text-gray-400" />}
+            />
           </div>
         )}
 
@@ -300,45 +293,45 @@ export default function DesignationDirectory() {
             <form onSubmit={handleAddDesignation} className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Code *</label>
+                  <label className={formStyles.label}>Designation Code *</label>
                   <input
                     required
                     type="text"
                     value={newDesigCode}
                     onChange={(e) => setNewDesigCode(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                     placeholder="e.g. SDEV, MGR, DIR"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Name *</label>
+                  <label className={formStyles.label}>Designation Name *</label>
                   <input
                     required
                     type="text"
                     value={newDesigName}
                     onChange={(e) => setNewDesigName(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                     placeholder="e.g. Senior Developer"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hierarchy Level *</label>
+                  <label className={formStyles.label}>Hierarchy Level *</label>
                   <input
                     required
                     type="number"
                     min="1"
                     value={newHierarchyLevel || ''}
                     onChange={(e) => setNewHierarchyLevel(parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                     placeholder="1 (Highest), 2, 3..."
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <label className={formStyles.label}>Description</label>
                   <textarea
                     value={newDesigDesc}
                     onChange={(e) => setNewDesigDesc(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none"
+                    className={formStyles.field()}
                     placeholder="Brief description of the designation..."
                     rows={3}
                   />
@@ -348,7 +341,7 @@ export default function DesignationDirectory() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                  className={formStyles.field()}
                 >
                   Cancel
                 </button>
@@ -382,42 +375,42 @@ export default function DesignationDirectory() {
             <form onSubmit={handleUpdateDesignation} className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Code *</label>
+                  <label className={formStyles.label}>Designation Code *</label>
                   <input
                     required
                     type="text"
                     value={editDesigCode}
                     onChange={(e) => setEditDesigCode(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Designation Name *</label>
+                  <label className={formStyles.label}>Designation Name *</label>
                   <input
                     required
                     type="text"
                     value={editDesigName}
                     onChange={(e) => setEditDesigName(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hierarchy Level *</label>
+                  <label className={formStyles.label}>Hierarchy Level *</label>
                   <input
                     required
                     type="number"
                     min="1"
                     value={editHierarchyLevel || ''}
                     onChange={(e) => setEditHierarchyLevel(parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+                    className={formStyles.field()}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <label className={formStyles.label}>Description</label>
                   <textarea
                     value={editDesigDesc}
                     onChange={(e) => setEditDesigDesc(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none"
+                    className={formStyles.field()}
                     rows={3}
                   />
                 </div>
@@ -426,7 +419,7 @@ export default function DesignationDirectory() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                  className={formStyles.field()}
                 >
                   Cancel
                 </button>

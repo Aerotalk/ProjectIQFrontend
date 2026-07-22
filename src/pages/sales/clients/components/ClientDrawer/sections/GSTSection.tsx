@@ -9,6 +9,9 @@ import {
   shouldShowOverseasFields,
   getStateFromGSTIN,
 } from '../../../utils/gstRules';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 
 // Common Indian States list
 const INDIAN_STATES = [
@@ -40,15 +43,11 @@ export default function GSTSection({ readOnly }: Props) {
   }
 
   return (
-    <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-white/10">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-        Part B — GST & Tax Fields
-      </h3>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <FormSection title="Part B — GST & Tax Fields">
+      <FormGrid>
         {showGSTIN && (
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">GSTIN *</label>
+            <label className={formStyles.label}>GSTIN *</label>
             <input 
               type="text" 
               {...register('gstin')} 
@@ -67,7 +66,7 @@ export default function GSTSection({ readOnly }: Props) {
                 }
               }}
               placeholder="15-character GSTIN"
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors uppercase ${errors.gstin ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+              className={cn(formStyles.field(!!errors.gstin, readOnly), "uppercase")} 
             />
             {errors.gstin && <p className="text-red-500 text-xs mt-1">{errors.gstin.message as string}</p>}
           </div>
@@ -75,7 +74,7 @@ export default function GSTSection({ readOnly }: Props) {
 
         {showPAN && (
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">
+            <label className={formStyles.label}>
               PAN Number {treatment !== 'business_none' && treatment !== 'overseas' && '*'}
               {(treatment === 'business_none' || treatment === 'overseas') && <span className="text-gray-400 font-normal normal-case ml-1">(optional)</span>}
             </label>
@@ -84,7 +83,7 @@ export default function GSTSection({ readOnly }: Props) {
               {...register('panNumber')} 
               disabled={readOnly || (showGSTIN)} // Pre-filled if GSTIN is present
               placeholder="10-character PAN"
-              className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors uppercase ${errors.panNumber ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${(showGSTIN) ? 'bg-gray-50 dark:bg-white/5 opacity-80' : ''}`} 
+              className={cn(formStyles.field(!!errors.panNumber, readOnly || showGSTIN), "uppercase", showGSTIN && "opacity-80 bg-gray-50 dark:bg-white/5")} 
             />
             {errors.panNumber && <p className="text-red-500 text-xs mt-1">{errors.panNumber.message as string}</p>}
           </div>
@@ -93,22 +92,22 @@ export default function GSTSection({ readOnly }: Props) {
         {showSEZ && (
           <>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">SEZ Unit / Developer Name *</label>
+              <label className={formStyles.label}>SEZ Unit / Developer Name *</label>
               <input 
                 type="text" 
                 {...register('sezUnitName')} 
                 disabled={readOnly}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${errors.sezUnitName ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`} 
+                className={formStyles.field(!!errors.sezUnitName, readOnly)} 
               />
               {errors.sezUnitName && <p className="text-red-500 text-xs mt-1">{errors.sezUnitName.message as string}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">LUT / Bond Reference No.</label>
+              <label className={formStyles.label}>LUT / Bond Reference No.</label>
               <input 
                 type="text" 
                 {...register('lutBondNo')} 
                 disabled={readOnly}
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+                className={formStyles.field(false, readOnly)} 
               />
             </div>
           </>
@@ -116,7 +115,7 @@ export default function GSTSection({ readOnly }: Props) {
 
         {showPlaceOfSupply && (
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Place of Supply *</label>
+            <label className={formStyles.label}>Place of Supply *</label>
             <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
               <Controller
                 name="placeOfSupply"
@@ -137,7 +136,7 @@ export default function GSTSection({ readOnly }: Props) {
         {showOverseas && (
           <>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Country *</label>
+              <label className={formStyles.label}>Country *</label>
               <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
                 <Controller
                   name="country"
@@ -161,7 +160,7 @@ export default function GSTSection({ readOnly }: Props) {
               {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country.message as string}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Currency *</label>
+              <label className={formStyles.label}>Currency *</label>
               <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
                 <Controller
                   name="currency"
@@ -185,18 +184,18 @@ export default function GSTSection({ readOnly }: Props) {
               {errors.currency && <p className="text-red-500 text-xs mt-1">{errors.currency.message as string}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Foreign Tax ID</label>
+              <label className={formStyles.label}>Foreign Tax ID</label>
               <input 
                 type="text" 
                 {...register('foreignTaxId')} 
                 disabled={readOnly}
                 placeholder="e.g. VAT ID, EIN"
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors" 
+                className={formStyles.field(false, readOnly)} 
               />
             </div>
           </>
         )}
-      </div>
-    </div>
+      </FormGrid>
+    </FormSection>
   );
 }

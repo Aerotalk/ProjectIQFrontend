@@ -1,3 +1,4 @@
+import { formStyles } from '@/components/ui/form-styles';
 import { useState, useEffect } from 'react';
 import { rolesService, type Role } from '../services/roles.service';
 import PermissionGate from '../components/PermissionGate';
@@ -66,7 +67,7 @@ export default function RolesList() {
       </div>
 
       {/* Roles List */}
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden mt-8">
+      <div className={formStyles.field()}>
         <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Shield size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
@@ -77,7 +78,7 @@ export default function RolesList() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/80 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <tr className={formStyles.field()}>
                 <th className="px-6 py-3 font-medium">Role Name</th>
                 <th className="px-6 py-3 font-medium">Description</th>
                 <th className="px-6 py-3 font-medium">Type</th>

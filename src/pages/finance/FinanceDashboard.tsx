@@ -6,6 +6,7 @@ import { POService } from '../../services/po.service';
 import { ExpenseService } from '../../services/expense.service';
 import { ChallanService } from '../../services/challan.service';
 import { useAuth } from '../../contexts/AuthContext';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 const KPI_DATA = [
   { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-[#792359]', bgColor: 'bg-purple-50 dark:bg-[#792359]/10', isPositive: true },
@@ -189,26 +190,28 @@ export default function FinanceDashboard() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Financial Trend (POs vs Expenses)</h2>
           <div className="flex items-center gap-2">
-            <select 
+            <CustomSelect
               value={trendQuarter}
-              onChange={(e) => setTrendQuarter(e.target.value)}
-              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
-            >
-              <option value="All">Full Year</option>
-              <option value="Q1">Q1 (Jan-Mar)</option>
-              <option value="Q2">Q2 (Apr-Jun)</option>
-              <option value="Q3">Q3 (Jul-Sep)</option>
-              <option value="Q4">Q4 (Oct-Dec)</option>
-            </select>
-            <select
-              value={trendYear}
-              onChange={(e) => setTrendYear(Number(e.target.value))}
-              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors outline-none cursor-pointer"
-            >
-              <option value={new Date().getFullYear()}>{new Date().getFullYear()}</option>
-              <option value={new Date().getFullYear() - 1}>{new Date().getFullYear() - 1}</option>
-              <option value={new Date().getFullYear() - 2}>{new Date().getFullYear() - 2}</option>
-            </select>
+              onChange={setTrendQuarter}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 min-h-0 h-auto rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 w-32"
+              options={[
+                { label: 'Full Year', value: 'All' },
+                { label: 'Q1 (Jan-Mar)', value: 'Q1' },
+                { label: 'Q2 (Apr-Jun)', value: 'Q2' },
+                { label: 'Q3 (Jul-Sep)', value: 'Q3' },
+                { label: 'Q4 (Oct-Dec)', value: 'Q4' }
+              ]}
+            />
+            <CustomSelect
+              value={trendYear.toString()}
+              onChange={(val) => setTrendYear(Number(val))}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1.5 min-h-0 h-auto rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 w-24"
+              options={[
+                { label: new Date().getFullYear().toString(), value: new Date().getFullYear().toString() },
+                { label: (new Date().getFullYear() - 1).toString(), value: (new Date().getFullYear() - 1).toString() },
+                { label: (new Date().getFullYear() - 2).toString(), value: (new Date().getFullYear() - 2).toString() }
+              ]}
+            />
           </div>
         </div>
         <div className="h-[280px] w-full">

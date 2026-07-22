@@ -1,3 +1,4 @@
+import { formStyles } from '@/components/ui/form-styles';
 import { Search, Info, Paperclip, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -132,21 +133,21 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
           {/* Left Column */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Number</label>
+              <label className={formStyles.label}>Number</label>
               <div className="flex-1 flex">
                 <input type="text" readOnly value={randomId} className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none rounded-sm text-gray-800 dark:text-gray-300" />
               </div>
             </div>
             
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Caller</label>
+              <label className={formStyles.label}>Caller</label>
               <div className="flex-1 relative flex">
                 <CustomSelect value={caller} onChange={setCaller} options={CLIENT_OPTIONS} />
               </div>
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Location</label>
+              <label className={formStyles.label}>Location</label>
               <div className="flex-1 relative flex">
                 <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
                 <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
@@ -154,7 +155,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs"><span className="text-red-500 mr-1">*</span>Category</label>
+              <label className={formStyles.label}><span className="text-red-500 mr-1">*</span>Category</label>
               <div className="flex-1">
                 <CustomSelect
                   value={category}
@@ -170,7 +171,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Subcategory</label>
+              <label className={formStyles.label}>Subcategory</label>
               <div className="flex-1">
                 <CustomSelect
                   value={subcategory}
@@ -183,7 +184,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Priority</label>
+              <label className={formStyles.label}>Priority</label>
               <div className="flex-1">
                 <CustomSelect
                   value={priority}
@@ -199,7 +200,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Urgency</label>
+              <label className={formStyles.label}>Urgency</label>
               <div className="flex-1">
                 <CustomSelect
                   value={urgency}
@@ -214,7 +215,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Business Application</label>
+              <label className={formStyles.label}>Business Application</label>
               <div className="flex-1 relative flex">
                 <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
                 <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
@@ -225,14 +226,14 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
           {/* Right Column */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Opened</label>
+              <label className={formStyles.label}>Opened</label>
               <div className="flex-1 flex">
                 <input type="text" value={new Date().toISOString().replace('T', ' ').substring(0, 19)} readOnly className="flex-1 border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-black/20 px-2 py-1 outline-none rounded-sm text-gray-800 dark:text-gray-300" />
               </div>
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Opened by</label>
+              <label className={formStyles.label}>Opened by</label>
               <div className="flex-1 flex">
                 <div className="flex-1 flex">
                   <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm text-gray-800 dark:text-gray-200" defaultValue="System User" />
@@ -243,7 +244,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Contact type</label>
+              <label className={formStyles.label}>Contact type</label>
               <div className="flex-1">
                 <CustomSelect
                   value={contactType}
@@ -259,7 +260,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">State</label>
+              <label className={formStyles.label}>State</label>
               <div className="flex-1">
                 <CustomSelect
                   value={state}
@@ -277,7 +278,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assignment group</label>
+              <label className={formStyles.label}>Assignment group</label>
               <div className="flex-1 flex">
                 <CustomSelect 
                   value={assignmentGroup} 
@@ -288,7 +289,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             </div>
 
             <div className="flex items-center">
-              <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Assigned to</label>
+              <label className={formStyles.label}>Assigned to</label>
               <div className="flex-1 flex">
                 <CustomSelect value={assignedTo} onChange={setAssignedTo} options={USER_OPTIONS} />
               </div>
@@ -300,7 +301,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
         {/* Full Width Fields */}
         <div className="mt-6 space-y-4">
           <div className="flex items-center">
-            <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs"><span className="text-red-500 mr-1">*</span>Short description</label>
+            <label className={formStyles.label}><span className="text-red-500 mr-1">*</span>Short description</label>
             <div className="flex-1">
               <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm" />
             </div>
@@ -324,7 +325,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
           </div>
 
           <div className="flex items-center">
-            <label className="w-40 text-right pr-4 text-gray-600 dark:text-gray-400 text-xs">Active</label>
+            <label className={formStyles.label}>Active</label>
             <div className="flex-1">
               <input type="checkbox" defaultChecked className="rounded border-gray-400 text-[#792359] focus:ring-[#792359]" />
             </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, CheckCircle2, Search, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { formStyles } from './form-styles';
 
 export type SelectOption = string | { label: string; value: string; subtitle?: React.ReactNode; description?: React.ReactNode; subLabel?: React.ReactNode };
 
@@ -13,9 +15,10 @@ interface CustomSelectProps {
   isLoading?: boolean;
   loadingText?: string;
   emptyText?: string;
+  className?: string;
 }
 
-export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText }: CustomSelectProps) {
+export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, className }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -131,7 +134,13 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
             setIsOpen(!isOpen);
           }
         }}
-        className={`w-full ${icon ? 'pl-9' : 'pl-3'} pr-3 py-2 bg-white dark:bg-[#0f1115] border ${isOpen ? 'border-[#792359] ring-2 ring-[#792359]/20' : 'border-gray-300 dark:border-white/10'} rounded-md text-sm text-gray-900 dark:text-white transition-all ${disabled ? 'opacity-50 cursor-not-allowed outline-none bg-gray-100 dark:bg-white/5' : 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359]'} flex items-center justify-between shadow-xs`}
+        className={cn(
+          formStyles.field(false, disabled),
+          "cursor-pointer flex items-center justify-between",
+          icon ? "pl-9" : "",
+          className,
+          isOpen ? "border-[#792359] ring-2 ring-[#792359]/20" : ""
+        )}
       >
         <span className="truncate pr-4">{displayLabel}</span>
         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#792359]' : ''}`} />

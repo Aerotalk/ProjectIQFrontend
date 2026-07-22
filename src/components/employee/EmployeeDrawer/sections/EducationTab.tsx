@@ -1,6 +1,8 @@
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2 } from 'lucide-react';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormGrid, FormRow } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
@@ -15,7 +17,7 @@ export default function EducationTab({ readOnly }: Props) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-2">
+      <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           Education History
         </h3>
@@ -36,49 +38,49 @@ export default function EducationTab({ readOnly }: Props) {
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 pt-2 border-t border-gray-200 dark:border-white/10">
         {fields.map((item, index) => (
           <div key={item.id} className="p-4 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 relative group">
             {!readOnly && (
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
                 <Trash2 size={16} />
               </button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Degree</label>
+            <FormGrid>
+              <FormRow>
+                <label className={formStyles.label}>Degree</label>
                 <Input type="text" {...register(`educations.${index}.degree`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Qualification</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Qualification</label>
                 <Input type="text" {...register(`educations.${index}.qualification`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Institution</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Institution</label>
                 <Input type="text" {...register(`educations.${index}.institution`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Field of Study</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Field of Study</label>
                 <Input type="text" {...register(`educations.${index}.fieldOfStudy`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Start Year</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Start Year</label>
                 <Input type="text" placeholder="YYYY" {...register(`educations.${index}.startYear`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">End Year</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>End Year</label>
                 <Input type="text" placeholder="YYYY" {...register(`educations.${index}.endYear`)} disabled={readOnly} />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Grade / CGPA</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Grade / CGPA</label>
                 <Input type="text" {...register(`educations.${index}.grade`)} disabled={readOnly} />
-              </div>
-            </div>
+              </FormRow>
+            </FormGrid>
           </div>
         ))}
       </div>

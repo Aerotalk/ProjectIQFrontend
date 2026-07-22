@@ -1,76 +1,99 @@
-import { useFormContext } from 'react-hook-form';
+import CustomSelect from '@/components/ui/CustomSelect';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function BankDetailsTab({ readOnly }: Props) {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, control, formState: { errors } } = useFormContext();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2">
-        Bank Details
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Bank Name</label>
+      <FormSection title="Bank Details" className="pt-0 border-t-0">
+        <FormGrid>
+        <FormRow>
+          <label className={formStyles.label}>Bank Name</label>
           <Input type="text" {...register('bankName')} disabled={readOnly} />
           {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName.message as string}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Branch Name</label>
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Branch Name</label>
           <Input type="text" {...register('branchName')} disabled={readOnly} />
-        </div>
+        </FormRow>
         
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Account Number</label>
+        <FormRow>
+          <label className={formStyles.label}>Account Number</label>
           <Input type="password" {...register('accountNumber')} disabled={readOnly} />
           {errors.accountNumber && <p className="text-red-500 text-xs mt-1">{errors.accountNumber.message as string}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Confirm Account Number</label>
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Confirm Account Number</label>
           <Input type="text" {...register('confirmAccountNumber')} disabled={readOnly} />
           {errors.confirmAccountNumber && <p className="text-red-500 text-xs mt-1">{errors.confirmAccountNumber.message as string}</p>}
-        </div>
+        </FormRow>
         
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">IFSC Code</label>
+        <FormRow>
+          <label className={formStyles.label}>IFSC Code</label>
           <Input type="text" {...register('ifscCode')} disabled={readOnly} className="uppercase" />
           {errors.ifscCode && <p className="text-red-500 text-xs mt-1">{errors.ifscCode.message as string}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Account Type</label>
-          <select {...register('accountType')} disabled={readOnly} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-            <option value="Savings">Savings</option>
-            <option value="Current">Current</option>
-            <option value="Salary">Salary</option>
-          </select>
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Account Type</label>
+          <Controller
+            name={'accountType'}
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                value={field.value || ''}
+                onChange={field.onChange}
+                options={[
+                  { label: 'Savings', value: 'Savings' },
+                  { label: 'Current', value: 'Current' },
+                  { label: 'Salary', value: 'Salary' }
+                ]}
+                disabled={readOnly}
+              />
+            )}
+          />
           {errors.accountType && <p className="text-red-500 text-xs mt-1">{errors.accountType.message as string}</p>}
-        </div>
+        </FormRow>
 
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Account Holder Name</label>
+        <FormRow>
+          <label className={formStyles.label}>Account Holder Name</label>
           <Input type="text" {...register('accountHolderName')} disabled={readOnly} />
           {errors.accountHolderName && <p className="text-red-500 text-xs mt-1">{errors.accountHolderName.message as string}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Payment Mode</label>
-          <select {...register('paymentMode')} disabled={readOnly} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cheque">Cheque</option>
-            <option value="Cash">Cash</option>
-          </select>
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Payment Mode</label>
+          <Controller
+            name={'paymentMode'}
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                value={field.value || ''}
+                onChange={field.onChange}
+                options={[
+                  { label: 'Bank Transfer', value: 'Bank Transfer' },
+                  { label: 'Cheque', value: 'Cheque' },
+                  { label: 'Cash', value: 'Cash' }
+                ]}
+                disabled={readOnly}
+              />
+            )}
+          />
           {errors.paymentMode && <p className="text-red-500 text-xs mt-1">{errors.paymentMode.message as string}</p>}
-        </div>
+        </FormRow>
 
-        <div className="md:col-span-2 flex items-center gap-2">
+        <FormRow className="md:col-span-2 flex flex-row items-center gap-2">
           <input type="checkbox" id="primaryAccount" {...register('primaryAccount')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
-          <label htmlFor="primaryAccount" className="text-sm text-gray-700 dark:text-gray-300">Primary Salary Account</label>
-        </div>
-      </div>
+          <label htmlFor="primaryAccount" className="text-sm text-gray-700 dark:text-gray-300 mb-0">Primary Salary Account</label>
+        </FormRow>
+      </FormGrid>
+      </FormSection>
     </div>
   );
 }

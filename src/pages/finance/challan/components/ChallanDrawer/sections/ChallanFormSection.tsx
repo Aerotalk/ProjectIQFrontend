@@ -1,8 +1,13 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 "use no memo";
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, useWatch, Controller, useFieldArray } from 'react-hook-form';
-import { Loader2, Paperclip, X as XIcon, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react'; // Wait, let me just add the imports without replacing the rest of the file
+import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 import { VendorService } from '@/services/vendor.service';
 import { POService } from '@/services/po.service';
 import { useProjects } from '@/hooks/useProjects';
@@ -11,8 +16,6 @@ import type { Vendor } from '@/types/vendor.types';
 import type { PurchaseOrder } from '@/types/po.types';
 import { ProductService } from '@/services/product.service';
 import type { Product } from '@/types/product.types';
-import { ClientService } from '@/services/client.service';
-import type { Client } from '@/types/client.types';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
@@ -36,7 +39,6 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { projects } = useProjects();
@@ -54,13 +56,11 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     Promise.all([
       VendorService.getVendors(companyId),
       POService.getAll(companyId),
-      ProductService.getProducts(companyId),
-      ClientService.getClients(companyId).catch(() => [])
-    ]).then(([vendorData, poData, productData, clientData]) => {
+      ProductService.getProducts(companyId)
+    ]).then(([vendorData, poData, productData]) => {
       setVendors(vendorData);
       setPurchaseOrders(poData);
       setProducts(productData);
-      setClients(clientData);
       setIsLoadingData(false);
     });
   }, [companyId]);
@@ -86,59 +86,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   // Sync display names when selection changes
   useEffect(() => {
     const project = projects.find(p => p.id === selectedProjectId);
-    if (project) {
-      setValue('projectName', project.projectName, { shouldValidate: false });
-      
-      // Auto-fetch client billing & shipping address
-      const clientNameOrId = project.client;
-      if (clientNameOrId) {
-        const client = clients.find(c => c.id === clientNameOrId || c.displayName === clientNameOrId || c.companyName === clientNameOrId);
-        if (client) {
-          const formatAddress = (
-            attn: string | undefined, 
-            line1: string, 
-            line2: string | undefined, 
-            city: string, 
-            state: string | undefined, 
-            zip: string | undefined, 
-            country: string | undefined
-          ) => {
-            const parts = [];
-            if (attn) parts.push(`Attn: ${attn}`);
-            if (line1) parts.push(line1);
-            if (line2) parts.push(line2);
-            parts.push(`${city}${state ? `, ${state}` : ''}${zip ? ` ${zip}` : ''}`);
-            parts.push(country || 'India');
-            return parts.join('\n');
-          };
-          
-          const billingAddr = formatAddress(
-            client.billingAttention,
-            client.billingAddressLine1,
-            client.billingAddressLine2,
-            client.billingCity,
-            client.billingState,
-            client.billingPinCode,
-            client.billingCountry
-          );
-          
-          const shippingAddr = client.sameAsBillingAddress 
-            ? billingAddr 
-            : formatAddress(
-                client.shippingAttention,
-                client.shippingAddressLine1 || client.billingAddressLine1,
-                client.shippingAddressLine2,
-                client.shippingCity || client.billingCity,
-                client.shippingState,
-                client.shippingPinCode,
-                client.shippingCountry
-              );
-              
-          setValue('billingAddress', billingAddr, { shouldValidate: true });
-          setValue('shippingAddress', shippingAddr, { shouldValidate: true });
-        }
-      }
-    }
+    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
     
     // If project changes, clear dependent fields if they don't match the new filters
     if (selectedProjectId) {
@@ -151,7 +99,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
         setValue('linkedVendorPoNumber', '');
       }
     }
-  }, [selectedProjectId, filteredVendors, filteredPOs, setValue, selectedVendorId, selectedPoId, projects, clients]);
+  }, [selectedProjectId, filteredVendors, filteredPOs, setValue, selectedVendorId, selectedPoId]);
 
   useEffect(() => {
     const vendor = vendors.find(v => v.id === selectedVendorId);
@@ -187,13 +135,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const fieldClass = (hasError: boolean) =>
-    `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-    `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
-    `disabled:opacity-60 disabled:cursor-not-allowed ` +
-    (hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10');
 
-  const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
 
   const PROJECT_OPTIONS = useMemo(() => {
     return projects.map(p => ({ label: `${p.projectCode} – ${p.projectName}`, value: p.id }));
@@ -211,16 +153,12 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     <div className="space-y-6">
       
       {/* ── Document Details ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Document Details
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormSection title="Document Details">
+        <FormGrid>
           
           {/* Challan Number */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Challan Number <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <AutoNumberInput
@@ -229,7 +167,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               placeholder="e.g. DC/2026/001"
               defaultPrefix="DC/2026/"
               nextNumber={nextNumber}
-              className={fieldClass(!!errors.challanNumber)}
+              className={formStyles.field(!!errors.challanNumber, readOnly)}
             />
             {errors.challanNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.challanNumber.message as string}</p>
@@ -238,15 +176,10 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
           
           {/* Challan Date */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Challan Date <span className="text-red-500 normal-case font-normal">*</span>
             </label>
-            <input
-              type="date"
-              {...register('challanDate')}
-              disabled={readOnly}
-              className={fieldClass(!!errors.challanDate)}
-            />
+            <CustomDatePicker name="challanDate" disabled={readOnly} />
             {errors.challanDate && (
               <p className="text-red-500 text-xs mt-1">{errors.challanDate.message as string}</p>
             )}
@@ -254,7 +187,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
           
           {/* Project */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Project / Reference # <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
@@ -277,7 +210,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
 
           {/* Vendor */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Vendor <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className="relative">
@@ -305,7 +238,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
           
           {/* Linked Vendor PO */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Linked Vendor PO
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
@@ -328,7 +261,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
 
           {/* E-Way Bill Number */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               E-Way Bill Number
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
@@ -337,28 +270,13 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               {...register('ewayBillNo')}
               disabled={readOnly}
               placeholder="e.g. 123456789012"
-              className={fieldClass(!!errors.ewayBillNo)}
-            />
-          </div>
-
-          {/* Transportation Mode */}
-          <div>
-            <label className={labelClass}>
-              Transportation Mode
-              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
-            </label>
-            <input
-              type="text"
-              {...register('transportMode')}
-              disabled={readOnly}
-              placeholder="e.g. Road, Rail, Air"
-              className={fieldClass(!!errors.transportMode)}
+              className={formStyles.field(!!errors.ewayBillNo, readOnly)}
             />
           </div>
           
           {/* Attachment */}
           <div>
-            <label className={labelClass}>
+            <label className={formStyles.label}>
               Attachment
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(PDF / image, max 10 MB)</span>
             </label>
@@ -408,39 +326,8 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             )}
           </div>
           
-        </div>
-      </div>
-
-      {/* ── Client Address Details ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Client Address Details
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Billing Address */}
-          <div>
-            <label className={labelClass}>Billing Address</label>
-            <textarea
-              {...register('billingAddress')}
-              disabled={readOnly}
-              rows={4}
-              placeholder="Billing address of client (auto-populated when project selected)..."
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none disabled:opacity-60"
-            />
-          </div>
-          {/* Shipping Address */}
-          <div>
-            <label className={labelClass}>Shipping Address</label>
-            <textarea
-              {...register('shippingAddress')}
-              disabled={readOnly}
-              rows={4}
-              placeholder="Shipping address of client (auto-populated when project selected)..."
-              className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none disabled:opacity-60"
-            />
-          </div>
-        </div>
-      </div>
+        </FormGrid>
+      </FormSection>
       
       {/* ── Line Items ── */}
       <div>
@@ -501,13 +388,13 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                       />
                       {isLoadingData && <Loader2 className="absolute right-8 top-2 w-3.5 h-3.5 animate-spin text-gray-400" />}
                     </div>
-                    <textarea
-                      placeholder="Item specification / description..."
-                      {...register(`lineItems.${index}.description`)}
-                      disabled={readOnly}
-                      rows={2}
-                      className={fieldClass(false) + " resize-y min-h-[40px] text-xs"}
-                    />
+                      <textarea
+                        placeholder="Item specification / description..."
+                        {...register(`lineItems.${index}.description`)}
+                        disabled={readOnly}
+                        rows={2}
+                        className={cn(formStyles.field(false, readOnly), "resize-y min-h-[40px] text-xs py-1.5")}
+                      />
                   </td>
                   <td className="px-3 py-2 align-top">
                     <input
@@ -515,7 +402,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                       placeholder="e.g. 998313"
                       {...register(`lineItems.${index}.hsnSac`)}
                       disabled={readOnly}
-                      className={fieldClass(false)}
+                      className={cn(formStyles.field(false, readOnly), "py-1.5")}
                     />
                   </td>
                   <td className="px-3 py-2 align-top">
@@ -525,7 +412,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                       min="0"
                       {...register(`lineItems.${index}.dispatchedQuantity`, { valueAsNumber: true })}
                       disabled={readOnly}
-                      className={fieldClass(false)}
+                      className={cn(formStyles.field(false, readOnly), "py-1.5")}
                     />
                   </td>
                   <td className="px-3 py-2 align-top">
@@ -534,7 +421,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                       placeholder="e.g. Box, Nos, Lot"
                       {...register(`lineItems.${index}.unit`)}
                       disabled={readOnly}
-                      className={fieldClass(false)}
+                      className={cn(formStyles.field(false, readOnly), "py-1.5")}
                     />
                   </td>
                   {!readOnly && (
@@ -564,15 +451,12 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
       </div>
 
       {/* ── Content & Remarks ── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
-          Content & Remarks
-        </h3>
+      <FormSection title="Content & Remarks">
         
-        <div className="space-y-4">
+        <FormGrid>
           {/* Description */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Description <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <textarea
@@ -580,21 +464,16 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               disabled={readOnly}
               placeholder="Specify what was delivered or what milestone was completed..."
               rows={4}
-              className={
-                `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-                `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors resize-none ` +
-                `disabled:opacity-60 disabled:cursor-not-allowed ` +
-                (errors.description ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-white/10')
-              }
+              className={formStyles.textarea(!!errors.description, readOnly)}
             />
             {errors.description && (
               <p className="text-red-500 text-xs mt-1">{errors.description.message as string}</p>
             )}
-          </div>
+          </FormRow>
           
           {/* Remarks */}
-          <div>
-            <label className={labelClass}>
+          <FormRow>
+            <label className={formStyles.label}>
               Remarks
               <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
             </label>
@@ -603,11 +482,11 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
               disabled={readOnly}
               placeholder="Any internal remarks or additional notes..."
               rows={3}
-              className={fieldClass(false) + " resize-none"}
+              className={formStyles.textarea(false, readOnly)}
             />
-          </div>
-        </div>
-      </div>
+          </FormRow>
+        </FormGrid>
+      </FormSection>
       
     </div>
   );

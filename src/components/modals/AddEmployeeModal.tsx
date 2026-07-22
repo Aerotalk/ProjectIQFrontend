@@ -222,19 +222,17 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 {!isCompanyScopedUser && (
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company (For Department & Designation)</label>
-                    <select
+                    <CustomSelect
                       value={selectedCompanyId}
-                      onChange={(e) => {
-                        setSelectedCompanyId(e.target.value);
+                      onChange={(val) => {
+                        setSelectedCompanyId(val);
                         setFormData({ ...formData, departmentId: '', designationId: '' });
                       }}
-                      className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white"
-                    >
-                      <option value="">Select Company</option>
-                      {companies.map((c) => (
-                        <option key={c.id} value={c.id}>{c.companyName}</option>
-                      ))}
-                    </select>
+                      options={[
+                        { label: 'Select Company', value: '' },
+                        ...companies.map((c) => ({ label: c.companyName, value: c.id }))
+                      ]}
+                    />
                   </div>
                 )}
 

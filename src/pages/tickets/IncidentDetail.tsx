@@ -1,7 +1,9 @@
+import { formStyles } from '@/components/ui/form-styles';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import { useAuth } from '../../contexts/AuthContext';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import toast from 'react-hot-toast';
 import { 
@@ -24,6 +26,13 @@ export default function IncidentDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [newNote, setNewNote] = useState('');
   const [activeTab, setActiveTab] = useState<'notes' | 'closure'>('notes');
+  const [closureDetails, setClosureDetails] = useState({
+    resolvingParty: 'Support Team',
+    resolvingAction: 'Bug Fix',
+    customerExperience: 'Degraded Experience',
+    causedBy: 'External',
+    rootCauseCategory: '-- None --'
+  });
   const [timeline, setTimeline] = useState<any[]>([
     {
       id: 1,
@@ -248,7 +257,7 @@ export default function IncidentDetail() {
             
             <div className="space-y-4 pt-4 border-t border-gray-100">
               <div>
-                <span className="block text-sm font-medium text-gray-700 mb-1">Detailed Description</span>
+                <span className={formStyles.label}>Detailed Description</span>
                 <div className="p-4 bg-gray-50 border border-gray-200 rounded-sm text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {ticket.description || 'No detailed description provided.'}
                 </div>
@@ -365,35 +374,46 @@ export default function IncidentDetail() {
                     <div className="flex items-center gap-2">
                       <span className="text-red-500">*</span>
                       <label className="w-1/3 text-xs font-medium text-gray-600">Resolving Party</label>
-                      <select className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                        <option>Support Team</option>
-                        <option>Development</option>
-                      </select>
+                      <div className="w-2/3">
+                        <CustomSelect
+                          value={closureDetails.resolvingParty}
+                          onChange={(val) => setClosureDetails({ ...closureDetails, resolvingParty: val })}
+                          options={['Support Team', 'Development']}
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-500">*</span>
                       <label className="w-1/3 text-xs font-medium text-gray-600">Resolving Action</label>
-                      <select className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                        <option>Bug Fix</option>
-                        <option>Configuration Change</option>
-                        <option>Other</option>
-                      </select>
+                      <div className="w-2/3">
+                        <CustomSelect
+                          value={closureDetails.resolvingAction}
+                          onChange={(val) => setClosureDetails({ ...closureDetails, resolvingAction: val })}
+                          options={['Bug Fix', 'Configuration Change', 'Other']}
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-500">*</span>
                       <label className="w-1/3 text-xs font-medium text-gray-600">Customer Experience</label>
-                      <select className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                        <option>Degraded Experience</option>
-                        <option>Outage</option>
-                      </select>
+                      <div className="w-2/3">
+                        <CustomSelect
+                          value={closureDetails.customerExperience}
+                          onChange={(val) => setClosureDetails({ ...closureDetails, customerExperience: val })}
+                          options={['Degraded Experience', 'Outage']}
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-red-500">*</span>
                       <label className="w-1/3 text-xs font-medium text-gray-600">Caused By</label>
-                      <select className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                        <option>External</option>
-                        <option>Internal</option>
-                      </select>
+                      <div className="w-2/3">
+                        <CustomSelect
+                          value={closureDetails.causedBy}
+                          onChange={(val) => setClosureDetails({ ...closureDetails, causedBy: val })}
+                          options={['External', 'Internal']}
+                        />
+                      </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="text-red-500">*</span>
@@ -418,11 +438,13 @@ export default function IncidentDetail() {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-1/3 text-xs font-medium text-gray-600">Root Cause Category</label>
-                      <select className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359]">
-                        <option>-- None --</option>
-                        <option>Code Defect</option>
-                        <option>Infrastructure</option>
-                      </select>
+                      <div className="w-2/3">
+                        <CustomSelect
+                          value={closureDetails.rootCauseCategory}
+                          onChange={(val) => setClosureDetails({ ...closureDetails, rootCauseCategory: val })}
+                          options={['-- None --', 'Code Defect', 'Infrastructure']}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

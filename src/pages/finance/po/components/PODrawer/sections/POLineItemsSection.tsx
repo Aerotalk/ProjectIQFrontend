@@ -5,6 +5,8 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProducts } from '@/hooks/useProducts';
 import { getQuantityInputConfig } from '@/utils/unit';
+import { formStyles } from '@/components/ui/form-styles';
+import { cn } from '@/lib/utils';
 
 interface Props {
   readOnly?: boolean;
@@ -24,7 +26,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
 
   const lineItemsError = errors.lineItems as { message?: string } | undefined;
 
-  const cellClass = `px-2 py-1.5 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors w-full disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-white/[0.02]`;
+  const cellClass = cn(formStyles.field(false, readOnly), "px-2 py-1.5 h-auto");
 
   const addNewItem = () => {
     append({
@@ -175,15 +177,16 @@ export default function POLineItemsSection({ readOnly }: Props) {
                         name={`lineItems.${index}.discountType`}
                         control={control}
                         render={({ field }) => (
-                          <select 
-                            {...field}
+                          <CustomSelect
                             value={field.value || 'FLAT'}
+                            onChange={field.onChange}
                             disabled={readOnly}
-                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1.5 border-r border-gray-300 dark:border-white/10 outline-none cursor-pointer"
-                          >
-                            <option value="FLAT">₹</option>
-                            <option value="PERCENTAGE">%</option>
-                          </select>
+                            className="bg-gray-50 dark:bg-black/20 text-sm font-medium text-gray-700 dark:text-gray-300 px-1 border-0 border-r border-gray-300 dark:border-white/10 outline-none h-full min-h-0 w-14 rounded-r-none shadow-none focus:ring-0"
+                            options={[
+                              { label: '₹', value: 'FLAT' },
+                              { label: '%', value: 'PERCENTAGE' }
+                            ]}
+                          />
                         )}
                       />
                       <input 
@@ -218,11 +221,11 @@ export default function POLineItemsSection({ readOnly }: Props) {
 
             {fields.length === 0 && (
               <tr>
-                <td colSpan={readOnly ? 7 : 8} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
+                <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                   {readOnly ? 'No line items.' : (
                     <span>
                       No items added yet.{' '}
-                      <button type="button" onClick={addNewItem} className="text-[#792359] dark:text-[#c44997] font-medium hover:underline">
+                      <button type="button" onClick={addNewItem} className="text-[#792359] dark:text-[#c44997] font-medium">
                         Add the first item
                       </button>
                     </span>

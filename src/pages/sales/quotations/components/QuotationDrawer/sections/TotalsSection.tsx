@@ -9,6 +9,8 @@ interface Props {
   readOnly?: boolean;
 }
 import { numberToWords } from '@/lib/utils';
+import { formStyles } from '@/components/ui/form-styles';
+import { cn } from '@/lib/utils';
 
 export default function TotalsSection({ readOnly }: Props) {
   const { control } = useFormContext();
@@ -120,7 +122,7 @@ export default function TotalsSection({ readOnly }: Props) {
               type="number" 
               {...useFormContext().register('deliveryCost', { valueAsNumber: true })}
               disabled={readOnly}
-              className="w-24 px-2 py-1 text-right bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 hide-arrows" 
+              className={cn(formStyles.field(false, readOnly), "w-24 text-right py-1 hide-arrows")}
               min="0"
               step="0.01"
               placeholder="0.00"

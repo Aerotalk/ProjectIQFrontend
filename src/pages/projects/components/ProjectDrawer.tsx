@@ -1,12 +1,18 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect } from 'react';
 import { X, Save, FolderKanban } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { api } from '../../../lib/api';
-import { ClientService } from '../../../services/client.service';
-import type { Client } from '../../../types/client.types';
+import { POService } from '../../../services/po.service';
+import { QuotationService } from '../../../services/quotation.service';
+import { ExpenseService } from '../../../services/expense.service';
+import { TicketService } from '../../../services/ticket.service';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
 import CustomSelect from '@/components/ui/CustomSelect';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 
 interface ProjectDrawerProps {
   isOpen: boolean;
@@ -20,7 +26,10 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const { selectedCompanyId } = useAuth();
   const { vendors } = useVendors({ companyId: selectedCompanyId || null });
   const [users, setUsers] = useState<any[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [incidents, setIncidents] = useState<any[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
+  const [pos, setPos] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
 
   const [formData, setFormData] = useState<ProjectFormValues>({
     projectCode: '',
@@ -42,7 +51,6 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
     const fetchUsers = async () => {
       try {
         const response: any = await api.get('/admin/users');
@@ -52,17 +60,28 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         console.error('Failed to load users', err);
       }
     };
-    const fetchClients = async () => {
+    const fetchRelations = async () => {
       if (!selectedCompanyId) return;
       try {
-        const data = await ClientService.getClients(selectedCompanyId);
-        setClients(data);
+        const [allPos, allQuotations, allExpenses, allTickets] = await Promise.all([
+          POService.getAll(selectedCompanyId).catch(() => []),
+          QuotationService.getQuotations(selectedCompanyId).catch(() => []),
+          ExpenseService.getAll(selectedCompanyId).catch(() => []),
+          TicketService.getAll(selectedCompanyId).catch(() => [])
+        ]);
+        setPos(allPos);
+        setQuotations(allQuotations);
+        setExpenses(allExpenses);
+        setIncidents(allTickets.filter((t: any) => t.type?.toLowerCase() === 'incident' || !t.type));
       } catch (err) {
-        console.error('Failed to load clients', err);
+        console.error('Failed to load relations', err);
       }
     };
-    fetchUsers();
-    fetchClients();
+    
+    if (isOpen) {
+      fetchUsers();
+      fetchRelations();
+    }
   }, [isOpen, selectedCompanyId]);
 
   useEffect(() => {
@@ -156,21 +175,21 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
             
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Code</label>
+            <FormSection title="Project Details" className="pt-0 border-t-0">
+              <FormGrid>
+                <FormRow>
+                  <label className={formStyles.label}>Project Code</label>
                   <input
                     type="text"
                     disabled={true}
                     value={formData.projectCode}
-                    className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                    className={formStyles.field(false, true)}
                     placeholder={mode === 'create' ? "Auto-generated upon save" : ""}
                   />
-                </div>
+                </FormRow>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                <FormRow>
+                  <label className={formStyles.label}>Status</label>
                   {isReadOnly ? (
                     <CustomSelect
                       value={formData.status}
@@ -189,107 +208,103 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                       ]}
                     />
                   ) : (
-                    <div className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300">
+                    <div className={cn(formStyles.field(false, true), "flex items-center")}>
                       {formData.status}
                     </div>
                   )}
-                </div>
-              </div>
+                </FormRow>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Name *</label>
+              <FormRow className="md:col-span-2">
+                <label className={formStyles.label}>Project Name *</label>
                 <input
                   required
                   type="text"
                   disabled={isReadOnly}
                   value={formData.projectName}
                   onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
+                  className={formStyles.field(false, isReadOnly)}
                   placeholder="e.g. ERP Implementation"
                 />
-              </div>
+              </FormRow>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Vendor *
-                    <span className="ml-1 text-[10px] text-gray-400 normal-case font-normal tracking-normal">(required)</span>
-                  </label>
-                  <CustomSelect
-                    disabled={isReadOnly}
-                    value={(formData.assignedVendors || [])[0] || ''}
-                    onChange={(val) => setFormData({ ...formData, assignedVendors: val ? [val] : [] })}
-                    options={[
-                      { label: 'Select a vendor...', value: '' },
-                      ...vendors.map(v => ({
-                        label: v.displayName,
-                        value: v.id
-                      }))
-                    ]}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Client *
-                    <span className="ml-1 text-[10px] text-gray-400 normal-case font-normal tracking-normal">(required)</span>
-                  </label>
-                  <CustomSelect
-                    disabled={isReadOnly}
-                    value={formData.client || ''}
-                    onChange={(val) => setFormData({ ...formData, client: val })}
-                    options={[
-                      { label: 'Select a client...', value: '' },
-                      ...clients.map(c => ({
-                        label: c.displayName || c.companyName || `${c.firstName || ''} ${c.lastName || ''}`.trim(),
-                        value: c.id
-                      }))
-                    ]}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date *</label>
-                  <input
-                    required
-                    type="date"
-                    disabled={isReadOnly}
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected End Date</label>
-                  <input
-                    type="date"
-                    disabled={isReadOnly}
-                    value={formData.expectedEndDate}
-                    onChange={(e) => setFormData({ ...formData, expectedEndDate: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white disabled:opacity-70"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Manager *</label>
-                <CustomSelect
+              <FormRow>
+                <label className={formStyles.label}>Linked Quotation</label>
+                <input
+                  type="text"
                   disabled={isReadOnly}
-                  value={formData.projectManager || ''}
-                  onChange={(val) => setFormData({ ...formData, projectManager: val })}
-                  options={[
-                    { label: 'Select Manager...', value: '' },
-                    ...users.map(u => ({ label: u.username || u.email, value: u.id }))
-                  ]}
+                  value={formData.linkedQuotation}
+                  onChange={(e) => setFormData({ ...formData, linkedQuotation: e.target.value })}
+                  className={formStyles.field(false, isReadOnly)}
+                  placeholder="Quotation number"
                 />
-              </div>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Client</label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  value={formData.client}
+                  onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                  className={formStyles.field(false, isReadOnly)}
+                  placeholder="Client name"
+                />
+              </FormRow>
+              
+              <FormRow>
+                <label className={formStyles.label}>Start Date *</label>
+                <CustomDatePicker value={formData.startDate} onChange={(val) => setFormData({ ...formData, startDate: val })} disabled={isReadOnly} />
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Expected End Date</label>
+                <CustomDatePicker value={formData.expectedEndDate} onChange={(val) => setFormData({ ...formData, expectedEndDate: val })} disabled={isReadOnly} />
+              </FormRow>
 
+              <FormRow>
+                <label className={formStyles.label}>Project Manager *</label>
+                <div className={isReadOnly ? 'opacity-80 pointer-events-none' : ''}>
+                  <CustomSelect
+                    value={formData.projectManager || ''}
+                    onChange={(val) => setFormData({ ...formData, projectManager: val })}
+                    options={[
+                      { label: 'Select Manager...', value: '' },
+                      ...users.map(u => ({ label: u.username || u.email, value: u.id }))
+                    ]}
+                  />
+                </div>
+              </FormRow>
 
+              <FormRow>
+                <label className={formStyles.label}>Assigned Vendors</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                  {vendors.length === 0 ? (
+                    <span className="text-gray-400 italic">No vendors found</span>
+                  ) : (
+                    vendors.map(vendor => (
+                      <label key={vendor.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.assignedVendors || []).includes(vendor.id)}
+                          onChange={(e) => {
+                            const current = formData.assignedVendors || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, assignedVendors: [...current, vendor.id] });
+                            } else {
+                              setFormData({ ...formData, assignedVendors: current.filter(id => id !== vendor.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {vendor.displayName}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </FormRow>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Entities (Employees)</label>
-                <div className="w-full max-h-32 overflow-y-auto px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm custom-scrollbar space-y-1">
+              <FormRow>
+                <label className={formStyles.label}>Assigned Entities (Employees)</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
                   {users.length === 0 ? (
                     <span className="text-gray-400 italic">No employees found</span>
                   ) : (
@@ -314,25 +329,139 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                     ))
                   )}
                 </div>
-              </div>
+              </FormRow>
 
-              {/* Linked Incidents, Quotations, POs and Expenses are managed from inside the project profile */}
+              <FormRow>
+                <label className={formStyles.label}>Linked Incidents</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                  {incidents.length === 0 ? (
+                    <span className="text-gray-400 italic">No incidents found</span>
+                  ) : (
+                    incidents.map(inc => (
+                      <label key={inc.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.linkedIncidents || []).includes(inc.id)}
+                          onChange={(e) => {
+                            const current = formData.linkedIncidents || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, linkedIncidents: [...current, inc.id] });
+                            } else {
+                              setFormData({ ...formData, linkedIncidents: current.filter(id => id !== inc.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {inc.ticketNumber || inc.subject}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </FormRow>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <FormRow>
+                <label className={formStyles.label}>Linked Quotations</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                  {quotations.length === 0 ? (
+                    <span className="text-gray-400 italic">No quotations found</span>
+                  ) : (
+                    quotations.map(q => (
+                      <label key={q.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.linkedQuotations || []).includes(q.id)}
+                          onChange={(e) => {
+                            const current = formData.linkedQuotations || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, linkedQuotations: [...current, q.id] });
+                            } else {
+                              setFormData({ ...formData, linkedQuotations: current.filter(id => id !== q.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {q.quotationNo}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </FormRow>
+
+              <FormRow>
+                <label className={formStyles.label}>Linked POs</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                  {pos.length === 0 ? (
+                    <span className="text-gray-400 italic">No POs found</span>
+                  ) : (
+                    pos.map(po => (
+                      <label key={po.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.linkedPOs || []).includes(po.id)}
+                          onChange={(e) => {
+                            const current = formData.linkedPOs || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, linkedPOs: [...current, po.id] });
+                            } else {
+                              setFormData({ ...formData, linkedPOs: current.filter(id => id !== po.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {po.poNumber || 'Draft PO'}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </FormRow>
+
+              <FormRow>
+                <label className={formStyles.label}>Linked Expenses</label>
+                <div className={cn(formStyles.field(false, isReadOnly), "max-h-32 overflow-y-auto custom-scrollbar space-y-1 block h-auto py-2")}>
+                  {expenses.length === 0 ? (
+                    <span className="text-gray-400 italic">No expenses found</span>
+                  ) : (
+                    expenses.map(ex => (
+                      <label key={ex.id} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 p-1 rounded-sm">
+                        <input 
+                          type="checkbox"
+                          disabled={isReadOnly}
+                          checked={(formData.linkedExpenses || []).includes(ex.id)}
+                          onChange={(e) => {
+                            const current = formData.linkedExpenses || [];
+                            if (e.target.checked) {
+                              setFormData({ ...formData, linkedExpenses: [...current, ex.id] });
+                            } else {
+                              setFormData({ ...formData, linkedExpenses: current.filter(id => id !== ex.id) });
+                            }
+                          }}
+                          className="rounded-sm border-gray-300 text-[#792359] focus:ring-[#792359]"
+                        />
+                        {ex.description} (₹{ex.amount})
+                      </label>
+                    ))
+                  )}
+                </div>
+              </FormRow>
+
+              <FormRow className="md:col-span-2">
+                <label className={formStyles.label}>Description</label>
                 <textarea
                   disabled={isReadOnly}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none disabled:opacity-70"
+                  className={formStyles.textarea(false, isReadOnly)}
                   placeholder="Project details and scope..."
                   rows={3}
                 />
-              </div>
-
-            </div>
-          </form>
-        </div>
+              </FormRow>
+            </FormGrid>
+          </FormSection>
+        </form>
+      </div>
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-end gap-3">

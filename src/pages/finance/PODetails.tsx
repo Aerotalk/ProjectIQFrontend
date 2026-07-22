@@ -1,3 +1,4 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -677,7 +678,7 @@ export default function PODetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">PO Date</p>
                   {isEditing ? (
-                    <input type="date" value={po.poDate} onChange={e => setPo({...po, poDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                    <CustomDatePicker value={po.poDate} onChange={(val) => setPo({...po, poDate: val})} />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{po.poDate}</p>
                   )}
@@ -685,7 +686,7 @@ export default function PODetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expected Delivery</p>
                   {isEditing ? (
-                    <input type="date" value={po.expectedDelivery ? po.expectedDelivery.split('T')[0] : ''} onChange={e => setPo({...po, expectedDelivery: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                    <CustomDatePicker value={po.expectedDelivery ? po.expectedDelivery.split('T')[0] : ''} onChange={(val) => setPo({...po, expectedDelivery: val})} />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{po.expectedDelivery ? new Date(po.expectedDelivery).toLocaleDateString() : 'N/A'}</p>
                   )}

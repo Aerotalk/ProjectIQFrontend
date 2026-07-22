@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { useVendors } from '../../../hooks/useVendors';
 import { api } from '../../../lib/api';
 import { POService } from '../../../services/po.service';
@@ -16,6 +17,8 @@ import { TicketService } from '../../../services/ticket.service';
 import { ProjectService } from '../../../services/project.service';
 import type { Project } from '../../../types/project.types';
 import toast from 'react-hot-toast';
+import { formStyles } from '@/components/ui/form-styles';
+
 
 interface Props {
   project: Project;
@@ -768,21 +771,17 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-1">
                   PEOPLE
                 </label>
-                <select
+                <CustomSelect
                   value={selectedPerson}
-                  onChange={(e) => setSelectedPerson(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
-                >
-                  <option value="">Select Person...</option>
-                  <option value={managerName}>{managerName} (Manager)</option>
-                  {currentProject.client && <option value={currentProject.client}>{currentProject.client} (Client)</option>}
-                  {assignedVendorNames.map((name, i) => (
-                    <option key={i} value={name}>{name} (Vendor)</option>
-                  ))}
-                  {parsedEntities.map((ent, i) => (
-                    <option key={`ent-${i}`} value={ent.name}>{ent.name} ({ent.tag})</option>
-                  ))}
-                </select>
+                  onChange={setSelectedPerson}
+                  options={[
+                    { label: 'Select Person...', value: '' },
+                    { label: `${managerName} (Manager)`, value: managerName },
+                    ...(currentProject.client ? [{ label: `${currentProject.client} (Client)`, value: currentProject.client }] : []),
+                    ...assignedVendorNames.map(name => ({ label: `${name} (Vendor)`, value: name })),
+                    ...parsedEntities.map(ent => ({ label: `${ent.name} (${ent.tag})`, value: ent.name }))
+                  ]}
+                />
               </div>
 
               <div>
@@ -804,7 +803,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
                 placeholder="Enter internal project notes..."
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none resize-none"
+                className={formStyles.textarea()}
               />
             </div>
 
@@ -955,7 +954,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   placeholder="e.g. John Doe / Acme Services"
                   value={entityName}
                   onChange={(e) => setEntityName(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
+                  className={formStyles.field()}
                 />
               </div>
 
@@ -963,22 +962,21 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                   Tag / Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  required
+                <CustomSelect
                   value={entityTag}
-                  onChange={(e) => setEntityTag(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
-                >
-                  <option value="">Select type</option>
-                  <option value="Site Engineer">Site Engineer</option>
-                  <option value="Vendor">Vendor</option>
-                  <option value="Contractor">Contractor</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Consultant">Consultant</option>
-                  <option value="Supervisor">Supervisor</option>
-                  <option value="Labour">Labour</option>
-                  <option value="Other">Other</option>
-                </select>
+                  onChange={setEntityTag}
+                  options={[
+                    { label: 'Select type', value: '' },
+                    { label: 'Site Engineer', value: 'Site Engineer' },
+                    { label: 'Vendor', value: 'Vendor' },
+                    { label: 'Contractor', value: 'Contractor' },
+                    { label: 'Manager', value: 'Manager' },
+                    { label: 'Consultant', value: 'Consultant' },
+                    { label: 'Supervisor', value: 'Supervisor' },
+                    { label: 'Labour', value: 'Labour' },
+                    { label: 'Other', value: 'Other' }
+                  ]}
+                />
               </div>
 
               <div>
@@ -990,7 +988,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   placeholder="Optional notes or responsibility"
                   value={entityRemarks}
                   onChange={(e) => setEntityRemarks(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] outline-none"
+                  className={formStyles.field()}
                 />
               </div>
 

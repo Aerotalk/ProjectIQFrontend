@@ -10,6 +10,7 @@ import ClientProfileView from './clients/components/ClientProfileView';
 import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function ClientsList() {
   const { user } = useAuth();
@@ -147,16 +148,16 @@ export default function ClientsList() {
         <div className="p-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl">
             {!isCompanyScopedUser && (
-              <select
-                value={localCompanyId}
-                onChange={(e) => setLocalCompanyId(e.target.value)}
-                className="w-full sm:w-64 px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors"
-              >
-                <option value="">Select Company</option>
-                {companies.map((c) => (
-                  <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-              </select>
+              <div className="w-full sm:w-64">
+                <CustomSelect
+                  value={localCompanyId}
+                  onChange={setLocalCompanyId}
+                  options={[
+                    { label: 'Select Company', value: '' },
+                    ...companies.map((c) => ({ label: c.companyName, value: c.id }))
+                  ]}
+                />
+              </div>
             )}
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />

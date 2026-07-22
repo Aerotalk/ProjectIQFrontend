@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Plus, Building2, MapPin, CreditCard, Save, Trash2, CheckCircle2, Loader2, Eye } from 'lucide-react';
+import { Plus, Save, Trash2, CheckCircle2, Loader2, Eye } from 'lucide-react';
 import { api } from '../lib/api';
 import { Country, State } from 'country-state-city';
 import CustomSelect from '@/components/ui/CustomSelect';
 import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 import { useAuth } from '../contexts/AuthContext';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 
 interface BankData {
   id: string;
@@ -63,8 +65,8 @@ const InputField = ({
   value: string, 
   onChange: (val: string) => void 
 }) => (
-  <div className="space-y-1.5">
-    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+  <FormRow>
+    <label className={formStyles.label}>
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
@@ -72,9 +74,9 @@ const InputField = ({
       required={required}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+      className={formStyles.field()}
     />
-  </div>
+  </FormRow>
 );
 
 export default function CompanyProfile() {
@@ -296,15 +298,8 @@ export default function CompanyProfile() {
       <form id="profile-form" onSubmit={handleSubmit} className="space-y-6 pb-12">
         
         {/* Basic Details */}
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-visible">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Building2 size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Company Details
-            </h2>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+        <FormSection title="Company Details" >
+          <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
               <InputField label="Company Name" required value={formData.companyName as string || ''} onChange={(val) => updateField('companyName', val)} />
               <InputField label="Legal Name" value={formData.legalName as string || ''} onChange={(val) => updateField('legalName', val)} />
               <InputField label="GST Number" value={formData.gstNumber as string || ''} onChange={(val) => updateField('gstNumber', val)} />
@@ -317,8 +312,8 @@ export default function CompanyProfile() {
               <InputField label="IEC Code" value={formData.iecCode as string || ''} onChange={(val) => updateField('iecCode', val)} />
               <InputField label="Email Address" type="email" required value={formData.email as string || ''} onChange={(val) => updateField('email', val)} />
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <FormRow>
+                <label className={formStyles.label}>
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <SharedPhoneInput
@@ -326,12 +321,12 @@ export default function CompanyProfile() {
                   onChange={(val) => updateField('phone', val)}
                   defaultCountry="IN"
                 />
-              </div>
+              </FormRow>
               <InputField label="Website URL" type="url" value={formData.website as string || ''} onChange={(val) => updateField('website', val)} />
               <div className="col-span-1 hidden lg:block"></div>
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+              <FormRow>
+                <label className={`${formStyles.label} flex items-center justify-between`}>
                   <span>Company Logo</span>
                   {formData.logoFileId && (
                     <a href={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
@@ -351,9 +346,9 @@ export default function CompanyProfile() {
                   )}
                   <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+              </FormRow>
+              <FormRow>
+                <label className={`${formStyles.label} flex items-center justify-between`}>
                   <span>Invoice Logo</span>
                   {formData.invoiceLogoId && (
                     <a href={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
@@ -373,9 +368,9 @@ export default function CompanyProfile() {
                   )}
                   <input type="file" accept="image/*" onChange={(e) => setInvoiceLogoFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
+              </FormRow>
+              <FormRow>
+                <label className={`${formStyles.label} flex items-center justify-between`}>
                   <span>Company Stamp</span>
                   {formData.stampFileId && (
                     <a href={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
@@ -395,38 +390,30 @@ export default function CompanyProfile() {
                   )}
                   <input type="file" accept="image/*" onChange={(e) => setStampFile(e.target.files?.[0] || null)} className="w-full px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-gray-400 file:mr-4 file:py-1 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-gray-200 dark:file:bg-white/10 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-300 dark:hover:file:bg-white/20 transition-all cursor-pointer" />
                 </div>
-              </div>
+              </FormRow>
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Primary Color</label>
+              <FormRow>
+                <label className={formStyles.label}>Primary Color</label>
                 <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
                   <input type="color" value={formData.primaryColor || '#792359'} onChange={(e) => updateField('primaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.primaryColor || '#792359'}</span>
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Secondary Color</label>
+              </FormRow>
+              <FormRow>
+                <label className={formStyles.label}>Secondary Color</label>
                 <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
                   <input type="color" value={formData.secondaryColor || '#E6A8D0'} onChange={(e) => updateField('secondaryColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              </FormRow>
+          </FormGrid>
+        </FormSection>
 
         {/* Address Details */}
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-visible">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <MapPin size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Address Details
-            </h2>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Address Type</label>
+        <FormSection title="Address Details" >
+          <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
+              <FormRow>
+                <label className={formStyles.label}>Address Type</label>
                 <CustomSelect
                   value={formData.addressType || 'Registered'}
                   onChange={(val) => updateField('addressType', val)}
@@ -435,7 +422,7 @@ export default function CompanyProfile() {
                     { label: 'Corporate', value: 'Corporate' }
                   ]}
                 />
-              </div>
+              </FormRow>
               
               <div className="md:col-span-2">
                 <InputField label="Address Line 1" required value={formData.addressLine1 as string || ''} onChange={(val) => updateField('addressLine1', val)} />
@@ -449,17 +436,17 @@ export default function CompanyProfile() {
                 <InputField label="City" required value={formData.city as string || ''} onChange={(val) => updateField('city', val)} />
               </div>
               
-              <div className="md:col-span-1 lg:col-span-1 space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">State <span className="text-red-500">*</span></label>
+              <FormRow className="md:col-span-1 lg:col-span-1">
+                <label className={formStyles.label}>State <span className="text-red-500">*</span></label>
                 <CustomSelect
                   value={formData.state || ''}
                   onChange={(val) => updateField('state', val)}
                   options={statesList.map((s: any) => ({ label: s.name, value: s.name }))}
                 />
-              </div>
+              </FormRow>
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Country <span className="text-red-500">*</span></label>
+              <FormRow>
+                <label className={formStyles.label}>Country <span className="text-red-500">*</span></label>
                 <CustomSelect
                   value={formData.country || ''}
                   onChange={(val) => {
@@ -468,31 +455,25 @@ export default function CompanyProfile() {
                   }}
                   options={countries.map((c: any) => ({ label: c.name, value: c.name }))}
                 />
-              </div>
+              </FormRow>
               <div className="md:col-span-1">
                 <InputField label="Postal Code" required value={formData.postalCode as string || ''} onChange={(val) => updateField('postalCode', val)} />
               </div>
-            </div>
-          </div>
-        </div>
+          </FormGrid>
+        </FormSection>
 
         {/* Bank Details */}
-        <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-visible">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <CreditCard size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
-              Bank Details
-            </h2>
+        <FormSection title="Bank Details">
+          <div className="mb-4 text-right">
             <button 
               type="button" 
               onClick={addBank}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#792359] bg-[#792359]/10 hover:bg-[#792359]/20 rounded-sm transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#792359] bg-[#792359]/10 hover:bg-[#792359]/20 rounded-sm transition-colors"
             >
               <Plus size={14} /> Add Another Bank
             </button>
           </div>
-          
-          <div className="p-6 space-y-8">
+          <div className="space-y-8">
             {banks.map((bank, index) => (
               <div key={bank.id} className="pb-4">
                 
@@ -511,31 +492,31 @@ export default function CompanyProfile() {
                   )}
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Bank Name <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.bankName} onChange={(e) => handleBankChange(bank.id, 'bankName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Account Holder Name <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.accountHolderName} onChange={(e) => handleBankChange(bank.id, 'accountHolderName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Account Number <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.accountNumber} onChange={(e) => handleBankChange(bank.id, 'accountNumber', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">IFSC Code <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.ifscCode} onChange={(e) => handleBankChange(bank.id, 'ifscCode', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">SWIFT Code</label>
-                    <input type="text" value={bank.swiftCode} onChange={(e) => handleBankChange(bank.id, 'swiftCode', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">UPI ID</label>
-                    <input type="text" value={bank.upiId} onChange={(e) => handleBankChange(bank.id, 'upiId', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
-                  </div>
+                <FormGrid className="md:grid-cols-2 lg:grid-cols-3">
+                  <FormRow>
+                    <label className={formStyles.label}>Bank Name <span className="text-red-500">*</span></label>
+                    <input type="text" value={bank.bankName} onChange={(e) => handleBankChange(bank.id, 'bankName', e.target.value)} required className={formStyles.field()} />
+                  </FormRow>
+                  <FormRow>
+                    <label className={formStyles.label}>Account Holder Name <span className="text-red-500">*</span></label>
+                    <input type="text" value={bank.accountHolderName} onChange={(e) => handleBankChange(bank.id, 'accountHolderName', e.target.value)} required className={formStyles.field()} />
+                  </FormRow>
+                  <FormRow>
+                    <label className={formStyles.label}>Account Number <span className="text-red-500">*</span></label>
+                    <input type="text" value={bank.accountNumber} onChange={(e) => handleBankChange(bank.id, 'accountNumber', e.target.value)} required className={formStyles.field()} />
+                  </FormRow>
+                  <FormRow>
+                    <label className={formStyles.label}>IFSC Code <span className="text-red-500">*</span></label>
+                    <input type="text" value={bank.ifscCode} onChange={(e) => handleBankChange(bank.id, 'ifscCode', e.target.value)} required className={formStyles.field()} />
+                  </FormRow>
+                  <FormRow>
+                    <label className={formStyles.label}>SWIFT Code</label>
+                    <input type="text" value={bank.swiftCode} onChange={(e) => handleBankChange(bank.id, 'swiftCode', e.target.value)} className={formStyles.field()} />
+                  </FormRow>
+                  <FormRow>
+                    <label className={formStyles.label}>UPI ID</label>
+                    <input type="text" value={bank.upiId} onChange={(e) => handleBankChange(bank.id, 'upiId', e.target.value)} className={formStyles.field()} />
+                  </FormRow>
                   
                   <div className="flex items-center pt-4 lg:col-span-3">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -549,11 +530,11 @@ export default function CompanyProfile() {
                       <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Set as Primary Bank</span>
                     </label>
                   </div>
-                </div>
+                </FormGrid>
               </div>
             ))}
           </div>
-        </div>
+        </FormSection>
 
       </form>
     </div>

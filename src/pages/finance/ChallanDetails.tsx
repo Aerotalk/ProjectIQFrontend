@@ -1,3 +1,4 @@
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
@@ -483,7 +484,7 @@ export default function ChallanDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Challan Date</p>
                   {isEditing ? (
-                    <input type="date" value={challan.challanDate} onChange={e => setChallan({...challan, challanDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                    <CustomDatePicker value={challan.challanDate} onChange={(val) => setChallan({...challan, challanDate: val})} />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.challanDate}</p>
                   )}
@@ -523,7 +524,7 @@ export default function ChallanDetails() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">PO Date</p>
                   {isEditing ? (
-                    <input type="date" value={challan.poDate || ''} onChange={e => setChallan({...challan, poDate: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
+                    <CustomDatePicker value={challan.poDate || ''} onChange={(val) => setChallan({...challan, poDate: val})} />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.poDate}</p>
                   )}

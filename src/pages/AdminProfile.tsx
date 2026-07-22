@@ -1,3 +1,5 @@
+import { FormGrid } from '@/components/ui/FormLayout';
+import { formStyles } from '@/components/ui/form-styles';
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -206,20 +208,21 @@ export default function AdminProfile() {
               </div>
 
               {/* Form Fields */}
-              <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5" onSubmit={handleSave}>
+              <form onSubmit={handleSave}>
+                <FormGrid className="md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Username</label>
+                  <label className={formStyles.label}>Username</label>
                   <div className="relative">
                     <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="text" value={profileData.username} onChange={(e) => setProfileData({...profileData, username: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={profileData.username} onChange={(e) => setProfileData({...profileData, username: e.target.value})} className={`${formStyles.field()} pl-9 pr-3`} />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email Address</label>
+                  <label className={formStyles.label}>Email Address</label>
                   <div className="relative">
                     <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="email" value={profileData.email} onChange={(e) => setProfileData({...profileData, email: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" disabled />
+                    <input type="email" value={profileData.email} onChange={(e) => setProfileData({...profileData, email: e.target.value})} className={`${formStyles.field(false, true)} pl-9 pr-3`} />
                   </div>
                 </div>
 
@@ -242,6 +245,7 @@ export default function AdminProfile() {
                     )}
                   </button>
                 </div>
+                </FormGrid>
               </form>
             </div>
           </div>
@@ -261,14 +265,14 @@ export default function AdminProfile() {
             <div className="p-6">
               <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Current Password</label>
+                  <label className={formStyles.label}>Current Password</label>
                   <div className="relative">
                     <input 
                       type={showPasswords.current ? "text" : "password"} 
                       value={passwords.current}
                       onChange={(e) => setPasswords({...passwords, current: e.target.value})}
                       placeholder="••••••••" 
-                      className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      className={`${formStyles.field()} pl-3 pr-10`} 
                     />
                     <button 
                       type="button"
@@ -280,14 +284,14 @@ export default function AdminProfile() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">New Password</label>
+                  <label className={formStyles.label}>New Password</label>
                   <div className="relative">
                     <input 
                       type={showPasswords.new ? "text" : "password"} 
                       value={passwords.new}
                       onChange={(e) => setPasswords({...passwords, new: e.target.value})}
                       placeholder="••••••••" 
-                      className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                      className={`${formStyles.field()} pl-3 pr-10`} 
                     />
                     <button 
                       type="button"
@@ -299,18 +303,14 @@ export default function AdminProfile() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Confirm New Password</label>
+                  <label className={formStyles.label}>Confirm New Password</label>
                   <div className="relative">
                     <input 
                       type={showPasswords.confirm ? "text" : "password"} 
                       value={passwords.confirm}
                       onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
                       placeholder="••••••••" 
-                      className={`w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border rounded-sm text-sm focus:outline-none text-gray-900 dark:text-white transition-colors ${
-                        passwords.confirm && passwords.new !== passwords.confirm 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-gray-200 dark:border-white/10 focus:border-[#792359] dark:focus:border-[#792359]'
-                      }`} 
+                      className={`\${formStyles.field(!!(passwords.confirm && passwords.new !== passwords.confirm))} pl-3 pr-10`} 
                     />
                     <button 
                       type="button"

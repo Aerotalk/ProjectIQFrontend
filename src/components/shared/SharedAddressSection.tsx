@@ -3,6 +3,9 @@ import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Country, State } from 'country-state-city';
 import SharedPhoneInput from './SharedPhoneInput';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
+import { cn } from '@/lib/utils';
 
 interface AddressSectionProps {
   prefix: string; // e.g. 'billing', 'shipping', or 'address'
@@ -41,9 +44,9 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
   return (
     <div>
       {title && <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">{title}</h4>}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Attention</label>
+      <FormGrid>
+        <FormRow>
+          <label className={formStyles.label}>Attention</label>
           <Controller
             name={`${prefix}Attention`}
             control={control}
@@ -57,10 +60,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               />
             )}
           />
-        </div>
+        </FormRow>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Country / Region</label>
+          <label className={formStyles.label}>Country / Region</label>
           <div className={pointerEventsClass}>
             <Controller
               name={`${prefix}Country`}
@@ -77,7 +80,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 1 {!optionalFields && '*'}</label>
+          <label className={formStyles.label}>Address Line 1 {!optionalFields && '*'}</label>
           <Controller
             name={`${prefix}AddressLine1`}
             control={control}
@@ -87,7 +90,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 {...field}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}AddressLine1`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+                className={cn(formStyles.field(!!(errors as any)[`${prefix}AddressLine1`], readOnly || disabledState), pointerEventsClass)} 
               />
             )}
           />
@@ -95,7 +98,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Address Line 2 (Area/Locality)</label>
+          <label className={formStyles.label}>Address Line 2 (Area/Locality)</label>
           <Controller
             name={`${prefix}AddressLine2`}
             control={control}
@@ -105,14 +108,14 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 {...field}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+                className={cn(formStyles.field(false, readOnly || disabledState), pointerEventsClass)} 
               />
             )}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">City {!optionalFields && '*'}</label>
+          <label className={formStyles.label}>City {!optionalFields && '*'}</label>
           <Controller
             name={`${prefix}City`}
             control={control}
@@ -122,7 +125,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 {...field}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}City`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+                className={cn(formStyles.field(!!(errors as any)[`${prefix}City`], readOnly || disabledState), pointerEventsClass)} 
               />
             )}
           />
@@ -130,7 +133,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">State / Province {!isOverseas && !optionalFields && '*'}</label>
+          <label className={formStyles.label}>State / Province {!isOverseas && !optionalFields && '*'}</label>
           <div className={pointerEventsClass}>
             <Controller
               name={`${prefix}State`}
@@ -158,7 +161,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">PIN / Postal Code {!isOverseas && !optionalFields && '*'}</label>
+          <label className={formStyles.label}>PIN / Postal Code {!isOverseas && !optionalFields && '*'}</label>
           <Controller
             name={`${prefix}PinCode`}
             control={control}
@@ -168,7 +171,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 {...field}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${(errors as any)[`${prefix}PinCode`] ? 'border-red-500' : 'border-gray-300 dark:border-white/10'} ${pointerEventsClass}`} 
+                className={cn(formStyles.field(!!(errors as any)[`${prefix}PinCode`], readOnly || disabledState), pointerEventsClass)} 
               />
             )}
           />
@@ -176,7 +179,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
         </div>
         
         <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Phone</label>
+          <label className={formStyles.label}>Phone</label>
           <SharedPhoneInput
             name={`${prefix}Phone`}
             disabled={readOnly || disabledState}
@@ -184,7 +187,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
             className={pointerEventsClass}
           />
         </div>
-      </div>
+      </FormGrid>
     </div>
   );
 }
@@ -248,18 +251,14 @@ export default function SharedAddressSection({
 
   return (
     <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-white/10">
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-          Part D - Address Details
-        </h3>
-        
+      <FormSection title="Part D - Address Details">
         <AddressFormGroup 
           prefix={sourcePrefix} 
           title="Billing Address" 
           readOnly={readOnly} 
           isOverseas={isOverseas} 
         />
-      </div>
+      </FormSection>
 
       <div className="pt-4 border-t border-gray-100 dark:border-white/5">
         <div className="flex items-center justify-between mb-4">

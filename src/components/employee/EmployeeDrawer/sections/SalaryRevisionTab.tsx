@@ -1,60 +1,73 @@
-import { useFormContext } from 'react-hook-form';
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
+import CustomSelect from '@/components/ui/CustomSelect';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { formStyles } from '@/components/ui/form-styles';
+import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function SalaryRevisionTab({ readOnly }: Props) {
-  const { register } = useFormContext();
+  const { register, control } = useFormContext();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2">
-        Salary Revision
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Revision Type</label>
-          <select {...register('revisionType')} disabled={readOnly} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white">
-            <option value="">Select Type</option>
-            <option value="Annual Appraisal">Annual Appraisal</option>
-            <option value="Mid-Year Appraisal">Mid-Year Appraisal</option>
-            <option value="Promotion">Promotion</option>
-            <option value="Correction">Correction</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Effective Date</label>
-          <Input type="date" {...register('revisionEffectiveDate')} disabled={readOnly} />
-        </div>
+      <FormSection title="Salary Revision" className="pt-0 border-t-0">
+        <FormGrid>
+        <FormRow>
+          <label className={formStyles.label}>Revision Type</label>
+          <Controller
+            name={'revisionType'}
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                value={field.value || ''}
+                onChange={field.onChange}
+                options={[
+                  { label: 'Select Type', value: '' },
+                  { label: 'Annual Appraisal', value: 'Annual Appraisal' },
+                  { label: 'Mid-Year Appraisal', value: 'Mid-Year Appraisal' },
+                  { label: 'Promotion', value: 'Promotion' },
+                  { label: 'Correction', value: 'Correction' }
+                ]}
+                disabled={readOnly}
+              />
+            )}
+          />
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Effective Date</label>
+          <CustomDatePicker name="revisionEffectiveDate" disabled={readOnly} />
+        </FormRow>
         
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Annual CTC</label>
+        <FormRow>
+          <label className={formStyles.label}>Annual CTC</label>
           <Input type="number" step="0.01" {...register('revisionAnnualCTC', { valueAsNumber: true })} disabled={readOnly} />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Increment %</label>
+        </FormRow>
+        <FormRow>
+          <label className={formStyles.label}>Increment %</label>
           <Input type="number" step="0.01" {...register('revisionIncrementPercentage', { valueAsNumber: true })} disabled={readOnly} />
-        </div>
+        </FormRow>
         
-        <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Salary Components Breakdown</label>
+        <FormRow className="md:col-span-2">
+          <label className={formStyles.label}>Salary Components Breakdown</label>
           <textarea
             {...register('revisionSalaryComponents')}
             disabled={readOnly}
             rows={3}
-            className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white resize-none"
+            className={formStyles.textarea(false, readOnly)}
             placeholder="e.g. Basic: 40%, HRA: 20%, etc."
           />
-        </div>
+        </FormRow>
 
-        <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Reason</label>
+        <FormRow className="md:col-span-2">
+          <label className={formStyles.label}>Reason</label>
           <Input type="text" {...register('revisionReason')} disabled={readOnly} />
-        </div>
-      </div>
+        </FormRow>
+      </FormGrid>
+      </FormSection>
     </div>
   );
 }
