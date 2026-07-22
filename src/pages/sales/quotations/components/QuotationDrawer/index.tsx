@@ -203,6 +203,23 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         }
       });
 
+      let signatureBase64 = '';
+      const stampId = company?.stampFileId;
+      if (stampId) {
+        try {
+          const blob = await api.get(`/admin/files/${stampId}`, { responseType: 'blob' });
+          if (blob) {
+            signatureBase64 = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.error('Failed to pre-fetch signature', e);
+        }
+      }
+
       const previewPayload = {
         primary_color_hex: '#792359',
         company_name: company?.name || company?.companyName || 'Company Name',
@@ -245,6 +262,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         grand_total: data.grandTotal.toFixed(2),
         amount_in_words: numberToWords(data.grandTotal),
         terms_and_conditions: data.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
+        company_signature_url: signatureBase64,
         bank_name: company?.bankAccounts?.[0]?.bankName || '',
         bank_account_no: company?.bankAccounts?.[0]?.accountNumber || '',
         bank_ifsc: company?.bankAccounts?.[0]?.ifscCode || '',
