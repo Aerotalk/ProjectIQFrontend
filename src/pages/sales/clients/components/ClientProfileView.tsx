@@ -109,6 +109,44 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
               </div>
             </div>
 
+            {/* Additional Contacts */}
+            {client.additionalContacts && client.additionalContacts.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-[13px] font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide border-b border-gray-100 dark:border-white/5 pb-2">
+                  ADDITIONAL CONTACTS
+                </h3>
+                <div className="space-y-4">
+                  {client.additionalContacts.map((contact, index) => (
+                    <div key={index} className="bg-gray-50 dark:bg-white/5 p-4 rounded-md text-sm">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-bold text-gray-900 dark:text-white block">{contact.name}</span>
+                            {contact.designation && <span className="text-gray-500 dark:text-gray-400 text-xs">{contact.designation}</span>}
+                          </div>
+                          {contact.role && (
+                            <span className="px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-300 text-[10px] font-medium uppercase tracking-wider">
+                              {contact.role}
+                            </span>
+                          )}
+                        </div>
+                        <div className="space-y-1.5 pt-2 border-t border-gray-200 dark:border-white/10">
+                          <div className="grid grid-cols-3 gap-2">
+                            <span className="text-gray-500 dark:text-gray-400">Email</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 col-span-2">{contact.email || '—'}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <span className="text-gray-500 dark:text-gray-400">Phone</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 col-span-2">{contact.phone || '—'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* RIGHT COLUMN */}
