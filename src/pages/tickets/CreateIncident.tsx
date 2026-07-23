@@ -76,11 +76,21 @@ export default function CreateIncident() {
       setIsSubmitting(true);
       if (!companyId) throw new Error('No company ID');
       
-      const newTicket = await TicketService.create(companyId, data);
+      const payload = { ...data };
+      if (payload.dueDate) {
+        try {
+          payload.dueDate = new Date(payload.dueDate).toISOString();
+        } catch(e) {
+          console.warn('Failed to parse due date');
+        }
+      }
+      
+      const newTicket = await TicketService.create(companyId, payload);
       toast.success('Incident created successfully');
       navigate(`/companydashboard/tickets/${newTicket.id}`);
-    } catch (err) {
-      toast.error('Failed to create incident');
+    } catch (err: any) {
+      console.error('Incident creation failed:', err);
+      toast.error(err?.message || 'Failed to create incident');
     } finally {
       setIsSubmitting(false);
     }
