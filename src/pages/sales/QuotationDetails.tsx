@@ -16,6 +16,7 @@ import type { Quotation, QuotationStatus } from '../../types/quotation.types';
 import type { Client } from '../../types/client.types';
 import { formatQuotationId, numberToWords } from '../../lib/utils';
 import QuotationPreviewPanel from './quotations/components/QuotationPreviewPanel';
+import PoUploadModal, { type PoEntry } from './quotations/components/PoUploadModal';
 import { Stepper } from '@/components/ui/Stepper';
 import { calculateQuotationTotals } from '@/utils/quotationCalculations';
 import FunkyLoader from '@/components/ui/FunkyLoader';
@@ -44,7 +45,59 @@ export default function QuotationDetails() {
   const [previewTemplate, setPreviewTemplate] = useState('');
   const [previewData, setPreviewData] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isPoModalOpen, setIsPoModalOpen] = useState(false);
+  
+  const handlePoUpload = async (entries: PoEntry[]) => {
+    try {
+      setIsApiLoading(true);
+      
+      const uploadedEntries = await Promise.all(entries.map(async (entry) => {
+        let fileId = null;
+        if (entry.file) {
+          try {
+            const formData = new FormData();
+            formData.append('file', entry.file);
+            const res = await api.post('/admin/files/upload', formData);
+            fileId = res.id || null;
+          } catch (e) {
+            console.error('Failed to upload file for PO:', entry.workOrderNumber, e);
+          }
+        } else if (entry.existingPoId) {
+          // If it's linked to an existing PO, we can just reference that PO's ID as the file source or log it
+          fileId = `Linked to PO (${entry.existingPoId})`;
+        }
+        return { ...entry, fileId };
+      }));
 
+      const poDetailsNote = {
+        id: Math.random().toString(36).substr(2, 9),
+        text: `Uploaded ${entries.length} PO/WO Document(s):\n${uploadedEntries.map(e => `- ${e.workOrderNumber} | Date: ${e.woDate} | Value: ₹${e.woValue.toLocaleString('en-IN')} | File ID: ${e.fileId || 'Failed'}`).join('\n')}`,
+        timestamp: new Date().toISOString(),
+        user: user?.username || user?.email || 'User'
+      };
+
+      const updatedNotesList = [...parsedCommunications, poDetailsNote];
+      const newNotesStr = JSON.stringify(updatedNotesList);
+
+      // Optimistic Update
+      setQuotation({ ...quotation, notes: newNotesStr });
+
+      if (id) {
+        const fullQuotation = await QuotationService.getQuotation(id);
+        await QuotationService.updateQuotation(id, { ...fullQuotation, notes: newNotesStr });
+      }
+      
+      // Update status to Confirmed Lead (Stage 6)
+      await handleStatusUpdate('Confirmed Lead', 'Lead confirmed, PO/WO uploaded successfully', 6);
+      
+      setIsPoModalOpen(false);
+    } catch (err: any) {
+      toast.error('Failed to process PO upload');
+      throw err;
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
 
   const [products, setProducts] = useState<any[]>([]);
   const [company, setCompany] = useState<any>(null);
@@ -144,7 +197,30 @@ export default function QuotationDetails() {
     }
   })();
 
-  const handleAddCommunication = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+  const uploadedDocuments = parsedCommunications.flatMap((note: any) => {
+    if (note.text?.includes('PO/WO Document(s):')) {
+      const lines = note.text.split('\n');
+      return lines.slice(1).map((line: string) => {
+        const parts = line.substring(2).split(' | ');
+        if (parts.length >= 3) {
+          const poNumber = parts[0];
+          const date = parts[1].replace('Date: ', '');
+          let fileId = '';
+          const fileIdPart = parts.find((p: string) => p.startsWith('File ID: '));
+          if (fileIdPart) {
+             fileId = fileIdPart.replace('File ID: ', '');
+          }
+          return { poNumber, date, fileId };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+    return [];
+  });
+
+  const handleAddCommunication = async () => {
     if (!tempNotes.trim() || !id) return;
 
     const newNote = {
@@ -651,10 +727,10 @@ export default function QuotationDetails() {
             </div>
             <button
               disabled={isApiLoading}
-              onClick={() => handleStatusUpdate('Confirmed Lead', 'Lead confirmed, finance team will proceed with project creation', 6)}
+              onClick={() => setIsPoModalOpen(true)}
               className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
             >
-              Upload WO / PO
+              Upload Purchase Order
             </button>
           </div>
         );
@@ -1205,10 +1281,51 @@ export default function QuotationDetails() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">Related Documents</h3>
                 </div>
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <FileText size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
-                  <p className="text-xs text-gray-500 dark:text-gray-400">No documents attached yet.</p>
-                </div>
+                {uploadedDocuments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <FileText size={28} className="text-gray-300 dark:text-gray-600 mb-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">No documents attached yet.</p>
+                  </div>
+                ) : (
+                  <ul className="space-y-3">
+                    {uploadedDocuments.map((doc: any, idx) => (
+                      <li key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-md">
+                        <div className="flex items-center gap-3">
+                          <FileText size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">PO: {doc.poNumber}</p>
+                            <p className="text-xs text-gray-500">Date: {doc.date}</p>
+                          </div>
+                        </div>
+                        {doc.fileId && doc.fileId !== 'Failed' && !doc.fileId.startsWith('Linked to PO') && (
+                          <a 
+                            href={`${API_BASE_URL}/admin/files/${doc.fileId}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline"
+                          >
+                            View Document
+                          </a>
+                        )}
+                        {doc.fileId && doc.fileId.startsWith('Linked to PO') && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-1 rounded">
+                              Auto-Linked
+                            </span>
+                            <a 
+                              href={`/companydashboard/finance/pos/${doc.fileId.match(/\((.*?)\)/)?.[1]}`} 
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline cursor-pointer"
+                            >
+                              View PO
+                            </a>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
 
@@ -1267,6 +1384,13 @@ export default function QuotationDetails() {
         templateContent={previewTemplate}
         data={previewData}
         filename={`Quotation_${quotation.qtnNo}.pdf`}
+      />
+
+      <PoUploadModal
+        isOpen={isPoModalOpen}
+        companyId={companyId}
+        onClose={() => setIsPoModalOpen(false)}
+        onSubmit={handlePoUpload}
       />
     </div>
   );
