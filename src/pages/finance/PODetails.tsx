@@ -132,9 +132,20 @@ export default function PODetails() {
     if (!isNew && id && companyId) {
       setIsApiLoading(true);
       POService.getAll(companyId)
-        .then((data: any) => {
+        .then(async (data: any) => {
           const safeData = Array.isArray(data) ? data : (data?.data || data?.content || []);
-          const foundPo = safeData.find((p: any) => p.id === id || p.poNumber === id);
+          let foundPo = safeData.find((p: any) => p.id === id || p.poNumber === id);
+          
+          if (foundPo && foundPo.id) {
+            try {
+              // Fetch the full PO to get lineItems which are omitted in list view
+              const fullPo = await POService.getById(foundPo.id);
+              if (fullPo) foundPo = fullPo;
+            } catch (e) {
+              console.error('Failed to fetch full PO details:', e);
+            }
+          }
+
           if (foundPo) {
             setCurrentStage(getStageFromStatus(foundPo.status));
             setPo({

@@ -93,9 +93,20 @@ export default function ChallanDetails() {
     if (!isNew && id && companyId) {
       setIsApiLoading(true);
       ChallanService.getAll(companyId)
-        .then((data: any) => {
+        .then(async (data: any) => {
           const safeData = Array.isArray(data) ? data : (data?.data || data?.content || []);
-          const found = safeData.find((p: any) => p.id === id || p.challanNumber === id);
+          let found = safeData.find((p: any) => p.id === id || p.challanNumber === id);
+          
+          if (found && found.id) {
+            try {
+              // Fetch the full Challan to get items which are omitted in list view
+              const fullChallan = await ChallanService.getById(found.id);
+              if (fullChallan) found = fullChallan;
+            } catch (e) {
+              console.error('Failed to fetch full Challan details:', e);
+            }
+          }
+
           if (found) {
             setChallan({
               ...found,
