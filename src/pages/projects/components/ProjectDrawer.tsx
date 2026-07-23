@@ -134,6 +134,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
     startDate: '',
     expectedEndDate: '',
     description: '',
+    budget: undefined,
     status: 'Pending Approval',
     assignedEntities: [],
     linkedIncidents: [],
@@ -190,6 +191,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           startDate: initialData.startDate || '',
           expectedEndDate: initialData.expectedEndDate || '',
           description: initialData.description || '',
+          budget: initialData.budget || undefined,
           status: initialData.status || 'Pending Approval',
           assignedEntities: initialData.assignedEntities || [],
           linkedIncidents: initialData.linkedIncidents || [],
@@ -208,6 +210,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
           startDate: '',
           expectedEndDate: '',
           description: '',
+          budget: undefined,
           status: 'Pending Approval',
           assignedEntities: [],
           linkedIncidents: [],
@@ -333,13 +336,27 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
                 />
               </div>
 
-              {/* Row: Due Date | Initial Status */}
+              {/* Row: Due Date | Budget */}
               <div>
                 <label className={formStyles.label}>DUE DATE *</label>
                 <CustomDatePicker
                   value={formData.expectedEndDate}
                   onChange={(val) => setFormData({ ...formData, expectedEndDate: val })}
                   disabled={isReadOnly}
+                />
+              </div>
+
+              <div>
+                <label className={formStyles.label}>BUDGET (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  disabled={isReadOnly}
+                  value={formData.budget === undefined ? '' : formData.budget}
+                  onChange={(e) => setFormData({ ...formData, budget: e.target.value === '' ? undefined : Number(e.target.value) })}
+                  className={formStyles.field(false, isReadOnly)}
+                  placeholder="0.00"
                 />
               </div>
 

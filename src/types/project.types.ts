@@ -9,6 +9,7 @@ export interface Project {
   startDate?: string;
   expectedEndDate?: string;
   expectedRevenue?: number;
+  budget?: number;
   description?: string;
   status: string;
 
@@ -31,6 +32,8 @@ export interface ProjectFormValues {
   projectManager?: string;
   startDate?: string;
   expectedEndDate?: string;
+  expectedRevenue?: number;
+  budget?: number;
   description?: string;
   status: string;
   
