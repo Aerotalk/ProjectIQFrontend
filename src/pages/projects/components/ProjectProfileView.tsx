@@ -197,7 +197,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
   // Financial BI Metrics derived strictly from backend data
   const totalInflows = projectQuotations.reduce((sum, q) => sum + (Number(q.grandTotal) || 0), 0);
-  const totalPoOutflows = projectPOs.reduce((sum, p) => sum + (Number(p.totalAmount) || 0), 0);
+  const totalPoOutflows = projectPOs.reduce((sum, p) => sum + (Number(p.grandTotal) || 0), 0);
   const totalExpenseOutflows = projectExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const totalOutflows = totalPoOutflows + totalExpenseOutflows;
   const netMargin = totalInflows - totalOutflows;
@@ -1134,7 +1134,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                         <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{po.poNumber || po.id}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Purchase Order</td>
                         <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">
-                          - ₹{(Number(po.totalAmount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          - ₹{(Number(po.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </td>
                         <td className="px-4 py-3"><span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">{po.status || 'Issued'}</span></td>
                       </tr>
