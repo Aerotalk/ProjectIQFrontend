@@ -309,7 +309,7 @@ export default function PODetails() {
         vendor_address_line1: vendor?.billingAddressLine1 || '',
         vendor_address_line2: vendor?.billingCity || '',
         vendor_phone: vendor?.phone || vendor?.billingPhone || '',
-        vendor_gstin: vendor?.gstin || vendor?.gstNumber || vendor?.gst || po.vendorGst || '',
+        vendor_gstin: vendor?.gstin || (vendor as any)?.gstNumber || (vendor as any)?.gst || (po as any).vendorGst || '',
         vendor_state: vendor?.billingState || '',
         
         transport_mode: 'By Road', 

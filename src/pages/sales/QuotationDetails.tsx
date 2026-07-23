@@ -63,7 +63,7 @@ export default function QuotationDetails() {
         category: p.type || 'Product',
         rate: p.standardRate || 0,
         gst: Number(p.gstRate?.replace('%', '')) || 18,
-        hsn: p.hsnSac || p.itemHsn || p.hsn || ''
+        hsn: p.hsnSac || (p as any).itemHsn || (p as any).hsn || ''
       })));
     });
   }, [companyId]);
@@ -438,7 +438,7 @@ export default function QuotationDetails() {
         client_phone: client?.phone || '',
         client_state: client?.billingState || '',
         client_email: client?.email || '',
-        client_gstin: client?.gstin || client?.gstNumber || client?.gst || quotation.clientGst || '',
+        client_gstin: client?.gstin || (client as any)?.gstNumber || (client as any)?.gst || (quotation as any).clientGst || '',
         estimate_number: quotation.qtnNo || 'Draft',
         estimate_date: quotation.createdOn || new Date().toLocaleDateString('en-GB'),
         place_of_supply: client?.billingState || '',

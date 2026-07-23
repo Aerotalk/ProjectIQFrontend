@@ -174,7 +174,7 @@ export default function ChallanDetails() {
         client_name: vendor?.displayName || vendor?.companyName || currentChallan.vendorName || '',
         client_address_line1: vendor?.billingAddressLine1 || vendor?.shippingAddressLine1 || '',
         client_address_line2: vendor?.billingCity || vendor?.shippingCity || '',
-        client_gstin: vendor?.gstin || vendor?.gstNumber || vendor?.gst || currentChallan.vendorGst || '',
+        client_gstin: vendor?.gstin || (vendor as any)?.gstNumber || (vendor as any)?.gst || (currentChallan as any).vendorGst || '',
         client_state: vendor?.billingState || vendor?.shippingState || '',
         
         has_shipping: !!vendor?.shippingAddressLine1,
