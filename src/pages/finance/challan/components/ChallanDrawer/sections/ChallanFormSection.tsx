@@ -65,17 +65,14 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     });
   }, [companyId]);
 
-  // Filter vendors based on selected project
-  // Note: Since vendors aren't formally linked to projects in the mock MOCK_PROJECTS array, 
-  // we simulate this by either returning all or filtering if we had a mapping.
-  // For the sake of this mock, if project is selected, we'll just show all active vendors
-  // to prevent an empty dropdown, but in a real app, this would filter by project assignments.
-  // The user requested: "Load only vendors assigned to that project."
-  // Since we don't have project assignments in the mock, we will just use the full list, 
-  // but we enforce that project must be selected first.
-  const filteredVendors = selectedProjectId 
-    ? vendors 
-    : [];
+  const filteredVendors = useMemo(() => {
+    if (!selectedProjectId) return [];
+    
+    const proj = projects.find(p => p.id === selectedProjectId);
+    return proj?.assignedVendors?.length 
+      ? vendors.filter(v => proj.assignedVendors!.includes(v.id))
+      : [];
+  }, [selectedProjectId, vendors, projects]);
 
   // Filter POs based on selected vendor
   const filteredPOs = purchaseOrders.filter(po => {

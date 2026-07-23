@@ -37,11 +37,17 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
 
   const vendorOptions = useMemo(() => {
     if (!selectedProjectId) return [];
-    return vendors.map(v => ({ 
+    
+    const proj = projects.find(p => p.id === selectedProjectId);
+    const filteredVendors = proj?.assignedVendors?.length 
+      ? vendors.filter(v => proj.assignedVendors!.includes(v.id))
+      : [];
+
+    return filteredVendors.map(v => ({ 
       label: v.displayName || v.companyName || v.firstName || v.id, 
       value: v.id 
     }));
-  }, [selectedProjectId, vendors]);
+  }, [selectedProjectId, vendors, projects]);
 
 
   // Sync project name
