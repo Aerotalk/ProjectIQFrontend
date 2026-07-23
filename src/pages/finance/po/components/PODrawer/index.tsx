@@ -49,6 +49,7 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
             gstRate: li.gstRate || 0,
             gstAmount: li.gstAmount || 0,
             totalAmount: li.totalAmount || 0,
+            hsnSac: li.hsnSac || '',
           })),
           subTotal: initialData.subTotal || 0,
           totalDiscount: initialData.totalDiscount || 0,

@@ -67,6 +67,7 @@ export default function PODetails() {
     amount: number;
     gstRate?: number;
     gstAmount?: number;
+    hsnSac?: string;
   }
 
   const [lineItems, setLineItems] = useState<LineItem[]>(isNew ? [{
@@ -159,7 +160,8 @@ export default function PODetails() {
                 unitPrice: Number(item.rate ?? item.unitPrice ?? 0),
                 amount: Number(item.totalAmount || 0),
                 gstRate: Number(item.gstRate || 0),
-                gstAmount: Number(item.gstAmount || 0)
+                gstAmount: Number(item.gstAmount || 0),
+                hsnSac: item.hsnSac || item.itemHsn || ''
               }));
               setLineItems(mappedItems);
               
@@ -399,7 +401,8 @@ export default function PODetails() {
                         gstRate: item.gstRate || 0,
                         gstAmount: item.gstAmount || 0,
                         taxableAmount: item.unitPrice * item.qty,
-                        totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0)
+                        totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0),
+                        hsnSac: item.hsnSac
                       })),
                       grandTotal: calculatedGrandTotal
                     };
@@ -597,7 +600,8 @@ export default function PODetails() {
                           gstRate: item.gstRate || 0,
                           gstAmount: item.gstAmount || 0,
                           taxableAmount: item.unitPrice * item.qty,
-                          totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0)
+                          totalAmount: (item.unitPrice * item.qty) + (item.gstAmount || 0),
+                          hsnSac: item.hsnSac
                         })),
                         grandTotal: calculatedGrandTotal
                       };
@@ -729,7 +733,7 @@ export default function PODetails() {
                 <div className="space-y-4">
                   {lineItems.map((item, idx) => (
                     <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-gray-50 dark:bg-white/5 p-4 rounded-sm border border-gray-200 dark:border-white/10">
-                      <div className="col-span-5">
+                      <div className="col-span-4">
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Item Description</p>
                         {isEditing ? (
                           <input type="text" value={item.description} onChange={e => {
@@ -742,6 +746,18 @@ export default function PODetails() {
                         )}
                       </div>
                       <div className="col-span-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">HSN/SAC</p>
+                        {isEditing ? (
+                          <input type="text" value={item.hsnSac || ''} onChange={e => {
+                            const newItems = [...lineItems];
+                            newItems[idx].hsnSac = e.target.value;
+                            setLineItems(newItems);
+                          }} className="w-full px-2 py-1 text-sm bg-white border rounded-sm dark:bg-[#0f1115] dark:border-white/10" />
+                        ) : (
+                          <p className="text-sm text-gray-900 dark:text-white">{item.hsnSac || '-'}</p>
+                        )}
+                      </div>
+                      <div className="col-span-1">
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Qty</p>
                         {isEditing ? (
                           <input type="number" value={item.qty} onChange={e => {
@@ -772,7 +788,7 @@ export default function PODetails() {
                     </div>
                   ))}
                   {isEditing && (
-                    <button onClick={() => setLineItems([...lineItems, { id: Math.random().toString(), description: '', qty: 1, unit: 'PCS', unitPrice: 0, amount: 0 }])} className="text-[#792359] text-sm font-medium hover:underline">+ Add Item</button>
+                    <button onClick={() => setLineItems([...lineItems, { id: Math.random().toString(), description: '', hsnSac: '', qty: 1, unit: 'PCS', unitPrice: 0, amount: 0 }])} className="text-[#792359] text-sm font-medium hover:underline">+ Add Item</button>
                   )}
                 </div>
               )}
