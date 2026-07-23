@@ -61,14 +61,14 @@ export default function ChallanPreviewPanel({ isOpen, onClose, templateContent, 
     await new Promise(resolve => setTimeout(resolve, 50));
     
     // TEMPORARY WORKAROUND: Remove main document stylesheets to prevent html2canvas from crashing on oklch()
-    const parentStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
-    const placeholders: { el: Element, parent: Node, nextSibling: Node | null }[] = [];
+    const stylesheets = Array.from(document.styleSheets);
+    const disabledStates = stylesheets.map(sheet => sheet.disabled);
     
-    parentStyles.forEach(style => {
-      const isStyleSheet = style.tagName.toLowerCase() === 'style' || (style as HTMLLinkElement).href?.includes('.css');
-      if (isStyleSheet) {
-        placeholders.push({ el: style, parent: style.parentNode!, nextSibling: style.nextSibling });
-        style.remove();
+    stylesheets.forEach(sheet => {
+      try {
+        sheet.disabled = true;
+      } catch (e) {
+        // Ignore CORS errors
       }
     });
 
@@ -90,17 +90,11 @@ export default function ChallanPreviewPanel({ isOpen, onClose, templateContent, 
       console.error('Error generating PDF:', error);
     } finally {
       // Restore styles immediately
-      placeholders.forEach(({ el, parent, nextSibling }) => {
-        if (parent) {
-          try {
-            if (nextSibling && nextSibling.parentNode === parent) {
-              parent.insertBefore(el, nextSibling);
-            } else {
-              parent.appendChild(el);
-            }
-          } catch (e) {
-            console.error('Failed to restore style:', e);
-          }
+      stylesheets.forEach((sheet, i) => {
+        try {
+          sheet.disabled = disabledStates[i];
+        } catch (e) {
+          console.error('Failed to restore style:', e);
         }
       });
       
