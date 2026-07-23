@@ -3,7 +3,8 @@ import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useEffect, useRef, useMemo } from 'react';
 import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Paperclip, X as XIcon, Copy } from 'lucide-react';
+import { Paperclip, X as XIcon, Copy, Loader2 } from 'lucide-react';
+import { useState } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { useVendors } from '@/hooks/useVendors';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +29,8 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
   const { selectedCompanyId } = useAuth();
   const { projects } = useProjects();
   const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId });
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedProjectId = useWatch({ control, name: 'projectId' });
@@ -48,6 +51,20 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
       value: v.id 
     }));
   }, [selectedProjectId, vendors, projects]);
+
+  useEffect(() => {
+    import('@/lib/api').then(({ api }) => {
+      api.get('/admin/templates?type=Purchase Order').then((res: any) => {
+        const templatesData = Array.isArray(res) ? res : (res.data || []);
+        setTemplates(templatesData);
+        setIsLoadingTemplates(false);
+        if (templatesData.length > 0 && !getValues('templateName')) {
+          const firstTemplate = templatesData[0];
+          setValue('templateName', typeof firstTemplate === 'string' ? firstTemplate : firstTemplate.filename);
+        }
+      }).catch(() => setIsLoadingTemplates(false));
+    });
+  }, [setValue, getValues]);
 
 
   // Sync project name
@@ -199,6 +216,34 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
           <CustomDatePicker name="poDate" disabled={readOnly} />
           {errors.poDate && (
             <p className="text-red-500 text-xs mt-1">{errors.poDate.message as string}</p>
+          )}
+        </div>
+
+        {/* -- Document Template -- */}
+        <div>
+          <label className={formStyles.label}>
+            Document Template <span className="text-red-500 normal-case font-normal">*</span>
+          </label>
+          <div className="relative">
+            <div className={readOnly || isLoadingTemplates ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="templateName"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={templates.map(t => typeof t === 'string' 
+                      ? { label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t } 
+                      : { label: t.name, value: t.filename })}
+                  />
+                )}
+              />
+            </div>
+            {isLoadingTemplates && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+          </div>
+          {errors.templateName && (
+            <p className="text-red-500 text-xs mt-1">{errors.templateName.message as string}</p>
           )}
         </div>
 

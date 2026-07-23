@@ -36,6 +36,7 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
           description: initialData.description || '',
           expectedDelivery: initialData.expectedDelivery || '',
           attachmentName: initialData.attachmentName || '',
+          templateName: initialData.templateName || '',
           lineItems: (initialData.lineItems || []).map(li => ({
             id: li.id,
             productId: li.productId,
@@ -77,6 +78,7 @@ export default function PODrawer({ isOpen, onClose, onSave, mode, initialData, p
           description: '',
           expectedDelivery: '',
           attachmentName: '',
+          templateName: '',
           internalNotes: '',
         });
       }

@@ -39,6 +39,8 @@ export default function ChallanDetails() {
   const [previewData, setPreviewData] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [company, setCompany] = useState<any>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -57,6 +59,7 @@ export default function ChallanDetails() {
     challanDate: new Date().toISOString().split('T')[0],
     description: '',
     remarks: '',
+    templateName: '',
     status: 'Draft'
   });
 
@@ -69,6 +72,13 @@ export default function ChallanDetails() {
         setProjects(pData);
       }).catch(console.error);
       ProductService.getProducts(companyId).then(setProducts).catch(console.error);
+      
+      setIsLoadingTemplates(true);
+      api.get('/admin/templates?type=Delivery Challan').then((res: any) => {
+        const templatesData = Array.isArray(res) ? res : (res.data || []);
+        setTemplates(templatesData);
+        setIsLoadingTemplates(false);
+      }).catch(() => setIsLoadingTemplates(false));
     }
   }, [companyId]);
 
@@ -133,7 +143,10 @@ export default function ChallanDetails() {
       
       const currentChallan = challan;
       
-      const templateRes = await api.get(`/admin/templates/delivery_challan.html`);
+      const endpoint = challan.templateName 
+        ? `/admin/templates/${encodeURIComponent(challan.templateName)}`
+        : `/admin/templates/delivery_challan.html`;
+      const templateRes = await api.get(endpoint);
       
       let logoBase64 = '';
       const logoId = company?.invoiceLogoId || company?.logoFileId;
@@ -571,6 +584,25 @@ export default function ChallanDetails() {
                     <input type="text" value={challan.contactMobile || ''} onChange={e => setChallan({...challan, contactMobile: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.contactMobile}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Document Template</p>
+                  {isEditing ? (
+                    <div className="relative">
+                      <CustomSelect
+                        value={challan.templateName || ''}
+                        onChange={(val) => setChallan({ ...challan, templateName: val })}
+                        options={templates.map(t => typeof t === 'string' 
+                          ? { label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t } 
+                          : { label: t.name, value: t.filename })}
+                      />
+                      {isLoadingTemplates && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+                    </div>
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {challan.templateName ? challan.templateName.replace('.html', '').replace(/[-_]/g, ' ') : 'Default'}
+                    </p>
                   )}
                 </div>
               </div>

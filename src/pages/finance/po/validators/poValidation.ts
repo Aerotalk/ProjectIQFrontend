@@ -51,6 +51,7 @@ export const poSchema = z.object({
   // TechSpec §4.2: Optional fields
   expectedDelivery: z.string().nullable().optional(),
   attachmentName: z.string().nullable().optional(),
+  templateName: z.string().min(1, 'Document Template is required'),
 });
 
 export type POFormValues = z.infer<typeof poSchema>;

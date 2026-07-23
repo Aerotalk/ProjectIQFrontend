@@ -41,6 +41,7 @@ export interface PurchaseOrder {
   internalNotes?: string;
   expectedDelivery?: string; // ISO date – optional, TechSpec §4.2
   attachmentName?: string;   // display name of the uploaded file
+  templateName?: string;     // selected PDF template
 
   createdAt?: string;
   updatedAt?: string;

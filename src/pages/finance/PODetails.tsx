@@ -48,6 +48,8 @@ export default function PODetails() {
   const [previewData, setPreviewData] = useState<any>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [company, setCompany] = useState<any>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 
   const stages = [
     { id: 1, name: 'Draft' },
@@ -86,6 +88,7 @@ export default function PODetails() {
     discount: 0 as number | string,
     grandTotal: 0,
     status: 'Draft' as POStatus,
+    templateName: '',
     internalNotes: ''
   });
 
@@ -97,6 +100,13 @@ export default function PODetails() {
         const pData = Array.isArray(data) ? data : (data?.data || data?.content || []);
         setProjects(pData);
       }).catch(console.error);
+      
+      setIsLoadingTemplates(true);
+      api.get('/admin/templates?type=Purchase Order').then((res: any) => {
+        const templatesData = Array.isArray(res) ? res : (res.data || []);
+        setTemplates(templatesData);
+        setIsLoadingTemplates(false);
+      }).catch(() => setIsLoadingTemplates(false));
     }
   }, [companyId]);
 
@@ -160,6 +170,7 @@ export default function PODetails() {
               discount: foundPo.totalDiscount || 0,
               grandTotal: foundPo.grandTotal || 0,
               status: foundPo.status || 'Draft',
+              templateName: foundPo.templateName || '',
               internalNotes: foundPo.internalNotes || ''
             });
             const sourceItems = foundPo.lineItems || foundPo.items;
@@ -205,7 +216,10 @@ export default function PODetails() {
     try {
       setIsLoadingPreview(true);
       
-      const templateRes = await api.get(`/admin/templates/purchase_order.html`);
+      const endpoint = po.templateName 
+        ? `/admin/templates/${encodeURIComponent(po.templateName)}`
+        : `/admin/templates/purchase_order.html`;
+      const templateRes = await api.get(endpoint);
       
       let logoBase64 = '';
       const logoId = company?.invoiceLogoId || company?.logoFileId;
@@ -741,6 +755,25 @@ export default function PODetails() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Document Template</p>
+                  {isEditing ? (
+                    <div className="relative">
+                      <CustomSelect
+                        value={po.templateName || ''}
+                        onChange={(val) => setPo({ ...po, templateName: val })}
+                        options={templates.map(t => typeof t === 'string' 
+                          ? { label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t } 
+                          : { label: t.name, value: t.filename })}
+                      />
+                      {isLoadingTemplates && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+                    </div>
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {po.templateName ? po.templateName.replace('.html', '').replace(/[-_]/g, ' ') : 'Default'}
+                    </p>
+                  )}
+                </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Description</p>
                   {isEditing ? (

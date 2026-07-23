@@ -34,7 +34,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
     });
     
     import('@/lib/api').then(({ api }) => {
-      api.get('/admin/templates').then((res: any) => {
+      api.get('/admin/templates?type=Quotation').then((res: any) => {
         const templatesData = Array.isArray(res) ? res : (res.data || []);
         setTemplates(templatesData);
         setIsLoadingTemplates(false);

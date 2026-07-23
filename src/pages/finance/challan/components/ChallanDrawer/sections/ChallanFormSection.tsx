@@ -39,6 +39,8 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { projects } = useProjects();
@@ -62,6 +64,14 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
       setPurchaseOrders(poData);
       setProducts(productData);
       setIsLoadingData(false);
+    });
+
+    import('@/lib/api').then(({ api }) => {
+      api.get('/admin/templates?type=Delivery Challan').then((res: any) => {
+        const templatesData = Array.isArray(res) ? res : (res.data || []);
+        setTemplates(templatesData);
+        setIsLoadingTemplates(false);
+      }).catch(() => setIsLoadingTemplates(false));
     });
   }, [companyId]);
 
@@ -179,6 +189,34 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             <CustomDatePicker name="challanDate" disabled={readOnly} />
             {errors.challanDate && (
               <p className="text-red-500 text-xs mt-1">{errors.challanDate.message as string}</p>
+            )}
+          </div>
+
+          {/* Document Template */}
+          <div>
+            <label className={formStyles.label}>
+              Document Template <span className="text-red-500 normal-case font-normal">*</span>
+            </label>
+            <div className="relative">
+              <div className={readOnly || isLoadingTemplates ? 'opacity-80 pointer-events-none' : ''}>
+                <Controller
+                  name="templateName"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={templates.map(t => typeof t === 'string' 
+                        ? { label: t.replace('.html', '').replace(/[-_]/g, ' '), value: t } 
+                        : { label: t.name, value: t.filename })}
+                    />
+                  )}
+                />
+              </div>
+              {isLoadingTemplates && <Loader2 className="absolute right-8 top-2.5 w-4 h-4 animate-spin text-gray-400" />}
+            </div>
+            {errors.templateName && (
+              <p className="text-red-500 text-xs mt-1">{errors.templateName.message as string}</p>
             )}
           </div>
           

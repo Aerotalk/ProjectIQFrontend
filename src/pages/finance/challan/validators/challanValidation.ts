@@ -22,6 +22,7 @@ export const challanSchema = z.object({
   linkedVendorPoNumber: z.string().nullable().optional(),
   attachmentName: z.string().nullable().optional(),
   ewayBillNo: z.string().nullable().optional(),
+  templateName: z.string().min(1, 'Document Template is required'),
   remarks: z.string().nullable().optional(),
   transportMode: z.string().nullable().optional(),
   billingAddress: z.string().nullable().optional(),
