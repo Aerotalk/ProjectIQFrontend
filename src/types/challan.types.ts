@@ -25,6 +25,7 @@ export interface DeliveryChallan {
   linkedVendorPoNumber?: string; // Hydrated for display
   attachmentName?: string;    // Optional uploaded file name
   ewayBillNo?: string;        // Optional E-way bill number
+  templateName?: string;      // Optional PDF template selection
   remarks?: string;           // Optional internal remarks
   status?: 'Draft' | 'Issued' | 'Dispatched' | 'Delivered';
 
