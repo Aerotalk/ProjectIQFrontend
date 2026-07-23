@@ -80,24 +80,27 @@ export default function SalesDashboard() {
     { label: 'Converted', value: pipelineStages[5].count.toString(), trend: 'N/A', icon: Trophy, color: 'text-amber-500' },
   ];
 
-  const recentQuotations = quotations.slice(0, 5).map(q => ({
+  const recentQuotations = quotations.slice(0, 5).map(q => {
+    const clientObj = clients.find(c => c.id === q.clientId);
+    return {
     id: q.id,
     no: formatQuotationId(q.quotationNo || q.id),
-    client: q.clientName,
-    project: q.subject,
-    amount: `₹ ${(q.grandTotal || 0).toLocaleString('en-IN')}`,
+    client: q.clientName || (clientObj ? (clientObj.companyName || clientObj.displayName) : 'Unknown Client'),
+    project: q.subject || '—',
+    amount: `₹ ${(q.grandTotal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
     status: q.status,
     statusColor: q.status === 'Approved' ? 'bg-green-100 text-green-600' : (q.status === 'Draft' ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-600'),
     validTill: new Date(q.validUntil).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     owner: 'System'
-  }));
+  };
+  });
 
   const topClients = clients.map((c) => {
-    const clientQuotations = quotations.filter(q => q.clientId === c.id && q.status === 'Accepted');
+    const clientQuotations = quotations.filter(q => q.clientId === c.id && ['Accepted', 'Confirmed Lead', 'Converted'].includes(q.status));
     const totalSales = clientQuotations.reduce((acc, q) => acc + (q.grandTotal || 0), 0);
     return {
       name: c.companyName || c.displayName || 'Unknown Client',
-      amount: totalSales > 0 ? `₹ ${totalSales.toLocaleString('en-IN')}` : '₹ 0'
+      amount: totalSales > 0 ? `₹ ${totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '₹ 0.00'
     };
   }).sort((a, b) => {
     const amountA = parseFloat(a.amount.replace(/[^0-9.-]+/g, ""));
