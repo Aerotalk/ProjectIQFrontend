@@ -85,12 +85,6 @@ export default function CreateIncident() {
         }
       }
       
-      // WORKAROUND: Attach the full project object to prevent Hibernate from merging a detached, mostly-null entity 
-      // which causes not-null constraint violations on project updates during ticket creation.
-      if (selectedProjectData) {
-        payload.project = selectedProjectData;
-      }
-      
       const newTicket = await TicketService.create(companyId, payload);
       toast.success('Incident created successfully');
       navigate(`/companydashboard/tickets/${newTicket.id}`);
