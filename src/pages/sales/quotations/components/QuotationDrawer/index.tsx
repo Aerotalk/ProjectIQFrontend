@@ -236,6 +236,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         client_phone: client?.phone || '',
         client_state: client?.billingState || '',
         client_email: client?.email || '',
+        client_gstin: client?.gstin || client?.gstNumber || client?.gst || data.clientGst || '',
         estimate_number: data.quotationNo || data.id,
         estimate_date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         place_of_supply: client?.billingState || '',
