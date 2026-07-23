@@ -148,7 +148,7 @@ export default function QuotationsList() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Proposal Value</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-0.5">
-                ₹{quotations.reduce((sum, q) => sum + (q.grandTotal || 0), 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                ₹{quotations.filter(q => q.status === 'Accepted' || q.status === 'Confirmed Lead' || q.status === 'Converted').reduce((sum, q) => sum + (q.grandTotal || 0), 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </p>
             </div>
           </div>
