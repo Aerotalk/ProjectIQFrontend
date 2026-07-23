@@ -41,6 +41,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
   const companyLogoUrl = user?.companyLogoId ? `${API_BASE_URL}/admin/files/${user.companyLogoId}` : null;
+  const avatarUrl = useAvatarUrl(user?.profilePhotoId);
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -425,10 +426,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm overflow-hidden">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
-                  ) : companyLogoUrl && role === 'company' ? (
-                    <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
                   ) : (
-                    orgName ? orgName.substring(0, 2).toUpperCase() : userInitials
+                    userInitials
                   )}
                 </div>
                 <ChevronDown size={14} className="text-gray-400" />
@@ -440,10 +439,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                     <div className="w-10 h-10 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
-                      ) : companyLogoUrl && role === 'company' ? (
-                        <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
                       ) : (
-                        orgName ? orgName.substring(0, 2).toUpperCase() : userInitials
+                        userInitials
                       )}
                     </div>
                     <div className="flex flex-col min-w-0">
