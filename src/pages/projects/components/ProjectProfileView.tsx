@@ -197,7 +197,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   const totalOutflows = totalPoOutflows + totalExpenseOutflows;
   const netMargin = totalInflows - totalOutflows;
   const marginPercentage = totalInflows > 0 ? ((netMargin / totalInflows) * 100).toFixed(1) : '0.0';
-  const estimationDisplayValue = currentProject.expectedRevenue || totalInflows;
+  const estimationDisplayValue = currentProject.budget || currentProject.expectedRevenue || totalInflows;
 
   // Add Entity Submit Handler -> updates backend
   const handleAddEntitySubmit = async (e: React.FormEvent) => {
