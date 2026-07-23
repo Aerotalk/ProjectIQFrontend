@@ -76,13 +76,19 @@ export default function CreateIncident() {
       setIsSubmitting(true);
       if (!companyId) throw new Error('No company ID');
       
-      const payload = { ...data };
+      const payload: any = { ...data };
       if (payload.dueDate) {
         try {
           payload.dueDate = new Date(payload.dueDate).toISOString();
         } catch(e) {
           console.warn('Failed to parse due date');
         }
+      }
+      
+      // WORKAROUND: Attach the full project object to prevent Hibernate from merging a detached, mostly-null entity 
+      // which causes not-null constraint violations on project updates during ticket creation.
+      if (selectedProjectData) {
+        payload.project = selectedProjectData;
       }
       
       const newTicket = await TicketService.create(companyId, payload);
