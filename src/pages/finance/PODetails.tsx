@@ -682,10 +682,13 @@ export default function PODetails() {
                       options={[
                         { label: 'Select Vendor', value: '' },
                         ...(po.projectId
-                          ? vendors.filter(v => {
+                          ? (() => {
                               const proj = projects.find(p => p.id === po.projectId);
-                              return proj?.assignedVendors?.includes(v.id);
-                            })
+                              const filteredVendors = proj?.assignedVendors?.length 
+                                ? vendors.filter(v => proj.assignedVendors!.includes(v.id))
+                                : [];
+                              return filteredVendors;
+                            })()
                           : []
                         ).map(v => ({ label: v.displayName || v.companyName || '', value: v.id }))
                       ]}
