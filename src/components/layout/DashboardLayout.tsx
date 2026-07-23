@@ -235,7 +235,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   }
 
-  const avatarUrl = useAvatarUrl(user?.profilePhotoId);
+
   const { breadcrumbs } = useBreadcrumbContext();
 
   return (
