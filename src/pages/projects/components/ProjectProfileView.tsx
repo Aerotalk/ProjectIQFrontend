@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useVendors } from '../../../hooks/useVendors';
+import { useClients } from '../../../hooks/useClients';
 import { api } from '../../../lib/api';
 import { POService } from '../../../services/po.service';
 import { QuotationService } from '../../../services/quotation.service';
@@ -52,6 +53,7 @@ interface ParsedDocument {
 export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
   const { selectedCompanyId } = useAuth();
   const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId || null });
+  const { clients } = useClients({ companyId: selectedCompanyId || null });
   
   const [currentProject, setCurrentProject] = useState<Project>(initialProject);
   const [users, setUsers] = useState<any[]>([]);
@@ -61,6 +63,9 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   const [pos, setPos] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const clientObj = clients.find(c => c.id === currentProject.client);
+  const clientName = clientObj ? (clientObj.displayName || clientObj.companyName || currentProject.client) : currentProject.client;
 
   // Add Entity Modal State
   const [isAddEntityModalOpen, setIsAddEntityModalOpen] = useState(false);
@@ -437,7 +442,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-md text-gray-700 dark:text-gray-300 font-medium">
               <Building2 size={14} className="text-[#792359] dark:text-[#c44997]" />
-              <span>Client: <strong className="text-gray-900 dark:text-white">{currentProject.client || 'N/A'}</strong></span>
+              <span>Client: <strong className="text-gray-900 dark:text-white">{clientName || 'N/A'}</strong></span>
             </div>
 
             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-md text-gray-700 dark:text-gray-300 font-medium">
