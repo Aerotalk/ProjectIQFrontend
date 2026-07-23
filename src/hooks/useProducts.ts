@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ProductService } from '../services/product.service';
 import type { Product } from '../types/product.types';
 import toast from 'react-hot-toast';
