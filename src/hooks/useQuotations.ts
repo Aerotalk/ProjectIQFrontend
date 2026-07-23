@@ -13,30 +13,45 @@ export const useQuotations = ({ companyId }: UseQuotationsOptions) => {
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchQuotations = useCallback(async () => {
-    if (!companyId) return;
+  useEffect(() => {
+    let ignore = false;
+    
+    if (!companyId) {
+      setQuotations([]);
+      return;
+    }
+
     setIsListLoading(true);
     setError(null);
-    try {
-      const data = await QuotationService.getQuotations(companyId);
-      const sortedData = data.sort((a, b) => {
-        const idA = a.quotationNo || a.id;
-        const idB = b.quotationNo || b.id;
-        return idB.localeCompare(idA); // Descending
+
+    QuotationService.getQuotations(companyId)
+      .then(data => {
+        if (!ignore) {
+          const sortedData = data.sort((a, b) => {
+            const idA = a.quotationNo || a.id;
+            const idB = b.quotationNo || b.id;
+            return idB.localeCompare(idA); // Descending
+          });
+          setQuotations(sortedData);
+        }
+      })
+      .catch((err: any) => {
+        if (!ignore) {
+          const message = err?.message || 'Failed to fetch quotations';
+          setError(message);
+          toast.error(message);
+        }
+      })
+      .finally(() => {
+        if (!ignore) setIsListLoading(false);
       });
-      setQuotations(sortedData);
-    } catch (err: any) {
-      const message = err?.message || 'Failed to fetch quotations';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsListLoading(false);
-    }
+
+    return () => {
+      ignore = true;
+    };
   }, [companyId]);
 
-  useEffect(() => {
-    fetchQuotations();
-  }, [fetchQuotations]);
+  const fetchQuotations = async () => {};
 
   const createQuotation = async (data: Omit<Quotation, 'id'>) => {
     if (!companyId) throw new Error('Company ID is missing');

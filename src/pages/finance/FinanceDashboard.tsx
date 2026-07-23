@@ -33,6 +33,8 @@ export default function FinanceDashboard() {
   const [trendQuarter, setTrendQuarter] = useState<string>('All');
 
   useEffect(() => {
+    let ignore = false;
+    
     const fetchDashboardData = async () => {
       try {
         if (!companyId) return;
@@ -42,6 +44,8 @@ export default function FinanceDashboard() {
           ChallanService.getAll(companyId),
           import('../../services/project.service').then(m => m.ProjectService.getAll(companyId))
         ]);
+
+        if (ignore) return;
 
         const pos = results[0].status === 'fulfilled' ? results[0].value : [];
         const expenses = results[1].status === 'fulfilled' ? results[1].value : [];
@@ -118,11 +122,15 @@ export default function FinanceDashboard() {
         });
         setProjects(formattedProjects);
       } catch (err) {
-        console.error("Error fetching dashboard data", err);
+        if (!ignore) console.error("Error fetching dashboard data", err);
       }
     };
     
     fetchDashboardData();
+    
+    return () => {
+      ignore = true;
+    };
   }, [companyId]);
 
   // Generate trend data based on year and quarter

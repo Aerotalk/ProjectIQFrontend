@@ -19,14 +19,16 @@ export default function POTotalsSection({ readOnly }: Props) {
   const [vendors, setVendors] = useState<any[]>([]);
 
   useEffect(() => {
+    let ignore = false;
     if (selectedCompanyId) {
       api.get(`/admin/companies/${selectedCompanyId}`)
-         .then(res => setCompany(res.data || res))
+         .then(res => { if (!ignore) setCompany(res.data || res) })
          .catch(console.error);
       VendorService.getVendors(selectedCompanyId)
-         .then(setVendors)
+         .then(v => { if (!ignore) setVendors(v) })
          .catch(console.error);
     }
+    return () => { ignore = true; };
   }, [selectedCompanyId]);
 
   const subTotal = useWatch({ control, name: 'subTotal', defaultValue: 0 });

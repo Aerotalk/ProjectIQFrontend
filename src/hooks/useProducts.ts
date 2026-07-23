@@ -13,30 +13,45 @@ export const useProducts = ({ companyId }: UseProductsOptions) => {
   const [isSaveLoading, setIsSaveLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = useCallback(async () => {
-    if (!companyId) return;
+  useEffect(() => {
+    let ignore = false;
+    
+    if (!companyId) {
+      setProducts([]);
+      return;
+    }
+
     setIsListLoading(true);
     setError(null);
-    try {
-      const data = await ProductService.getProducts(companyId);
-      const sortedData = data.sort((a, b) => {
-        const idA = a.itemCode || a.itemName || a.id;
-        const idB = b.itemCode || b.itemName || b.id;
-        return idB.localeCompare(idA);
+
+    ProductService.getProducts(companyId)
+      .then(data => {
+        if (!ignore) {
+          const sortedData = data.sort((a, b) => {
+            const idA = a.itemCode || a.itemName || a.id;
+            const idB = b.itemCode || b.itemName || b.id;
+            return idB.localeCompare(idA);
+          });
+          setProducts(sortedData);
+        }
+      })
+      .catch((err: any) => {
+        if (!ignore) {
+          const message = err?.message || 'Failed to fetch products';
+          setError(message);
+          toast.error(message);
+        }
+      })
+      .finally(() => {
+        if (!ignore) setIsListLoading(false);
       });
-      setProducts(sortedData);
-    } catch (err: any) {
-      const message = err?.message || 'Failed to fetch products';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsListLoading(false);
-    }
+
+    return () => {
+      ignore = true;
+    };
   }, [companyId]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const fetchProducts = async () => {};
 
   const createProduct = async (data: Omit<Product, 'id'>) => {
     if (!companyId) throw new Error('Company ID is missing');

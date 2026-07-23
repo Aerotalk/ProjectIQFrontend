@@ -3,24 +3,11 @@ import { ProjectService } from '../services/project.service';
 import type { Project } from '../types/project.types';
 import { useAuth } from '../contexts/AuthContext';
 
-const projectCache: Record<string, Project[]> = {};
-const projectPromises: Record<string, Promise<Project[]>> = {};
-
-export const invalidateProjectsCache = (companyId: string) => {
-  delete projectCache[companyId];
-};
-
 export function useProjects() {
   const { selectedCompanyId } = useAuth();
   
-  const [projects, setProjects] = useState<Project[]>(() => 
-    selectedCompanyId && projectCache[selectedCompanyId] ? projectCache[selectedCompanyId] : []
-  );
-  
-  const [loading, setLoading] = useState(() => 
-    selectedCompanyId ? !projectCache[selectedCompanyId] : false
-  );
-  
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -33,32 +20,17 @@ export function useProjects() {
         return;
       }
 
-      if (projectCache[selectedCompanyId]) {
-        setProjects(projectCache[selectedCompanyId]);
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
 
-        if (!projectPromises[selectedCompanyId]) {
-          projectPromises[selectedCompanyId] = ProjectService.getAll(selectedCompanyId).then(data => {
-            const sortedData = data.sort((a, b) => {
-              const idA = a.projectCode || a.projectName || a.id;
-              const idB = b.projectCode || b.projectName || b.id;
-              return idB.localeCompare(idA); // Descending
-            });
-            projectCache[selectedCompanyId] = sortedData;
-            return sortedData;
-          }).finally(() => {
-            delete projectPromises[selectedCompanyId];
-          });
-        }
-
-        const sortedData = await projectPromises[selectedCompanyId];
+        const data = await ProjectService.getAll(selectedCompanyId);
         
         if (isMounted) {
+          const sortedData = data.sort((a, b) => {
+            const idA = a.projectCode || a.projectName || a.id;
+            const idB = b.projectCode || b.projectName || b.id;
+            return idB.localeCompare(idA); // Descending
+          });
           setProjects(sortedData);
           setError(null);
         }
@@ -68,6 +40,7 @@ export function useProjects() {
         if (isMounted) setLoading(false);
       }
     }
+    
     fetchProjects();
 
     return () => {

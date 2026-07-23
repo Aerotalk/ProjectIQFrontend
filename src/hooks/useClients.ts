@@ -14,31 +14,45 @@ export const useClients = ({ companyId }: UseClientsOptions) => {
   const [isArchiveLoading, setIsArchiveLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchClients = useCallback(async () => {
-    if (!companyId) return;
+  useEffect(() => {
+    let ignore = false;
+    
+    if (!companyId) {
+      setClients([]);
+      return;
+    }
+
     setIsListLoading(true);
     setError(null);
-    try {
-      const data = await ClientService.getClients(companyId);
-      const sortedData = data.sort((a, b) => {
-        const idA = a.clientNo || a.displayName || a.id;
-        const idB = b.clientNo || b.displayName || b.id;
-        // Descending order so newest is on top if it's clientNo
-        return idB.localeCompare(idA);
+
+    ClientService.getClients(companyId)
+      .then(data => {
+        if (!ignore) {
+          const sortedData = data.sort((a, b) => {
+            const idA = a.clientNo || a.displayName || a.id;
+            const idB = b.clientNo || b.displayName || b.id;
+            return idB.localeCompare(idA);
+          });
+          setClients(sortedData);
+        }
+      })
+      .catch((err: any) => {
+        if (!ignore) {
+          const message = err?.message || 'Failed to fetch clients';
+          setError(message);
+          toast.error(message);
+        }
+      })
+      .finally(() => {
+        if (!ignore) setIsListLoading(false);
       });
-      setClients(sortedData);
-    } catch (err: any) {
-      const message = err?.message || 'Failed to fetch clients';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setIsListLoading(false);
-    }
+
+    return () => {
+      ignore = true;
+    };
   }, [companyId]);
 
-  useEffect(() => {
-    fetchClients();
-  }, [fetchClients]);
+  const fetchClients = async () => {};
 
   const createClient = async (data: Omit<Client, 'id' | 'clientNo'>) => {
     if (!companyId) throw new Error('Company ID is missing');
