@@ -11,6 +11,9 @@ export const useProductForm = (defaultValues?: Partial<ProductFormValues>) => {
       standardRate: 0,
       unit: 'Piece (Nos)',
       gstRate: '18%',
+      itemName: '',
+      itemCode: '',
+      description: '',
       ...defaultValues
     },
     mode: 'onTouched'
