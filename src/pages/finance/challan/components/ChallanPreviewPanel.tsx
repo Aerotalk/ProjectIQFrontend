@@ -60,15 +60,13 @@ export default function ChallanPreviewPanel({ isOpen, onClose, templateContent, 
     // Wait a brief moment for the overlay to render before removing styles
     await new Promise(resolve => setTimeout(resolve, 50));
     
-    // TEMPORARY WORKAROUND: Remove main document stylesheets to prevent html2canvas from crashing on oklch()
-    const stylesheets = Array.from(document.styleSheets);
-    const disabledStates = stylesheets.map(sheet => sheet.disabled);
+    const styleElements = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
+    const parentNodes = styleElements.map(el => el.parentNode);
+    const nextSiblings = styleElements.map(el => el.nextSibling);
     
-    stylesheets.forEach(sheet => {
-      try {
-        sheet.disabled = true;
-      } catch (e) {
-        // Ignore CORS errors
+    styleElements.forEach(el => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
       }
     });
 
@@ -90,11 +88,15 @@ export default function ChallanPreviewPanel({ isOpen, onClose, templateContent, 
       console.error('Error generating PDF:', error);
     } finally {
       // Restore styles immediately
-      stylesheets.forEach((sheet, i) => {
-        try {
-          sheet.disabled = disabledStates[i];
-        } catch (e) {
-          console.error('Failed to restore style:', e);
+      styleElements.forEach((el, i) => {
+        const parent = parentNodes[i];
+        const sibling = nextSiblings[i];
+        if (parent) {
+          if (sibling) {
+            parent.insertBefore(el, sibling);
+          } else {
+            parent.appendChild(el);
+          }
         }
       });
       
