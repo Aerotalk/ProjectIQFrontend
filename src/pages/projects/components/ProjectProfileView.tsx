@@ -586,7 +586,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                         {po.vendorName || assignedVendorNames[0] || 'Vendor'}
                       </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white text-right">
-                        ₹{(Number(po.totalAmount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        ₹{(Number(po.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="px-4 py-3">
                         <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200">
