@@ -102,7 +102,7 @@ export default function PODetails() {
       }).catch(console.error);
       
       setIsLoadingTemplates(true);
-      api.get('/admin/templates?type=Purchase Order').then((res: any) => {
+      api.get('/admin/templates?type=purchase_order').then((res: any) => {
         const templatesData = Array.isArray(res) ? res : (res.data || []);
         setTemplates(templatesData);
         setIsLoadingTemplates(false);
