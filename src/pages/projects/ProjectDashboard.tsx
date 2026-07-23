@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar, Users, AlertCircle } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';
+import { ClientService } from '../../services/client.service';
 import type { Project, ProjectFormValues } from '../../types/project.types';
 import ProjectDrawer from './components/ProjectDrawer';
 import ProjectQuickGlance from './components/ProjectQuickGlance';
@@ -13,6 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function ProjectDashboard() {
   const { selectedCompanyId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -43,8 +45,12 @@ export default function ProjectDashboard() {
     try {
       setIsLoading(true);
       if (selectedCompanyId) {
-        const data = await ProjectService.getAll(selectedCompanyId);
-        setProjects(data);
+        const [projectsData, clientsData] = await Promise.all([
+          ProjectService.getAll(selectedCompanyId),
+          ClientService.getClients(selectedCompanyId).catch(() => [])
+        ]);
+        setProjects(projectsData);
+        setClients(clientsData);
       }
     } catch (err) {
       toast.error('Failed to load projects');
@@ -288,7 +294,9 @@ export default function ProjectDashboard() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                     <Briefcase size={14} className="text-gray-400" />
-                    CLIENT: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.client || 'N/A'}</span>
+                    CLIENT: <span className="text-gray-800 dark:text-gray-200 ml-1">
+                      {clients.find(c => c.id === p.client)?.displayName || clients.find(c => c.id === p.client)?.companyName || p.client || 'N/A'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                     <FolderKanban size={14} className="text-gray-400" />
@@ -311,7 +319,7 @@ export default function ProjectDashboard() {
                   <div>
                     <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Budget</div>
                     <div className="text-base font-bold text-gray-900 dark:text-white">
-                      ₹{(p.expectedRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹{(p.budget || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                   <div className="flex -space-x-2">
