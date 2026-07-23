@@ -151,8 +151,9 @@ export default function PODetails() {
               status: foundPo.status || 'Draft',
               internalNotes: foundPo.internalNotes || ''
             });
-            if (foundPo.lineItems) {
-              const mappedItems = foundPo.lineItems.map((item: any) => ({
+            const sourceItems = foundPo.lineItems || foundPo.items;
+            if (sourceItems) {
+              const mappedItems = sourceItems.map((item: any) => ({
                 id: Math.random().toString(),
                 description: item.description || '',
                 qty: Number(item.quantity || 0),
@@ -320,6 +321,26 @@ export default function PODetails() {
         due_date: po.expectedDelivery ? new Date(po.expectedDelivery).toLocaleDateString('en-GB') : 'N/A',
         
         items: lineItems.map((item, index) => {
+          const qty = Number(item.qty || 0);
+          const price = Number(item.unitPrice || 0);
+          const taxable = qty * price;
+          const rate = Number(item.gstRate || 0);
+          const gstAmt = Number(item.gstAmount || (taxable * rate / 100));
+          return {
+            item_index: index + 1,
+            item_name: item.description || 'Item',
+            item_hsn: (item as any).hsnSac || (item as any).itemHsn || '', 
+            item_quantity: qty,
+            item_unit: item.unit || 'Nos',
+            item_price: price.toFixed(2),
+            item_taxable: taxable.toFixed(2),
+            item_gst_rate: rate,
+            item_gst_amount: gstAmt.toFixed(2),
+            item_amount: (taxable + gstAmt).toFixed(2)
+          };
+        }),
+        has_items: lineItems.length > 0,
+        line_items: lineItems.map((item, index) => {
           const qty = Number(item.qty || 0);
           const price = Number(item.unitPrice || 0);
           const taxable = qty * price;
