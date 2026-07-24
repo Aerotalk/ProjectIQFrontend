@@ -31,6 +31,8 @@ import ProjectDashboard from './projects/ProjectDashboard';
 import EmployeeDirectory from './EmployeeDirectory';
 import DepartmentDirectory from './DepartmentDirectory';
 import DesignationDirectory from './DesignationDirectory';
+import PayrollDashboard from './payroll/PayrollDashboard';
+import PayrollListing from './payroll/PayrollListing';
 
 function DefaultView() {
   return (
@@ -163,6 +165,16 @@ export default function CompanyDashboard() {
         <Route path="/designations" element={
           <PermissionGate permission="designation.view">
             <DesignationDirectory />
+          </PermissionGate>
+        } />
+        <Route path="/payroll" element={
+          <PermissionGate permission="employee.view">
+            <PayrollDashboard />
+          </PermissionGate>
+        } />
+        <Route path="/payroll/list" element={
+          <PermissionGate permission="employee.view">
+            <PayrollListing />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />
