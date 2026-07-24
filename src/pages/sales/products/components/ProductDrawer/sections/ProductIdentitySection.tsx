@@ -1,4 +1,4 @@
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ProductIdentitySection({ readOnly, nextNumber }: Props) {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, control, formState: { errors } } = useFormContext();
 
   return (
     <FormSection title="Step 1 — Product Identity" className="pt-0 border-t-0">
@@ -48,11 +48,17 @@ export default function ProductIdentitySection({ readOnly, nextNumber }: Props) 
 
         <div>
           <label className={formStyles.label}>Item Name *</label>
-          <input
-            type="text"
-            {...register('itemName')}
-            disabled={readOnly}
-            className={formStyles.field(!!errors.itemName, readOnly)}
+          <Controller
+            name="itemName"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                disabled={readOnly}
+                className={formStyles.field(!!errors.itemName, readOnly)}
+              />
+            )}
           />
           {errors.itemName && <p className="text-red-500 text-xs mt-1">{errors.itemName.message as string}</p>}
         </div>

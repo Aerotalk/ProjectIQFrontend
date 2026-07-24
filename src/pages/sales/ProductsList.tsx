@@ -41,6 +41,7 @@ export default function ProductsList() {
       }
       setIsDrawerOpen(false);
     } catch (error: any) {
+      console.error('Error saving product:', error);
       throw error;
     }
   };
