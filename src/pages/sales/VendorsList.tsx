@@ -11,6 +11,7 @@ import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 import FunkyLoader from '@/components/ui/FunkyLoader';
 import ConfirmModal from '@/components/modals/ConfirmModal';
+import SmartActionMenu from '@/components/ui/SmartActionMenu';
 
 export default function VendorsList() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -171,48 +172,43 @@ export default function VendorsList() {
                       </span>
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === vendor.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button 
-                        onClick={(e) => {
+                      <SmartActionMenu
+                        isOpen={openDropdownId === vendor.id}
+                        onToggle={(e) => {
                           e.stopPropagation();
                           setOpenDropdownId(openDropdownId === vendor.id ? null : vendor.id);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
-                        <MoreVertical size={16} />
-                      </button>
-                      {openDropdownId === vendor.id && (
-                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDrawer('view', vendor);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Eye size={14} /> View
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDrawer('edit', vendor);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Edit size={14} /> Edit
+                        </button>
+                        {vendor.status !== 'Inactive' && (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              openDrawer('view', vendor);
+                              handleArchiveVendor(vendor);
                             }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                            className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            <Eye size={14} /> View
+                            <Archive size={14} /> Archive
                           </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openDrawer('edit', vendor);
-                            }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                          >
-                            <Edit size={14} /> Edit
-                          </button>
-                          {vendor.status !== 'Inactive' && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleArchiveVendor(vendor);
-                              }}
-                              className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                            >
-                              <Archive size={14} /> Archive
-                            </button>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </SmartActionMenu>
                     </td>
                   </tr>
                 ))}

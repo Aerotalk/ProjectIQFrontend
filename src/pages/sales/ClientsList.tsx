@@ -11,6 +11,8 @@ import type { ClientFormValues } from './clients/validators/clientValidation';
 import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import CustomSelect from '@/components/ui/CustomSelect';
+import ConfirmModal from '@/components/modals/ConfirmModal';
+import SmartActionMenu from '@/components/ui/SmartActionMenu';
 
 export default function ClientsList() {
   const { user } = useAuth();
@@ -38,6 +40,8 @@ export default function ClientsList() {
   const itemsPerPage = 10;
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  
+  const [clientToArchive, setClientToArchive] = useState<Client | null>(null);
 
   useBreadcrumbs([
     { label: 'Sales', path: '/companydashboard/sales' },
@@ -73,10 +77,8 @@ export default function ClientsList() {
     }
   };
 
-  const handleArchiveClient = async (client: Client) => {
-    if (window.confirm(`Are you sure you want to archive client ${client.displayName}?`)) {
-      await archiveClient(client);
-    }
+  const handleArchiveClient = (client: Client) => {
+    setClientToArchive(client);
     setOpenDropdownId(null);
   };
 
@@ -221,45 +223,43 @@ export default function ClientsList() {
                       </span>
                     </td>
                     <td className={`px-6 py-4 text-center ${openDropdownId === client.id ? 'relative z-50' : 'relative z-10'}`}>
-                      <button 
-                        onClick={(e) => {
+                      <SmartActionMenu
+                        isOpen={openDropdownId === client.id}
+                        onToggle={(e) => {
                           e.stopPropagation();
                           setOpenDropdownId(openDropdownId === client.id ? null : client.id);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors inline-flex"
                       >
-                        <MoreVertical size={16} />
-                      </button>
-                      {openDropdownId === client.id && (
-                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDrawer('view', client);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Eye size={14} /> View
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDrawer('edit', client);
+                          }}
+                          className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <Edit size={14} /> Edit
+                        </button>
+                        {client.status !== 'Inactive' && (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleOpenDrawer('view', client);
+                              handleArchiveClient(client);
                             }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                            className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            <Eye size={14} /> View
+                            <Archive size={14} /> Archive
                           </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenDrawer('edit', client);
-                            }}
-                            className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                          >
-                            <Edit size={14} /> Edit
-                          </button>
-                          {client.status !== 'Inactive' && (
-                            <button 
-                              onClick={() => handleArchiveClient(client)}
-                              className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
-                            >
-                              <Archive size={14} /> Archive
-                            </button>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </SmartActionMenu>
                     </td>
                   </tr>
                 ))
@@ -304,6 +304,19 @@ export default function ClientsList() {
         </div>
       </div>
 
+      <ConfirmModal
+        isOpen={!!clientToArchive}
+        onClose={() => setClientToArchive(null)}
+        onConfirm={() => {
+          if (clientToArchive) {
+            archiveClient(clientToArchive);
+          }
+        }}
+        title="Archive Client"
+        message={`Are you sure you want to archive client ${clientToArchive?.displayName}?`}
+        confirmText="Archive"
+        isDestructive={true}
+      />
     </div>
   );
 }
