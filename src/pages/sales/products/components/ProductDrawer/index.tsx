@@ -28,8 +28,12 @@ export default function ProductDrawer({ isOpen, onClose, onSave, mode, initialDa
         type: 'Product',
         status: 'Active',
         standardRate: 0,
-        unit: 'Pieces',
+        unit: 'Piece (Nos)',
         gstRate: '18%',
+        itemName: '',
+        itemCode: '',
+        description: '',
+        hsnSac: '',
         ...initialData
       });
     }
