@@ -31,6 +31,7 @@ export default function ProductsList() {
   ]);
 
   const handleSaveProduct = async (data: ProductFormValues) => {
+    toast.error(`DEBUG: itemName is "${data.itemName}"`);
     try {
       if (drawerMode === 'create') {
         await createProduct(data as unknown as Omit<Product, 'id'>);
