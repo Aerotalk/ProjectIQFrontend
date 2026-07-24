@@ -1,6 +1,6 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   ChevronRight, Info,
   CheckCircle2, Send, Truck, Download, Loader2
@@ -18,6 +18,7 @@ import type { Project } from '../../types/project.types';
 import POPreviewPanel from './po/components/POPreviewPanel';
 import { ToWords } from 'to-words';
 import { Stepper } from '@/components/ui/Stepper';
+import { useReturnNavigation } from '../../hooks/useReturnNavigation';
 
 const toWords = new ToWords({
   localeCode: 'en-IN',
@@ -32,7 +33,7 @@ const toWords = new ToWords({
 
 export default function PODetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { navigateBack } = useReturnNavigation();
   const { selectedCompanyId: companyId } = useAuth();
   
   const [isApiLoading, setIsApiLoading] = useState(false);
@@ -40,6 +41,10 @@ export default function PODetails() {
   const [projects, setProjects] = useState<Project[]>([]);
   
   const isNew = id === 'new';
+  const location = useLocation();
+  const initialProjectId = location.state?.openProjectId || '';
+  const initialProjectName = location.state?.openProjectName || '';
+  const initialVendorId = location.state?.openVendorId || '';
   const [isEditing, setIsEditing] = useState(isNew);
   const [currentStage, setCurrentStage] = useState(1);
   const [activeTab, setActiveTab] = useState('Products & Services');
@@ -78,10 +83,10 @@ export default function PODetails() {
 
   const [po, setPo] = useState({
     poNumber: isNew ? 'Unassigned' : '',
-    vendorId: '',
+    vendorId: isNew ? initialVendorId : '',
     vendorName: '',
-    projectId: '',
-    projectName: '',
+    projectId: isNew ? initialProjectId : '',
+    projectName: isNew ? initialProjectName : '',
     poDate: new Date().toISOString().split('T')[0],
     expectedDelivery: '',
     description: '',
@@ -159,7 +164,7 @@ export default function PODetails() {
           if (foundPo) {
             setCurrentStage(getStageFromStatus(foundPo.status));
             setPo({
-              poNumber: foundPo.poNumber || foundPo.id,
+              poNumber: foundPo.poNumber || 'Unassigned',
               vendorId: foundPo.vendorId || '',
               vendorName: foundPo.vendorName || '',
               projectId: foundPo.projectId || '',
@@ -454,7 +459,7 @@ export default function PODetails() {
                     };
                     await POService.create(companyId!, payload as any);
                     toast.success('PO saved successfully');
-                    navigate('/companydashboard/finance/pos');
+                    navigateBack('/companydashboard/finance/pos');
                   } catch (err: any) {
                     toast.error(err?.message || 'Failed to save PO');
                   } finally {
@@ -622,7 +627,13 @@ export default function PODetails() {
             <div className="flex items-center gap-2">
               {isEditing && (
                 <button
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    if (isNew) {
+                      navigateBack('/companydashboard/finance/pos');
+                    } else {
+                      setIsEditing(false);
+                    }
+                  }}
                   className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
                 >
                   Cancel

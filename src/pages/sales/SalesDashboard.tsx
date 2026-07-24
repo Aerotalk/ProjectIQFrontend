@@ -84,7 +84,7 @@ export default function SalesDashboard() {
     const clientObj = clients.find(c => c.id === q.clientId);
     return {
     id: q.id,
-    no: formatQuotationId(q.quotationNo || q.id),
+    no: formatQuotationId(q.quotationNo || 'Unassigned'),
     client: q.clientName || (clientObj ? (clientObj.companyName || clientObj.displayName) : 'Unknown Client'),
     project: q.subject || '—',
     amount: `₹ ${(q.grandTotal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,

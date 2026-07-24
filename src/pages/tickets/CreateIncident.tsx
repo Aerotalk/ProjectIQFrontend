@@ -1,6 +1,7 @@
 import { formStyles } from '@/components/ui/form-styles';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useReturnNavigation } from '../../hooks/useReturnNavigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormValues, TicketService } from '../../services/ticket.service';
@@ -16,6 +17,7 @@ import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
 
 export default function CreateIncident() {
+  const { navigateBack } = useReturnNavigation();
   const navigate = useNavigate();
   const { selectedCompanyId: companyId } = useAuth();
   
@@ -133,7 +135,7 @@ export default function CreateIncident() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => navigate('/companydashboard/tickets')}
+            onClick={() => navigateBack('/companydashboard/tickets')}
             className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
           >
             <ArrowLeft size={16} />
@@ -144,7 +146,7 @@ export default function CreateIncident() {
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={() => navigate('/companydashboard/tickets')}
+            onClick={() => navigateBack('/companydashboard/tickets')}
             className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-sm text-sm font-medium hover:bg-gray-50"
           >
             Cancel

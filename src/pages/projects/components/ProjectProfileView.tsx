@@ -3,7 +3,8 @@ import {
   ArrowLeft, Edit, FileText, Users, DollarSign, Plus, 
   Upload, Eye, CheckCircle2, MessageSquare, 
   Building2, X, ShoppingBag, Download, 
-  TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2
+  TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2,
+  FileImage, FileSpreadsheet, File
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -16,6 +17,7 @@ import { QuotationService } from '../../../services/quotation.service';
 import { ExpenseService } from '../../../services/expense.service';
 import { TicketService } from '../../../services/ticket.service';
 import { ProjectService } from '../../../services/project.service';
+import { FileService } from '../../../services/file.service';
 import type { Project } from '../../../types/project.types';
 import toast from 'react-hot-toast';
 import { formStyles } from '@/components/ui/form-styles';
@@ -48,7 +50,20 @@ interface ParsedDocument {
   date: string;
   size: string;
   type: string;
+  mimeType?: string;
+  originalId?: string;
 }
+
+const getFileIcon = (mimeType?: string, fileName?: string) => {
+  const mt = mimeType?.toLowerCase() || '';
+  const name = fileName?.toLowerCase() || '';
+  
+  if (mt.startsWith('image/') || name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tif|tiff|ico|heic|heif|avif)$/)) return <FileImage size={13} className="text-[#792359] dark:text-[#c44997]" />;
+  if (mt.includes('pdf') || name.endsWith('.pdf')) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
+  if (mt.includes('word') || name.match(/\.(doc|docx)$/)) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
+  if (mt.includes('excel') || mt.includes('spreadsheet') || name.match(/\.(xls|xlsx)$/)) return <FileSpreadsheet size={13} className="text-[#792359] dark:text-[#c44997]" />;
+  return <File size={13} className="text-[#792359] dark:text-[#c44997]" />;
+};
 
 export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
   const { selectedCompanyId } = useAuth();
@@ -79,6 +94,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   // Project Notes Form State
   const [selectedPerson, setSelectedPerson] = useState('');
   const [noteContent, setNoteContent] = useState('');
+  const [deletedNoteIds, setDeletedNoteIds] = useState<string[]>([]);
 
   // Financial BI Dashboard Modal & Status State
   const [isBiModalOpen, setIsBiModalOpen] = useState(false);
@@ -296,19 +312,37 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
     }
   };
 
+  // Delete Note Handler -> visually removes for now
+  const handleDeleteNote = (noteId: string) => {
+    setDeletedNoteIds(prev => [...prev, noteId]);
+    // TODO: Actually remove the note from the backend in the future
+  };
+
   // Upload Invoice Document Handler -> updates backend
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg', '.tif', '.tiff', '.ico', '.heic', '.heif', '.avif', '.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+    const fileExt = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+      toast.error('Unsupported file type. Please upload an Image, PDF, Word document or Excel spreadsheet.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     setIsSaving(true);
     try {
+      const uploadResult = await FileService.uploadFile(file, 'project_document');
+
       const newDocObj: ParsedDocument = {
         id: Date.now().toString(),
+        originalId: uploadResult.id,
         name: file.name,
         date: new Date().toLocaleDateString('en-GB'),
         size: (file.size / 1024).toFixed(0) + ' KB',
-        type: file.name.toLowerCase().includes('po') ? 'PO Invoice' : 'Vendor Invoice'
+        type: file.name.toLowerCase().includes('po') ? 'PO Invoice' : 'Vendor Invoice',
+        mimeType: uploadResult.mimeType
       };
 
       const updatedDocs = [JSON.stringify(newDocObj), ...(currentProject.projectDocuments || [])];
@@ -318,12 +352,27 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
       });
 
       setCurrentProject(updatedProject);
-      toast.success(`Invoice "${file.name}" uploaded and saved to project`);
-    } catch (err) {
-      toast.error('Failed to save invoice document');
+      toast.success('Document uploaded successfully');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to upload document');
     } finally {
       setIsSaving(false);
-      e.target.value = '';
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDownload = async (doc: ParsedDocument) => {
+    if (!doc.originalId) {
+      toast.error('Legacy document: File cannot be downloaded');
+      return;
+    }
+    try {
+      await FileService.downloadFile(doc.originalId, doc.name);
+      toast.success('Document downloaded successfully');
+    } catch (err) {
+      toast.error('Failed to download document');
     }
   };
 
@@ -365,13 +414,13 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
     if (projectQuotations.length > 0) {
       projectQuotations.forEach((q: any) => {
-        rows.push(['Inflow', q.quotationNo || q.id, 'Quotation Proposal', (Number(q.grandTotal) || 0).toFixed(2), q.status || 'Sent', q.date || '']);
+        rows.push(['Inflow', q.quotationNo || 'Draft/Unassigned', 'Quotation Proposal', (Number(q.grandTotal) || 0).toFixed(2), q.status || 'Sent', q.date || '']);
       });
     }
 
     if (projectPOs.length > 0) {
       projectPOs.forEach((p: any) => {
-        rows.push(['Outflow', p.poNumber || p.id, 'Purchase Order', (Number(p.totalAmount) || 0).toFixed(2), p.status || 'Issued', p.createdOn || '']);
+        rows.push(['Outflow', p.poNumber || 'Draft/Unassigned', 'Purchase Order', (Number(p.totalAmount) || 0).toFixed(2), p.status || 'Issued', p.createdOn || '']);
       });
     }
 
@@ -405,7 +454,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
         ref={fileInputRef} 
         onChange={handleFileUpload} 
         className="hidden" 
-        accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx" 
+        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx" 
       />
 
       {/* ── Back Navigation ── */}
@@ -480,7 +529,14 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               </div>
             </div>
             <Link
-              to="/companydashboard/sales/quotations"
+              to="/companydashboard/sales/quotations/new"
+              state={{ 
+                returnTo: '/companydashboard/projects', 
+                openProjectId: currentProject.id,
+                openProjectName: currentProject.projectName || currentProject.projectCode || '',
+                openClientId: currentProject.client,
+                openClientName: clientName
+              }}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
             >
               <Plus size={14} /> Create Quotation
@@ -504,7 +560,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   projectQuotations.map((q: any, idx: number) => (
                     <tr key={q.id || idx} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                        {q.quotationNo || `QT-00000${idx + 1}`}
+                        {q.quotationNo || 'Unassigned'}
                       </td>
                       <td className="px-4 py-3 text-gray-500">
                         <span className="text-[11px] bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded">
@@ -525,6 +581,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                       <td className="px-4 py-3 text-center">
                         <Link
                           to={`/companydashboard/sales/quotations/${q.id}`}
+                          state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 dark:border-[#c44997]/20 rounded hover:bg-[#792359]/5 transition-colors"
                         >
                           <Eye size={12} /> View
@@ -557,7 +614,13 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               </div>
             </div>
             <Link
-              to="/companydashboard/finance/pos"
+              to="/companydashboard/finance/pos/new"
+              state={{ 
+                returnTo: '/companydashboard/projects', 
+                openProjectId: currentProject.id,
+                openProjectName: currentProject.projectName || currentProject.projectCode || '',
+                openVendorId: assignedVendorsList[0]?.id || ''
+              }}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
             >
               <Plus size={14} /> Create PO
@@ -580,7 +643,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   projectPOs.map((po: any, idx: number) => (
                     <tr key={po.id || idx} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
-                        {po.poNumber || `PO-2026-00${idx + 1}`}
+                        {po.poNumber || 'Unassigned'}
                       </td>
                       <td className="px-4 py-3 text-gray-900 dark:text-white">
                         {po.vendorName || assignedVendorNames[0] || 'Vendor'}
@@ -596,6 +659,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                       <td className="px-4 py-3 text-center">
                         <Link
                           to={`/companydashboard/finance/pos/${po.id}`}
+                          state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 rounded hover:bg-[#792359]/5 transition-colors"
                         >
                           <Eye size={12} /> View
@@ -628,7 +692,8 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               </div>
             </div>
             <Link
-              to="/companydashboard/tickets"
+              to="/companydashboard/tickets/create"
+              state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}
               className="bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
             >
               <Plus size={14} /> Raise Incident
@@ -669,6 +734,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                       <td className="px-4 py-3 text-center">
                         <Link
                           to={`/companydashboard/tickets/${t.id}`}
+                          state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}
                           className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-[#792359] dark:text-[#c44997] border border-[#792359]/20 rounded hover:bg-[#792359]/5 transition-colors"
                         >
                           <Eye size={12} /> View
@@ -825,15 +891,25 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
             {/* Render Saved Notes */}
             <div className="mt-4 space-y-2 max-h-36 overflow-y-auto custom-scrollbar border-t border-gray-100 dark:border-white/5 pt-3">
               {parsedNotes.length > 0 ? (
-                parsedNotes.map(n => (
-                  <div key={n.id} className="p-2.5 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-md text-xs space-y-1">
-                    <div className="flex justify-between font-semibold text-gray-900 dark:text-white">
-                      <span>{n.person}</span>
-                      <span className="text-[10px] text-gray-400">{n.date}</span>
+                parsedNotes.map(n => {
+                  const isDeleted = deletedNoteIds.includes(n.id);
+                  return (
+                    <div key={n.id} className={`p-2.5 border rounded-md text-xs space-y-1 transition-all ${isDeleted ? 'bg-gray-100/50 dark:bg-white/[0.01] border-transparent opacity-50' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5'}`}>
+                      <div className="flex justify-between items-center font-semibold text-gray-900 dark:text-white">
+                        <div className={`flex items-center gap-2 ${isDeleted ? 'line-through text-gray-400' : ''}`}>
+                          <span>{n.person}</span>
+                          <span className="text-[10px] font-normal text-gray-400">{n.date}</span>
+                        </div>
+                        {!isDeleted && (
+                          <button onClick={() => handleDeleteNote(n.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-sm hover:bg-gray-200 dark:hover:bg-white/10" title="Delete Note">
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+                      <p className={`text-gray-600 dark:text-gray-300 ${isDeleted ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{n.text}</p>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300">{n.text}</p>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-xs text-center text-gray-400 py-4">No project notes recorded yet.</p>
               )}
@@ -870,6 +946,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <th className="px-4 py-2.5 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">TYPE</th>
                   <th className="px-4 py-2.5 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">DATE</th>
                   <th className="px-4 py-2.5 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">SIZE</th>
+                  <th className="px-4 py-2.5 font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -877,7 +954,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   parsedDocuments.map((inv) => (
                     <tr key={inv.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Paperclip size={13} className="text-[#792359] dark:text-[#c44997]" />
+                        {getFileIcon(inv.mimeType, inv.name)}
                         <span>{inv.name}</span>
                       </td>
                       <td className="px-4 py-3">
@@ -887,11 +964,20 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                       </td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.date}</td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{inv.size}</td>
+                      <td className="px-3 py-3 text-right">
+                        <button 
+                          onClick={() => handleDownload(inv)}
+                          className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                          title="Download"
+                        >
+                          <Download size={16} />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
+                    <td colSpan={5} className="px-4 py-10 text-center text-xs text-gray-400 dark:text-gray-500">
                       No uploaded invoices or documents found for this project. Click "Upload Invoice" to attach.
                     </td>
                   </tr>
@@ -1119,7 +1205,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     {projectQuotations.map((q: any, idx: number) => (
                       <tr key={`in-${idx}`} className="bg-emerald-50/20 dark:bg-emerald-500/[0.02]">
                         <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400">Inflow</td>
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{q.quotationNo || q.id}</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{q.quotationNo || 'Unassigned'}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Sales Quotation</td>
                         <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400 text-right">
                           + ₹{(Number(q.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -1131,7 +1217,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     {projectPOs.map((po: any, idx: number) => (
                       <tr key={`po-${idx}`} className="bg-red-50/20 dark:bg-red-500/[0.02]">
                         <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400">Outflow</td>
-                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{po.poNumber || po.id}</td>
+                        <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{po.poNumber || 'Unassigned'}</td>
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-300">Purchase Order</td>
                         <td className="px-4 py-3 font-bold text-red-700 dark:text-red-400 text-right">
                           - ₹{(Number(po.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}

@@ -75,7 +75,7 @@ export default function QuotationsList() {
     const timeB = new Date((b as any).createdAt || b.date).getTime();
     // Fallback to sorting by ID or quotationNo descending if timestamps are exactly the same
     if (timeA === timeB) {
-      return (b.quotationNo || b.id).localeCompare(a.quotationNo || a.id);
+      return (b.quotationNo || '').localeCompare(a.quotationNo || '');
     }
     return timeB - timeA;
   });
@@ -199,7 +199,7 @@ export default function QuotationsList() {
                     onClick={() => navigate(`/companydashboard/sales/quotations/${quotation.id}`)}
                   >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">{formatQuotationId(quotation.quotationNo || quotation.id)}</div>
+                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">{formatQuotationId(quotation.quotationNo || 'Unassigned')}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(quotation.date).toLocaleDateString('en-GB')}</div>

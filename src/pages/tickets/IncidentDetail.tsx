@@ -1,6 +1,7 @@
 import { formStyles } from '@/components/ui/form-styles';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useReturnNavigation } from '../../hooks/useReturnNavigation';
 import { TicketService, type TicketFormValues } from '../../services/ticket.service';
 import { useAuth } from '../../contexts/AuthContext';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -18,7 +19,7 @@ const STAGES = ['New', 'Assigned', 'In Progress', 'Waiting for Client', 'Resolve
 
 export default function IncidentDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { navigateBack } = useReturnNavigation();
   const { selectedCompanyId: companyId } = useAuth();
   
   const { projects } = useProjects();
@@ -92,7 +93,7 @@ export default function IncidentDetail() {
     return (
       <div className="text-center py-20 text-gray-500">
         <h2 className="text-xl font-semibold mb-2">Incident not found</h2>
-        <button onClick={() => navigate('/companydashboard/tickets')} className="text-[#792359] hover:underline">
+        <button onClick={() => navigateBack('/companydashboard/tickets')} className="text-[#792359] hover:underline">
           Return to list
         </button>
       </div>
@@ -175,7 +176,7 @@ export default function IncidentDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => navigate('/companydashboard/tickets')}
+            onClick={() => navigateBack('/companydashboard/tickets')}
             className="w-8 h-8 shrink-0 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
           >
             <ArrowLeft size={16} />

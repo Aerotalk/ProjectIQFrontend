@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar, Users, AlertCircle } from 'lucide-react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';
 import { ClientService } from '../../services/client.service';
@@ -12,6 +13,8 @@ import FunkyLoader from '@/components/ui/FunkyLoader';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProjectDashboard() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { selectedCompanyId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -62,6 +65,18 @@ export default function ProjectDashboard() {
   useEffect(() => {
     fetchProjects();
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (location.state?.openProjectId && projects.length > 0) {
+      const proj = projects.find(p => p.id === location.state.openProjectId);
+      if (proj) {
+        setDrawerMode('view');
+        setSelectedProject(proj);
+        setIsDrawerOpen(true);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [location.state, projects, navigate, location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

@@ -1,6 +1,6 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
   ChevronRight, Edit, Download, Info,
   CheckCircle2, FileText, Send, MessageSquare, Plus
@@ -20,6 +20,7 @@ import PoUploadModal, { type PoEntry } from './quotations/components/PoUploadMod
 import { Stepper } from '@/components/ui/Stepper';
 import { calculateQuotationTotals } from '@/utils/quotationCalculations';
 import FunkyLoader from '@/components/ui/FunkyLoader';
+import { useReturnNavigation } from '../../hooks/useReturnNavigation';
 
 interface UserData {
   id: string;
@@ -29,8 +30,12 @@ interface UserData {
 
 export default function QuotationDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { navigateBack } = useReturnNavigation();
   const { selectedCompanyId: companyId, user } = useAuth();
+  const location = useLocation();
+  const initialProjectName = location.state?.openProjectName || '';
+  const initialClientId = location.state?.openClientId || '';
+  const initialClientName = location.state?.openClientName || '';
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
@@ -158,9 +163,9 @@ export default function QuotationDetails() {
 
   const [quotation, setQuotation] = useState({
     qtnNo: isNew ? 'Unassigned' : '',
-    clientId: isNew ? '' : '',
-    client: isNew ? '' : '',
-    project: isNew ? '' : '',
+    clientId: isNew ? initialClientId : '',
+    client: isNew ? initialClientName : '',
+    project: isNew ? initialProjectName : '',
     amount: isNew ? '' : '',
     validTill: isNew ? '' : '',
     owner: user?.username || user?.email || 'Unassigned',
@@ -322,7 +327,7 @@ export default function QuotationDetails() {
           }
 
           setQuotation({
-            qtnNo: formatQuotationId(data.quotationNo || data.id),
+            qtnNo: formatQuotationId(data.quotationNo || 'Unassigned'),
             clientId: data.clientId || '',
             client: clientName,
             project: data.subject || '',
@@ -620,7 +625,7 @@ export default function QuotationDetails() {
 
                     await QuotationService.createQuotation(companyId, newQuotationData);
                     toast.success('Quotation draft saved successfully');
-                    navigate('/companydashboard/sales/quotations');
+                    navigateBack('/companydashboard/sales/quotations');
                   } catch (err: any) {
                     toast.error(err?.message || 'Failed to save quotation');
                   } finally {
@@ -868,7 +873,7 @@ export default function QuotationDetails() {
                       ownerName = user?.username || user?.email || 'Unassigned';
                     }
                     setQuotation({
-                      qtnNo: formatQuotationId(data.quotationNo || data.id),
+                      qtnNo: formatQuotationId(data.quotationNo || 'Unassigned'),
                       clientId: data.clientId || '',
                       client: clientName,
                       project: data.subject || '',
@@ -898,6 +903,8 @@ export default function QuotationDetails() {
                       })));
                     }
                   }).finally(() => setIsApiLoading(false));
+                } else if (isNew) {
+                  navigateBack('/companydashboard/sales/quotations');
                 }
               }}
               className="px-4 py-2 text-sm font-medium rounded-sm transition-colors bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"

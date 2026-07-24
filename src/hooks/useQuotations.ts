@@ -28,8 +28,8 @@ export const useQuotations = ({ companyId }: UseQuotationsOptions) => {
       .then(data => {
         if (!ignore) {
           const sortedData = data.sort((a, b) => {
-            const idA = a.quotationNo || a.id;
-            const idB = b.quotationNo || b.id;
+            const idA = a.quotationNo || '';
+            const idB = b.quotationNo || '';
             return idB.localeCompare(idA); // Descending
           });
           setQuotations(sortedData);

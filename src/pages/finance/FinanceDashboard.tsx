@@ -66,7 +66,7 @@ export default function FinanceDashboard() {
         const formattedPOs = pos.slice(0, 5).map(po => {
           const proj = projs.find(p => p.id === po.projectId);
           return {
-            id: po.poNumber || `PO-${po.id.substring(0,6).toUpperCase()}`,
+            id: po.poNumber || 'Unassigned',
             vendor: po.vendorName,
             project: proj ? (proj.projectCode || proj.projectName) : (po.projectId ? `PRJ-${po.projectId.substring(0,6).toUpperCase()}` : 'General'),
             amount: `₹ ${(po.grandTotal || 0).toLocaleString('en-IN')}`,
