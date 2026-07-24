@@ -134,10 +134,8 @@ export default function QuotationDetails() {
     amount: number;
   }
 
-  const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: '1', name: 'Web Application Development', category: 'Development', qty: 1, rate: 150000, gst: 18, amount: 150000 },
-    { id: '2', name: 'Data Integration Service', category: 'Integration', qty: 1, rate: 60000, gst: 18, amount: 60000 }
-  ]);
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
+
 
   const availableProducts = products.length > 0 ? products : [
     { id: '1', name: 'Web Application Development', category: 'Development', rate: 150000, gst: 18 },
