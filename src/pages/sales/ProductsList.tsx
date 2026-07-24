@@ -145,7 +145,7 @@ export default function ProductsList() {
                         onClick={() => openDrawer('view', product)}
                         className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
-                        {product.itemName}
+                        {product.itemName || <span className="italic opacity-80">(Unnamed Item)</span>}
                       </button>
                       <div className="text-xs text-gray-500 font-normal mt-0.5">{product.itemCode}</div>
                     </td>
