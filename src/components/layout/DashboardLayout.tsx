@@ -254,11 +254,11 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
       <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
-        <div className="h-16 flex items-center justify-center px-6 border-b border-white/5 bg-black/10">
+        <div className="h-16 w-full flex items-center justify-center p-3 border-b border-white/5 bg-black/10 box-border overflow-hidden">
           {companyLogoUrl && role === 'company' ? (
-            <img src={companyLogoUrl} alt={`${orgName} Logo`} className="h-10 w-auto rounded-sm shadow-sm object-contain" />
+            <img src={companyLogoUrl} alt={`${orgName} Logo`} className="w-full h-full object-contain rounded-sm shadow-sm" />
           ) : (
-            <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto rounded-sm shadow-sm" />
+            <img src={logo} alt="BumbleERP Logo" className="w-full h-full object-contain rounded-sm shadow-sm" />
           )}
         </div>
 
