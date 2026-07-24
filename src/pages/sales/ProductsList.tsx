@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Eye, Edit, Archive } from 'lucide-react';
+import { Search, Plus, ChevronLeft, ChevronRight, Package, Eye, Edit, Archive } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
