@@ -15,10 +15,12 @@ function Calendar({
   classNames,
   showOutsideDays = true,
   captionLayout = "label",
-  buttonVariant = "ghost",
+  buttonVariant = "outline",
   locale,
   formatters,
   components,
+  startMonth = new Date(1900, 0),
+  endMonth = new Date(2100, 11),
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -27,6 +29,8 @@ function Calendar({
 
   return (
     <DayPicker
+      startMonth={startMonth}
+      endMonth={endMonth}
       showOutsideDays={showOutsideDays}
       className={cn(
         "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:32px] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
