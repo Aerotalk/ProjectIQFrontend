@@ -27,6 +27,12 @@ export const ProductService = {
     return mapToProduct(response as ProductDto);
   },
 
+  archiveProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
+    const dto = mapToProductDto({ ...data, status: 'Inactive' });
+    const response = await api.put(`/admin/sales/products/${id}`, dto);
+    return mapToProduct(response as ProductDto);
+  },
+
   deleteProduct: async (id: string): Promise<void> => {
     await api.delete(`/admin/sales/products/${id}`);
   }

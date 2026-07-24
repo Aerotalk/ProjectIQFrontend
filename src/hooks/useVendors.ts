@@ -74,6 +74,21 @@ export const useVendors = ({ companyId }: UseVendorsOptions) => {
     }
   };
 
+  const archiveVendor = async (vendor: Vendor) => {
+    setIsSaveLoading(true);
+    try {
+      const archivedVendor = await VendorService.archiveVendor(vendor.id, vendor);
+      setVendors(prev => prev.map(v => v.id === vendor.id ? archivedVendor : v));
+      toast.success('Vendor archived successfully');
+      return archivedVendor;
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to archive vendor');
+      throw err;
+    } finally {
+      setIsSaveLoading(false);
+    }
+  };
+
   // We expose fetchVendors as a no-op or re-trigger if needed, but since useEffect handles it based on companyId, we just return a function that does nothing for backwards compatibility if it's called explicitly.
   const fetchVendors = async () => {};
 
@@ -84,6 +99,7 @@ export const useVendors = ({ companyId }: UseVendorsOptions) => {
     error,
     fetchVendors,
     createVendor,
-    updateVendor
+    updateVendor,
+    archiveVendor
   };
 };

@@ -27,6 +27,13 @@ export const VendorService = {
     return mapToVendor(response as VendorDto);
   },
 
+  archiveVendor: async (id: string, data: Partial<Vendor>): Promise<Vendor> => {
+    // Backend doesn't support soft delete, so we use update to set status to 'Inactive'
+    const dto = mapToVendorDto({ ...data, status: 'Inactive' });
+    const response = await api.put(`/admin/sales/vendors/${id}`, dto);
+    return mapToVendor(response as VendorDto);
+  },
+
   deleteVendor: async (id: string): Promise<void> => {
     await api.delete(`/admin/sales/vendors/${id}`);
   }

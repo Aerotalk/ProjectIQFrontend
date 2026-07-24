@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Package, Eye, Edit, Archive } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { getNextSequenceNumber } from '../../utils/sequence';
 import FunkyLoader from '@/components/ui/FunkyLoader';
+import ConfirmModal from '@/components/modals/ConfirmModal';
 
 export default function ProductsList() {
   const { selectedCompanyId: companyId } = useAuth();
-  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct } = useProducts({ companyId });
+  const { products, isListLoading: isLoading, isSaveLoading: isSubmitting, createProduct, updateProduct, archiveProduct } = useProducts({ companyId });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -24,6 +25,8 @@ export default function ProductsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  const [productToArchive, setProductToArchive] = useState<Product | null>(null);
 
   useBreadcrumbs([
     { label: 'Sales', path: '/companydashboard/sales' },
@@ -44,6 +47,11 @@ export default function ProductsList() {
       console.error('Error saving product:', error);
       throw error;
     }
+  };
+
+  const handleArchiveProduct = (product: Product) => {
+    setProductToArchive(product);
+    setOpenDropdownId(null);
   };
 
   const openDrawer = (mode: 'create' | 'edit' | 'view', product?: Product) => {
@@ -175,19 +183,30 @@ export default function ProductsList() {
                         <MoreVertical size={16} />
                       </button>
                       {openDropdownId === product.id && (
-                        <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
+                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
                           <button
                             onClick={() => openDrawer('view', product)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            View
+                            <Eye size={14} /> View
                           </button>
                           <button
                             onClick={() => openDrawer('edit', product)}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            Edit
+                            <Edit size={14} /> Edit
                           </button>
+                          {product.status !== 'Inactive' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleArchiveProduct(product);
+                              }}
+                              className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                            >
+                              <Archive size={14} /> Archive
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -232,6 +251,20 @@ export default function ProductsList() {
           </div>
         </div>
       </div>
+      
+      <ConfirmModal
+        isOpen={!!productToArchive}
+        onClose={() => setProductToArchive(null)}
+        onConfirm={() => {
+          if (productToArchive) {
+            archiveProduct(productToArchive);
+          }
+        }}
+        title="Archive Product"
+        message={`Are you sure you want to archive product ${productToArchive?.itemName || productToArchive?.itemCode}?`}
+        confirmText="Archive"
+        isDestructive={true}
+      />
     </div>
   );
 }

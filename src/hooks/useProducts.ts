@@ -76,6 +76,21 @@ export const useProducts = ({ companyId }: UseProductsOptions) => {
     }
   };
 
+  const archiveProduct = async (product: Product) => {
+    setIsSaveLoading(true);
+    try {
+      const archivedProduct = await ProductService.archiveProduct(product.id, product);
+      setProducts(prev => prev.map(p => p.id === product.id ? archivedProduct : p));
+      toast.success('Product archived successfully');
+      return archivedProduct;
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to archive product');
+      throw err;
+    } finally {
+      setIsSaveLoading(false);
+    }
+  };
+
   return {
     products,
     isListLoading,
@@ -83,6 +98,7 @@ export const useProducts = ({ companyId }: UseProductsOptions) => {
     error,
     fetchProducts,
     createProduct,
-    updateProduct
+    updateProduct,
+    archiveProduct
   };
 };

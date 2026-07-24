@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store } from 'lucide-react';
+import { Search, MoreVertical, Plus, ChevronLeft, ChevronRight, Store, Eye, Edit, Archive } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVendors } from '../../hooks/useVendors';
@@ -10,10 +10,11 @@ import VendorProfileView from './vendors/components/VendorProfileView';
 import type { VendorFormValues } from './vendors/validators/vendorValidation';
 import { Input } from '@/components/ui/input';
 import FunkyLoader from '@/components/ui/FunkyLoader';
+import ConfirmModal from '@/components/modals/ConfirmModal';
 
 export default function VendorsList() {
   const { selectedCompanyId: companyId } = useAuth();
-  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor } = useVendors({ companyId });
+  const { vendors, isListLoading: isLoading, isSaveLoading: isSubmitting, createVendor, updateVendor, archiveVendor } = useVendors({ companyId });
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
@@ -23,6 +24,8 @@ export default function VendorsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  
+  const [vendorToArchive, setVendorToArchive] = useState<Vendor | null>(null);
 
   useBreadcrumbs([
     { label: 'Sales', path: '/companydashboard/sales' },
@@ -43,6 +46,11 @@ export default function VendorsList() {
       // Pass the error to the drawer to map validation errors
       throw error;
     }
+  };
+
+  const handleArchiveVendor = (vendor: Vendor) => {
+    setVendorToArchive(vendor);
+    setOpenDropdownId(null);
   };
 
   const openDrawer = (mode: 'create' | 'edit' | 'view', vendor?: Vendor) => {
@@ -173,7 +181,7 @@ export default function VendorsList() {
                         <MoreVertical size={16} />
                       </button>
                       {openDropdownId === vendor.id && (
-                        <div className="absolute right-8 top-10 w-32 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
+                        <div className="absolute right-8 top-10 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left">
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
@@ -181,7 +189,7 @@ export default function VendorsList() {
                             }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            View
+                            <Eye size={14} /> View
                           </button>
                           <button 
                             onClick={(e) => {
@@ -190,8 +198,19 @@ export default function VendorsList() {
                             }}
                             className="w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                           >
-                            Edit
+                            <Edit size={14} /> Edit
                           </button>
+                          {vendor.status !== 'Inactive' && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleArchiveVendor(vendor);
+                              }}
+                              className="w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                            >
+                              <Archive size={14} /> Archive
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -238,6 +257,19 @@ export default function VendorsList() {
         </div>
       </div>
 
+      <ConfirmModal
+        isOpen={!!vendorToArchive}
+        onClose={() => setVendorToArchive(null)}
+        onConfirm={() => {
+          if (vendorToArchive) {
+            archiveVendor(vendorToArchive);
+          }
+        }}
+        title="Archive Vendor"
+        message={`Are you sure you want to archive vendor ${vendorToArchive?.displayName || vendorToArchive?.companyName || vendorToArchive?.firstName}?`}
+        confirmText="Archive"
+        isDestructive={true}
+      />
     </div>
   );
 }
