@@ -1,19 +1,32 @@
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Controller, useWatch } from 'react-hook-form';
 import { FormSection, FormGrid } from '../../../ui/FormLayout';
 import { Input } from '../../../ui/input';
 import { CurrencyInput } from '../../../ui/CurrencyInput';
 import type { PayrollFormValues } from '../validators/payrollValidation';
 import { formStyles } from '../../../ui/form-styles';
-import CustomDatePicker from '../../../ui/CustomDatePicker';
+import CustomMonthPicker from '../../../ui/CustomMonthPicker';
+import CustomSelect from '../../../ui/CustomSelect';
+import { usePayroll } from '../../../../hooks/usePayroll';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function SalaryInputsTab({ readOnly }: Props) {
-  const { register, watch, formState: { errors } } = useFormContext<PayrollFormValues>();
+  const { register, control, formState: { errors } } = useFormContext<PayrollFormValues>();
+  const { employees } = usePayroll();
 
-  const recurring = watch('salaryInputs.recurring');
+  const employeeOptions = employees.map(e => ({
+    value: e.empId,
+    label: e.name,
+    subtitle: e.empId
+  }));
+
+  const recurring = useWatch({
+    control,
+    name: 'salaryInputs.recurring',
+    defaultValue: false
+  });
 
   const inputTypeOptions = [
     { value: 'Addition', label: 'Addition' },
@@ -29,11 +42,18 @@ export default function SalaryInputsTab({ readOnly }: Props) {
             <label className={formStyles.label}>
               Employee *
             </label>
-            <Input
-              {...register('salaryInputs.employee')}
-              placeholder="Search employee..."
-              disabled={readOnly}
-              className={errors.salaryInputs?.employee ? 'border-red-500' : ''}
+            <Controller
+              name="salaryInputs.employee"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  options={employeeOptions}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  disabled={readOnly}
+                  className={errors.salaryInputs?.employee ? 'border-red-500' : ''}
+                />
+              )}
             />
             {errors.salaryInputs?.employee && (
               <p className="text-xs text-red-500">{errors.salaryInputs.employee.message}</p>
@@ -44,9 +64,10 @@ export default function SalaryInputsTab({ readOnly }: Props) {
             <label className={formStyles.label}>
               Payroll Period *
             </label>
-            <CustomDatePicker
+            <CustomMonthPicker
               name="salaryInputs.payrollPeriod"
               disabled={readOnly}
+              hasError={!!errors.salaryInputs?.payrollPeriod}
             />
             {errors.salaryInputs?.payrollPeriod && (
               <p className="text-xs text-red-500">{errors.salaryInputs.payrollPeriod.message}</p>
@@ -116,11 +137,20 @@ export default function SalaryInputsTab({ readOnly }: Props) {
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 cursor-pointer mt-6">
-              <input
-                type="checkbox"
-                {...register('salaryInputs.recurring')}
-                disabled={readOnly}
-                className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700"
+              <Controller
+                name="salaryInputs.recurring"
+                control={control}
+                render={({ field: { value, onChange, onBlur, ref } }) => (
+                  <input
+                    type="checkbox"
+                    checked={!!value}
+                    onChange={(e) => onChange(e.target.checked)}
+                    onBlur={onBlur}
+                    ref={ref}
+                    disabled={readOnly}
+                    className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700"
+                  />
+                )}
               />
               <span className={formStyles.label}>Recurring</span>
             </label>
@@ -130,7 +160,7 @@ export default function SalaryInputsTab({ readOnly }: Props) {
             <label className={formStyles.label}>
               Recurring Until
             </label>
-            <CustomDatePicker
+            <CustomMonthPicker
               name="salaryInputs.recurringUntil"
               disabled={!recurring || readOnly}
             />

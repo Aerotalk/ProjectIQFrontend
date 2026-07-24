@@ -254,15 +254,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
       <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
         {/* Logo Area */}
-        <div className="h-16 flex items-center px-6 border-b border-white/5 bg-black/10">
+        <div className="h-16 flex items-center justify-center px-6 border-b border-white/5 bg-black/10">
           {companyLogoUrl && role === 'company' ? (
-            <img src={companyLogoUrl} alt={`${orgName} Logo`} className="h-10 w-auto mr-3 rounded-sm shadow-sm object-contain" />
+            <img src={companyLogoUrl} alt={`${orgName} Logo`} className="h-10 w-auto rounded-sm shadow-sm object-contain" />
           ) : (
-            <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto mr-3 rounded-sm shadow-sm" />
+            <img src={logo} alt="BumbleERP Logo" className="h-10 w-auto rounded-sm shadow-sm" />
           )}
-          <span className="font-bold text-lg tracking-wide text-white truncate max-w-[140px]" title={role === 'company' ? orgName : 'BumbleERP'}>
-            {role === 'company' ? orgName : 'BumbleERP'}
-          </span>
         </div>
 
         {/* Navigation */}
@@ -319,19 +316,19 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         </nav>
 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full">
             <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
-              {companyLogoUrl ? (
-                <img src={companyLogoUrl} alt="Company Logo" className="w-full h-full object-cover" />
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
               ) : (
-                orgName ? orgName.substring(0, 2).toUpperCase() : (role === 'company' ? 'CC' : role === 'employee' ? 'EP' : userInitials)
+                userInitials
               )}
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-white truncate w-[130px]" title={orgName}>
-                {orgName}
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-medium text-white truncate w-full" title={user?.username || 'User'}>
+                {user?.username || 'User'}
               </span>
-              <span className="text-[10px] text-gray-400">{role === 'company' ? 'Company' : role === 'employee' ? 'Employee' : 'Admin'}</span>
+              <span className="text-[10px] text-gray-400 truncate">{(user as any)?.designation || 'Employee'}</span>
             </div>
           </div>
         </div>
