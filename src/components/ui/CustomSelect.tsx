@@ -15,10 +15,11 @@ interface CustomSelectProps {
   isLoading?: boolean;
   loadingText?: string;
   emptyText?: string;
+  placeholder?: string;
   className?: string;
 }
 
-export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, className }: CustomSelectProps) {
+export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, placeholder, className }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
   const selectedLabel = options.find(opt => getOptionValue(opt) === value);
   const displayLabel = selectedLabel 
     ? getOptionLabel(selectedLabel) 
-    : (isLoading ? (loadingText || "Loading...") : (value || "Select..."));
+    : (isLoading ? (loadingText || "Loading...") : (value || placeholder || "Select..."));
 
   const updatePosition = () => {
     if (dropdownRef.current) {

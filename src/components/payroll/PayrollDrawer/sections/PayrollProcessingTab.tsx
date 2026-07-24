@@ -5,7 +5,7 @@ import CustomSelect from '../../../ui/CustomSelect';
 import type { PayrollFormValues } from '../validators/payrollValidation';
 import { Users, Calculator, Wallet, Coins } from 'lucide-react';
 import { formStyles } from '../../../ui/form-styles';
-import CustomDatePicker from '../../../ui/CustomDatePicker';
+import CustomMonthPicker from '../../../ui/CustomMonthPicker';
 
 interface Props {
   readOnly?: boolean;
@@ -36,9 +36,10 @@ export default function PayrollProcessingTab({ readOnly }: Props) {
             <label className={formStyles.label}>
               Payroll Period *
             </label>
-            <CustomDatePicker
+            <CustomMonthPicker
               name="payrollProcessing.payrollPeriod"
               disabled={readOnly}
+              hasError={!!errors.payrollProcessing?.payrollPeriod}
             />
             {errors.payrollProcessing?.payrollPeriod && (
               <p className="text-xs text-red-500">{errors.payrollProcessing.payrollPeriod.message}</p>
