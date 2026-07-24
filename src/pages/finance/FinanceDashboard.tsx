@@ -16,7 +16,14 @@ const KPI_DATA = [
   { label: 'Profit (Est.)', value: '₹ 32,50,000', trend: '+22% vs last month', icon: IndianRupee, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10', isPositive: true },
 ];
 
-// Mock data is removed, data will be fetched from backend.
+const formatIndianCurrency = (num: number): string => {
+  if (num >= 10000000) {
+    return (num / 10000000).toFixed(2).replace(/\.00$/, '') + ' Cr';
+  } else if (num >= 100000) {
+    return (num / 100000).toFixed(2).replace(/\.00$/, '') + ' L';
+  }
+  return num.toLocaleString('en-IN');
+};
 
 export default function FinanceDashboard() {
   const { selectedCompanyId: companyId } = useAuth();
@@ -179,8 +186,8 @@ export default function FinanceDashboard() {
         {KPI_DATA.map((kpi, i) => {
           let displayValue = kpi.value;
           if (kpi.label === 'Active Projects') displayValue = projects.length.toString();
-          if (kpi.label === 'PO Value') displayValue = `₹ ${poTotal.toLocaleString('en-IN')}`;
-          if (kpi.label === 'Expenses') displayValue = `₹ ${expenseTotal.toLocaleString('en-IN')}`;
+          if (kpi.label === 'PO Value') displayValue = `₹ ${formatIndianCurrency(poTotal)}`;
+          if (kpi.label === 'Expenses') displayValue = `₹ ${formatIndianCurrency(expenseTotal)}`;
           if (kpi.label === 'Profit (Est.)' || kpi.label === 'Project Value') displayValue = 'N/A';
           
           return (

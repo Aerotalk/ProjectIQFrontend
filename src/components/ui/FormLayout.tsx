@@ -8,15 +8,25 @@ import { formStyles } from "./form-styles"
 export function FormSection({
   className,
   title,
+  description,
   children,
   ...props
-}: React.ComponentProps<"div"> & { title?: React.ReactNode }) {
+}: React.ComponentProps<"div"> & { title?: React.ReactNode, description?: React.ReactNode }) {
   return (
     <div className={cn("space-y-4", className)} {...props}>
-      {title && (
-        <h3 className={formStyles.sectionTitle}>
-          {title}
-        </h3>
+      {(title || description) && (
+        <div className="mb-4">
+          {title && (
+            <h3 className={formStyles.sectionTitle}>
+              {title}
+            </h3>
+          )}
+          {description && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {description}
+            </p>
+          )}
+        </div>
       )}
       {children}
     </div>
