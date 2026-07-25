@@ -28,13 +28,13 @@ export default function PayrollDashboard() {
  
  <div className="flex flex-wrap items-center gap-2">
  <button 
- onClick={() => navigate('/companydashboard/payroll/list')}
+ onClick={() => navigate('/companydashboard/hrms/payroll/list')}
  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm font-medium shadow-sm"
  >
  <Users size={16} />
  View All Payrolls
  </button>
- <button onClick={() => navigate('/companydashboard/payroll/list')} className="flex items-center gap-2 px-4 py-2 bg-[#792359] text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
+ <button onClick={() => navigate('/companydashboard/hrms/payroll/list')} className="flex items-center gap-2 px-4 py-2 bg-[#792359] text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
  <Plus size={16} />
  New Payroll Run
  </button>
@@ -70,7 +70,7 @@ export default function PayrollDashboard() {
  { label: 'Payslip Templates', icon: FileImage, color: 'text-indigo-500' },
  { label: 'Configuration', icon: Settings, color: 'text-teal-500' }
  ].map((action, i) => (
- <button key={i} onClick={() => navigate('/companydashboard/payroll/list')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-md border border-gray-200 dark:border-gray-800 hover:border-[#792359]/30 hover:bg-[#792359]/5 transition-all group">
+ <button key={i} onClick={() => navigate('/companydashboard/hrms/payroll/list')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-md border border-gray-200 dark:border-gray-800 hover:border-[#792359]/30 hover:bg-[#792359]/5 transition-all group">
  <div className={`w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-[#1f2229] shadow-sm ${action.color}`}>
  <action.icon size={20} />
  </div>
@@ -124,7 +124,7 @@ export default function PayrollDashboard() {
  <span className="px-2.5 py-1 text-[10px] font-bold rounded-md bg-green-50 border border-green-200 text-green-700 dark:bg-green-500/10 dark:border-green-500/20 dark:text-green-400 uppercase tracking-wider">Processed</span>
  </td>
  <td className="px-6 py-4 text-right ">
- <button onClick={() => navigate('/companydashboard/payroll/list')} className="text-[#792359] dark:text-[#e6a8d0] hover:underline font-medium text-xs bg-[#792359]/5 px-3 py-1.5 rounded-md">View Details</button>
+ <button onClick={() => navigate('/companydashboard/hrms/payroll/list')} className="text-[#792359] dark:text-[#e6a8d0] hover:underline font-medium text-xs bg-[#792359]/5 px-3 py-1.5 rounded-md">View Details</button>
  </td>
  </tr>
  <tr className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group">
@@ -136,7 +136,7 @@ export default function PayrollDashboard() {
  <span className="px-2.5 py-1 text-[10px] font-bold rounded-md bg-orange-50 border border-orange-200 text-orange-700 dark:bg-orange-500/10 dark:border-orange-500/20 dark:text-orange-400 uppercase tracking-wider">Processing</span>
  </td>
  <td className="px-6 py-4 text-right ">
- <button onClick={() => navigate('/companydashboard/payroll/list')} className="text-[#792359] dark:text-[#e6a8d0] hover:underline font-medium text-xs bg-[#792359]/5 px-3 py-1.5 rounded-md">View Details</button>
+ <button onClick={() => navigate('/companydashboard/hrms/payroll/list')} className="text-[#792359] dark:text-[#e6a8d0] hover:underline font-medium text-xs bg-[#792359]/5 px-3 py-1.5 rounded-md">View Details</button>
  </td>
  </tr>
  </tbody>

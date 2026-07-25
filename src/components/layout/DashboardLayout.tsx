@@ -140,7 +140,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         { name: 'Employee Directory', path: `${basePath}/employees`, permission: 'employee.view' },
         { name: 'Departments', path: `${basePath}/departments`, permission: 'department.view' },
         { name: 'Designations', path: `${basePath}/designations`, permission: 'designation.view' },
-        { name: 'Payroll', path: `${basePath}/payroll`, permission: 'employee.view' }
+        { name: 'Payroll', path: `${basePath}/hrms/payroll`, permission: 'employee.view' },
+        { name: 'Workforce', path: `${basePath}/hrms/workforce`, permission: 'employee.view' }
       ]
     },
     {
