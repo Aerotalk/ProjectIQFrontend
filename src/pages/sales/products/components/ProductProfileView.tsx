@@ -4,7 +4,6 @@ import {
 } from 'lucide-react';
 import type { Product } from '../../../../types/product.types';
 import { ProductService } from '../../../../services/product.service';
-import { HSN_SAC_CODES } from '../../../../data/hsnCodes';
 
 interface Props {
   product: Product;

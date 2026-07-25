@@ -272,7 +272,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                     <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No Commercial Settings</h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Set credit limits and terms.</p>
                   </div>
-                  <button onClick={() => onEdit && onEdit('commercial-settings')} className="mt-2 px-4 py-1.5 bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-md text-xs font-medium transition-colors">
+                  <button onClick={() => onEdit && onEdit()} className="mt-2 px-4 py-1.5 bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-md text-xs font-medium transition-colors">
                     Configure Settings
                   </button>
                 </div>

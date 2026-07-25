@@ -84,9 +84,6 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
  .filter(po => po.status === 'Ordered' || po.status === 'Partially Received')
  .reduce((sum, po) => sum + (po.grandTotal || 0), 0);
 
- // SVG Chart: Expense History (Last 6 Months representation)
- const months = ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
- const barHeights = [35, 60, 45, 80, 50, 90];
 
  return (
  <div className="w-full bg-gray-50 dark:bg-[#0a0a0a] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col min-h-[calc(100vh-8rem)] overflow-hidden transition-colors duration-300">

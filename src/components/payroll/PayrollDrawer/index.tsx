@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
 import { usePayrollForm } from './hooks/usePayrollForm';
