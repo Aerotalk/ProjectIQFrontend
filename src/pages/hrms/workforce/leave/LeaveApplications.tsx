@@ -51,7 +51,7 @@ export default function LeaveApplications() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLeaveApplication(selectedApp.id, newData),
+    (newData: any) => WorkforceService.updateLeaveApplication(selectedApp?.id, newData),
     {
       onSuccess: () => {
         refresh();

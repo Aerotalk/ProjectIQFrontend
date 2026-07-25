@@ -25,7 +25,7 @@ export default function AttendanceSchemes() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateAttendanceScheme(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateAttendanceScheme(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

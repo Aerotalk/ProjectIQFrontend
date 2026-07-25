@@ -25,7 +25,7 @@ export default function Regularization() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateRegularization(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateRegularization(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

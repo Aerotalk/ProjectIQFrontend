@@ -25,7 +25,7 @@ export default function LockConfig() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLockConfig(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateLockConfig(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

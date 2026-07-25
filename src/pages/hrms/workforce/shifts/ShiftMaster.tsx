@@ -25,7 +25,7 @@ export default function ShiftMaster() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateShift(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateShift(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

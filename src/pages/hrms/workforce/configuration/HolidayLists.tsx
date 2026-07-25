@@ -25,7 +25,7 @@ export default function HolidayLists() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateHolidayList(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateHolidayList(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

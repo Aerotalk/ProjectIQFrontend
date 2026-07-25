@@ -25,7 +25,7 @@ export default function ShiftRotation() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateShiftRotation(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateShiftRotation(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();
