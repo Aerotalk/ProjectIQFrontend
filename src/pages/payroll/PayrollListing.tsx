@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Filter, Eye, Edit, ArrowLeft, Loader2, X } from 'lucide-react';
+import { Search, Plus, Filter, Edit, ArrowLeft, Loader2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PayrollDrawer from '../../components/payroll/PayrollDrawer';
 import PayrollProfileView from '../../components/payroll/PayrollProfileView';

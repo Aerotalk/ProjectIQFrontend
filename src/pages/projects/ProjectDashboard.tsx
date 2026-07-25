@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar, Users, AlertCircle } from 'lucide-react';
+import { Search, Plus, MoreVertical, FolderKanban, Filter, Briefcase, Calendar, Users } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { ProjectService } from '../../services/project.service';

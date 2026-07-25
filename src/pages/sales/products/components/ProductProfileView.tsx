@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  X, Edit, Box, DollarSign, FileText, 
-  Tag, Info
+  X, Edit, Box, DollarSign, Info
 } from 'lucide-react';
 import type { Product } from '../../../../types/product.types';
 import { ProductService } from '../../../../services/product.service';

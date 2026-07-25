@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
- X, Edit, Building, MapPin, Activity, FileText, 
+ X, Edit, MapPin, Activity, FileText, 
  MessageSquare, TrendingUp, CreditCard, User, Settings, Cpu, Mail, Phone, ExternalLink, Plus, Building2
 } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
@@ -123,7 +123,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
  {/* Action Controls */}
  <div className="flex items-center gap-3">
  <button
- onClick={onEdit}
+ onClick={() => onEdit()}
  className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
  >
  <Edit size={16} className="text-gray-500" /> 

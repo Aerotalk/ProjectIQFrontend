@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
-  ArrowLeft, Edit, FileText, Users, DollarSign, Plus, 
-  Upload, Eye, CheckCircle2, MessageSquare, 
+  Edit, FileText, Users, DollarSign, Plus, 
+  CheckCircle2, MessageSquare, 
   Building2, X, ShoppingBag, Download, 
   TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2,
   FileImage, FileSpreadsheet, File, Activity
@@ -65,8 +65,7 @@ const getFileIcon = (mimeType?: string, fileName?: string) => {
 };
 
 export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
-  const navigate = useNavigate();
-  const { selectedCompanyId } = useAuth();
+    const { selectedCompanyId } = useAuth();
   const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId || null });
   const { clients } = useClients({ companyId: selectedCompanyId || null });
   

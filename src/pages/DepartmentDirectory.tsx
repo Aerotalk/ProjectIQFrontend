@@ -1,7 +1,7 @@
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Search, Plus, Trash2, Edit2, Loader2, Users, Building2 } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Loader2, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Department {
