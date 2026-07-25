@@ -25,6 +25,7 @@ export default function VendorsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [drawerScrollSection, setDrawerScrollSection] = useState<string | null>(null);
   
   const [vendorToArchive, setVendorToArchive] = useState<Vendor | null>(null);
 
@@ -54,11 +55,12 @@ export default function VendorsList() {
     setOpenDropdownId(null);
   };
 
-  const openDrawer = (mode: 'create' | 'edit' | 'view', vendor?: Vendor) => {
+  const openDrawer = (mode: 'create' | 'edit' | 'view', vendor?: Vendor, section?: string) => {
     setDrawerMode(mode);
     setSelectedVendor(vendor || null);
     setIsDrawerOpen(true);
     setOpenDropdownId(null);
+    setDrawerScrollSection(section || null);
   };
 
   const filteredVendors = vendors.filter(v => 
@@ -79,7 +81,7 @@ export default function VendorsList() {
           <VendorProfileView 
             vendor={selectedVendor!} 
             onClose={() => setIsDrawerOpen(false)}
-            onEdit={() => setDrawerMode('edit')}
+            onEdit={(section) => openDrawer('edit', selectedVendor!, section)}
           />
         ) : (
           <VendorDrawer 
@@ -90,6 +92,7 @@ export default function VendorsList() {
             vendorId={selectedVendor?.id}
             onSave={handleSaveVendor}
             isSubmitting={isSubmitting}
+            scrollToSection={drawerScrollSection}
           />
         )}
       </div>

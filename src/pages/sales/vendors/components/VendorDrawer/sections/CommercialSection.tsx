@@ -12,7 +12,7 @@ export default function CommercialSection({ readOnly }: Props) {
   const { register, control } = useFormContext();
 
   return (
-    <FormSection title="Part E — Commercial Settings">
+    <FormSection title="Part E — Commercial Settings" id="commercial-settings">
       <FormGrid>
         <div>
           <label className={formStyles.label}>Payment Terms</label>

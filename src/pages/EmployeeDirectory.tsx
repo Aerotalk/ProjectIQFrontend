@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Search, Plus, User, Mail, Briefcase, Trash2, Edit2, Loader2, MapPin } from 'lucide-react';
+import { Search, Plus, User, Mail, Briefcase, Trash2, Edit2, Loader2, MapPin, Eye } from 'lucide-react';
 import CustomSelect from '@/components/ui/CustomSelect';
 import EmployeeDrawer from '../components/employee/EmployeeDrawer';
+import EmployeeProfileView from '../components/employee/EmployeeProfileView';
 import type { EmployeeFormValues } from '../components/employee/EmployeeDrawer/validators/employeeValidation';
 import toast from 'react-hot-toast';
 
@@ -32,6 +33,7 @@ export default function EmployeeDirectory() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     fetchEmployees();
@@ -114,6 +116,21 @@ export default function EmployeeDirectory() {
     );
   }
 
+  if (viewingEmployee) {
+    return (
+      <div className="max-w-[1400px] mx-auto animate-in fade-in zoom-in-95 duration-300">
+        <EmployeeProfileView
+          employee={viewingEmployee}
+          onClose={() => setViewingEmployee(null)}
+          onEdit={() => {
+            setViewingEmployee(null);
+            openDrawer('edit', viewingEmployee);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -189,61 +206,62 @@ export default function EmployeeDirectory() {
           <p className="text-gray-500 max-w-sm">We couldn't find any employees matching your search criteria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredEmployees.map((emp) => (
-            <div key={emp.id} className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col hover:-translate-y-1">
-              <div className="h-20 bg-gradient-to-r from-[#792359]/10 to-[#e6a8d0]/10 dark:from-[#792359]/20 dark:to-transparent w-full"></div>
-
-              <div className="px-5 pb-5 flex-1 flex flex-col">
-                <div className="relative -mt-10 mb-3 flex justify-between items-start">
-                  <div className="w-20 h-20 bg-white dark:bg-[#181a1f] rounded-full p-1 shadow-sm">
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-[#792359] to-[#b8458f] flex items-center justify-center text-white text-xl font-bold border border-white/10">
-                      {emp.firstName.charAt(0)}{emp.lastName.charAt(0)}
-                    </div>
+            <div key={emp.id} className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col p-5">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#792359] to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
+                    {emp.firstName.charAt(0)}{emp.lastName.charAt(0)}
                   </div>
-
-                  <div className={`px-2 py-0.5 mt-10 rounded-sm text-[10px] font-bold uppercase tracking-wider ${emp.employmentStatus === 'ACTIVE' || !emp.employmentStatus
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>
-                    {emp.employmentStatus || 'Active'}
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                      {emp.firstName} {emp.middleName ? emp.middleName + ' ' : ''}{emp.lastName}
+                    </h3>
+                    <p className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] truncate">
+                      {emp.designation?.designationName || 'No Designation'}
+                    </p>
                   </div>
                 </div>
-
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-1">
-                  {emp.firstName} {emp.middleName ? emp.middleName + ' ' : ''}{emp.lastName}
-                </h3>
-
-                <p className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0] mb-4">
-                  {emp.designation?.designationName || 'No Designation'}
-                </p>
-
-                <div className="space-y-2 mt-auto">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <Briefcase size={14} className="text-gray-400" />
-                    <span className="truncate">{emp.department?.departmentName || 'No Department'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <MapPin size={14} className="text-gray-400" />
-                    <span className="truncate">EMP: {emp.employeeCode || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <Mail size={14} className="text-gray-400" />
-                    <span className="truncate" title={emp.user?.email}>{emp.user?.email || 'No Email Linked'}</span>
-                  </div>
+                <div className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider shrink-0 ${emp.employmentStatus === 'ACTIVE' || !emp.employmentStatus
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                  }`}>
+                  {emp.employmentStatus || 'Active'}
                 </div>
+              </div>
 
-                <div className="mt-5 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2">
-                  <button 
-                    onClick={() => openDrawer('edit', emp)}
-                    className="flex-1 py-1.5 flex justify-center items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-[#792359]/5 dark:hover:bg-white/5 rounded-sm transition-colors"
-                  >
-                    <Edit2 size={14} /> Edit
-                  </button>
-                  <button className="flex-1 py-1.5 flex justify-center items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-sm transition-colors">
-                    <Trash2 size={14} /> Delete
-                  </button>
+              <div className="space-y-2 mb-5 flex-1">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <Briefcase size={14} className="text-gray-400 shrink-0" />
+                  <span className="truncate">{emp.department?.departmentName || 'No Department'}</span>
                 </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <MapPin size={14} className="text-gray-400 shrink-0" />
+                  <span className="truncate">EMP: {emp.employeeCode || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <Mail size={14} className="text-gray-400 shrink-0" />
+                  <span className="truncate" title={emp.user?.email}>{emp.user?.email || 'No Email Linked'}</span>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-2">
+                <button 
+                  onClick={() => setViewingEmployee(emp)}
+                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                >
+                  <Eye size={14} /> View
+                </button>
+                <button 
+                  onClick={() => openDrawer('edit', emp)}
+                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                >
+                  <Edit2 size={14} /> Edit
+                </button>
+                <button className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                  <Trash2 size={14} /> Delete
+                </button>
               </div>
             </div>
           ))}

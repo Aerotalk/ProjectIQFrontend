@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { PaymentService } from '../../services/payment.service';
 import type { PaymentRecord } from '../../types/payment.types';
 import PaymentDrawer from './payment/components/PaymentDrawer';
+import PaymentProfileView from './payment/components/PaymentProfileView';
 import type { PaymentFormValues } from './payment/validators/paymentValidation';
 import { useProjects } from '../../hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -170,6 +171,18 @@ export default function PaymentManagement() {
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   if (isDrawerOpen) {
+    if (drawerMode === 'view' && selectedPayment) {
+      return (
+        <div className="max-w-[1400px] mx-auto pb-12">
+          <PaymentProfileView 
+            payment={selectedPayment}
+            onClose={() => setIsDrawerOpen(false)}
+            onEdit={() => setDrawerMode('edit')}
+          />
+        </div>
+      );
+    }
+    
     return (
       <div className="max-w-[1400px] mx-auto pb-12">
         <PaymentDrawer

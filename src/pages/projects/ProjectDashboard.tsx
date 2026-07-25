@@ -219,7 +219,7 @@ export default function ProjectDashboard() {
       {/* Top Stat Summary Cards */}
       {!isLoading && projects.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg p-5 shadow-xs flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-[#792359]/10 text-[#792359] dark:text-[#c44997] flex items-center justify-center shrink-0">
               <FolderKanban size={22} />
             </div>
@@ -228,7 +228,7 @@ export default function ProjectDashboard() {
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-0.5">{projects.length}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg p-5 shadow-xs flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <Briefcase size={22} />
             </div>
@@ -239,7 +239,7 @@ export default function ProjectDashboard() {
               </p>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg p-5 shadow-xs flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Users size={22} />
             </div>
@@ -261,7 +261,7 @@ export default function ProjectDashboard() {
             <div 
               key={p.id} 
               onClick={() => handleView(p)}
-              className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 hover:border-[#792359] dark:hover:border-[#c44997] rounded-xl hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
+              className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 hover:border-[#792359] dark:hover:border-[#c44997] rounded-lg hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
             >
               <div className="p-5 flex flex-col h-full relative space-y-4">
                 
@@ -306,24 +306,30 @@ export default function ProjectDashboard() {
                 </div>
 
                 {/* Client & Vendors */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    <Briefcase size={14} className="text-gray-400" />
-                    CLIENT: <span className="text-gray-800 dark:text-gray-200 ml-1">
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
+                  <div>
+                    <span className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Client</span>
+                    <span className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate block pr-2" title={clients.find(c => c.id === p.client)?.displayName || clients.find(c => c.id === p.client)?.companyName || p.client || 'N/A'}>
                       {clients.find(c => c.id === p.client)?.displayName || clients.find(c => c.id === p.client)?.companyName || p.client || 'N/A'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    <FolderKanban size={14} className="text-gray-400" />
-                    VENDORS: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.assignedVendors?.length ? `${p.assignedVendors.length} Assigned` : 'None'}</span>
+                  <div>
+                    <span className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Vendors</span>
+                    <span className="text-xs font-medium text-gray-900 dark:text-gray-100 block">
+                      {p.assignedVendors?.length || '0'} Assigned
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    <Users size={14} className="text-gray-400" />
-                    ENTITIES (EMPLOYEES): <span className="text-gray-800 dark:text-gray-200 ml-1">{p.assignedEntities?.length ? `${p.assignedEntities.length} Assigned` : 'None'}</span>
+                  <div>
+                    <span className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Entities</span>
+                    <span className="text-xs font-medium text-gray-900 dark:text-gray-100 block">
+                      {p.assignedEntities?.length || '0'} Assigned
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    <AlertCircle size={14} className="text-gray-400" />
-                    INCIDENTS: <span className="text-gray-800 dark:text-gray-200 ml-1">{p.linkedIncidents?.length ? `${p.linkedIncidents.length} Reported` : 'None'}</span>
+                  <div>
+                    <span className="block text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Incidents</span>
+                    <span className="text-xs font-medium text-gray-900 dark:text-gray-100 block">
+                      {p.linkedIncidents?.length || '0'} Reported
+                    </span>
                   </div>
                 </div>
 
@@ -352,7 +358,7 @@ export default function ProjectDashboard() {
                     <Calendar size={14} className="text-gray-400" />
                     <span>Due: {p.expectedEndDate ? new Date(p.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }} className="text-xs font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                  <button onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }} className="text-xs font-semibold text-[#792359] hover:text-[#52173c] dark:text-[#e6a8d0] dark:hover:text-[#f4d1e8] transition-colors">
                     Quick Glance
                   </button>
                 </div>
@@ -361,7 +367,7 @@ export default function ProjectDashboard() {
             </div>
           ))}
           {filteredProjects.length === 0 && (
-            <div className="col-span-full py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-[#181a1f] border border-dashed border-gray-300 dark:border-white/10 rounded-xl">
+            <div className="col-span-full py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-[#181a1f] border border-dashed border-gray-300 dark:border-white/10 rounded-lg">
               No projects found.
             </div>
           )}

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Edit } from 'lucide-react';
+import { 
+  X, Edit, Box, DollarSign, FileText, 
+  Tag, Info
+} from 'lucide-react';
 import type { Product } from '../../../../types/product.types';
 import { ProductService } from '../../../../services/product.service';
 import { HSN_SAC_CODES } from '../../../../data/hsnCodes';
@@ -12,6 +15,7 @@ interface Props {
 
 export default function ProductProfileView({ product: initialProduct, onClose, onEdit }: Props) {
   const [product, setProduct] = useState<Product>(initialProduct);
+  const [activeTab, setActiveTab] = useState<'overview'>('overview');
 
   useEffect(() => {
     if (initialProduct.id) {
@@ -22,118 +26,164 @@ export default function ProductProfileView({ product: initialProduct, onClose, o
   }, [initialProduct.id]);
 
   return (
-    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
-      {/* Header */}
-      <div className="px-8 py-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] flex items-center justify-center rounded-sm border border-[#792359]/10 dark:border-[#e6a8d0]/10 text-3xl font-bold">
+    <div className="w-full bg-gray-50 dark:bg-[#0a0a0a] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col min-h-[calc(100vh-8rem)] overflow-hidden transition-colors duration-300">
+      
+      {/* ── 1. Header Section ── */}
+      <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             {(product.itemName || 'P').charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               {product.itemName}
             </h2>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-white border border-gray-200 text-gray-800 dark:bg-transparent dark:text-gray-300 dark:border-white/20 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                 {product.itemCode || product.id}
               </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-[#792359]/10 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] border border-[#792359]/20 dark:border-[#e6a8d0]/20 shadow-sm">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/50">
                 {product.type}
               </span>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium border shadow-sm ${product.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}`}>
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${
+                product.status === 'Active' 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' 
+                  : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/50'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${product.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 {product.status}
               </span>
             </div>
           </div>
         </div>
+
+        {/* Action Controls */}
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={onEdit}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 dark:bg-transparent dark:border-white/20 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
           >
-            <Edit size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Edit Profile
+            <Edit size={16} className="text-gray-500" /> 
+            <span>Edit Profile</span>
           </button>
-          <button 
+          <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            className="p-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            title="Close"
           >
             <X size={20} />
           </button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12">
+      {/* ── 2. Navigation Tabs ── */}
+      <div className="px-6 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex items-center gap-8">
+        {[
+          { id: 'overview', label: 'Product Details', icon: <Box size={16} /> }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id 
+                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── 3. Profile Content Workspace ── */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        
+        {/* ── TABS CORE CONTENT: OVERVIEW ── */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* Left Column */}
-            <div className="space-y-12">
-              {/* Identity Details */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
-                  Identity Details
-                </h3>
-                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
-                  <div className="text-gray-500 dark:text-gray-400">Item Type</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium">{product.type}</div>
-                  
-                  <div className="text-gray-500 dark:text-gray-400">Item Name</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium">{product.itemName}</div>
-                  
-                  <div className="text-gray-500 dark:text-gray-400">Unit</div>
-                  <div className="text-gray-900 dark:text-gray-100">{product.unit}</div>
-
-                  {product.description && (
-                    <>
-                      <div className="text-gray-500 dark:text-gray-400">Description</div>
-                      <div className="text-gray-900 dark:text-gray-100">{product.description}</div>
-                    </>
-                  )}
+            {/* LEFT PROFILE COLUMN */}
+            <div className="lg:col-span-1 flex flex-col gap-6">
+              
+              {/* Identity Details Box */}
+              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Info className="text-gray-400" size={18} />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Identity Details</h4>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Product Type</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-200">{product.type}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Item Code</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-200">{product.itemCode || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Unit of Measure</span>
+                    <span className="text-sm text-gray-800 dark:text-gray-300">{product.unit}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Pricing Details */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
-                  Pricing Details
-                </h3>
-                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
-                  <div className="text-gray-500 dark:text-gray-400">Standard Rate</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium tracking-wide">₹ {product.standardRate?.toLocaleString('en-IN') || 0}</div>
-                </div>
-              </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-12">
-              {/* Taxation Section */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 border-b border-gray-200 dark:border-white/10 pb-3">
-                  Taxation Details
-                </h3>
-                <div className="grid grid-cols-[1fr_2fr] gap-y-5 text-sm">
-                  <div className="text-gray-500 dark:text-gray-400">GST Rate</div>
-                  <div className="text-gray-900 dark:text-gray-100 font-medium tracking-wide">{product.gstRate}</div>
+            {/* RIGHT COLUMN */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              
+              {/* Pricing & Taxation */}
+              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <DollarSign className="text-gray-400" size={18} />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pricing & Taxation</h4>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Selling Price</span>
+                      <span className="text-xl font-bold text-[#792359] dark:text-[#e6a8d0]">
+                        {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.standardRate)}
+                      </span>
+                    </div>
+                    {product.description && (
+                      <div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Description</span>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">{product.description}</p>
+                      </div>
+                    )}
+                  </div>
                   
-                  {product.hsnSac && (
-                    <>
-                      <div className="text-gray-500 dark:text-gray-400">HSN/SAC Code</div>
-                      <div className="text-gray-900 dark:text-gray-100 tracking-wide">{product.hsnSac}</div>
-                    </>
-                  )}
-                  {(product.hsnDescription || (product.hsnSac && HSN_SAC_CODES.find(c => c.value === product.hsnSac)?.label.split(' - ')[1])) && (
-                    <>
-                      <div className="text-gray-500 dark:text-gray-400">HSN Description</div>
-                      <div className="text-gray-900 dark:text-gray-100">{product.hsnDescription || HSN_SAC_CODES.find(c => c.value === product.hsnSac)?.label.split(' - ')[1]}</div>
-                    </>
-                  )}
+                  <div className="space-y-4 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 pt-4 md:pt-0 md:pl-8">
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Tax Preference</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-200">{product.gstRate !== '0' ? 'Taxable' : 'Non-Taxable'}</span>
+                    </div>
+                    
+                    {product.gstRate !== '0' && product.hsnSac && (
+                      <>
+                        <div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">HSN/SAC Code</span>
+                          <span className="text-sm font-mono text-gray-800 dark:text-gray-300">{product.hsnSac}</span>
+                        </div>
+                        <div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Applicable Tax</span>
+                          <span className="text-sm text-gray-800 dark:text-gray-300">
+                            GST {product.gstRate}%
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              
+
             </div>
           </div>
-        </div>
+        )}
+
       </div>
     </div>
   );

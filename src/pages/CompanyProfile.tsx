@@ -338,7 +338,8 @@ export default function CompanyProfile() {
         </div>
       </div>
 
-      <form id="profile-form" onSubmit={handleSubmit} className="space-y-6 pb-12">
+      <div className="bg-white dark:bg-[#181a1f] rounded-xl border border-gray-200 dark:border-white/10 shadow-sm p-6 lg:p-8">
+        <form id="profile-form" onSubmit={handleSubmit} className="space-y-10 pb-4">
 
         {/* ── Company Details ── 3-col grid */}
         <FormSection title="Company Details">
@@ -539,7 +540,8 @@ export default function CompanyProfile() {
           </div>
         </FormSection>
 
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

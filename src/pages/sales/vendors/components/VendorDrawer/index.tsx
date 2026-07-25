@@ -20,9 +20,10 @@ interface Props {
   initialData?: Partial<VendorFormValues>;
   vendorId?: string;
   isSubmitting?: boolean;
+  scrollToSection?: string | null;
 }
 
-export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialData, vendorId, isSubmitting }: Props) {
+export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialData, vendorId, isSubmitting, scrollToSection }: Props) {
   const form = useVendorForm(initialData);
 
   // Reset form when drawer opens/closes or initialData changes
@@ -55,6 +56,17 @@ export default function VendorDrawer({ isOpen, onClose, onSave, mode, initialDat
       });
     }
   }, [isOpen, initialData, form]);
+
+  React.useEffect(() => {
+    if (isOpen && mode === 'edit' && scrollToSection) {
+      setTimeout(() => {
+        const element = document.getElementById(scrollToSection);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100); // small delay to ensure DOM is ready
+    }
+  }, [isOpen, mode, scrollToSection]);
 
   if (!isOpen) return null;
 

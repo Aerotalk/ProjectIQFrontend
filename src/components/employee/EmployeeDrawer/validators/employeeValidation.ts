@@ -31,7 +31,7 @@ export const familySchema = z.object({
   phone: z.string().optional(),
 });
 
-export const employeeFormSchema = z.object({
+const baseEmployeeFormSchema = z.object({
   // Tab 1 - Basic Info - Personal
   firstName: z.string().min(1, 'First Name is required'),
   middleName: z.string().optional(),
@@ -161,9 +161,12 @@ export const employeeFormSchema = z.object({
 
   // Meta fields
   employmentStatus: z.string().default('ACTIVE'),
-}).refine(data => !data.confirmAccountNumber || data.accountNumber === data.confirmAccountNumber, {
+});
+
+export const employeeFormSchema = baseEmployeeFormSchema.refine(data => !data.confirmAccountNumber || data.accountNumber === data.confirmAccountNumber, {
   message: "Account numbers don't match",
   path: ["confirmAccountNumber"]
 });
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>;
+export const editEmployeeFormSchema = baseEmployeeFormSchema.partial();

@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   Shield,
   Building2,
-  FolderKanban
+  FolderKanban,
+  Menu,
+  X
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -24,6 +26,7 @@ import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import { useBreadcrumbContext } from '../../contexts/BreadcrumbContext';
 
 export default function DashboardLayout({ children, role = 'org' }: { children: React.ReactNode, role?: 'org' | 'company' | 'employee' }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Sales');
@@ -251,10 +254,34 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         </div>
       </div>
 
-      {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
-      <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
+      {/* Floating Toggle Button (visible when sidebar is closed) */}
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className={`fixed left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full shadow-lg text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 ${
+          isSidebarOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
+        }`}
+        title="Open Sidebar"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Sidebar - Floating Card Style */}
+      <aside 
+        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-[#792359]/30 shadow-2xl shadow-[#792359]/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${
+          isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Toggle Close Button */}
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="absolute -right-3 top-6 w-7 h-7 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-gray-500 hover:text-[#792359] hover:scale-110 shadow-md transition-all z-50 cursor-pointer"
+          title="Close Sidebar"
+        >
+          <X size={14} />
+        </button>
+
         {/* Logo Area */}
-        <div className="h-16 w-full flex items-center justify-center p-3 border-b border-white/5 bg-black/10 box-border overflow-hidden">
+        <div className="h-16 w-full flex items-center justify-center p-3 border-b border-white/5 bg-black/10 box-border overflow-hidden rounded-t-2xl">
           {companyLogoUrl && role === 'company' ? (
             <img src={companyLogoUrl} alt={`${orgName} Logo`} className="w-full h-full object-contain rounded-sm shadow-sm" />
           ) : (
@@ -315,7 +342,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
+        <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between rounded-b-2xl">
           <div className="flex items-center gap-3 w-full">
             <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
               {avatarUrl ? (
@@ -335,10 +362,14 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-[220px] xl:ml-[260px] flex flex-col min-h-screen min-w-0">
+      <div 
+        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'ml-[252px] xl:ml-[292px]' : 'ml-[72px]'
+        }`}
+      >
 
-        {/* Top Header - Clean, subtle border, highly professional */}
-        <header className="h-16 bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 xl:px-8 sticky top-0 z-10 transition-colors duration-200">
+        {/* Top Header - Floating Card Style */}
+        <header className="h-16 mt-4 mx-4 lg:mx-6 xl:mx-8 bg-white/95 dark:bg-[#181a1f]/95 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl shadow-md flex items-center justify-between px-4 lg:px-6 xl:px-8 sticky top-4 z-20 transition-colors duration-200">
 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
             <Link to={basePath} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</Link>

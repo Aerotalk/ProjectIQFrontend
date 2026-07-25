@@ -12,7 +12,7 @@ export default function BankDetailsSection({ readOnly }: Props) {
   const bankErrors = (errors as any)?.bankDetails;
 
   return (
-    <FormSection title="Bank Details">
+    <FormSection title="Bank Details" id="bank-details">
       <FormGrid>
         <div>
           <label className={formStyles.label}>Account Name</label>

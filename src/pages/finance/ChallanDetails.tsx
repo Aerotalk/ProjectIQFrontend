@@ -433,30 +433,35 @@ export default function ChallanDetails() {
 
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
         {/* Stepper */}
-        <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-          <div className="relative flex justify-between">
-            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 dark:bg-white/10 -translate-y-1/2 z-0"></div>
+        <div className="p-8 border-b border-gray-200 dark:border-white/5 bg-gray-50/10 dark:bg-transparent">
+          <div className="relative flex justify-between max-w-4xl mx-auto">
+            {/* Background Line */}
+            <div className="absolute top-5 left-0 w-full h-[2px] bg-gray-200 dark:bg-gray-800 -translate-y-1/2 z-0"></div>
+            {/* Active Line */}
             <div
-              className="absolute top-1/2 left-0 h-[2px] bg-[#792359] dark:bg-[#e6a8d0] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
+              className="absolute top-5 left-0 h-[2px] bg-[#792359] dark:bg-[#792359] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
               style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
             ></div>
+            
             {stages.map((stage) => {
               const isActive = stage.id === currentStage;
               const isPast = stage.id < currentStage;
-              const isConverted = stage.id === 4 && currentStage === 4;
 
               return (
-                <div key={stage.id} className="relative z-10 flex flex-col items-center gap-3 bg-gray-50/50 dark:bg-transparent px-2">
+                <div key={stage.id} className="relative z-10 flex flex-col items-center gap-3 bg-white dark:bg-[#181a1f] px-2 w-32">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 border-2
-                      ${isPast || isActive ? 'bg-[#792359] border-[#792359] text-white' : 'bg-white dark:bg-[#181a1f] border-gray-300 dark:border-gray-600 text-gray-400'}
-                      ${isConverted ? 'bg-emerald-500 border-emerald-500 text-white' : ''}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300
+                      ${isPast || isActive 
+                        ? 'bg-[#792359] text-white' 
+                        : 'bg-white dark:bg-[#181a1f] border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300'
+                      }
+                      ${isActive ? 'ring-[6px] ring-[#792359]/10 dark:ring-[#792359]/20' : ''}
                     `}
                   >
-                    {(isPast || isConverted) ? <CheckCircle2 size={16} /> : stage.id}
+                    {stage.id}
                   </div>
-                  <span className={`text-xs font-semibold uppercase tracking-wider
-                    ${isActive ? 'text-[#792359] dark:text-[#e6a8d0]' : isPast || isConverted ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400'}
+                  <span className={`text-sm text-center
+                    ${isActive ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-500 dark:text-gray-400 font-medium'}
                   `}>
                     {stage.name}
                   </span>
