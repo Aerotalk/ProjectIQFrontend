@@ -25,7 +25,7 @@ export default function LeaveTypes() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLeaveType(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateLeaveType(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

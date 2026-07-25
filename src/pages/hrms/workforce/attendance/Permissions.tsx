@@ -25,7 +25,7 @@ export default function Permissions() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updatePermission(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updatePermission(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

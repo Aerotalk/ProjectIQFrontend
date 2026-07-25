@@ -27,7 +27,7 @@ export default function AttendanceWizardDrawer({ isOpen, onClose }: { isOpen: bo
   };
 
   const renderStep = () => {
-    switch (STEPS[currentStep].id) {
+    switch (STEPS[currentStep]?.id) {
       case 'select_period':
         return (
           <div className="space-y-6">

@@ -25,7 +25,7 @@ export default function LeaveSchemes() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLeaveScheme(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateLeaveScheme(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();

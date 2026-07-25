@@ -25,7 +25,7 @@ export default function IPMapping() {
   );
 
   const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateIPMapping(selectedItem.id, newData),
+    (newData: any) => WorkforceService.updateIPMapping(selectedItem?.id, newData),
     {
       onSuccess: () => {
         refresh();
