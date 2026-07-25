@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Search, Plus, Filter, Edit, ArrowLeft, Loader2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import PayrollDrawer from '../../components/payroll/PayrollDrawer';
-import PayrollProfileView from '../../components/payroll/PayrollProfileView';
-import type { PayrollFormValues } from '../../components/payroll/PayrollDrawer/validators/payrollValidation';
-import { usePayroll } from '../../hooks/usePayroll';
-import CustomSelect from '../../components/ui/CustomSelect';
-import CustomMonthPicker from '../../components/ui/CustomMonthPicker';
+import PayrollDrawer from '../../../components/payroll/PayrollDrawer';
+import PayrollProfileView from '../../../components/payroll/PayrollProfileView';
+import type { PayrollFormValues } from '../../../components/payroll/PayrollDrawer/validators/payrollValidation';
+import { usePayroll } from '../../../hooks/usePayroll';
+import CustomSelect from '../../../components/ui/CustomSelect';
+import CustomMonthPicker from '../../../components/ui/CustomMonthPicker';
 
 export default function PayrollListing() {
  const navigate = useNavigate();

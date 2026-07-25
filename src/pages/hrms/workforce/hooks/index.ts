@@ -1,0 +1,101 @@
+import { useState, useEffect, useCallback } from 'react';
+import { WorkforceService } from '../services';
+import type { PaginatedResponse } from '../types';
+import toast from 'react-hot-toast';
+
+// Generic Hook Factory for Data Fetching
+function useQuery<T>(fetcher: (params?: any) => Promise<PaginatedResponse<T>>, defaultParams?: any) {
+  const [data, setData] = useState<T[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [params, setParams] = useState(defaultParams || { page: 1, limit: 10 });
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetcher(params);
+      setData(res.data);
+      setTotal(res.totalCount);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+      toast.error('Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetcher, params]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const refresh = () => fetchData();
+
+  return { data, total, loading, error, params, setParams, refresh };
+}
+
+export function useMutation<TData, TVariables>(
+  mutationFn: (vars: TVariables) => Promise<TData>,
+  options?: { onSuccess?: (data: TData) => void; onError?: (error: Error) => void; successMessage?: string }
+) {
+  const [isMutating, setIsMutating] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const mutate = async (vars: TVariables) => {
+    setIsMutating(true);
+    setError(null);
+    try {
+      const result = await mutationFn(vars);
+      if (options?.successMessage) {
+        toast.success(options.successMessage);
+      }
+      if (options?.onSuccess) {
+        options.onSuccess(result);
+      }
+      return result;
+    } catch (err: any) {
+      setError(err);
+      toast.error(err.message || 'An error occurred during operation');
+      if (options?.onError) {
+        options.onError(err);
+      }
+      throw err;
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  return { mutate, isMutating, error };
+}
+
+// Custom Hooks
+export const useLeaveTypes = (params?: any) => useQuery(WorkforceService.getLeaveTypes, params);
+export const useLeaveSchemes = (params?: any) => useQuery(WorkforceService.getLeaveSchemes, params);
+export const useLeaveBalances = (params?: any) => useQuery(WorkforceService.getLeaveBalances, params);
+export const useLeaveApplications = (params?: any) => useQuery(WorkforceService.getLeaveApplications, params);
+export const useAttendanceRecords = (params?: any) => useQuery(WorkforceService.getAttendanceRecords, params);
+export const useShifts = (params?: any) => useQuery(WorkforceService.getShifts, params);
+export const useShiftRotations = (params?: any) => useQuery(WorkforceService.getShiftRotations, params);
+export const useHolidayLists = (params?: any) => useQuery(WorkforceService.getHolidayLists, params);
+export const useAttendanceSchemes = (params?: any) => useQuery(WorkforceService.getAttendanceSchemes, params);
+export const useIPMappings = (params?: any) => useQuery(WorkforceService.getIPMappings, params);
+export const useLockConfigs = (params?: any) => useQuery(WorkforceService.getLockConfigs, params);
+export const useRegularizations = (params?: any) => useQuery(WorkforceService.getRegularizations, params);
+export const usePermissions = (params?: any) => useQuery(WorkforceService.getPermissions, params);
+
+export const useDashboardKPIs = () => {
+  const [kpis, setKpis] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    WorkforceService.getDashboardKPIs().then(res => {
+      setKpis(res);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  return { kpis, loading };
+};

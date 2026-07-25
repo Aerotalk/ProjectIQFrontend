@@ -31,8 +31,9 @@ import ProjectDashboard from './projects/ProjectDashboard';
 import EmployeeDirectory from './EmployeeDirectory';
 import DepartmentDirectory from './DepartmentDirectory';
 import DesignationDirectory from './DesignationDirectory';
-import PayrollDashboard from './payroll/PayrollDashboard';
-import PayrollListing from './payroll/PayrollListing';
+import PayrollDashboard from './hrms/payroll/PayrollDashboard';
+import PayrollListing from './hrms/payroll/PayrollListing';
+import WorkforceMain from './hrms/workforce/WorkforceMain';
 
 function DefaultView() {
   return (
@@ -167,14 +168,19 @@ export default function CompanyDashboard() {
             <DesignationDirectory />
           </PermissionGate>
         } />
-        <Route path="/payroll" element={
+        <Route path="/hrms/payroll" element={
           <PermissionGate permission="employee.view">
             <PayrollDashboard />
           </PermissionGate>
         } />
-        <Route path="/payroll/list" element={
+        <Route path="/hrms/payroll/list" element={
           <PermissionGate permission="employee.view">
             <PayrollListing />
+          </PermissionGate>
+        } />
+        <Route path="/hrms/workforce/*" element={
+          <PermissionGate permission="employee.view">
+            <WorkforceMain />
           </PermissionGate>
         } />
         <Route path="*" element={<DefaultView />} />

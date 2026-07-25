@@ -48,12 +48,14 @@ export function FormGrid({
   columns = 2,
   children,
   ...props
-}: React.ComponentProps<"div"> & { columns?: 2 | 3 }) {
+}: React.ComponentProps<"div"> & { columns?: 1 | 2 | 3 }) {
   return (
     <div
       className={cn(
         "grid gap-6",
-        columns === 3
+        columns === 1
+          ? "grid-cols-1"
+          : columns === 3
           ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
           : "grid-cols-1 md:grid-cols-2",
         className
@@ -75,6 +77,32 @@ export function FormRow({ className, children, ...props }: React.ComponentProps<
   return (
     <div className={cn("col-span-full", className)} {...props}>
       {children}
+    </div>
+  )
+}
+
+export function FormLayout({ className, children, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div className={cn("space-y-6", className)} {...props}>
+      {children}
+    </div>
+  )
+}
+
+interface FormFieldProps extends React.ComponentProps<"div"> {
+  label: string;
+  error?: string;
+  required?: boolean;
+}
+
+export function FormField({ className, label, error, required, children, ...props }: FormFieldProps) {
+  return (
+    <div className={cn("space-y-1", className)} {...props}>
+      <label className={formStyles.label}>
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   )
 }
