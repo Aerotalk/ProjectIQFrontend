@@ -1,7 +1,6 @@
 
 import { 
   Target, 
-  TrendingUp, 
   Users, 
   CheckCircle2, 
   Clock, 
@@ -11,7 +10,6 @@ import {
 } from 'lucide-react';
 import { mockCycles, mockGoals, mockSelfReviews, mockManagerReviews } from '../mock/mockPerformanceData';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../../../components/ui/button';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 

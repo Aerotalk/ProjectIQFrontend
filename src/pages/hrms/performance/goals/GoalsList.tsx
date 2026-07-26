@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { Plus, Search, Filter, Edit, CheckCircle, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Edit, CheckCircle } from 'lucide-react';
 import { mockGoals } from '../mock/mockPerformanceData';
 import type { Goal } from '../types';
 import GoalDrawer from './GoalDrawer';

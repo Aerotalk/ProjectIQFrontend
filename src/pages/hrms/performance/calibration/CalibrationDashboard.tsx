@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { Button } from '../../../../components/ui/button';
 import { Search, Filter, CheckCircle, BarChart2 } from 'lucide-react';
 import { mockCalibrationRecords } from '../mock/mockPerformanceData';
 import type { CalibrationRecord } from '../types';

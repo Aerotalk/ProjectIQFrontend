@@ -25,7 +25,6 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const getOptionLabel = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.label;
   const getOptionValue = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.value;
