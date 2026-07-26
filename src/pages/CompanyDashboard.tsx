@@ -34,6 +34,8 @@ import DesignationDirectory from './DesignationDirectory';
 import PayrollDashboard from './hrms/payroll/PayrollDashboard';
 import PayrollListing from './hrms/payroll/PayrollListing';
 import WorkforceMain from './hrms/workforce/WorkforceMain';
+import ExpenseClaimsMain from './hrms/expense-claims/ExpenseClaimsMain';
+import PerformanceMain from './hrms/performance/PerformanceMain';
 
 function DefaultView() {
   return (
@@ -139,6 +141,16 @@ export default function CompanyDashboard() {
         <Route path="/finance/projects/:id" element={
           <PermissionGate permission="finance.projects.view">
             <ProjectFinanceDetails />
+          </PermissionGate>
+        } />
+        <Route path="/hrms/expense-claims/*" element={
+          <PermissionGate permission="employee.view">
+            <ExpenseClaimsMain />
+          </PermissionGate>
+        } />
+        <Route path="/hrms/performance/*" element={
+          <PermissionGate permission="employee.view">
+            <PerformanceMain />
           </PermissionGate>
         } />
         <Route path="/account" element={<CompanyProfile />} />

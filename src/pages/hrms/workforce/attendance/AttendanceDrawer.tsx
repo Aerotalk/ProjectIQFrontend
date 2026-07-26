@@ -19,12 +19,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-        onClick={onClose}
-      />
-      
-      <div className="fixed inset-y-0 right-0 w-[480px] bg-white dark:bg-[#181a1f] shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
+      <div className={`w-[360px] lg:w-[420px] bg-white dark:bg-[#181a1f] border-l border-gray-200 dark:border-white/10 shadow-lg flex flex-col transform transition-transform duration-300 overflow-hidden ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 absolute right-0'}`}>
         <div className="flex items-center justify-between p-5 lg:p-6 border-b border-gray-100 dark:border-white/5">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
