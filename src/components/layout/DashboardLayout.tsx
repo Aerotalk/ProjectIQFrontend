@@ -143,7 +143,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         { name: 'Payroll', path: `${basePath}/hrms/payroll`, permission: 'employee.view' },
         { name: 'Attendance Workforce', path: `${basePath}/hrms/workforce`, permission: 'employee.view' },
         { name: 'Expense Claims', path: `${basePath}/hrms/expense-claims`, permission: 'employee.view' },
-        { name: 'Employee Performance', path: `${basePath}/hrms/performance-analytics`, permission: 'employee.view' },
+        { name: 'Performance Management', path: `${basePath}/hrms/performance`, permission: 'employee.view' },
         { name: 'HR Settings', path: `${basePath}/hrms/hr-settings`, permission: 'employee.view' },
       ]
     },

@@ -1,10 +1,22 @@
 import { useMemo, useState } from 'react';
-import { format, parse, isValid } from 'date-fns';
-import { Calendar } from '../../../../components/ui/calendar';
+import { 
+  format, 
+  parse, 
+  isValid, 
+  startOfMonth, 
+  endOfMonth, 
+  startOfWeek, 
+  endOfWeek, 
+  eachDayOfInterval, 
+  isSameMonth, 
+  isToday, 
+  isWeekend 
+} from 'date-fns';
 import type { AttendanceRecord } from '../types';
 import { AttendanceStatus } from '../types';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import { Eye, Edit2, AlertCircle, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AttendanceCalendarProps {
   data: AttendanceRecord[];
@@ -17,7 +29,7 @@ const ActionMenu = ({ record, onAction }: { record: AttendanceRecord, onAction?:
   return (
     <div onClick={(e) => e.stopPropagation()}>
       <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-         <div className="w-48 bg-white dark:bg-[#181a1f] rounded-sm shadow-lg border border-gray-200 dark:border-white/10 py-1">
+         <div className="w-48 bg-white dark:bg-[#181a1f] rounded-sm shadow-lg border border-gray-200 dark:border-white/10 py-1 z-50 relative">
             <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'view')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Eye size={14} /> View Details</button>
             <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'edit')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Edit2 size={14} /> Edit Attendance</button>
             <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -37,6 +49,15 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
     const parsed = parse(monthYear, 'MMMM yyyy', new Date());
     return isValid(parsed) ? parsed : new Date();
   }, [monthYear]);
+
+  // Generate calendar grid days
+  const days = useMemo(() => {
+    const start = startOfWeek(startOfMonth(currentMonth));
+    const end = endOfWeek(endOfMonth(currentMonth));
+    return eachDayOfInterval({ start, end });
+  }, [currentMonth]);
+
+  const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const getStatusIcon = (status: AttendanceStatus | 'Weekend' | 'Late' | 'Regularized') => {
     switch (status) {
@@ -61,10 +82,7 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
     const isOT = record.overtimeHours && record.overtimeHours > 0;
 
     return (
-      <div 
-        className="flex flex-col h-full w-full p-2 outline-none"
-        tabIndex={0}
-      >
+      <div className="flex flex-col h-full w-full outline-none">
         <div className="flex w-full justify-between items-start mb-1">
            <span className="font-semibold text-xs text-gray-900 dark:text-gray-100">{date.getDate()}</span>
            {/* Add empty div to keep spacing if no action menu is active */}
@@ -73,27 +91,27 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
 
         <div className="flex items-center gap-1.5 mb-1.5">
           {getStatusIcon(record.status)}
-          <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 truncate">
             {record.status}
           </span>
         </div>
 
         <div className="mt-auto w-full space-y-1">
            {(record.checkIn || record.checkOut) && (
-             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
                {record.checkIn || '--:--'} - {record.checkOut || '--:--'}
              </div>
            )}
            
-           <div className="flex items-center justify-between">
+           <div className="flex items-center justify-between flex-wrap gap-1">
              {record.workingHours !== undefined && (
                <div className="text-[10px] font-bold text-gray-600 dark:text-gray-400">
                  {record.workingHours}h
                </div>
              )}
              <div className="flex items-center gap-1 ml-auto">
-                {isLate && <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/20 px-1 py-0.5 rounded-sm" title={`Late by ${record.lateBy}m`}>⚠ Late</span>}
-                {isOT && <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1 py-0.5 rounded-sm" title={`OT ${record.overtimeHours}h`}>⏰ OT</span>}
+                {isLate && <span className="text-[9px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-900/20 px-1 py-0.5 rounded-sm" title={`Late by ${record.lateBy}m`}>⚠ Late</span>}
+                {isOT && <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 px-1 py-0.5 rounded-sm" title={`OT ${record.overtimeHours}h`}>⏰ OT</span>}
              </div>
            </div>
         </div>
@@ -102,81 +120,79 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
   };
 
   return (
-    <div className="flex flex-col h-full items-center overflow-auto custom-scrollbar relative p-4">
+    <div className="flex flex-col h-full overflow-hidden p-4">
        {/* Mobile Fallback */}
        <div className="w-full lg:hidden flex flex-col items-center justify-center py-12 text-gray-500">
          <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
          <p className="text-sm">Please switch to Table View on mobile devices.</p>
        </div>
 
-      <div className="hidden lg:block w-full">
-        <Calendar
-          mode="single"
-          month={currentMonth}
-          disableNavigation
-          showOutsideDays={true}
-          className="w-full bg-transparent p-0"
-          modifiers={{
-            weekend: (date) => date.getDay() === 0 || date.getDay() === 6
-          }}
-          classNames={{
-             root: "w-full",
-             months: "w-full",
-             month: "w-full",
-             month_caption: "hidden", // Hide native month/year label
-             nav: "hidden", // Hide native < > arrows
-             month_grid: "w-full border-collapse",
-             weekdays: "grid grid-cols-7 w-full mb-1",
-             weekday: "text-gray-500 font-semibold text-[11px] uppercase tracking-wider text-center py-2 border-b border-gray-100 dark:border-white/5",
-             week: "grid grid-cols-7 w-full border-b border-gray-100 dark:border-white/5 last:border-b-0",
-             day: "min-h-[90px] h-full w-full p-0 relative border-r border-gray-100 dark:border-white/5 last:border-r-0",
-             today: "", // Remove calendar.tsx defaults
-             outside: "opacity-40",
-          }}
-          components={{
-             DayButton: ({ day, modifiers, ...props }) => {
-                const { className: _discard, ...restProps } = props as any;
-                
-                const dateString = format(day.date, 'yyyy-MM-dd');
-                const record = data.find(d => d.attendanceDate === dateString || d.date === dateString);
-                
-                // Color the cell background based on status
-                let cellBgClass = 'bg-white dark:bg-transparent';
-                let borderClass = 'border-transparent';
-                
-                // Shaded weekends that fill the cell
-                if (modifiers.weekend) {
-                   cellBgClass = 'bg-[#f8f9fa] dark:bg-[#1a1c21]';
-                }
+      <div className="hidden lg:flex flex-col h-full w-full min-h-[600px] border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden bg-white dark:bg-[#181a1f] shadow-sm">
+        {/* Header */}
+        <div className="grid grid-cols-7 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-black/10 flex-shrink-0">
+          {WEEKDAYS.map((day, idx) => (
+            <div 
+              key={day} 
+              className={cn(
+                "py-3 text-center text-xs font-semibold uppercase tracking-wider",
+                idx === 0 || idx === 6 ? "text-gray-400" : "text-gray-500 dark:text-gray-400",
+                idx !== 6 && "border-r border-gray-200 dark:border-white/10"
+              )}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
 
-                if (modifiers.today) {
-                   cellBgClass = 'bg-[#792359]/5 dark:bg-[#e6a8d0]/5';
-                   borderClass = 'border-[#792359]/30 dark:border-[#e6a8d0]/30 shadow-sm rounded-md ring-1 ring-[#792359]/20 z-10';
-                }
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 flex-1 auto-rows-fr">
+          {days.map((day, idx) => {
+            const isSame = isSameMonth(day, currentMonth);
+            const today = isToday(day);
+            const weekend = isWeekend(day);
+            const dateString = format(day, 'yyyy-MM-dd');
+            const record = data.find(d => d.attendanceDate === dateString || d.date === dateString);
+            
+            // Grid borders:
+            // Don't draw right border for last column
+            // Don't draw bottom border for last row (handled by container overflow/border)
+            const isLastCol = (idx + 1) % 7 === 0;
+            const isLastRow = Math.floor(idx / 7) === Math.floor((days.length - 1) / 7);
 
-                return (
-                  <div 
-                    {...restProps} 
-                    className={`h-full w-full transition-all duration-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 border ${cellBgClass} ${borderClass}`}
-                    onClick={(e) => {
-                      if (record && onAction) {
-                        onAction(record, 'view');
-                      }
-                      if (props.onClick) props.onClick(e as any);
-                    }}
-                  >
-                     {!record ? (
-                       <div className="h-full w-full p-2 flex flex-col items-start">
-                          <span className={`font-semibold text-xs ${modifiers.today ? 'text-[#792359] dark:text-[#e6a8d0]' : 'text-gray-400 dark:text-gray-500'}`}>{day.date.getDate()}</span>
-                       </div>
-                     ) : (
-                       renderDayContent(day.date)
-                     )}
+            return (
+              <div
+                key={day.toISOString()}
+                className={cn(
+                  "p-2 relative group transition-colors duration-200 cursor-pointer",
+                  !isLastCol && "border-r border-gray-200 dark:border-white/10",
+                  !isLastRow && "border-b border-gray-200 dark:border-white/10",
+                  !isSame && "opacity-40 bg-gray-50/30 dark:bg-black/20",
+                  isSame && weekend && "bg-[#f8f9fa] dark:bg-[#1a1c21]",
+                  isSame && !weekend && "bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-white/5",
+                  today && "bg-[#792359]/5 dark:bg-[#e6a8d0]/5 ring-1 ring-inset ring-[#792359]/30 dark:ring-[#e6a8d0]/30 z-10 rounded-[1px]"
+                )}
+                onClick={() => {
+                  if (record && onAction) {
+                    onAction(record, 'view');
+                  }
+                }}
+              >
+                {!record || !isSame ? (
+                  <div className="flex w-full justify-between items-start">
+                    <span className={cn(
+                      "font-semibold text-xs",
+                      today ? "text-[#792359] dark:text-[#e6a8d0]" : "text-gray-400 dark:text-gray-500"
+                    )}>
+                      {day.getDate()}
+                    </span>
                   </div>
-                );
-             }
-          }}
-        />
+                ) : (
+                  renderDayContent(day)
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
