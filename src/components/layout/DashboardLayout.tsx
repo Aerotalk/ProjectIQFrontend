@@ -16,8 +16,7 @@ import {
   Shield,
   Building2,
   FolderKanban,
-  Menu,
-  PanelLeftClose
+  Menu
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
