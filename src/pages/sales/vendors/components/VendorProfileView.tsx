@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     X, Edit, MapPin, Activity, FileText,
-    MessageSquare, TrendingUp, CreditCard, User, Settings, Cpu, Mail, Phone, ExternalLink, Plus, Building2
+    MessageSquare, TrendingUp, CreditCard, User, Settings, Mail, Phone, ExternalLink, Plus, Building2
 } from 'lucide-react';
 import type { Vendor } from '../../../../types/vendor.types';
 import { VendorService } from '../../../../services/vendor.service';
