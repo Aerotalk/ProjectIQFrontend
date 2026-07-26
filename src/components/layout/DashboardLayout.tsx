@@ -37,7 +37,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
   const { user, logout } = useAuth();
   const { can } = usePermissions();
-  
+
   const userEmail = user?.email || 'user';
   const orgName = user?.companyName || user?.organizationName || 'My Organization';
   const userInitials = userEmail.substring(0, 2).toUpperCase();
@@ -176,7 +176,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       ...item,
       subItems: item.subItems.filter(sub => {
         if ('permission' in sub && !can(sub.permission as string)) return false;
-        
+
         // Also check if nested items have permission
         if (sub.items) {
           // IMPORTANT: Do not mutate the original object in navConfig
@@ -258,27 +258,25 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       {/* Floating Toggle Button (visible when sidebar is closed) */}
       <button
         onClick={() => setIsSidebarOpen(true)}
-        className={`fixed left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full shadow-lg text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 ${
-          isSidebarOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
-        }`}
+        className={`fixed left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full shadow-lg text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 ${isSidebarOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
+          }`}
         title="Open Sidebar"
       >
         <Menu size={20} />
       </button>
 
       {/* Sidebar - Floating Card Style */}
-      <aside 
-        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-[#792359]/30 shadow-2xl shadow-[#792359]/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${
-          isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
-        }`}
+      <aside
+        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-[#792359]/30 shadow-2xl shadow-[#792359]/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+          }`}
       >
-        {/* Toggle Close Button */}
+        {/* Toggle Close Button (Hamburger on middle right side) */}
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="absolute -right-3 top-6 w-7 h-7 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-gray-500 hover:text-[#792359] hover:scale-110 shadow-md transition-all z-50 cursor-pointer"
+          className="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:scale-110 shadow-lg transition-all z-50 cursor-pointer"
           title="Close Sidebar"
         >
-          <X size={14} />
+          <Menu size={18} />
         </button>
 
         {/* Logo Area */}
@@ -322,7 +320,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                   <div className="pl-9 pr-3 py-1 flex flex-col gap-1 border-l border-white/10 ml-5 relative">
                     {item.subItems.map(sub => {
                       const isActive = activeModuleName === item.name && activePageName === sub.name;
-                      
+
                       return (
                         <Link
                           key={sub.name}
@@ -334,7 +332,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                           {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#e6a8d0] border-2 border-[#3a112b]" />}
                           {sub.name}
                         </Link>
-                       );
+                      );
                     })}
                   </div>
                 </div>
@@ -363,10 +361,9 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       </aside>
 
       {/* Main Content Area */}
-      <div 
-        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? 'ml-[252px] xl:ml-[292px]' : 'ml-[72px]'
-        }`}
+      <div
+        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-[252px] xl:ml-[292px]' : 'ml-[72px]'
+          }`}
       >
 
         {/* Top Header - Floating Card Style */}
@@ -374,7 +371,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
             <Link to={basePath} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</Link>
-            
+
             {breadcrumbs.length > 0 ? (
               breadcrumbs.map((crumb, index) => {
                 const isLast = index === breadcrumbs.length - 1;
@@ -488,7 +485,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
                   </div>
                   <div className="border-t border-gray-100 dark:border-white/5 py-1">
-                    <button 
+                    <button
                       className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors w-full text-left"
                       onClick={() => {
                         setIsProfileOpen(false);
