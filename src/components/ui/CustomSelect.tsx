@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, CheckCircle2, Search, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formStyles } from './form-styles';
@@ -37,60 +36,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
     ? getOptionLabel(selectedLabel) 
     : (isLoading ? (loadingText || "Loading...") : (value || placeholder || "Select..."));
 
-  const updatePosition = () => {
-    if (dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const spaceBelow = viewportHeight - rect.bottom;
-      
-      let top: number | string = rect.bottom + 6;
-      let bottom: number | string = 'auto';
 
-      // If there is not enough space below (260px) and there is more space above, open upwards
-      if (spaceBelow < 260 && rect.top > spaceBelow) {
-        top = 'auto';
-        bottom = viewportHeight - rect.top + 6;
-      }
-
-      setDropdownStyle({
-        position: 'fixed',
-        top,
-        bottom,
-        left: rect.left,
-        width: rect.width,
-        zIndex: 999999
-      });
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setSearchQuery('');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (isOpen) {
-      updatePosition();
-      const handleScroll = (e: Event) => {
-        if (menuRef.current && menuRef.current.contains(e.target as Node)) {
-          return;
-        }
-        updatePosition();
-      };
-      window.addEventListener('scroll', handleScroll, true);
-      window.addEventListener('resize', updatePosition);
-      return () => {
-        window.removeEventListener('scroll', handleScroll, true);
-        window.removeEventListener('resize', updatePosition);
-      };
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -147,11 +93,10 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
         <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#792359]' : ''}`} />
       </div>
 
-      {isOpen && createPortal(
+      {isOpen && (
         <div 
           ref={menuRef}
-          style={dropdownStyle}
-          className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute left-0 top-[calc(100%+4px)] w-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in slide-in-from-top-2 duration-150 z-[99999]"
         >
           <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#181a1f] z-10 rounded-t-lg">
             <div className="relative">
@@ -223,8 +168,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
               })
             )}
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );
