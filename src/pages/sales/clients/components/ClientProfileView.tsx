@@ -3,6 +3,7 @@ import { X, Edit, User, Phone, Mail, MapPin, Building2, FileText, MessageSquare,
 import type { Client } from '../../../../types/client.types';
 import { QuotationService } from '../../../../services/quotation.service';
 import type { Quotation } from '../../../../types/quotation.types';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 interface Props {
   client: Client;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ClientProfileView({ client, onClose, onEdit }: Props) {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'comments'>('overview');
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [comments, setComments] = useState<string[]>([]);
@@ -136,39 +138,161 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
         
         {/* ── TABS CORE CONTENT: OVERVIEW ── */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             
-            {/* LEFT PROFILE COLUMN */}
-            <div className="lg:col-span-1 flex flex-col gap-6">
+            {/* LEFT COLUMN */}
+            <div className="flex flex-col gap-6">
               
-              {/* Primary Contact Person Box */}
+              {/* Contacts Box */}
               <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <User className="text-gray-400" size={18} />
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Primary Contact</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Contact Details</h4>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Contact Name</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Primary Contact Name</span>
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-200">{client.primaryContactPerson || '—'}</span>
                   </div>
-                  <div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Email Address</span>
-                    <a href={`mailto:${client.email}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5">
-                      <Mail size={14} />
-                      <span className="truncate">{client.email || '—'}</span>
-                    </a>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Email Address</span>
+                      <a href={`mailto:${client.email}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5">
+                        <Mail size={14} />
+                        <span className="truncate">{client.email || '—'}</span>
+                      </a>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Phone Number</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-300 flex items-center gap-1.5">
+                        <Phone size={14} className="text-gray-400" />
+                        <span>{client.phone || '—'}</span>
+                      </span>
+                    </div>
                   </div>
+                  {client.alternatePhone && (
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Alternate Phone</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-300 flex items-center gap-1.5">
+                        <Phone size={14} className="text-gray-400" />
+                        <span>{client.alternatePhone}</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {client.additionalContacts && client.additionalContacts.length > 0 && (
+                    <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800 space-y-4">
+                      {client.additionalContacts.map((contact, i) => (
+                        <div key={i} className="space-y-2">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium block">
+                            {contact.role} Contact
+                          </span>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-200">{contact.name}</div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5">
+                              <Mail size={14} />
+                              <span className="truncate">{contact.email || '—'}</span>
+                            </div>
+                            <div className="text-sm text-gray-800 dark:text-gray-300 flex items-center gap-1.5">
+                              <Phone size={14} className="text-gray-400" />
+                              <span>{contact.phone || '—'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Address card */}
+              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm flex flex-col">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="text-gray-400" size={18} />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Addresses</h4>
+                </div>
+                
+                <div className="space-y-5 flex flex-col">
                   <div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Phone Number</span>
-                    <span className="text-sm text-gray-800 dark:text-gray-300 flex items-center gap-1.5">
-                      <Phone size={14} className="text-gray-400" />
-                      <span>{client.phone || '—'}</span>
-                    </span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Billing Address</span>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-100 dark:border-gray-800">
+                      <div>
+                        {client.billingAddressLine1}<br />
+                        {client.billingAddressLine2 && <>{client.billingAddressLine2}<br /></>}
+                        {client.billingCity}, {client.billingState} {client.billingPinCode}<br />
+                        {client.billingCountry || 'India'}
+                        {client.billingPhone && (
+                          <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-1.5 text-gray-800 dark:text-gray-300">
+                            <Phone size={12} className="text-gray-400" />
+                            <span>{client.billingPhone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Shipping Address</span>
+                    {client.shippingAddressLine1 ? (
+                      <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-100 dark:border-gray-800">
+                        <div>
+                          {client.shippingAddressLine1}<br />
+                          {client.shippingAddressLine2 && <>{client.shippingAddressLine2}<br /></>}
+                          {client.shippingCity}, {client.shippingState} {client.shippingPinCode}<br />
+                          {client.shippingCountry || 'India'}
+                          {client.shippingPhone && (
+                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center gap-1.5 text-gray-800 dark:text-gray-300">
+                              <Phone size={12} className="text-gray-400" />
+                              <span>{client.shippingPhone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-500 italic flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-dashed border-gray-200 dark:border-gray-700">
+                        Same as billing address
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
 
+            </div>
+            
+            {/* RIGHT COLUMN */}
+            <div className="flex flex-col gap-6">
+
+              {/* Financial Summary */}
+              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Activity className="text-[#792359] dark:text-[#e6a8d0]" size={20} />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Financial Summary</h4>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Total Quotations Amount</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      ₹{totalQuotationsAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30">
+                    <div className="text-xs font-medium text-orange-600 dark:text-orange-400 mb-1">Pending Quotations</div>
+                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                      {pendingQuotations.length}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30 sm:col-span-2">
+                    <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">Total Tickets</div>
+                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                      {tickets.length}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               {/* Tax & Compliance card */}
               <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -183,64 +307,17 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                   {client.gstin && (
                     <div>
                       <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">GSTIN</span>
-                      <span className="text-sm font-mono text-gray-800 dark:text-gray-300">{client.gstin}</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-300">{client.gstin}</span>
                     </div>
                   )}
                   {client.panNumber && (
                     <div>
                       <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">PAN Number</span>
-                      <span className="text-sm font-mono text-gray-800 dark:text-gray-300">{client.panNumber}</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-300">{client.panNumber}</span>
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Address card */}
-              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="text-gray-400" size={18} />
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Addresses</h4>
-                </div>
-                
-                <div className="space-y-5 flex-1 flex flex-col">
-                  <div>
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Billing Address</span>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-100 dark:border-gray-800">
-                      <div>
-                        {client.billingAddressLine1}<br />
-                        {client.billingAddressLine2 && <>{client.billingAddressLine2}<br /></>}
-                        {client.billingCity}, {client.billingState} {client.billingPinCode}<br />
-                        {client.billingCountry || 'India'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 flex flex-col">
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-2">Shipping Address</span>
-                    {client.shippingAddressLine1 ? (
-                      <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-100 dark:border-gray-800 flex-1">
-                        <div>
-                          {client.shippingAddressLine1}<br />
-                          {client.shippingAddressLine2 && <>{client.shippingAddressLine2}<br /></>}
-                          {client.shippingCity}, {client.shippingState} {client.shippingPinCode}<br />
-                          {client.shippingCountry || 'India'}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-gray-500 italic flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-dashed border-gray-200 dark:border-gray-700">
-                        Same as billing address
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            
-            {/* RIGHT COLUMN */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
-              
               
               {/* Commercial settings */}
               {(client.paymentTerms || client.creditLimit) ? (
@@ -264,7 +341,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm flex-1 flex flex-col items-center justify-center text-center space-y-3 py-8">
+                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center text-center space-y-3 py-6">
                   <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center">
                     <Settings className="text-gray-400" size={20} />
                   </div>
@@ -277,41 +354,6 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                   </button>
                 </div>
               )}
-
-
-              
-              {/* Financial Summary */}
-              <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <Activity className="text-[#792359] dark:text-[#e6a8d0]" size={20} />
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Financial Summary</h4>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
-                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Total Quotations Amount</div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      ₹{totalQuotationsAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30">
-                    <div className="text-xs font-medium text-orange-600 dark:text-orange-400 mb-1">Pending Quotations</div>
-                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                      {pendingQuotations.length}
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
-                    <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">Total Tickets</div>
-                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                      {tickets.length}
-                    </div>
-                  </div>
-                </div>
-                
-                </div>
-
 
             </div>
           </div>
@@ -459,7 +501,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                   </div>
                   <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-lg bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 shadow-sm">
                     <div className="flex items-center justify-between mb-1">
-                      <h5 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">System User</h5>
+                      <h5 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{user?.username || 'System Admin'}</h5>
                       <time className="text-xs text-gray-500">Just now</time>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">{comment}</p>
