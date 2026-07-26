@@ -1,12 +1,6 @@
+import { useState, useEffect } from 'react';
 import CustomSelect, { type SelectOption } from '../ui/CustomSelect';
-
-const MOCK_EMPLOYEES = [
-  { id: 'emp-1', name: 'John Doe', designation: 'Software Engineer', avatar: 'https://i.pravatar.cc/150?u=1' },
-  { id: 'emp-2', name: 'Jane Smith', designation: 'Product Manager', avatar: 'https://i.pravatar.cc/150?u=2' },
-  { id: 'emp-3', name: 'Robert Johnson', designation: 'QA Tester', avatar: 'https://i.pravatar.cc/150?u=3' },
-  { id: 'emp-4', name: 'Emily Davis', designation: 'HR Executive', avatar: 'https://i.pravatar.cc/150?u=4' },
-  { id: 'emp-5', name: 'Michael Brown', designation: 'Backend Developer', avatar: 'https://i.pravatar.cc/150?u=5' },
-];
+import { EmployeeService, type Employee } from '../../services/employee.service';
 
 interface EmployeeSelectorProps {
   value: string;
@@ -17,11 +11,29 @@ interface EmployeeSelectorProps {
 }
 
 export default function EmployeeSelector({ value, onChange, disabled, className, placeholder = 'Select Employee' }: EmployeeSelectorProps) {
-  const options: SelectOption[] = MOCK_EMPLOYEES.map(emp => ({
-    label: emp.name,
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setLoading(true);
+        const data = await EmployeeService.getAll();
+        setEmployees(data || []);
+      } catch (error) {
+        console.error('Failed to fetch employees:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
+
+  const options: SelectOption[] = employees.map(emp => ({
+    label: `${emp.firstName} ${emp.lastName}`,
     value: emp.id,
-    subtitle: emp.designation,
-    subLabel: emp.id
+    subtitle: emp.designationId || 'Employee', // Ideally resolve designation name, but ID/placeholder for now
+    subLabel: emp.employeeId || emp.id.substring(0, 8)
   }));
 
   return (
@@ -29,9 +41,9 @@ export default function EmployeeSelector({ value, onChange, disabled, className,
       options={options}
       value={value}
       onChange={onChange}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={className}
-      placeholder={placeholder}
+      placeholder={loading ? 'Loading employees...' : placeholder}
     />
   );
 }

@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Save, Loader2 } from 'lucide-react';
 import { FormLayout, FormSection, FormGrid, FormField } from '../../../../components/ui/FormLayout';
-import { Input } from '../../../../components/ui/input';
+
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
+import CustomTimePicker from '../../../../components/ui/CustomTimePicker';
 import EmployeeSelector from '../../../../components/hrms/EmployeeSelector';
 
 const regularizationSchema = z.object({
@@ -99,11 +100,23 @@ export default function RegularizationDrawer({ isOpen, onClose, mode, initialDat
 
                     <div className="grid grid-cols-2 gap-4">
                       <FormField label="Actual Check In (Optional)" error={errors.checkIn?.message}>
-                        <Input type="time" {...register('checkIn')} disabled={readOnly} />
+                        <Controller
+                          name="checkIn"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} />
+                          )}
+                        />
                       </FormField>
 
                       <FormField label="Actual Check Out (Optional)" error={errors.checkOut?.message}>
-                        <Input type="time" {...register('checkOut')} disabled={readOnly} />
+                        <Controller
+                          name="checkOut"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} />
+                          )}
+                        />
                       </FormField>
                     </div>
 

@@ -4,8 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Save, Loader2 } from 'lucide-react';
 import { FormLayout, FormSection, FormGrid, FormField } from '../../../../components/ui/FormLayout';
-import { Input } from '../../../../components/ui/input';
+
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
+import CustomTimePicker from '../../../../components/ui/CustomTimePicker';
 import EmployeeSelector from '../../../../components/hrms/EmployeeSelector';
 
 const permissionSchema = z.object({
@@ -99,11 +100,23 @@ export default function PermissionDrawer({ isOpen, onClose, mode, initialData, o
 
                     <div className="grid grid-cols-2 gap-4">
                       <FormField label="Start Time" error={errors.startTime?.message} required>
-                        <Input type="time" {...register('startTime')} disabled={readOnly} className={errors.startTime ? 'border-red-500' : ''} />
+                        <Controller
+                          name="startTime"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} className={errors.startTime ? 'border-red-500 ring-1 ring-red-500' : ''} />
+                          )}
+                        />
                       </FormField>
 
                       <FormField label="End Time" error={errors.endTime?.message} required>
-                        <Input type="time" {...register('endTime')} disabled={readOnly} className={errors.endTime ? 'border-red-500' : ''} />
+                        <Controller
+                          name="endTime"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} className={errors.endTime ? 'border-red-500 ring-1 ring-red-500' : ''} />
+                          )}
+                        />
                       </FormField>
                     </div>
 

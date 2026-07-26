@@ -2,8 +2,10 @@ import { Users, UserMinus, Clock, Calendar, CheckSquare, FileText, ShieldAlert, 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 import { useDashboardKPIs } from '../hooks';
 import { Skeleton } from '../../../../components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
 
 export default function WorkforceDashboard() {
+  const navigate = useNavigate();
   const { kpis, loading } = useDashboardKPIs();
 
   // Mock Data for Charts
@@ -84,7 +86,7 @@ export default function WorkforceDashboard() {
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Fingerprint size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Today's Attendance
             </h2>
-            <button className="text-xs text-[#792359] hover:underline">View All</button>
+            <button className="text-xs text-[#792359] hover:underline" onClick={() => navigate('../attendance/daily')}>View All</button>
           </div>
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -128,7 +130,7 @@ export default function WorkforceDashboard() {
                   <p className="text-xs font-semibold text-gray-900 dark:text-white">Jane Smith</p>
                   <p className="text-[10px] text-gray-500">Sick Leave • 2 Days</p>
                 </div>
-                <button className="text-xs bg-[#792359] text-white px-2 py-1 rounded-sm hover:bg-[#52173c]">Review</button>
+                <button className="text-xs bg-[#792359] text-white px-2 py-1 rounded-sm hover:bg-[#52173c]" onClick={() => navigate('../leave/applications')}>Review</button>
               </div>
             ))}
           </div>

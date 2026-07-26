@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { X, Save, Loader2 } from 'lucide-react';
 import { FormLayout, FormSection, FormGrid, FormField } from '../../../../components/ui/FormLayout';
 import { Input } from '../../../../components/ui/input';
+import CustomTimePicker from '../../../../components/ui/CustomTimePicker';
 
 const shiftSchema = z.object({
   shiftName: z.string().min(1, 'Shift Name is required'),
@@ -91,11 +92,23 @@ export default function ShiftDrawer({ isOpen, onClose, mode, initialData, onSave
 
                   <FormGrid>
                     <FormField label="Start Time" error={errors.startTime?.message} required>
-                      <Input type="time" {...register('startTime')} disabled={readOnly} className={errors.startTime ? 'border-red-500' : ''} />
+                      <Controller
+                        name="startTime"
+                        control={control}
+                        render={({ field }) => (
+                          <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} className={errors.startTime ? 'border-red-500 ring-1 ring-red-500' : ''} />
+                        )}
+                      />
                     </FormField>
 
                     <FormField label="End Time" error={errors.endTime?.message} required>
-                      <Input type="time" {...register('endTime')} disabled={readOnly} className={errors.endTime ? 'border-red-500' : ''} />
+                      <Controller
+                        name="endTime"
+                        control={control}
+                        render={({ field }) => (
+                          <CustomTimePicker value={field.value} onChange={field.onChange} disabled={readOnly} className={errors.endTime ? 'border-red-500 ring-1 ring-red-500' : ''} />
+                        )}
+                      />
                     </FormField>
                   </FormGrid>
 

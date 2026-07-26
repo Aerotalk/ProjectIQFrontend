@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Filter, LayoutList, Calendar as CalendarIcon } from 'lucide-react';
 import CustomTable from '../../../../components/ui/CustomTable';
+import AttendanceCalendar from './AttendanceCalendar';
 
 export default function DailyAttendance() {
   const [view, setView] = useState<'table' | 'calendar'>('table');
@@ -81,17 +82,7 @@ export default function DailyAttendance() {
             <CustomTable columns={columns} data={data} />
           </div>
         ) : (
-          <div className="flex-1 p-6 flex items-center justify-center text-center">
-            <div>
-              <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CalendarIcon size={24} className="text-[#792359] dark:text-[#e6a8d0]" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Monthly Calendar View</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm mx-auto">
-                Full calendar view showing visual indicators for Present, Absent, Leave, Holiday, and Weekends across the month.
-              </p>
-            </div>
-          </div>
+          <AttendanceCalendar data={data} />
         )}
       </div>
     </div>
