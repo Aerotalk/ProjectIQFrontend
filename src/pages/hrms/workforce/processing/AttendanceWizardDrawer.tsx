@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import WorkflowStepper from '../../../../components/WorkflowStepper';
 import toast from 'react-hot-toast';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
 
 const STEPS = [
   { id: 'select_period', label: 'Select Period' },
@@ -11,11 +12,14 @@ const STEPS = [
 ];
 
 export default function AttendanceWizardDrawer({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  // Use isOpen if needed, e.g. for animations or effects
-  console.debug("Drawer Open:", isOpen);
   const form = useForm();
+  
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+
+  if (!isOpen) return null;
 
   const onSubmit = async () => {
     setIsSubmitting(true);
@@ -38,11 +42,11 @@ export default function AttendanceWizardDrawer({ isOpen, onClose }: { isOpen: bo
             <div className="grid grid-cols-2 gap-4 max-w-md">
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">From Date</label>
-                <input type="date" className="w-full bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-gray-800 rounded-sm px-3 py-2 text-sm text-gray-900 dark:text-white" />
+                <CustomDatePicker value={fromDate} onChange={setFromDate} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">To Date</label>
-                <input type="date" className="w-full bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-gray-800 rounded-sm px-3 py-2 text-sm text-gray-900 dark:text-white" />
+                <CustomDatePicker value={toDate} onChange={setToDate} />
               </div>
             </div>
           </div>

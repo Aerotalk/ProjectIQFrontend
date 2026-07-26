@@ -45,7 +45,7 @@ export default function SmartActionMenu({ isOpen, onToggle, children }: SmartAct
   }, [isOpen]);
 
   return (
-    <>
+    <div className="relative inline-block text-left">
       <button 
         ref={buttonRef}
         onClick={onToggle}
@@ -55,15 +55,15 @@ export default function SmartActionMenu({ isOpen, onToggle, children }: SmartAct
       </button>
       {isOpen && (
         <div 
-          className={`absolute right-8 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-10 py-1 text-left ${
+          className={`absolute right-0 w-36 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-lg z-50 py-1 text-left ${
             position === 'up' 
-              ? 'bottom-10 origin-bottom-right' 
-              : 'top-10 origin-top-right'
+              ? 'bottom-full mb-1 origin-bottom-right' 
+              : 'top-full mt-1 origin-top-right'
           }`}
         >
           {children}
         </div>
       )}
-    </>
+    </div>
   );
 }

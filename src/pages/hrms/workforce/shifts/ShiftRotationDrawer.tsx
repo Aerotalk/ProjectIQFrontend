@@ -46,7 +46,7 @@ export default function ShiftRotationDrawer({ isOpen, onClose, mode, initialData
   const readOnly = mode === 'view';
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end bg-black/20 dark:bg-black/40 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-[100] flex justify-end bg-black/20 dark:bg-black/40 transition-opacity">
       <div className="w-full max-w-md bg-white dark:bg-[#181a1f] h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         
         {/* Header */}

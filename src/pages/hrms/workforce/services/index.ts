@@ -99,4 +99,66 @@ export const WorkforceService = {
   createLockConfig: (data: Omit<any, 'id'>) => Repositories.LockConfigRepo.create(data),
   updateLockConfig: (id: string, data: Partial<any>) => Repositories.LockConfigRepo.update(id, data),
   deleteLockConfig: (id: string) => Repositories.LockConfigRepo.delete(id),
+  // Shift Roster
+  getShiftRosters: (params?: any) => Repositories.ShiftRosterRepo.getAll(params),
+  getShiftRosterById: (id: string) => Repositories.ShiftRosterRepo.getById(id),
+  createShiftRoster: (data: Omit<any, 'id'>) => Repositories.ShiftRosterRepo.create(data),
+  updateShiftRoster: (id: string, data: Partial<any>) => Repositories.ShiftRosterRepo.update(id, data),
+  deleteShiftRoster: (id: string) => Repositories.ShiftRosterRepo.delete(id),
+
+  // Holiday
+  getHolidays: (params?: any) => Repositories.HolidayRepo.getAll(params),
+  getHolidayById: (id: string) => Repositories.HolidayRepo.getById(id),
+  createHoliday: (data: Omit<any, 'id'>) => Repositories.HolidayRepo.create(data),
+  updateHoliday: (id: string, data: Partial<any>) => Repositories.HolidayRepo.update(id, data),
+  deleteHoliday: (id: string) => Repositories.HolidayRepo.delete(id),
+
+  // Attendance Period
+  getAttendancePeriods: (params?: any) => Repositories.AttendancePeriodRepo.getAll(params),
+  getAttendancePeriodById: (id: string) => Repositories.AttendancePeriodRepo.getById(id),
+  createAttendancePeriod: (data: Omit<any, 'id'>) => Repositories.AttendancePeriodRepo.create(data),
+  updateAttendancePeriod: (id: string, data: Partial<any>) => Repositories.AttendancePeriodRepo.update(id, data),
+  deleteAttendancePeriod: (id: string) => Repositories.AttendancePeriodRepo.delete(id),
+
+  // Processed Attendance
+  getProcessedAttendances: (params?: any) => Repositories.ProcessedAttendanceRepo.getAll(params),
+  getProcessedAttendanceById: (id: string) => Repositories.ProcessedAttendanceRepo.getById(id),
+  createProcessedAttendance: (data: Omit<any, 'id'>) => Repositories.ProcessedAttendanceRepo.create(data),
+  updateProcessedAttendance: (id: string, data: Partial<any>) => Repositories.ProcessedAttendanceRepo.update(id, data),
+  deleteProcessedAttendance: (id: string) => Repositories.ProcessedAttendanceRepo.delete(id),
+
+  // Attendance Exception
+  getAttendanceExceptions: (params?: any) => Repositories.AttendanceExceptionRepo.getAll(params),
+  getAttendanceExceptionById: (id: string) => Repositories.AttendanceExceptionRepo.getById(id),
+  createAttendanceException: (data: Omit<any, 'id'>) => Repositories.AttendanceExceptionRepo.create(data),
+  updateAttendanceException: (id: string, data: Partial<any>) => Repositories.AttendanceExceptionRepo.update(id, data),
+  deleteAttendanceException: (id: string) => Repositories.AttendanceExceptionRepo.delete(id),
+
+  // Attendance Device
+  getAttendanceDevices: (params?: any) => Repositories.AttendanceDeviceRepo.getAll(params),
+  getAttendanceDeviceById: (id: string) => Repositories.AttendanceDeviceRepo.getById(id),
+  createAttendanceDevice: (data: Omit<any, 'id'>) => Repositories.AttendanceDeviceRepo.create(data),
+  updateAttendanceDevice: (id: string, data: Partial<any>) => Repositories.AttendanceDeviceRepo.update(id, data),
+  deleteAttendanceDevice: (id: string) => Repositories.AttendanceDeviceRepo.delete(id),
+
+  // Attendance Log
+  getAttendanceLogs: (params?: any) => Repositories.AttendanceLogRepo.getAll(params),
+  getAttendanceLogById: (id: string) => Repositories.AttendanceLogRepo.getById(id),
+  createAttendanceLog: (data: Omit<any, 'id'>) => Repositories.AttendanceLogRepo.create(data),
+  updateAttendanceLog: (id: string, data: Partial<any>) => Repositories.AttendanceLogRepo.update(id, data),
+  deleteAttendanceLog: (id: string) => Repositories.AttendanceLogRepo.delete(id),
+
+  // Approval History
+  getApprovalHistories: (params?: any) => Repositories.ApprovalHistoryRepo.getAll(params),
+  getApprovalHistoryById: (id: string) => Repositories.ApprovalHistoryRepo.getById(id),
+  createApprovalHistory: (data: Omit<any, 'id'>) => Repositories.ApprovalHistoryRepo.create(data),
+  updateApprovalHistory: (id: string, data: Partial<any>) => Repositories.ApprovalHistoryRepo.update(id, data),
+  deleteApprovalHistory: (id: string) => Repositories.ApprovalHistoryRepo.delete(id),
+
+  // Employee Attendance Summary
+  getEmployeeAttendanceSummaries: (params?: any) => Repositories.EmployeeAttendanceSummaryRepo.getAll(params),
+  getEmployeeAttendanceSummaryById: (id: string) => Repositories.EmployeeAttendanceSummaryRepo.getById(id),
+  createEmployeeAttendanceSummary: (data: Omit<any, 'id'>) => Repositories.EmployeeAttendanceSummaryRepo.create(data),
+  updateEmployeeAttendanceSummary: (id: string, data: Partial<any>) => Repositories.EmployeeAttendanceSummaryRepo.update(id, data),
+  deleteEmployeeAttendanceSummary: (id: string) => Repositories.EmployeeAttendanceSummaryRepo.delete(id),
 };

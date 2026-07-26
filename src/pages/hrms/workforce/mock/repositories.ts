@@ -1,46 +1,59 @@
 import type { 
   LeaveType, LeaveScheme, LeaveBalance, LeaveApplication,
-  AttendanceRecord, Shift, ShiftRotationPattern,
-  HolidayList, AttendanceScheme, IPMapping, LockConfiguration,
-  RegularizationRequest, PermissionRequest, PaginatedResponse
+  AttendanceRecord, Shift, ShiftRotationPattern, ShiftRoster,
+  Holiday, HolidayList, AttendanceScheme, IPMapping, AttendancePeriod, ProcessedAttendance, LockConfiguration,
+  RegularizationRequest, PermissionRequest, PaginatedResponse,
+  AttendanceException, AttendanceDevice, AttendanceLog, ApprovalHistory, EmployeeAttendanceSummary
 } from '../types';
+import { AttendanceStatus, ApprovalStatus, AttendanceSource } from '../types';
 
 // Helper for artificial delay
 const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
+const now = new Date().toISOString();
+
 // Mock Data Stores
 let leaveTypes: LeaveType[] = [
-  { id: '1', name: 'Casual Leave', code: 'CL', category: 'Paid', active: true },
-  { id: '2', name: 'Sick Leave', code: 'SL', category: 'Paid', active: true },
-  { id: '3', name: 'Loss of Pay', code: 'LOP', category: 'Unpaid', active: true },
+  { id: '1', name: 'Casual Leave', code: 'CL', category: 'Paid', active: true, color: '#4CAF50', icon: 'Sun', requiresApproval: true, requiresAttachment: false, minimumDays: 0.5, maximumDays: 5, probationAllowed: true, noticePeriodRequired: 0, allowHalfDay: true, allowHourlyLeave: false, createdAt: now, updatedAt: now },
+  { id: '2', name: 'Sick Leave', code: 'SL', category: 'Paid', active: true, color: '#F44336', icon: 'Thermometer', requiresApproval: true, requiresAttachment: true, minimumDays: 0.5, maximumDays: 10, probationAllowed: true, noticePeriodRequired: 0, allowHalfDay: true, allowHourlyLeave: false, createdAt: now, updatedAt: now },
+  { id: '3', name: 'Loss of Pay', code: 'LOP', category: 'Unpaid', active: true, color: '#9E9E9E', icon: 'MinusCircle', requiresApproval: true, requiresAttachment: false, minimumDays: 0.5, maximumDays: 365, probationAllowed: true, noticePeriodRequired: 0, allowHalfDay: true, allowHourlyLeave: true, createdAt: now, updatedAt: now },
 ];
 
 let leaveSchemes: LeaveScheme[] = [
-  { id: '1', schemeName: 'Standard India Scheme', defaultScheme: true, rulesCount: 2 },
+  { id: '1', schemeName: 'Standard India Scheme', defaultScheme: true, rulesCount: 2, createdAt: now, updatedAt: now },
 ];
 
 let leaveBalances: LeaveBalance[] = [
-  { id: '1', employeeId: 'emp-1', leaveTypeId: '1', openingBalance: 12, granted: 0, availed: 2, encashed: 0, available: 10, closingBalance: 10, updatedOn: '2026-07-25' },
+  { id: '1', employeeId: 'emp-1', employeeName: 'John Doe', employeeCode: 'EMP001', department: 'IT', leaveTypeId: '1', leaveTypeName: 'Casual Leave', year: 2026, openingBalance: 12, granted: 0, availed: 2, encashed: 0, lapsed: 0, available: 10, createdAt: now, updatedAt: now },
 ];
 
 let leaveApplications: LeaveApplication[] = [];
 
 let attendanceRecords: AttendanceRecord[] = [
-  { id: '1', employeeId: 'emp-1', date: new Date().toISOString().split('T')[0], shiftId: 'shift-1', status: 'Present', checkIn: '09:00', checkOut: '18:00', hours: 9, regularized: false }
+  { id: '1', employeeId: 'emp-1', employeeCode: 'EMP001', employeeName: 'John Doe', departmentId: 'dept-1', designationId: 'desig-1', locationId: 'loc-1', attendanceDate: new Date().toISOString().split('T')[0], date: new Date().toISOString().split('T')[0], shiftId: 'shift-1', shiftName: 'General Shift', status: AttendanceStatus.Present, checkIn: '09:00', checkOut: '18:00', workingHours: 9, hours: 9, breakHours: 1, overtimeHours: 0, lateBy: 0, earlyExit: 0, attendanceSource: AttendanceSource.Biometric, regularizationStatus: ApprovalStatus.Approved, approvalStatus: ApprovalStatus.Approved, regularized: false, createdAt: now, updatedAt: now }
 ];
 
 let shifts: Shift[] = [
-  { id: 'shift-1', shiftName: 'General Shift', shiftCode: 'GS', startTime: '09:00', endTime: '18:00', graceTime: 15, halfDayHours: 4.5, fullDayHours: 9, nightShift: false },
+  { id: 'shift-1', shiftName: 'General Shift', shiftCode: 'GS', description: 'Standard 9 to 6 shift', startTime: '09:00', endTime: '18:00', graceTime: 15, lateGraceMinutes: 15, earlyExitGraceMinutes: 10, halfDayHours: 4.5, fullDayHours: 9, weeklyHours: 45, breakStart: '13:00', breakEnd: '14:00', flexibleShift: false, overtimeAllowed: true, nightShift: false, active: true, createdAt: now, updatedAt: now },
 ];
 
 let regularizationRequests: RegularizationRequest[] = [];
 let permissionRequests: PermissionRequest[] = [];
 
 let shiftRotations: ShiftRotationPattern[] = [];
+let shiftRosters: ShiftRoster[] = [];
 let holidayLists: HolidayList[] = [];
+let holidays: Holiday[] = [];
 let attendanceSchemes: AttendanceScheme[] = [];
 let ipMappings: IPMapping[] = [];
 let lockConfigs: LockConfiguration[] = [];
+let attendancePeriods: AttendancePeriod[] = [];
+let processedAttendances: ProcessedAttendance[] = [];
+let attendanceExceptions: AttendanceException[] = [];
+let attendanceDevices: AttendanceDevice[] = [];
+let attendanceLogs: AttendanceLog[] = [];
+let approvalHistories: ApprovalHistory[] = [];
+let employeeAttendanceSummaries: EmployeeAttendanceSummary[] = [];
 
 // Generic CRUD Mock Repository Generator
 function createRepository<T extends { id: string }>(
@@ -141,6 +154,16 @@ export const HolidayListRepo = createRepository<HolidayList>(holidayLists, 'Holi
 export const AttendanceSchemeRepo = createRepository<AttendanceScheme>(attendanceSchemes, 'AttendanceScheme');
 export const IPMappingRepo = createRepository<IPMapping>(ipMappings, 'IPMapping');
 export const LockConfigRepo = createRepository<LockConfiguration>(lockConfigs, 'LockConfiguration');
+
+export const ShiftRosterRepo = createRepository<ShiftRoster>(shiftRosters, 'ShiftRoster');
+export const HolidayRepo = createRepository<Holiday>(holidays, 'Holiday');
+export const AttendancePeriodRepo = createRepository<AttendancePeriod>(attendancePeriods, 'AttendancePeriod');
+export const ProcessedAttendanceRepo = createRepository<ProcessedAttendance>(processedAttendances, 'ProcessedAttendance');
+export const AttendanceExceptionRepo = createRepository<AttendanceException>(attendanceExceptions, 'AttendanceException');
+export const AttendanceDeviceRepo = createRepository<AttendanceDevice>(attendanceDevices, 'AttendanceDevice');
+export const AttendanceLogRepo = createRepository<AttendanceLog>(attendanceLogs, 'AttendanceLog');
+export const ApprovalHistoryRepo = createRepository<ApprovalHistory>(approvalHistories, 'ApprovalHistory');
+export const EmployeeAttendanceSummaryRepo = createRepository<EmployeeAttendanceSummary>(employeeAttendanceSummaries, 'EmployeeAttendanceSummary');
 
 // Custom repositories that need specialized queries can be added here
 export const DashboardRepo = {

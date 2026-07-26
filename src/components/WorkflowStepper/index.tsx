@@ -2,6 +2,7 @@ import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import { X, Loader2, Save } from 'lucide-react';
+import CustomSelect from '../ui/CustomSelect';
 
 export interface Step {
   id: string;
@@ -57,7 +58,8 @@ export default function WorkflowStepper({
   );
 
   return (
-    <div className="w-full bg-white dark:bg-[#181a1f] rounded-sm shadow-sm border border-gray-200 dark:border-white/10 flex flex-col min-h-[calc(100vh-8rem)]">
+    <div className="fixed inset-0 z-[100] flex justify-end bg-black/20 dark:bg-black/40 transition-opacity">
+      <div className="w-full max-w-xl bg-white dark:bg-[#181a1f] h-full shadow-2xl border-l border-gray-200 dark:border-white/10 flex flex-col animate-in slide-in-from-right duration-300">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
         <div>
@@ -78,20 +80,11 @@ export default function WorkflowStepper({
       <div className="bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/10 shrink-0 px-6 py-3">
         <div className="relative max-w-xs">
           <label className="sr-only">Select Step</label>
-          <select
-            value={currentStep}
-            onChange={(e) => onStepChange(Number(e.target.value))}
-            className="w-full appearance-none bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white text-sm rounded-md pl-4 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#792359] focus:border-[#792359] transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 dark:hover:border-gray-700"
-          >
-            {steps.map((step, index) => (
-              <option key={step.id} value={index}>
-                {index + 1}. {step.label}
-              </option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 dark:text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
+          <CustomSelect
+            value={currentStep.toString()}
+            onChange={(val) => onStepChange(Number(val))}
+            options={steps.map((step, index) => ({ value: index.toString(), label: `${index + 1}. ${step.label}` }))}
+          />
         </div>
       </div>
 
@@ -141,6 +134,7 @@ export default function WorkflowStepper({
             </button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

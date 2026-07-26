@@ -28,12 +28,12 @@ export default function WorkforceDashboard() {
   const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
 
   const KPI_CONFIG = [
-    { label: 'Present Today', key: 'present', icon: Users, color: 'text-emerald-600', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { label: 'Absent', key: 'absent', icon: UserMinus, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20' },
-    { label: 'Late Arrivals', key: 'late', icon: Clock, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20' },
-    { label: 'On Leave', key: 'onLeave', icon: Calendar, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Pending Leave', key: 'pendingRequests', icon: FileText, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-900/20' },
-    { label: 'Regularization', key: 'regularization', icon: CheckSquare, color: 'text-cyan-500', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20' },
+    { label: 'Present Today', key: 'present', icon: Users, color: 'text-emerald-600', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20', path: '../attendance/daily?status=Present' },
+    { label: 'Absent', key: 'absent', icon: UserMinus, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20', path: '../attendance/daily?status=Absent' },
+    { label: 'Late Arrivals', key: 'late', icon: Clock, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20', path: '../attendance/daily?status=Late' },
+    { label: 'On Leave', key: 'onLeave', icon: Calendar, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20', path: '../attendance/daily?status=Leave' },
+    { label: 'Pending Leave', key: 'pendingRequests', icon: FileText, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-900/20', path: '../leave/approval-queue' },
+    { label: 'Regularization', key: 'regularization', icon: CheckSquare, color: 'text-cyan-500', bgColor: 'bg-cyan-50 dark:bg-cyan-900/20', path: '../attendance/regularization' },
   ];
 
   if (loading) {
@@ -61,7 +61,11 @@ export default function WorkforceDashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {KPI_CONFIG.map((kpi, i) => (
-          <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group">
+          <div 
+            key={i} 
+            onClick={() => navigate(kpi.path)}
+            className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
+          >
             <div className="flex items-center gap-3 mb-3">
               <div className={`p-2 rounded-sm border ${kpi.bgColor} border-transparent`}>
                 <kpi.icon size={18} className={kpi.color} strokeWidth={2} />

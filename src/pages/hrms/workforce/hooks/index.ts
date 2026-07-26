@@ -83,7 +83,15 @@ export const useIPMappings = (params?: any) => useQuery(WorkforceService.getIPMa
 export const useLockConfigs = (params?: any) => useQuery(WorkforceService.getLockConfigs, params);
 export const useRegularizations = (params?: any) => useQuery(WorkforceService.getRegularizations, params);
 export const usePermissions = (params?: any) => useQuery(WorkforceService.getPermissions, params);
-
+export const useShiftRosters = (params?: any) => useQuery(WorkforceService.getShiftRosters, params);
+export const useHolidays = (params?: any) => useQuery(WorkforceService.getHolidays, params);
+export const useAttendancePeriods = (params?: any) => useQuery(WorkforceService.getAttendancePeriods, params);
+export const useProcessedAttendances = (params?: any) => useQuery(WorkforceService.getProcessedAttendances, params);
+export const useAttendanceExceptions = (params?: any) => useQuery(WorkforceService.getAttendanceExceptions, params);
+export const useAttendanceDevices = (params?: any) => useQuery(WorkforceService.getAttendanceDevices, params);
+export const useAttendanceLogs = (params?: any) => useQuery(WorkforceService.getAttendanceLogs, params);
+export const useApprovalHistories = (params?: any) => useQuery(WorkforceService.getApprovalHistories, params);
+export const useEmployeeAttendanceSummaries = (params?: any) => useQuery(WorkforceService.getEmployeeAttendanceSummaries, params);
 export const useDashboardKPIs = () => {
   const [kpis, setKpis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
