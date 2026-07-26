@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Edit, FileText, Users, DollarSign, Plus, 
   CheckCircle2, MessageSquare, 
-  Building2, X, ShoppingBag, Download, 
+  Building2, X, ShoppingBag, Download, Upload, 
   TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2,
   FileImage, FileSpreadsheet, File, Activity
 } from 'lucide-react';
@@ -51,6 +51,7 @@ interface ParsedDocument {
   type: string;
   mimeType?: string;
   originalId?: string;
+  amount?: string;
 }
 
 const getFileIcon = (mimeType?: string, fileName?: string) => {
@@ -90,8 +91,22 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   const [entityTag, setEntityTag] = useState('');
   const [entityRemarks, setEntityRemarks] = useState('');
 
-  // Invoice Upload Ref
+  // File Upload Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Document Upload Modal State
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadDocType, setUploadDocType] = useState<'Quotation' | 'Purchase Order'>('Quotation');
+  const [uploadAmount, setUploadAmount] = useState('');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const uploadFileInputRef = useRef<HTMLInputElement>(null);
+
+  const openUploadModal = (type: 'Quotation' | 'Purchase Order') => {
+    setUploadDocType(type);
+    setUploadAmount('');
+    setUploadFile(null);
+    setIsUploadModalOpen(true);
+  };
 
   // Project Notes Form State
   const [selectedPerson, setSelectedPerson] = useState('');
@@ -222,6 +237,33 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   const marginPercentage = totalInflows > 0 ? ((netMargin / totalInflows) * 100).toFixed(1) : '0.0';
   const estimationDisplayValue = currentProject.budget || currentProject.expectedRevenue || totalInflows;
 
+  // Combined lists for tables
+  const combinedQuotations = [
+    ...projectQuotations,
+    ...parsedDocuments.filter(d => d.type === 'Quotation').map(d => ({
+      id: d.id,
+      isDocument: true,
+      quotationNo: d.name,
+      date: d.date,
+      grandTotal: Number(d.amount) || 0,
+      status: 'Uploaded',
+      doc: d
+    }))
+  ];
+
+  const combinedPOs = [
+    ...projectPOs,
+    ...parsedDocuments.filter(d => d.type === 'Purchase Order').map(d => ({
+      id: d.id,
+      isDocument: true,
+      poNumber: d.name,
+      vendorName: 'Uploaded Document',
+      grandTotal: Number(d.amount) || 0,
+      status: 'Uploaded',
+      doc: d
+    }))
+  ];
+
   // Add Entity Submit Handler
   const handleAddEntitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -319,7 +361,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
     setDeletedNoteIds(prev => [...prev, noteId]);
   };
 
-  // Upload Invoice Document Handler
+  // Upload Document Handler (Generic)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -328,7 +370,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
     const fileExt = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
     if (!allowedExtensions.includes(fileExt)) {
       toast.error('Unsupported file type. Please upload an Image, PDF, Word document or Excel spreadsheet.');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      e.target.value = '';
       return;
     }
 
@@ -336,13 +378,15 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
     try {
       const uploadResult = await FileService.uploadFile(file, 'project_document');
 
+      const determinedType = file.name.toLowerCase().includes('po') ? 'PO Invoice' : 'Vendor Invoice';
+
       const newDocObj: ParsedDocument = {
         id: Date.now().toString(),
         originalId: uploadResult.id,
         name: file.name,
         date: new Date().toLocaleDateString('en-GB'),
         size: (file.size / 1024).toFixed(0) + ' KB',
-        type: file.name.toLowerCase().includes('po') ? 'PO Invoice' : 'Vendor Invoice',
+        type: determinedType,
         mimeType: uploadResult.mimeType
       };
 
@@ -358,9 +402,58 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
       toast.error(err?.message || 'Failed to upload document');
     } finally {
       setIsSaving(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      e.target.value = '';
+    }
+  };
+
+  const handleModalUploadSubmit = async () => {
+    if (!uploadFile) {
+      toast.error('Please select a file to upload');
+      return;
+    }
+    if (!uploadAmount) {
+      toast.error('Please enter the amount');
+      return;
+    }
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg', '.tif', '.tiff', '.ico', '.heic', '.heif', '.avif', '.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+    const fileExt = uploadFile.name.slice(uploadFile.name.lastIndexOf('.')).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+      toast.error('Unsupported file type. Please upload an Image, PDF, Word document or Excel spreadsheet.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const uploadResult = await FileService.uploadFile(uploadFile, 'project_document');
+
+      const newDocObj: ParsedDocument = {
+        id: Date.now().toString(),
+        originalId: uploadResult.id,
+        name: uploadFile.name,
+        date: new Date().toLocaleDateString('en-GB'),
+        size: (uploadFile.size / 1024).toFixed(0) + ' KB',
+        type: uploadDocType,
+        mimeType: uploadResult.mimeType,
+        amount: uploadAmount
+      };
+
+      const updatedDocs = [JSON.stringify(newDocObj), ...(currentProject.projectDocuments || [])];
+      const updatedProject = await ProjectService.update(currentProject.id, {
+        ...currentProject,
+        projectDocuments: updatedDocs
+      });
+
+      setCurrentProject(updatedProject);
+      toast.success(`${uploadDocType} uploaded successfully`);
+      setIsUploadModalOpen(false);
+      setUploadFile(null);
+      setUploadAmount('');
+    } catch (err: any) {
+      toast.error(err?.message || `Failed to upload ${uploadDocType}`);
+    } finally {
+      setIsSaving(false);
+      if (uploadFileInputRef.current) uploadFileInputRef.current.value = '';
     }
   };
 
@@ -447,7 +540,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
   return (
     <div className="w-full bg-gray-50 dark:bg-[#0a0a0a] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col min-h-[calc(100vh-8rem)] overflow-hidden transition-colors duration-300">
       
-      {/* Hidden File Input for Invoice Upload */}
+      {/* Hidden File Inputs */}
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -645,9 +738,14 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <FileText size={16} className="text-gray-500" />
                   Quotations
                 </h4>
-                <Link to="/companydashboard/sales/quotations/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
-                  + Create Quotation
-                </Link>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => openUploadModal('Quotation')} className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1">
+                    <Upload size={14} /> Upload
+                  </button>
+                  <Link to="/companydashboard/sales/quotations/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
+                    + Create Quotation
+                  </Link>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
@@ -660,23 +758,31 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {projectQuotations.map((q: any) => (
+                    {combinedQuotations.map((q: any) => (
                       <tr key={q.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">
-                           <Link to={`/companydashboard/sales/quotations/${q.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{q.quotationNo || 'Unassigned'}</Link>
+                           {q.isDocument ? (
+                             <button onClick={() => handleDownload(q.doc)} className="hover:underline flex items-center gap-2 text-left">
+                               {getFileIcon(q.doc.mimeType, q.doc.name)} {q.quotationNo}
+                             </button>
+                           ) : (
+                             <Link to={`/companydashboard/sales/quotations/${q.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{q.quotationNo || 'Unassigned'}</Link>
+                           )}
                         </td>
-                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{q.date ? new Date(q.date).toLocaleDateString('en-GB') : '—'}</td>
+                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                           {q.isDocument ? q.date : (q.date ? new Date(q.date).toLocaleDateString('en-GB') : '—')}
+                        </td>
                         <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
                           {(Number(q.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50">
+                          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${q.isDocument ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/50' : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50'}`}>
                             {q.status || 'Sent'}
                           </span>
                         </td>
                       </tr>
                     ))}
-                    {projectQuotations.length === 0 && (
+                    {combinedQuotations.length === 0 && (
                       <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No quotations created.</td></tr>
                     )}
                   </tbody>
@@ -691,9 +797,14 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <ShoppingBag size={16} className="text-gray-500" />
                   Purchase Orders
                 </h4>
-                <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
-                  + Create PO
-                </Link>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => openUploadModal('Purchase Order')} className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1">
+                    <Upload size={14} /> Upload
+                  </button>
+                  <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
+                    + Create PO
+                  </Link>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
@@ -706,23 +817,29 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {projectPOs.map((po: any) => (
+                    {combinedPOs.map((po: any) => (
                       <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">
-                          <Link to={`/companydashboard/finance/pos/${po.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{po.poNumber || 'Unassigned'}</Link>
+                          {po.isDocument ? (
+                             <button onClick={() => handleDownload(po.doc)} className="hover:underline flex items-center gap-2 text-left">
+                               {getFileIcon(po.doc.mimeType, po.doc.name)} {po.poNumber}
+                             </button>
+                          ) : (
+                            <Link to={`/companydashboard/finance/pos/${po.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{po.poNumber || 'Unassigned'}</Link>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{po.vendorName || 'Vendor'}</td>
                         <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
                           {(Number(po.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50">
+                          <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${po.isDocument ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/50' : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50'}`}>
                             {po.status || 'Issued'}
                           </span>
                         </td>
                       </tr>
                     ))}
-                    {projectPOs.length === 0 && (
+                    {combinedPOs.length === 0 && (
                       <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No purchase orders issued.</td></tr>
                     )}
                   </tbody>
@@ -1043,6 +1160,100 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Document Upload Modal ── */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'transparent', pointerEvents: 'auto' }}>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-gray-800 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] max-w-md w-full animate-in zoom-in-95 duration-150 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <Upload className="text-[#792359] dark:text-[#c44997]" size={20} />
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Upload {uploadDocType}</h3>
+              </div>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  {uploadDocType} Amount (₹) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  required
+                  placeholder="0.00"
+                  value={uploadAmount}
+                  onChange={(e) => setUploadAmount(e.target.value)}
+                  className={formStyles.field()}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                  Document <span className="text-red-500">*</span>
+                </label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 dark:hover:bg-[#1f2128] transition-colors cursor-pointer"
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      setUploadFile(e.dataTransfer.files[0]);
+                    }
+                  }}
+                  onClick={() => uploadFileInputRef.current?.click()}
+                >
+                  <Upload className="text-gray-400 mb-2" size={24} />
+                  {uploadFile ? (
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{uploadFile.name}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Drag and drop file here</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">or</p>
+                      <button type="button" className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded text-xs font-medium border border-gray-200 dark:border-gray-700">
+                        Browse Local Storage
+                      </button>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={uploadFileInputRef} 
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setUploadFile(e.target.files[0]);
+                    }
+                  }} 
+                  className="hidden" 
+                  accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx" 
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleModalUploadSubmit}
+                disabled={isSaving || !uploadFile || !uploadAmount}
+                className="px-4 py-2 bg-[#792359] hover:bg-[#611b47] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              >
+                {isSaving ? 'Uploading...' : 'Upload & Save'}
+              </button>
+            </div>
           </div>
         </div>
       )}
