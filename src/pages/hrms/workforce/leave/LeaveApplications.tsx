@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, FileText } from 'lucide-react';
 import { useLeaveApplications, useMutation } from '../hooks';
 import { WorkforceService } from '../services';
 import CustomTable from '../../../../components/ui/CustomTable';
@@ -159,5 +159,4 @@ export default function LeaveApplications() {
   );
 }
 
-// Add FileText import as it was used in empty state
-import { FileText } from 'lucide-react';
+

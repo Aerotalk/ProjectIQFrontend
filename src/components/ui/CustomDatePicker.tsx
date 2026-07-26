@@ -91,7 +91,7 @@ export default function CustomDatePicker({
               </PopoverTrigger>
               <PopoverContent
                 align="start"
-                className="w-auto p-2 shadow-lg rounded-lg"
+                className="w-auto p-2 shadow-lg rounded-lg z-[200]"
               >
                 <Calendar
                   mode="single"
@@ -116,7 +116,7 @@ export default function CustomDatePicker({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-auto p-2 shadow-lg rounded-lg"
+        className="w-auto p-2 shadow-lg rounded-lg z-[200]"
       >
         <Calendar
           mode="single"
