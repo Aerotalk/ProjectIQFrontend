@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import CustomTable from '../../../../../components/ui/CustomTable';
-import { Button } from '../../../../../components/ui/button';
 import { Search, Filter, Edit, FileText, CheckCircle2 } from 'lucide-react';
 import { mockManagerReviews } from '../../mock/mockPerformanceData';
 import type { ManagerReview } from '../../types';
@@ -75,9 +74,9 @@ export default function ManagerReviewsQueue() {
       render: (_: any, row: ManagerReview) => (
         <div className="flex items-center gap-2">
           {row.status === 'Pending' ? (
-            <Button size="sm" variant="default" className="bg-[#792359] hover:bg-[#b8458f] text-white" onClick={() => handleOpenDrawer(row)}>
+            <button className="px-3 py-1.5 flex items-center bg-[#792359] hover:bg-[#52173c] text-white text-xs font-medium rounded-sm shadow-sm transition-colors" onClick={() => handleOpenDrawer(row)}>
               <Edit size={14} className="mr-1" /> Assess
-            </Button>
+            </button>
           ) : (
             <button onClick={() => handleOpenDrawer(row)} className="flex items-center text-xs text-gray-500 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors">
               <FileText size={14} className="mr-1" /> View Details
@@ -107,10 +106,10 @@ export default function ManagerReviewsQueue() {
               className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
             />
           </div>
-          <Button variant="outline" className="text-gray-600 dark:text-gray-300">
+          <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
             <Filter size={16} className="mr-2" />
             Filter
-          </Button>
+          </button>
         </div>
       </div>
 

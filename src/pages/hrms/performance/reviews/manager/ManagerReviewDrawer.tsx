@@ -4,7 +4,8 @@ import { FormLayout } from '../../../../../components/ui/FormLayout';
 import CustomSelect from '../../../../../components/ui/CustomSelect';
 import type { ManagerReview, SelfReview } from '../../types';
 import { mockGoals, mockSelfReviews } from '../../mock/mockPerformanceData';
-import { Star, User, AlertCircle } from 'lucide-react';
+import { formStyles } from '../../../../../components/ui/form-styles';
+import { Star, User, AlertCircle, Save, Check } from 'lucide-react';
 
 interface ManagerReviewDrawerProps {
   isOpen: boolean;
@@ -77,17 +78,37 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
       footer={
         !isReadOnly ? (
           <div className="flex justify-end gap-3 w-full">
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
               Cancel
             </button>
-            <button onClick={handleSaveDraft} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+            <button 
+              onClick={handleSaveDraft} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+            >
+              <Save size={16} className="inline mr-2" />
               Save Draft
             </button>
-            <button onClick={handleSubmit} className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-sm hover:bg-[#b8458f]">
+            <button 
+              onClick={handleSubmit} 
+              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+            >
+              <Check size={16} />
               Submit Assessment
             </button>
           </div>
-        ) : null
+        ) : (
+          <div className="flex justify-end gap-3 w-full">
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        )
       }
     >
       <FormLayout>
@@ -150,7 +171,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
                         <span className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] uppercase tracking-wider">Manager Assessment</span>
                       </div>
                       <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Rating</label>
+                        <label className={formStyles.label}>Your Rating</label>
                         <RatingStars 
                           value={mgrRating?.managerRating || 0} 
                           onChange={(v) => handleGoalRatingChange(goal.id, v)} 
@@ -158,9 +179,9 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Comments</label>
+                        <label className={formStyles.label}>Your Comments</label>
                         <textarea 
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                          className={formStyles.textarea(false, isReadOnly)}
                           rows={2}
                           value={mgrRating?.managerComment || ''}
                           onChange={(e) => handleGoalCommentChange(goal.id, e.target.value)}
@@ -185,7 +206,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Promotion Recommendation</label>
+                <label className={formStyles.label}>Promotion Recommendation</label>
                 <CustomSelect 
                   options={[
                     { value: 'Yes', label: 'Highly Recommended for Promotion' },
@@ -198,10 +219,10 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Training Recommendations</label>
+                <label className={formStyles.label}>Training Recommendations</label>
                 <input 
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm"
+                  className={formStyles.field(false, isReadOnly)}
                   value={formData.trainingRecommendation || ''}
                   onChange={(e) => setFormData({...formData, trainingRecommendation: e.target.value})}
                   disabled={isReadOnly}
@@ -211,11 +232,11 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
-                Performance Improvement Plan (PIP) <AlertCircle size={14} className="text-orange-500" />
+              <label className={formStyles.label}>
+                Performance Improvement Plan (PIP) <AlertCircle size={14} className="inline text-orange-500 mb-0.5" />
               </label>
               <textarea 
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                className={formStyles.textarea(false, isReadOnly)}
                 rows={2}
                 value={formData.improvementPlan || ''}
                 onChange={(e) => setFormData({...formData, improvementPlan: e.target.value})}
@@ -224,10 +245,10 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 mt-4">Final Manager Comments</label>
+            <div className="mt-4">
+              <label className={formStyles.label}>Final Manager Comments</label>
               <textarea 
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                className={formStyles.textarea(false, isReadOnly)}
                 rows={4}
                 value={formData.managerComments || ''}
                 onChange={(e) => setFormData({...formData, managerComments: e.target.value})}

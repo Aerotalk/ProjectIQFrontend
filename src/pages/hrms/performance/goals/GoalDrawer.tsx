@@ -4,8 +4,9 @@ import { FormLayout } from '../../../../components/ui/FormLayout';
 import CustomInput from '../../../../components/ui/CustomInput';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
+import { formStyles } from '../../../../components/ui/form-styles';
 import type { Goal } from '../types';
-import { Target } from 'lucide-react';
+import { Target, Save } from 'lucide-react';
 
 interface GoalDrawerProps {
   isOpen: boolean;
@@ -28,16 +29,45 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
 
   const isReadOnly = mode === 'view';
 
+  const handleSave = () => {
+    onSave && onSave(formData);
+    onClose();
+  };
+
   return (
     <Drawer 
       isOpen={isOpen} 
       onClose={onClose} 
       title={mode === 'create' ? 'Create New Goal' : mode === 'edit' ? 'Edit Goal' : 'Goal Details'}
       size="md"
-      onSave={isReadOnly ? undefined : () => {
-        onSave && onSave(formData);
-        onClose();
-      }}
+      footer={
+        !isReadOnly ? (
+          <div className="flex justify-end gap-3 w-full">
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleSave} 
+              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+            >
+              <Save size={16} />
+              Save Goal
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-end gap-3 w-full">
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        )
+      }
     >
       <FormLayout>
         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-white/5">
@@ -60,7 +90,7 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+            <label className={formStyles.label}>Category</label>
             <CustomSelect 
               options={[
                 { value: 'Strategic', label: 'Strategic' },
@@ -74,7 +104,7 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+            <label className={formStyles.label}>Priority</label>
             <CustomSelect 
               options={[
                 { value: 'High', label: 'High' },
@@ -89,9 +119,9 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Measurement</h3>
+          <h3 className={formStyles.sectionTitle}>Measurement</h3>
           
-          <div className="grid grid-cols-1 gap-4 mb-4">
+          <div className="grid grid-cols-1 gap-4 mb-4 mt-4">
             <CustomInput 
               label="Key Performance Indicator (KPI)" 
               value={formData.kpi || ''}
@@ -134,7 +164,7 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
             disabled={isReadOnly}
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
+            <label className={formStyles.label}>Due Date</label>
             <CustomDatePicker 
               value={formData.dueDate}
               onChange={(val: string) => setFormData({...formData, dueDate: val})}
@@ -144,7 +174,7 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
         </div>
 
         <div className="mt-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <label className={formStyles.label}>Status</label>
           <CustomSelect 
             options={[
               { value: 'On Track', label: 'On Track' },

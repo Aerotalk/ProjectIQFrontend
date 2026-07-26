@@ -133,7 +133,6 @@ body {
   }
   html {
     @apply font-sans;
-    scrollbar-gutter: stable;
   }
   /* Prevent flex/grid children from overflowing their containers */
   .flex > * {
@@ -201,4 +200,11 @@ body {
 
 [data-slot="calendar"] td {
   vertical-align: top !important;
+}
+
+@keyframes grow-width {
+  from { width: 0%; }
+}
+.animate-grow-width {
+  animation: grow-width 1s ease-out forwards;
 }

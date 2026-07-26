@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { Button } from '../../../../components/ui/button';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { mockCompetencies } from '../mock/mockPerformanceData';
 import Drawer from '../../../../components/ui/Drawer';
@@ -107,10 +106,10 @@ export default function TemplatesMain() {
             className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
           />
         </div>
-        <Button variant="default" onClick={() => setIsDrawerOpen(true)} className="bg-[#792359] hover:bg-[#b8458f] text-white">
+        <button onClick={() => setIsDrawerOpen(true)} className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
           <Plus size={16} className="mr-2" />
           Add New
-        </Button>
+        </button>
       </div>
 
       {/* Main Table Area (Showing Competencies for brevity) */}

@@ -98,9 +98,12 @@ export default function CalibrationDashboard() {
       render: (_: any, row: CalibrationRecord) => (
         <div className="flex items-center gap-2">
           {row.status !== 'Finalized' && (
-            <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-50" onClick={() => handleApprove(row.id)}>
+            <button 
+              className="px-3 py-1.5 flex items-center bg-[#792359] hover:bg-[#52173c] text-white text-xs font-medium rounded-sm shadow-sm transition-colors" 
+              onClick={() => handleApprove(row.id)}
+            >
               <CheckCircle size={14} className="mr-1" /> Approve
-            </Button>
+            </button>
           )}
         </div>
       )
@@ -126,14 +129,14 @@ export default function CalibrationDashboard() {
               className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
             />
           </div>
-          <Button variant="outline" className="text-gray-600 dark:text-gray-300">
+          <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
             <Filter size={16} className="mr-2" />
             Filter
-          </Button>
-          <Button variant="default" className="bg-[#792359] hover:bg-[#b8458f] text-white">
+          </button>
+          <button className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
             <CheckCircle size={16} className="mr-2" />
             Finalize All
-          </Button>
+          </button>
         </div>
       </div>
 

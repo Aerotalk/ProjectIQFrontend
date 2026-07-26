@@ -88,9 +88,24 @@ export default function PendingApprovals() {
         isOpen={!!selectedClaim}
         onClose={() => setSelectedClaim(null)}
         title={`Approval Action - ${selectedClaim?.claimNo}`}
-        size="lg"
+        footer={
+          <>
+            <button 
+              onClick={handleReject}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
+            >
+              Reject
+            </button>
+            <button 
+              onClick={handleApprove}
+              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
+            >
+              Approve
+            </button>
+          </>
+        }
       >
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-md">
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Summary</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -103,20 +118,6 @@ export default function PendingApprovals() {
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Expense Items</h4>
             <p className="text-sm text-gray-500">No items mock data available for this view.</p>
           </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#181a1f] flex justify-end space-x-3">
-          <button 
-            onClick={handleReject}
-            className="px-4 py-2 border border-red-500 text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10"
-          >
-            Reject
-          </button>
-          <button 
-            onClick={handleApprove}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Approve
-          </button>
         </div>
       </Drawer>
     </div>
