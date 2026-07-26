@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Edit, FileText, Users, DollarSign, Plus, 
-  CheckCircle2, MessageSquare, 
-  Building2, X, ShoppingBag, Download, Upload, 
+import {
+  Edit, FileText, Users, DollarSign, Plus,
+  CheckCircle2, MessageSquare,
+  Building2, X, ShoppingBag, Download, Upload,
   TrendingUp, TrendingDown, PieChart, ShieldAlert, Paperclip, Trash2,
   FileImage, FileSpreadsheet, File, Activity
 } from 'lucide-react';
@@ -12,6 +12,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { useVendors } from '../../../hooks/useVendors';
 import { useClients } from '../../../hooks/useClients';
 import { api } from '../../../lib/api';
+
 import { POService } from '../../../services/po.service';
 import { QuotationService } from '../../../services/quotation.service';
 import { ExpenseService } from '../../../services/expense.service';
@@ -57,7 +58,7 @@ interface ParsedDocument {
 const getFileIcon = (mimeType?: string, fileName?: string) => {
   const mt = mimeType?.toLowerCase() || '';
   const name = fileName?.toLowerCase() || '';
-  
+
   if (mt.startsWith('image/') || name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tif|tiff|ico|heic|heif|avif)$/)) return <FileImage size={13} className="text-[#792359] dark:text-[#c44997]" />;
   if (mt.includes('pdf') || name.endsWith('.pdf')) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
   if (mt.includes('word') || name.match(/\.(doc|docx)$/)) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
@@ -66,10 +67,10 @@ const getFileIcon = (mimeType?: string, fileName?: string) => {
 };
 
 export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
-    const { selectedCompanyId } = useAuth();
+  const { selectedCompanyId } = useAuth();
   const { vendors, isListLoading: isVendorsLoading } = useVendors({ companyId: selectedCompanyId || null });
   const { clients } = useClients({ companyId: selectedCompanyId || null });
-  
+
   const [currentProject, setCurrentProject] = useState<Project>(initialProject);
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoaded, setUsersLoaded] = useState(false);
@@ -93,7 +94,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
   // File Upload Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Document Upload Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadDocType, setUploadDocType] = useState<'Quotation' | 'Purchase Order'>('Quotation');
@@ -151,26 +152,26 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
         console.error('Failed to load relations', err);
       }
     };
-    
+
     fetchUsers();
     fetchRelations();
   }, [selectedCompanyId]);
 
   // Filter dynamic entities & items by projectId or linked IDs strictly from backend data
-  const projectQuotations = quotations.filter((q: any) => 
+  const projectQuotations = quotations.filter((q: any) =>
     q.projectId === currentProject.id || (currentProject.linkedQuotations && currentProject.linkedQuotations.includes(q.id))
   );
 
-  const projectPOs = pos.filter((p: any) => 
+  const projectPOs = pos.filter((p: any) =>
     p.projectId === currentProject.id || (currentProject.linkedPOs && currentProject.linkedPOs.includes(p.id))
   );
 
-  const projectIncidents = incidents.filter((t: any) => 
+  const projectIncidents = incidents.filter((t: any) =>
     t.projectId === currentProject.id || (currentProject.linkedIncidents && currentProject.linkedIncidents.includes(t.id)) ||
     (t.subject && currentProject.projectName && t.subject.toLowerCase().includes(currentProject.projectName.toLowerCase()))
   );
 
-  const projectExpenses = expenses.filter((e: any) => 
+  const projectExpenses = expenses.filter((e: any) =>
     e.projectId === currentProject.id || (currentProject.linkedExpenses && currentProject.linkedExpenses.includes(e.id))
   );
 
@@ -539,14 +540,14 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
   return (
     <div className="w-full bg-gray-50 dark:bg-[#0a0a0a] rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 flex flex-col min-h-[calc(100vh-8rem)] overflow-hidden transition-colors duration-300">
-      
+
       {/* Hidden File Inputs */}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileUpload} 
-        className="hidden" 
-        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx" 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        className="hidden"
+        accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx"
       />
 
       {/* ── 1. Header Section ── */}
@@ -563,11 +564,10 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                 {currentProject.projectCode || currentProject.id || 'No Code'}
               </span>
-              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${
-                isProjectClosed 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' 
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${isProjectClosed
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50'
                   : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50'
-              }`}>
+                }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${isProjectClosed ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                 {isProjectClosed ? 'Completed' : (currentProject.status || 'Active')}
               </span>
@@ -581,21 +581,21 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
             onClick={() => setIsBiModalOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
           >
-            <PieChart size={16} className="text-[#792359] dark:text-[#c44997]" /> 
+            <PieChart size={16} className="text-[#792359] dark:text-[#c44997]" />
             <span>BI Dashboard</span>
           </button>
           <button
             onClick={toggleProjectClosed}
             className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
           >
-            <CheckCircle2 size={16} className={isProjectClosed ? 'text-emerald-500' : 'text-gray-500'} /> 
+            <CheckCircle2 size={16} className={isProjectClosed ? 'text-emerald-500' : 'text-gray-500'} />
             <span>{isProjectClosed ? 'Project Completed' : 'Mark Completed'}</span>
           </button>
           <button
             onClick={onEdit}
             className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
           >
-            <Edit size={16} className="text-gray-500" /> 
+            <Edit size={16} className="text-gray-500" />
             <span>Edit Project</span>
           </button>
           <button
@@ -619,11 +619,10 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab.id 
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+            className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
+                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]'
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-            }`}
+              }`}
           >
             {tab.icon}
             {tab.label}
@@ -633,14 +632,14 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
       {/* ── 3. Profile Content Workspace ── */}
       <div className="flex-1 p-6 overflow-y-auto">
-        
+
         {/* ── TABS CORE CONTENT: OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             {/* LEFT PROFILE COLUMN */}
             <div className="lg:col-span-1 flex flex-col gap-6">
-              
+
               {/* Primary Details Box */}
               <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -678,7 +677,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
 
             {/* RIGHT COLUMN */}
             <div className="lg:col-span-2 flex flex-col gap-6">
-              
+
               {/* Actions Callout */}
               <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 flex items-center justify-between shadow-sm">
                 <div>
@@ -715,7 +714,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">₹{netMargin.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     Project Estimation: <span className="font-semibold text-gray-900 dark:text-gray-200">₹{estimationDisplayValue.toLocaleString('en-IN')}</span>
@@ -730,7 +729,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
         {/* ── TABS CORE CONTENT: TRANSACTIONS & DOCS ── */}
         {activeTab === 'transactions' && (
           <div className="space-y-6">
-            
+
             {/* Quotations Table */}
             <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#121212]">
@@ -761,16 +760,16 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     {combinedQuotations.map((q: any) => (
                       <tr key={q.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">
-                           {q.isDocument ? (
-                             <button onClick={() => handleDownload(q.doc)} className="hover:underline flex items-center gap-2 text-left">
-                               {getFileIcon(q.doc.mimeType, q.doc.name)} {q.quotationNo}
-                             </button>
-                           ) : (
-                             <Link to={`/companydashboard/sales/quotations/${q.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{q.quotationNo || 'Unassigned'}</Link>
-                           )}
+                          {q.isDocument ? (
+                            <button onClick={() => handleDownload(q.doc)} className="hover:underline flex items-center gap-2 text-left">
+                              {getFileIcon(q.doc.mimeType, q.doc.name)} {q.quotationNo}
+                            </button>
+                          ) : (
+                            <Link to={`/companydashboard/sales/quotations/${q.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{q.quotationNo || 'Unassigned'}</Link>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                           {q.isDocument ? q.date : (q.date ? new Date(q.date).toLocaleDateString('en-GB') : '—')}
+                          {q.isDocument ? q.date : (q.date ? new Date(q.date).toLocaleDateString('en-GB') : '—')}
                         </td>
                         <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
                           {(Number(q.grandTotal) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -821,9 +820,9 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                       <tr key={po.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">
                           {po.isDocument ? (
-                             <button onClick={() => handleDownload(po.doc)} className="hover:underline flex items-center gap-2 text-left">
-                               {getFileIcon(po.doc.mimeType, po.doc.name)} {po.poNumber}
-                             </button>
+                            <button onClick={() => handleDownload(po.doc)} className="hover:underline flex items-center gap-2 text-left">
+                              {getFileIcon(po.doc.mimeType, po.doc.name)} {po.poNumber}
+                            </button>
                           ) : (
                             <Link to={`/companydashboard/finance/pos/${po.id}`} state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }}>{po.poNumber || 'Unassigned'}</Link>
                           )}
@@ -904,7 +903,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
         {/* ── TABS CORE CONTENT: INCIDENTS & ENTITIES ── */}
         {activeTab === 'incidents' && (
           <div className="space-y-6">
-            
+
             {/* Live Incidents Section */}
             <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm overflow-hidden flex flex-col">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#121212]">
@@ -1010,7 +1009,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <MessageSquare size={18} className="text-gray-500" />
                 Notes & Comments Timeline
               </h4>
-              
+
               <div className="space-y-4">
                 <div>
                   <CustomSelect
@@ -1180,7 +1179,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
@@ -1200,7 +1199,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                   Document <span className="text-red-500">*</span>
                 </label>
-                <div 
+                <div
                   className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 dark:hover:bg-[#1f2128] transition-colors cursor-pointer"
                   onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
                   onDrop={(e) => {
@@ -1225,16 +1224,16 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                     </>
                   )}
                 </div>
-                <input 
-                  type="file" 
-                  ref={uploadFileInputRef} 
+                <input
+                  type="file"
+                  ref={uploadFileInputRef}
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       setUploadFile(e.target.files[0]);
                     }
-                  }} 
-                  className="hidden" 
-                  accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx" 
+                  }}
+                  className="hidden"
+                  accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.tif,.tiff,.ico,.heic,.heif,.avif,.pdf,.doc,.docx,.xls,.xlsx"
                 />
               </div>
             </div>
@@ -1262,7 +1261,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
       {isBiModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar animate-in zoom-in-95 duration-150 p-6 space-y-6">
-            
+
             {/* Modal Top Header */}
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-4">
