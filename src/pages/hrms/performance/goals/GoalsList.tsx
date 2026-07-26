@@ -6,7 +6,7 @@ import type { Goal } from '../types';
 import GoalDrawer from './GoalDrawer';
 
 export default function GoalsList() {
-  const [goals] = useState<Goal[]>(mockGoals);
+  const [goals, setGoals] = useState<Goal[]>(mockGoals);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -19,6 +19,10 @@ export default function GoalsList() {
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedGoal(null);
+  };
+
+  const handleCompleteGoal = (id: string) => {
+    setGoals(goals.map(g => g.id === id ? { ...g, status: 'Completed', progress: 100 } : g));
   };
 
   const filteredGoals = goals.filter(goal => 
@@ -102,7 +106,11 @@ export default function GoalsList() {
             <Edit size={16} />
           </button>
           {row.status !== 'Completed' && (
-            <button className="p-1 text-gray-500 hover:text-green-600 transition-colors" title="Mark Complete">
+            <button 
+              className="p-1 text-gray-500 hover:text-green-600 transition-colors" 
+              title="Mark Complete"
+              onClick={() => handleCompleteGoal(row.id)}
+            >
               <CheckCircle size={16} />
             </button>
           )}

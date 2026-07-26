@@ -47,14 +47,14 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
       footer={
         !isViewMode ? (
           <div className="flex justify-end gap-3 w-full">
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
             >
               Cancel
             </button>
-            <button 
-              onClick={handleSave} 
+            <button
+              onClick={handleSave}
               className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
             >
               <Save size={16} />
@@ -63,8 +63,8 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
           </div>
         ) : (
           <div className="flex justify-end gap-3 w-full">
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
             >
               Close
@@ -75,17 +75,17 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
     >
       <FormLayout>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomInput 
-            label="Cycle Name" 
-            value={formData.name || ''} 
-            onChange={(e: any) => setFormData({...formData, name: e.target.value})} 
-            required 
+          <CustomInput
+            label="Cycle Name"
+            value={formData.name || ''}
+            onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
+            required
             readOnly={isViewMode}
             placeholder="e.g. Annual Review 2026"
           />
           <div>
             <label className={formStyles.label}>Review Type</label>
-            <CustomSelect 
+            <CustomSelect
               options={[
                 { value: 'Annual', label: 'Annual' },
                 { value: 'Bi-Annual', label: 'Bi-Annual' },
@@ -93,7 +93,7 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
                 { value: 'Probation', label: 'Probation' }
               ]}
               value={formData.type || ''}
-              onChange={(val) => setFormData({...formData, type: val as any})}
+              onChange={(val) => setFormData({ ...formData, type: val as any })}
               disabled={isViewMode}
             />
           </div>
@@ -102,17 +102,17 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
             <label className={formStyles.label}>Start Date</label>
-            <CustomDatePicker 
+            <CustomDatePicker
               value={formData.startDate}
-              onChange={(date: string) => setFormData({...formData, startDate: date})}
+              onChange={(date: string) => setFormData({ ...formData, startDate: date })}
               disabled={isViewMode}
             />
           </div>
           <div>
             <label className={formStyles.label}>End Date</label>
-            <CustomDatePicker 
+            <CustomDatePicker
               value={formData.endDate}
-              onChange={(date: string) => setFormData({...formData, endDate: date})}
+              onChange={(date: string) => setFormData({ ...formData, endDate: date })}
               disabled={isViewMode}
             />
           </div>
@@ -122,28 +122,30 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
           Review Deadlines
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className={formStyles.label}>Self Review Deadline</label>
-            <CustomDatePicker 
-              value={formData.selfReviewDeadline}
-              onChange={(date: string) => setFormData({...formData, selfReviewDeadline: date})}
-              disabled={isViewMode}
-            />
-          </div>
-          <div>
-            <label className={formStyles.label}>Manager Review Deadline</label>
-            <CustomDatePicker 
-              value={formData.managerReviewDeadline}
-              onChange={(date: string) => setFormData({...formData, managerReviewDeadline: date})}
-              disabled={isViewMode}
-            />
+        <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={formStyles.label}>Self Review Deadline</label>
+              <CustomDatePicker
+                value={formData.selfReviewDeadline}
+                onChange={(date: string) => setFormData({ ...formData, selfReviewDeadline: date })}
+                disabled={isViewMode}
+              />
+            </div>
+            <div>
+              <label className={formStyles.label}>Manager Review Deadline</label>
+              <CustomDatePicker
+                value={formData.managerReviewDeadline}
+                onChange={(date: string) => setFormData({ ...formData, managerReviewDeadline: date })}
+                disabled={isViewMode}
+              />
+            </div>
           </div>
           <div>
             <label className={formStyles.label}>HR Review Deadline</label>
-            <CustomDatePicker 
+            <CustomDatePicker
               value={formData.hrReviewDeadline}
-              onChange={(val: string) => setFormData({...formData, hrReviewDeadline: val})}
+              onChange={(val: string) => setFormData({ ...formData, hrReviewDeadline: val })}
               disabled={isViewMode}
             />
           </div>
@@ -156,28 +158,28 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={formStyles.label}>Target Departments</label>
-            <CustomSelect 
+            <CustomSelect
               options={[
-                {value: 'All', label: 'All Departments'},
-                {value: 'Engineering', label: 'Engineering'},
-                {value: 'Sales', label: 'Sales'}
+                { value: 'All', label: 'All Departments' },
+                { value: 'Engineering', label: 'Engineering' },
+                { value: 'Sales', label: 'Sales' }
               ]}
               value={(formData as any).targetDepartments?.[0] || 'All'}
-              onChange={(val) => setFormData({...formData, targetDepartments: [val]} as any)}
+              onChange={(val) => setFormData({ ...formData, targetDepartments: [val] } as any)}
               disabled={isViewMode}
             />
             <p className="text-xs text-gray-500 mt-1">Leave as 'All' to include everyone.</p>
           </div>
           <div>
             <label className={formStyles.label}>Target Locations</label>
-            <CustomSelect 
+            <CustomSelect
               options={[
-                {value: 'All', label: 'All Locations'},
-                {value: 'New York', label: 'New York'},
-                {value: 'London', label: 'London'}
+                { value: 'All', label: 'All Locations' },
+                { value: 'New York', label: 'New York' },
+                { value: 'London', label: 'London' }
               ]}
               value={(formData as any).targetLocations?.[0] || 'All'}
-              onChange={(val) => setFormData({...formData, targetLocations: [val]} as any)}
+              onChange={(val) => setFormData({ ...formData, targetLocations: [val] } as any)}
               disabled={isViewMode}
             />
           </div>
@@ -187,11 +189,11 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
           <label className={formStyles.label}>
             Description
           </label>
-          <textarea 
+          <textarea
             className={formStyles.textarea(false, isViewMode)}
             rows={4}
             value={formData.description || ''}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             disabled={isViewMode}
             placeholder="Add context or instructions for this appraisal cycle..."
           />

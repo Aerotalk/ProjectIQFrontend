@@ -83,7 +83,7 @@ export function FormRow({ className, children, ...props }: React.ComponentProps<
 
 export function FormLayout({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div className={cn("space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both", className)} {...props}>
+    <div className={cn("space-y-6", className)} {...props}>
       {children}
     </div>
   )

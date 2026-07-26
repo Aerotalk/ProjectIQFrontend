@@ -6,7 +6,7 @@ import type { AppraisalCycle } from '../types';
 import CycleDrawer from './CycleDrawer';
 
 export default function AppraisalCycles() {
-  const [cycles] = useState<AppraisalCycle[]>(mockCycles);
+  const [cycles, setCycles] = useState<AppraisalCycle[]>(mockCycles);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState<AppraisalCycle | null>(null);
@@ -19,6 +19,14 @@ export default function AppraisalCycles() {
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedCycle(null);
+  };
+
+  const handleLaunchCycle = (id: string) => {
+    setCycles(cycles.map(c => c.id === id ? { ...c, status: 'Active' } : c));
+  };
+
+  const handleArchiveCycle = (id: string) => {
+    setCycles(cycles.map(c => c.id === id ? { ...c, status: 'Completed' } : c));
   };
 
   const filteredCycles = cycles.filter(cycle => 
@@ -80,12 +88,20 @@ export default function AppraisalCycles() {
             <Edit size={16} />
           </button>
           {row.status === 'Draft' && (
-            <button className="p-1 text-gray-500 hover:text-green-600 transition-colors" title="Launch Cycle">
+            <button 
+              className="p-1 text-gray-500 hover:text-green-600 transition-colors" 
+              title="Launch Cycle"
+              onClick={() => handleLaunchCycle(row.id)}
+            >
               <Play size={16} />
             </button>
           )}
           {row.status === 'Completed' && (
-            <button className="p-1 text-gray-500 hover:text-orange-600 transition-colors" title="Archive">
+            <button 
+              className="p-1 text-gray-500 hover:text-orange-600 transition-colors" 
+              title="Archive"
+              onClick={() => handleArchiveCycle(row.id)}
+            >
               <Archive size={16} />
             </button>
           )}

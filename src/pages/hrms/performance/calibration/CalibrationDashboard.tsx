@@ -30,6 +30,10 @@ export default function CalibrationDashboard() {
     }
   };
 
+  const handleFinalizeAll = () => {
+    setRecords(records.map(r => ({ ...r, finalRating: r.proposedRating, status: 'Finalized' as const })));
+  };
+
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'Calibrated': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
@@ -133,7 +137,7 @@ export default function CalibrationDashboard() {
             <Filter size={16} className="mr-2" />
             Filter
           </button>
-          <button className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+          <button onClick={handleFinalizeAll} className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
             <CheckCircle size={16} className="mr-2" />
             Finalize All
           </button>
