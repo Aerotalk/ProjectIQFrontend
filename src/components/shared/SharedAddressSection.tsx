@@ -14,6 +14,7 @@ interface AddressSectionProps {
   isOverseas?: boolean;
   disabledState?: boolean;
   optionalFields?: boolean;
+  onFieldChange?: () => void;
 }
 
 const COUNTRIES = Country.getAllCountries().map(c => ({
@@ -21,7 +22,7 @@ const COUNTRIES = Country.getAllCountries().map(c => ({
   value: c.isoCode
 }));
 
-export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabledState, optionalFields }: AddressSectionProps) {
+export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabledState, optionalFields, onFieldChange }: AddressSectionProps) {
   const { formState: { errors }, setValue, control } = useFormContext();
 
   const countryCode = useWatch({ name: `${prefix}Country`, control });
@@ -54,6 +55,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               <input 
                 type="text" 
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onFieldChange?.();
+                }}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
                 className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
@@ -71,7 +76,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               render={({ field }) => (
                 <CustomSelect
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={(val) => {
+                    field.onChange(val);
+                    onFieldChange?.();
+                  }}
                   options={COUNTRIES}
                 />
               )}
@@ -88,6 +96,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               <input 
                 type="text" 
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onFieldChange?.();
+                }}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
                 className={cn(formStyles.field(!!(errors as any)[`${prefix}AddressLine1`], readOnly || disabledState), pointerEventsClass)} 
@@ -106,6 +118,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               <input 
                 type="text" 
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onFieldChange?.();
+                }}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
                 className={cn(formStyles.field(false, readOnly || disabledState), pointerEventsClass)} 
@@ -123,6 +139,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               <input 
                 type="text" 
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onFieldChange?.();
+                }}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
                 className={cn(formStyles.field(!!(errors as any)[`${prefix}City`], readOnly || disabledState), pointerEventsClass)} 
@@ -149,7 +169,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 return (
                   <CustomSelect
                     value={field.value}
-                    onChange={(val) => setValue(`${prefix}State`, val, { shouldValidate: true, shouldDirty: true })}
+                    onChange={(val) => {
+                      setValue(`${prefix}State`, val, { shouldValidate: true, shouldDirty: true });
+                      onFieldChange?.();
+                    }}
                     options={options}
                     disabled={readOnly || disabledState || states.length === 0}
                   />
@@ -169,6 +192,10 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
               <input 
                 type="text" 
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onFieldChange?.();
+                }}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
                 className={cn(formStyles.field(!!(errors as any)[`${prefix}PinCode`], readOnly || disabledState), pointerEventsClass)} 
@@ -185,6 +212,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
             disabled={readOnly || disabledState}
             defaultCountry={countryCode}
             className={pointerEventsClass}
+            onChange={() => onFieldChange?.()}
           />
         </div>
       </FormGrid>
@@ -301,8 +329,12 @@ export default function SharedAddressSection({
         <AddressFormGroup 
           prefix={targetPrefix} 
           readOnly={readOnly} 
-          disabledState={isSameAsBilling}
           isOverseas={isOverseas} 
+          onFieldChange={() => {
+            if (isSameAsBilling) {
+              setValue('sameAsBillingAddress', false, { shouldValidate: true, shouldDirty: true });
+            }
+          }}
         />
       </div>
     </div>

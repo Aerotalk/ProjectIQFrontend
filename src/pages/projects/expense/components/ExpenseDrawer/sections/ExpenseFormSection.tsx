@@ -201,23 +201,30 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
             <div className="flex flex-col gap-4 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50/50 dark:bg-white/[0.02]">
               {/* GST Applicable Toggle */}
               <label className="flex items-center gap-3 cursor-pointer">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    {...register('isGstApplicable')}
-                    disabled={readOnly}
-                    className="sr-only peer"
-                  />
-                  <div className={`w-9 h-5 rounded-full transition-colors ${
-                    isGstApplicable
-                      ? 'bg-[#792359] dark:bg-[#c44997]'
-                      : 'bg-gray-200 dark:bg-white/10 peer-hover:bg-gray-300 dark:peer-hover:bg-white/20'
-                    } ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  ></div>
-                  <div className={`absolute left-[2px] top-[2px] bg-white w-4 h-4 rounded-full transition-transform ${
-                    isGstApplicable ? 'translate-x-full' : ''
-                  }`}></div>
-                </div>
+                <Controller
+                  name="isGstApplicable"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={readOnly}
+                        className="sr-only peer"
+                      />
+                      <div className={`w-9 h-5 rounded-full transition-colors ${
+                        field.value
+                          ? 'bg-[#792359] dark:bg-[#c44997]'
+                          : 'bg-gray-200 dark:bg-white/10 peer-hover:bg-gray-300 dark:peer-hover:bg-white/20'
+                        } ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      ></div>
+                      <div className={`absolute left-[2px] top-[2px] bg-white w-4 h-4 rounded-full transition-transform ${
+                        field.value ? 'translate-x-full' : ''
+                      }`}></div>
+                    </div>
+                  )}
+                />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">GST Applicable</span>
               </label>
 

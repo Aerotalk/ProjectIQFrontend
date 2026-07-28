@@ -61,9 +61,9 @@ export const getClientSchema = () => {
       return val;
     }, z.boolean()),
     shippingAttention: z.string().nullable().optional(),
-    shippingAddressLine1: z.string().nullable().optional(),
+    shippingAddressLine1: z.string().min(1, 'Shipping Address Line 1 is required'),
     shippingAddressLine2: z.string().nullable().optional(),
-    shippingCity: z.string().nullable().optional(),
+    shippingCity: z.string().min(1, 'Shipping City is required'),
     shippingState: z.string().nullable().optional(),
     shippingPinCode: z.string().nullable().optional(),
     shippingCountry: z.string().nullable().optional(),
@@ -124,6 +124,12 @@ export const getClientSchema = () => {
       if (!data.billingPinCode) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['billingPinCode'], message: 'PIN Code is required' });
       if (data.billingPinCode && !/^[0-9]{6}$/.test(data.billingPinCode)) {
          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['billingPinCode'], message: 'Invalid PIN Code (6 digits)' });
+      }
+
+      if (!data.shippingState) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingState'], message: 'State is required' });
+      if (!data.shippingPinCode) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingPinCode'], message: 'PIN Code is required' });
+      if (data.shippingPinCode && !/^[0-9]{6}$/.test(data.shippingPinCode)) {
+         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingPinCode'], message: 'Invalid PIN Code (6 digits)' });
       }
     }
   });

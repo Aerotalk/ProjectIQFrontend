@@ -381,7 +381,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
           )}
         </div>
 
-        <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10">
+        <div className="rounded-sm border border-gray-200 dark:border-white/10">
           <table className="w-full text-left text-xs">
             <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">
               <tr>
