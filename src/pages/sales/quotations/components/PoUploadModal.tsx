@@ -117,7 +117,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
           </button>
         </div>
         
-        <div className="p-5 flex-1 overflow-y-auto space-y-4">
+        <div className={`p-5 flex-1 overflow-y-auto space-y-4 transition-[padding] duration-200 ${openDropdownId ? 'pb-52' : ''}`}>
           {entries.map((entry) => {
             const filteredPos = existingPos.filter(po => 
               po.poNumber?.toLowerCase().includes((entry.workOrderNumber || '').toLowerCase()) || 
@@ -125,7 +125,10 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
             );
 
             return (
-            <div key={entry.id} className="grid grid-cols-12 gap-4 items-end bg-gray-50 dark:bg-[#0f1115] p-4 rounded-lg border border-gray-200 dark:border-white/5 relative group">
+            <div 
+              key={entry.id} 
+              className={`grid grid-cols-12 gap-4 items-end bg-gray-50 dark:bg-[#0f1115] p-4 rounded-lg border border-gray-200 dark:border-white/5 relative group ${openDropdownId === entry.id ? 'z-50' : 'z-10'}`}
+            >
               <div className="col-span-12 md:col-span-4">
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Upload File</label>
                 <div className="relative">
