@@ -1,6 +1,6 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
-import { useState, useEffect, useRef } from 'react';
-import { X, Save, FolderKanban, ChevronDown, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Save, FolderKanban } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useVendors } from '../../../hooks/useVendors';
 import { useClients } from '../../../hooks/useClients';
@@ -10,11 +10,9 @@ import { QuotationService } from '../../../services/quotation.service';
 import { ExpenseService } from '../../../services/expense.service';
 import { TicketService } from '../../../services/ticket.service';
 import type { Project, ProjectFormValues } from '../../../types/project.types';
-import type { Vendor } from '../../../types/vendor.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
-import { cn } from '@/lib/utils';
 
 interface ProjectDrawerProps {
   isOpen: boolean;

@@ -22,6 +22,7 @@ interface CustomSelectProps {
 export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, placeholder, className, isMulti }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropUp, setDropUp] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,15 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus({ preventScroll: true });
+    }
+  }, [isOpen]);
+
+  // Determine whether to flip the dropdown upward
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setDropUp(spaceBelow < 280);
     }
   }, [isOpen]);
 
@@ -92,13 +102,13 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
         onClick={(e) => {
           if (!disabled) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen(prev => !prev);
           }
         }}
         onKeyDown={(e) => {
           if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen(prev => !prev);
           }
         }}
         className={cn(
@@ -116,7 +126,11 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
       {isOpen && (
         <div 
           ref={menuRef}
-          className="absolute left-0 top-[calc(100%+4px)] w-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in slide-in-from-top-2 duration-150 z-[99999]"
+          className={`absolute left-0 w-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in duration-150 z-[99999] ${
+            dropUp
+              ? 'bottom-[calc(100%+4px)] slide-in-from-bottom-2'
+              : 'top-[calc(100%+4px)] slide-in-from-top-2'
+          }`}
         >
           <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#181a1f] z-10 rounded-t-lg">
             <div className="relative">

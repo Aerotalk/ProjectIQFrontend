@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { rolesService } from '../../services/roles.service';
 import { permissionsService, type PermissionMatrix } from '../../services/permissions.service';
 
