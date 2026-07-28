@@ -63,8 +63,9 @@ export default function ProductsList() {
   };
 
   const filteredProducts = products.filter(p =>
-    p.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
+    p.status !== 'Inactive' &&
+    (p.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.itemCode.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -263,6 +264,7 @@ export default function ProductsList() {
         onConfirm={() => {
           if (productToArchive) {
             archiveProduct(productToArchive);
+            setProductToArchive(null);
           }
         }}
         title="Archive Product"
