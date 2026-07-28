@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Upload, Trash2, CheckCircle2 } from 'lucide-react';
+import { X, Plus, Upload, Trash2, CheckCircle2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import FunkyLoader from '@/components/ui/FunkyLoader';
 import { POService } from '@/services/po.service';
@@ -28,6 +28,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingPos, setExistingPos] = useState<PurchaseOrder[]>([]);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (isOpen && companyId) {
@@ -105,13 +106,6 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <datalist id="existing-pos">
-        {existingPos.map(po => (
-          <option key={po.id} value={po.poNumber}>
-            {po.projectName ? `${po.projectName}` : ''}
-          </option>
-        ))}
-      </datalist>
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
         <div className="p-5 flex items-center justify-between border-b border-gray-200 dark:border-white/10">
           <div>
@@ -123,9 +117,18 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
           </button>
         </div>
         
-        <div className="p-5 flex-1 overflow-y-auto space-y-4">
-          {entries.map((entry) => (
-            <div key={entry.id} className="grid grid-cols-12 gap-4 items-end bg-gray-50 dark:bg-[#0f1115] p-4 rounded-lg border border-gray-200 dark:border-white/5 relative group">
+        <div className={`p-5 flex-1 overflow-y-auto space-y-4 transition-[padding] duration-200 ${openDropdownId ? 'pb-52' : ''}`}>
+          {entries.map((entry) => {
+            const filteredPos = existingPos.filter(po => 
+              po.poNumber?.toLowerCase().includes((entry.workOrderNumber || '').toLowerCase()) || 
+              po.projectName?.toLowerCase().includes((entry.workOrderNumber || '').toLowerCase())
+            );
+
+            return (
+            <div 
+              key={entry.id} 
+              className={`grid grid-cols-12 gap-4 items-end bg-gray-50 dark:bg-[#0f1115] p-4 rounded-lg border border-gray-200 dark:border-white/5 relative group ${openDropdownId === entry.id ? 'z-50' : 'z-10'}`}
+            >
               <div className="col-span-12 md:col-span-4">
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Upload File</label>
                 <div className="relative">
@@ -148,16 +151,42 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                 </div>
               </div>
               
-              <div className="col-span-12 md:col-span-3">
+              <div className="col-span-12 md:col-span-3 relative">
                 <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Purchase Order Number</label>
-                <input
-                  type="text"
-                  list="existing-pos"
-                  value={entry.workOrderNumber}
-                  onChange={(e) => handleUpdateRow(entry.id, 'workOrderNumber', e.target.value)}
-                  placeholder="e.g. PO-2024-001"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={entry.workOrderNumber}
+                    onChange={(e) => {
+                      handleUpdateRow(entry.id, 'workOrderNumber', e.target.value);
+                      setOpenDropdownId(entry.id);
+                    }}
+                    onFocus={() => setOpenDropdownId(entry.id)}
+                    onBlur={() => setTimeout(() => setOpenDropdownId(null), 200)}
+                    placeholder="e.g. PO-2024-001"
+                    className="w-full px-3 py-2 pr-8 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <ChevronDown size={14} className="text-gray-400" />
+                  </div>
+                </div>
+                {openDropdownId === entry.id && filteredPos.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {filteredPos.map(po => (
+                      <li
+                        key={po.id}
+                        className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer"
+                        onMouseDown={() => {
+                          handleUpdateRow(entry.id, 'workOrderNumber', po.poNumber);
+                          setOpenDropdownId(null);
+                        }}
+                      >
+                        <div className="font-medium">{po.poNumber}</div>
+                        {po.projectName && <div className="text-xs text-gray-500">{po.projectName}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="col-span-12 md:col-span-2">
@@ -175,7 +204,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                 <input
                   type="number"
                   min="0"
-                  value={entry.woValue || ''}
+                  value={entry.woValue === 0 && !entry.workOrderNumber ? '' : entry.woValue}
                   onChange={(e) => handleUpdateRow(entry.id, 'woValue', Number(e.target.value))}
                   placeholder="Value"
                   className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
@@ -194,7 +223,8 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
 
           <button
             onClick={handleAddRow}
@@ -225,3 +255,4 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
     </div>
   );
 }
+
