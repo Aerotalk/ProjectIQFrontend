@@ -181,6 +181,7 @@ export default function VendorsList() {
                           e.stopPropagation();
                           setOpenDropdownId(openDropdownId === vendor.id ? null : vendor.id);
                         }}
+                        onClose={() => setOpenDropdownId(null)}
                       >
                         <button 
                           onClick={(e) => {

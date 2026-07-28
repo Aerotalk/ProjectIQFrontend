@@ -152,6 +152,16 @@ export const getVendorSchema = () => {
       if (data.billingPinCode && !/^[0-9]{6}$/.test(data.billingPinCode)) {
          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['billingPinCode'], message: 'Invalid PIN Code (6 digits)' });
       }
+
+      if (!data.sameAsBillingAddress) {
+        if (!data.shippingAddressLine1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingAddressLine1'], message: 'Shipping Address Line 1 is required' });
+        if (!data.shippingCity) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingCity'], message: 'Shipping City is required' });
+        if (!data.shippingState) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingState'], message: 'Shipping State is required' });
+        if (!data.shippingPinCode) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingPinCode'], message: 'Shipping PIN Code is required' });
+        if (data.shippingPinCode && !/^[0-9]{6}$/.test(data.shippingPinCode)) {
+           ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['shippingPinCode'], message: 'Invalid Shipping PIN Code (6 digits)' });
+        }
+      }
     }
   });
 };

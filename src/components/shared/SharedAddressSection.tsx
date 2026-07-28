@@ -239,6 +239,7 @@ export default function SharedAddressSection({
 }: SharedAddressSectionProps) {
   const { watch, setValue, getValues, control } = useFormContext();
   const isOverseas = treatment ? ['OVERSEAS', 'SEZ', 'DEEMED_EXPORT'].includes(treatment) : false;
+  const isSyncing = useRef(false);
   
   const isSameAsBilling = watch('sameAsBillingAddress');
 
@@ -253,6 +254,7 @@ export default function SharedAddressSection({
 
   useEffect(() => {
     if (isSameAsBilling && !readOnly && !singlePrefix) {
+      isSyncing.current = true;
       const opts = { shouldValidate: true, shouldDirty: true };
       setValue(`${targetPrefix}Attention`, sourceAttention || '', opts);
       setValue(`${targetPrefix}AddressLine1`, sourceAddressLine1 || '', opts);
@@ -262,6 +264,10 @@ export default function SharedAddressSection({
       setValue(`${targetPrefix}State`, sourceState || '', opts);
       setValue(`${targetPrefix}PinCode`, sourcePinCode || '', opts);
       setValue(`${targetPrefix}Phone`, sourcePhone || '', opts);
+      
+      setTimeout(() => {
+        isSyncing.current = false;
+      }, 150);
     }
   }, [
     isSameAsBilling, readOnly, setValue, targetPrefix, singlePrefix,
@@ -304,6 +310,7 @@ export default function SharedAddressSection({
                       const isChecked = e.target.checked;
                       field.onChange(isChecked);
                       if (isChecked && !readOnly) {
+                        isSyncing.current = true;
                         const vals = getValues();
                         const opts = { shouldValidate: true, shouldDirty: true };
                         setValue(`${targetPrefix}Attention`, vals[`${sourcePrefix}Attention`] || '', opts);
@@ -314,6 +321,10 @@ export default function SharedAddressSection({
                         setValue(`${targetPrefix}State`, vals[`${sourcePrefix}State`] || '', opts);
                         setValue(`${targetPrefix}PinCode`, vals[`${sourcePrefix}PinCode`] || '', opts);
                         setValue(`${targetPrefix}Phone`, vals[`${sourcePrefix}Phone`] || '', opts);
+                        
+                        setTimeout(() => {
+                          isSyncing.current = false;
+                        }, 150);
                       }
                     }}
                     disabled={readOnly}
@@ -331,7 +342,7 @@ export default function SharedAddressSection({
           readOnly={readOnly} 
           isOverseas={isOverseas} 
           onFieldChange={() => {
-            if (isSameAsBilling) {
+            if (isSameAsBilling && !isSyncing.current) {
               setValue('sameAsBillingAddress', false, { shouldValidate: true, shouldDirty: true });
             }
           }}

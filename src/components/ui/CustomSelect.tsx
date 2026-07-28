@@ -54,6 +54,16 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const filteredOptions = useMemo(() => {
     if (!searchQuery) return options;
     const lowerQuery = searchQuery.toLowerCase();
