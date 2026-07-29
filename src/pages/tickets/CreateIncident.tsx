@@ -5,16 +5,17 @@ import { useReturnNavigation } from '../../hooks/useReturnNavigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormValues, TicketService } from '../../services/ticket.service';
-// import { ProjectService } from '../../services/project.service';
 import type { Project } from '../../types/project.types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import { useProjects } from '../../hooks/useProjects';
+import { useClients } from '../../hooks/useClients';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Building2, UserCircle, Briefcase, FileText, IndianRupee } from 'lucide-react';
 import { rolesService, type Role } from '../../services/roles.service';
 import { api } from '../../lib/api';
 import CustomSelect from '@/components/ui/CustomSelect';
+import CustomDateTimePicker from '@/components/ui/CustomDateTimePicker';
 
 export default function CreateIncident() {
   const { navigateBack } = useReturnNavigation();
@@ -27,6 +28,7 @@ export default function CreateIncident() {
   ]);
   
   const { projects, loading: projectsLoading } = useProjects();
+  const { clients } = useClients({ companyId });
   const [selectedProjectData, setSelectedProjectData] = useState<Project | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -356,10 +358,10 @@ export default function CreateIncident() {
                 </div>
                 <div>
                   <label className={formStyles.label}>Due Date</label>
-                  <input
-                    type="datetime-local"
-                    {...register('dueDate')}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                  <CustomDateTimePicker
+                    name="dueDate"
+                    placeholder="Pick a date"
+                    withTime
                   />
                 </div>
               </div>
@@ -392,7 +394,14 @@ export default function CreateIncident() {
                     <span className="text-gray-500 block text-xs">Client</span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Building2 size={14} className="text-gray-400" />
-                      <span className="font-medium text-gray-900">{selectedProjectData?.client || 'Not Assigned'}</span>
+                      <span className="font-medium text-gray-900">
+                        {(() => {
+                          const clientId = selectedProjectData?.client;
+                          if (!clientId) return 'Not Assigned';
+                          const clientObj = clients.find(c => c.id === clientId);
+                          return clientObj ? (clientObj.displayName || clientObj.companyName || clientId) : clientId;
+                        })()}
+                      </span>
                     </div>
                   </div>
                   <div>

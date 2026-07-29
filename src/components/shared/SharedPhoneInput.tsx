@@ -25,9 +25,13 @@ export default function SharedPhoneInput({ name, value, onChange, disabled, defa
       <Controller
         name={name}
         control={formContext.control}
-        render={({ field: { ref, ...fieldProps } }) => (
+        render={({ field: { ref, onChange: fieldOnChange, ...fieldProps } }) => (
           <PhoneInput
             {...fieldProps}
+            onChange={(val) => {
+              fieldOnChange(val);
+              onChange?.(val as string);
+            }}
             key={safeDefaultCountry || 'default'}
             defaultCountry={safeDefaultCountry}
             disabled={disabled}

@@ -4,7 +4,7 @@ import { zodNumericOptional } from '@/utils/validation';
 export const productSchema = z.object({
   id: z.string().nullable().optional(),
   itemCode: z.string().nullable().optional(),
-  itemName: z.string().optional(),
+  itemName: z.string().min(1, 'Item Name is required'),
   description: z.string().nullable().optional(),
   type: z.enum(['Product', 'Service']).optional(),
   unit: z.string().optional(),

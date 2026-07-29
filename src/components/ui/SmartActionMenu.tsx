@@ -4,12 +4,24 @@ import { MoreVertical } from 'lucide-react';
 interface SmartActionMenuProps {
   isOpen: boolean;
   onToggle: (e: React.MouseEvent) => void;
+  onClose?: () => void;
   children: ReactNode;
 }
 
-export default function SmartActionMenu({ isOpen, onToggle, children }: SmartActionMenuProps) {
+export default function SmartActionMenu({ isOpen, onToggle, onClose, children }: SmartActionMenuProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState<'down' | 'up'>('down');
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && onClose && containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -45,7 +57,7 @@ export default function SmartActionMenu({ isOpen, onToggle, children }: SmartAct
   }, [isOpen]);
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left" ref={containerRef}>
       <button 
         ref={buttonRef}
         onClick={onToggle}

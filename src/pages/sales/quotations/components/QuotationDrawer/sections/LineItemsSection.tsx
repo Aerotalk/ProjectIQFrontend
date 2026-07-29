@@ -76,7 +76,7 @@ export default function LineItemsSection({ readOnly }: Props) {
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-sm border border-gray-200 dark:border-white/10 min-h-[250px]">
+      <div className="rounded-sm border border-gray-200 dark:border-white/10 min-h-[250px]">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10">

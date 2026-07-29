@@ -53,7 +53,22 @@ export const api = {
     }
 
     const makeRequest = async () => {
-      let response = await fetch(url, config);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      config.signal = controller.signal;
+
+      let response: Response;
+      try {
+        response = await fetch(url, config);
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        // AbortError = our own timeout; TypeError = network-level failure (server unreachable, CORS, etc.)
+        if (err?.name === 'AbortError') {
+          throw { status: 0, message: 'Request timed out. Please check your connection and try again.' };
+        }
+        throw { status: 0, message: 'Network error. Please check your connection and try again.' };
+      }
+      clearTimeout(timeoutId);
 
       // If 401 and we are not already trying to refresh or log in
       if (response.status === 401 && !endpoint.includes('/auth/')) {

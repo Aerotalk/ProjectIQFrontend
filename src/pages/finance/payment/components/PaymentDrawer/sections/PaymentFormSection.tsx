@@ -89,13 +89,24 @@ export default function PaymentFormSection({ readOnly, nextNumber }: Props) {
             <label className={formStyles.label}>
               Linked Invoice <span className="text-gray-400 normal-case font-normal">(Optional)</span>
             </label>
-            <input
-              type="text"
-              {...register('linkedInvoiceNumber')}
-              disabled={readOnly}
-              placeholder="e.g. INV-2026-001"
-              className={formStyles.field(!!errors.linkedInvoiceNumber, readOnly)}
-            />
+            <div className={readOnly ? 'opacity-80 pointer-events-none' : ''}>
+              <Controller
+                name="linkedInvoiceNumber"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    options={[
+                      { label: 'INV-2026-001', value: 'INV-2026-001', subtitle: 'Pending Amount: ₹50,000' },
+                      { label: 'INV-2026-002', value: 'INV-2026-002', subtitle: 'Pending Amount: ₹12,500' },
+                      { label: 'INV-2026-003', value: 'INV-2026-003', subtitle: 'Pending Amount: ₹1,75,000' },
+                    ]}
+                    placeholder="Search invoice..."
+                  />
+                )}
+              />
+            </div>
           </div>
 
           {/* Payment Date */}

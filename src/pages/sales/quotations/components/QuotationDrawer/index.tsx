@@ -241,7 +241,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
         estimate_date: data.date ? new Date(data.date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         place_of_supply: client?.billingState || '',
         items: lineItems.map((item: any, idx: number) => {
-          const lineTaxable = item.taxableAmount ?? (item.rate * (item.quantity || 1));
+          const lineAmount = item.rate * (item.quantity || 1);
           return {
             item_index: idx + 1,
             item_name: item.itemName,
@@ -250,7 +250,7 @@ export default function QuotationDrawer({ isOpen, onClose, onSave, mode, initial
             item_quantity: item.quantity,
             item_unit: item.unit || 'Unit',
             item_price: item.rate.toFixed(2),
-            item_amount: lineTaxable.toFixed(2)
+            item_amount: lineAmount.toFixed(2)
           };
         }),
         sub_total: data.subTotal.toFixed(2),

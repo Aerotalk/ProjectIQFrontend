@@ -37,6 +37,7 @@ export default function QuotationDetails() {
   const initialClientId = location.state?.openClientId || '';
   const initialClientName = location.state?.openClientName || '';
   const [isApiLoading, setIsApiLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
 
@@ -236,17 +237,47 @@ export default function QuotationDetails() {
     const updatedNotesList = [...parsedCommunications, newNote];
     const newNotesStr = JSON.stringify(updatedNotesList);
 
-    // Optimistic UI update
-    setQuotation({ ...quotation, notes: newNotesStr });
+    // Optimistic UI update — show the note immediately
+    setQuotation(prev => ({ ...prev, notes: newNotesStr }));
     setTempNotes('');
 
-    // Fire and forget backend update
+    // Persist to backend without an unnecessary preceding GET.
+    // We build the update payload from current in-memory state so we
+    // avoid: (a) a redundant network round-trip, (b) stale-cache races.
     (async () => {
       try {
-        const fullQuotation = await QuotationService.getQuotation(id);
-        await QuotationService.updateQuotation(id, { ...fullQuotation, notes: newNotesStr });
+        await QuotationService.updateQuotation(id, {
+          ...quotation,
+          notes: newNotesStr,
+          // Map the local UI shape back to the Quotation type fields
+          clientName: quotation.client,
+          salesperson: quotation.owner,
+          validUntil: quotation.validTill,
+          subject: quotation.project,
+          grandTotal: grandTotal,
+          subTotal: subTotal,
+          totalGstAmount: totalGst,
+          totalDiscount: totalDiscount,
+          lineItems: lineItems.map((item, idx) => {
+            const calcLine = calculatedLines[idx];
+            return {
+              productId: item.productId || item.id,
+              itemName: item.name,
+              quantity: item.qty,
+              unit: 'Unit',
+              rate: item.rate,
+              discount: calcLine?.itemDiscountAmount ?? 0,
+              gstRate: item.gst,
+              taxableAmount: calcLine?.rowTaxableAmount ?? (item.rate * item.qty),
+              gstAmount: calcLine?.rowGstAmount ?? (item.rate * item.qty * item.gst / 100),
+              totalAmount: calcLine?.rowTotalAmount ?? (item.rate * item.qty * (1 + item.gst / 100))
+            };
+          })
+        });
       } catch (err: any) {
-        toast.error('Failed to sync note to server');
+        toast.error(err?.message || 'Failed to sync note to server. Please try again.');
+        // Roll back the optimistic update so the user knows it didn't persist
+        setQuotation(prev => ({ ...prev, notes: quotation.notes }));
       }
     })();
   };
@@ -264,14 +295,9 @@ export default function QuotationDetails() {
     }));
   };
 
-  useEffect(() => {
-    if (companyId) {
-      ClientService.getClients(companyId).then(setClients).catch(console.error);
-      api.get('/admin/users').then((res: any) => {
-        setUsers(Array.isArray(res) ? res : (res.content || []));
-      }).catch(console.error);
-    }
-  }, [companyId]);
+  // NOTE: clients and users are already fetched in the useEffect above (L110-L127).
+  // The duplicate effect was removed to eliminate redundant API calls that could
+  // increase the chance of a network error on page load.
 
   const getStageFromStatus = (status?: string) => {
     switch (status) {
@@ -311,6 +337,7 @@ export default function QuotationDetails() {
   useEffect(() => {
     if (!isNew && id && clients.length > 0 && users.length > 0) {
       setIsApiLoading(true);
+      setLoadError(null);
       QuotationService.getQuotation(id)
         .then((data: Quotation) => {
           setCurrentStage(getStageFromStatus(data.status));
@@ -361,6 +388,7 @@ export default function QuotationDetails() {
         })
         .catch((err: any) => {
           console.error('Failed to fetch quotation', err);
+          setLoadError(err?.message || 'Failed to load quotation details. Please refresh the page.');
         })
         .finally(() => {
           setIsApiLoading(false);
@@ -386,6 +414,7 @@ export default function QuotationDetails() {
     calculatedLines,
     taxGroups,
     totalDiscount,
+    totalTaxableAmount,
     deliveryCost
   } = calculateQuotationTotals(
     lineItems,
@@ -524,7 +553,7 @@ export default function QuotationDetails() {
         items: lineItems.map((item, index) => {
           const product = products.find(p => p.id === item.productId || p.id === item.id);
           const calcLine = calculatedLines[index];
-          const lineTaxable = calcLine ? calcLine.rowTaxableAmount : (item.rate * item.qty);
+          const lineAmount = calcLine ? calcLine.rowSubTotal : (item.rate * item.qty);
           return {
             item_index: index + 1,
             item_name: item.name,
@@ -533,16 +562,16 @@ export default function QuotationDetails() {
             item_quantity: item.qty,
             item_unit: 'Unit',
             item_price: item.rate.toFixed(2),
-            item_amount: lineTaxable.toFixed(2)
+            item_amount: lineAmount.toFixed(2)
           };
         }),
         sub_total: subTotal.toFixed(2),
         discount: totalDiscount.toFixed(2),
         has_discount: totalDiscount > 0,
-        taxable_amount: (subTotal - totalDiscount).toFixed(2),
+        taxable_amount: totalTaxableAmount.toFixed(2),
         total_tax: totalGst.toFixed(2),
-        delivery_cost: (Number(quotation.deliveryCost) || 0).toFixed(2),
-        has_delivery_cost: Number(quotation.deliveryCost) > 0,
+        delivery_cost: deliveryCost.toFixed(2),
+        has_delivery_cost: deliveryCost > 0,
         grand_total: grandTotal.toFixed(2),
         amount_in_words: numberToWords(grandTotal),
         terms_and_conditions: quotation.termsAndConditions || company?.termsAndConditions || 'Terms and conditions apply',
@@ -601,22 +630,25 @@ export default function QuotationDetails() {
                       date: new Date().toISOString().split('T')[0],
                       validUntil: quotation.validTill,
                       subject: quotation.project,
-                      lineItems: lineItems.map(item => ({
-                        productId: item.id,
-                        itemName: item.name,
-                        quantity: item.qty,
-                        unit: 'Unit',
-                        rate: item.rate,
-                        discount: 0,
-                        gstRate: item.gst,
-                        taxableAmount: item.rate * item.qty,
-                        gstAmount: item.rate * item.qty * item.gst / 100,
-                        totalAmount: item.rate * item.qty * (1 + item.gst / 100)
-                      })),
+                      lineItems: lineItems.map((item, idx) => {
+                        const calcLine = calculatedLines[idx];
+                        return {
+                          productId: item.id,
+                          itemName: item.name,
+                          quantity: item.qty,
+                          unit: 'Unit',
+                          rate: item.rate,
+                          discount: calcLine?.itemDiscountAmount ?? 0,
+                          gstRate: item.gst,
+                          taxableAmount: calcLine?.rowTaxableAmount ?? (item.rate * item.qty),
+                          gstAmount: calcLine?.rowGstAmount ?? (item.rate * item.qty * item.gst / 100),
+                          totalAmount: calcLine?.rowTotalAmount ?? (item.rate * item.qty * (1 + item.gst / 100))
+                        };
+                      }),
                       subTotal: subTotal,
-                      totalDiscount: Number(quotation.discount) || 0,
-                      deliveryCost: Number(quotation.deliveryCost) || 0,
-                      totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
+                      totalDiscount: totalDiscount,
+                      deliveryCost: deliveryCost,
+                      totalTaxableAmount: subTotal - totalDiscount,
                       totalGstAmount: totalGst,
                       grandTotal: grandTotal,
                       status: 'Draft',
@@ -770,6 +802,21 @@ export default function QuotationDetails() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
+      {/* Load error banner */}
+      {loadError && !isNew && (
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 rounded-md flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Info className="text-red-600 dark:text-red-400 shrink-0" size={20} />
+            <p className="text-sm text-red-800 dark:text-red-200">{loadError}</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="ml-4 shrink-0 px-3 py-1.5 text-xs font-medium bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors"
+          >
+            Reload
+          </button>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -805,10 +852,6 @@ export default function QuotationDetails() {
                   if (!isNew && id) {
                     setIsApiLoading(true);
                     try {
-                      const subTotal = lineItems.reduce((acc, item) => acc + (item.rate * item.qty), 0);
-                      const totalGst = lineItems.reduce((acc, item) => acc + (item.rate * item.qty * item.gst / 100), 0);
-                      const grandTotal = subTotal + totalGst - (Number(quotation.discount) || 0) + (Number(quotation.deliveryCost) || 0);
-
                       const fullQuotation = await QuotationService.getQuotation(id);
                       await QuotationService.updateQuotation(id, {
                         ...fullQuotation,
@@ -816,25 +859,28 @@ export default function QuotationDetails() {
                         clientName: quotation.client,
                         salesperson: quotation.owner,
                         validUntil: quotation.validTill,
-                        totalDiscount: Number(quotation.discount) || 0,
-                        deliveryCost: Number(quotation.deliveryCost) || 0,
+                        totalDiscount: totalDiscount,
+                        deliveryCost: deliveryCost,
                         taxType: quotation.taxType,
                         subTotal: subTotal,
-                        totalTaxableAmount: subTotal - (Number(quotation.discount) || 0),
+                        totalTaxableAmount: subTotal - totalDiscount,
                         totalGstAmount: totalGst,
                         grandTotal: grandTotal,
-                        lineItems: lineItems.map(item => ({
-                          productId: item.productId || item.id,
-                          itemName: item.name,
-                          quantity: item.qty,
-                          unit: 'Unit',
-                          rate: item.rate,
-                          discount: 0,
-                          gstRate: item.gst,
-                          taxableAmount: item.rate * item.qty,
-                          gstAmount: item.rate * item.qty * item.gst / 100,
-                          totalAmount: item.rate * item.qty * (1 + item.gst / 100)
-                        }))
+                        lineItems: lineItems.map((item, idx) => {
+                          const calcLine = calculatedLines[idx];
+                          return {
+                            productId: item.productId || item.id,
+                            itemName: item.name,
+                            quantity: item.qty,
+                            unit: 'Unit',
+                            rate: item.rate,
+                            discount: calcLine?.itemDiscountAmount ?? 0,
+                            gstRate: item.gst,
+                            taxableAmount: calcLine?.rowTaxableAmount ?? (item.rate * item.qty),
+                            gstAmount: calcLine?.rowGstAmount ?? (item.rate * item.qty * item.gst / 100),
+                            totalAmount: calcLine?.rowTotalAmount ?? (item.rate * item.qty * (1 + item.gst / 100))
+                          };
+                        })
                       });
                       toast.success('Changes saved successfully');
                     } catch (err: any) {
@@ -899,7 +945,7 @@ export default function QuotationDetails() {
                         qty: item.quantity || 1,
                         rate: item.rate || 0,
                         gst: item.gstRate || 0,
-                        amount: item.totalAmount || 0
+                        amount: item.taxableAmount ?? ((item.rate || 0) * (item.quantity || 1))
                       })));
                     }
                   }).finally(() => setIsApiLoading(false));

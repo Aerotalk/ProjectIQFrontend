@@ -6,8 +6,8 @@ import { formStyles } from './form-styles';
 export type SelectOption = string | { label: string; value: string; subtitle?: React.ReactNode; description?: React.ReactNode; subLabel?: React.ReactNode };
 
 interface CustomSelectProps {
-  value: string;
-  onChange: (val: string) => void;
+  value: string | string[];
+  onChange: (val: any) => void;
   options: SelectOption[];
   icon?: React.ReactNode;
   disabled?: boolean;
@@ -16,11 +16,13 @@ interface CustomSelectProps {
   emptyText?: string;
   placeholder?: string;
   className?: string;
+  isMulti?: boolean;
 }
 
-export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, placeholder, className }: CustomSelectProps) {
+export default function CustomSelect({ value, onChange, options, icon, disabled, isLoading, loadingText, emptyText, placeholder, className, isMulti }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropUp, setDropUp] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -29,11 +31,21 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
   const getOptionLabel = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.label;
   const getOptionValue = (opt: SelectOption) => typeof opt === 'string' ? opt : opt.value;
 
-  // Find the currently selected label based on the value
-  const selectedLabel = options.find(opt => getOptionValue(opt) === value);
-  const displayLabel = selectedLabel 
-    ? getOptionLabel(selectedLabel) 
-    : (isLoading ? (loadingText || "Loading...") : (value || placeholder || "Select..."));
+  // Find the currently selected label(s) based on the value
+  const displayLabel = useMemo(() => {
+    if (isMulti) {
+      const arr = (value as string[]) || [];
+      if (arr.length === 0) return placeholder || "Select...";
+      const labels = options.filter(opt => arr.includes(getOptionValue(opt))).map(getOptionLabel);
+      if (labels.length > 0) return labels.join(', ');
+      return options.length === 0 ? "Loading options..." : (placeholder || "Select...");
+    } else {
+      const selectedOpt = options.find(opt => getOptionValue(opt) === (value as string));
+      return selectedOpt 
+        ? getOptionLabel(selectedOpt) 
+        : (isLoading ? (loadingText || "Loading...") : ((value as string) || placeholder || "Select..."));
+    }
+  }, [value, isMulti, options, isLoading, loadingText, placeholder]);
 
 
 
@@ -42,6 +54,25 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
       inputRef.current.focus({ preventScroll: true });
     }
   }, [isOpen]);
+
+  // Determine whether to flip the dropdown upward
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setDropUp(spaceBelow < 280);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredOptions = useMemo(() => {
     if (!searchQuery) return options;
@@ -71,13 +102,13 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
         onClick={(e) => {
           if (!disabled) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen(prev => !prev);
           }
         }}
         onKeyDown={(e) => {
           if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            setIsOpen(!isOpen);
+            setIsOpen(prev => !prev);
           }
         }}
         className={cn(
@@ -95,7 +126,11 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
       {isOpen && (
         <div 
           ref={menuRef}
-          className="absolute left-0 top-[calc(100%+4px)] w-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in slide-in-from-top-2 duration-150 z-[99999]"
+          className={`absolute left-0 w-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl max-h-64 flex flex-col animate-in fade-in duration-150 z-[99999] ${
+            dropUp
+              ? 'bottom-[calc(100%+4px)] slide-in-from-bottom-2'
+              : 'top-[calc(100%+4px)] slide-in-from-top-2'
+          }`}
         >
           <div className="p-2 border-b border-gray-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#181a1f] z-10 rounded-t-lg">
             <div className="relative">
@@ -123,7 +158,7 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
               filteredOptions.map((option, index) => {
                 const optValue = getOptionValue(option);
                 const optLabel = getOptionLabel(option);
-                const isSelected = value === optValue;
+                const isSelected = isMulti ? ((value as string[]) || []).includes(optValue) : (value as string) === optValue;
                 const isObj = typeof option !== 'string';
                 const subLabel = isObj && 'subLabel' in option ? option.subLabel : undefined;
 
@@ -136,10 +171,19 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      onChange(optValue);
-                      setSearchQuery('');
-                      setIsOpen(false);
-                      setTimeout(() => triggerRef.current?.focus({ preventScroll: true }), 0);
+                      if (isMulti) {
+                        const arr = (value as string[]) || [];
+                        if (arr.includes(optValue)) {
+                          onChange(arr.filter(v => v !== optValue));
+                        } else {
+                          onChange([...arr, optValue]);
+                        }
+                      } else {
+                        onChange(optValue);
+                        setSearchQuery('');
+                        setIsOpen(false);
+                        setTimeout(() => triggerRef.current?.focus({ preventScroll: true }), 0);
+                      }
                     }}
                     className={`px-3 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between gap-2 mx-1 rounded-md ${
                       isSelected 

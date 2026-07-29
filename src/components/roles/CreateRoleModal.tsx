@@ -129,12 +129,12 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {permissions.map((perm) => (
                           <label key={perm.id} className="flex items-start gap-2 cursor-pointer group">
-                            <div className="relative flex items-center justify-center mt-0.5">
+                            <div className="flex items-center mt-0.5">
                               <input
                                 type="checkbox"
                                 checked={selectedIds.has(perm.id)}
                                 onChange={() => handleToggle(perm.id)}
-                                className="peer sr-only"
+                                className="w-4 h-4 text-[#792359] bg-white border-gray-300 rounded focus:ring-[#792359] dark:focus:ring-[#792359] dark:ring-offset-gray-800 focus:ring-2 dark:bg-[#181a1f] dark:border-gray-600 cursor-pointer"
                               />
                               <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-sm peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
                                 <CheckCircle2 size={12} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
