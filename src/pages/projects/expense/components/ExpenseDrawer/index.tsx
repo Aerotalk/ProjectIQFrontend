@@ -68,7 +68,7 @@ export default function ExpenseDrawer({ isOpen, onClose, onSave, mode, initialDa
 
   const drawerSubtitle = mode === 'create'
     ? 'Record a new project expense.'
-    : `Expense ID: ${expenseId || initialData?.id || '—'}`;
+    : `Expense ID: ${initialData?.expenseNo || expenseId || initialData?.id || '—'}`;
 
   if (!isOpen) return null;
 
