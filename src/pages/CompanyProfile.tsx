@@ -35,6 +35,7 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+  sidebarColor: string;
   logoFileId?: string;
   invoiceLogoId?: string;
   stampFileId?: string;
@@ -406,7 +407,13 @@ export default function CompanyProfile() {
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
               </div>
             </div>
-            <div /> {/* intentional spacer */}
+            <div>
+              <label className={formStyles.label}>Sidebar Color</label>
+              <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
+                <input type="color" value={formData.sidebarColor || '#3a132c'} onChange={(e) => updateField('sidebarColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.sidebarColor || '#3a132c'}</span>
+              </div>
+            </div>
           </FormGrid>
         </FormSection>
 

@@ -33,6 +33,7 @@ interface AccountData {
   website: string;
   primaryColor: string;
   secondaryColor: string;
+  sidebarColor: string;
   adminPassword?: string;
   companyCode?: string;
   logoFileId?: string;
@@ -126,7 +127,8 @@ const AccountForm = ({
     phone: initialData?.phone || '',
     website: initialData?.website || '',
     primaryColor: initialData?.primaryColor || '#792359',
-    secondaryColor: initialData?.secondaryColor || '#e6a8d0',
+    secondaryColor: initialData?.secondaryColor || '#E6A8D0',
+    sidebarColor: initialData?.sidebarColor || '#3a132c',
     logoFileId: initialData?.logoFileId,
     invoiceLogoId: initialData?.invoiceLogoId,
     stampFileId: initialData?.stampFileId,
@@ -432,6 +434,13 @@ const AccountForm = ({
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.secondaryColor || '#E6A8D0'}</span>
                 </div>
               </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Sidebar Color</label>
+                <div className="flex items-center gap-3 w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm">
+                  <input type="color" value={formData.sidebarColor || '#3a132c'} onChange={(e) => updateField('sidebarColor', e.target.value)} className="h-6 w-6 rounded cursor-pointer border-0 p-0" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">{formData.sidebarColor || '#3a132c'}</span>
+                </div>
+              </div>
             </div>
             
             {/* Terms and Conditions */}
@@ -657,6 +666,7 @@ export default function MyAccounts() {
         website: data.website,
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
+        sidebarColor: data.sidebarColor,
         status: 'ACTIVE',
         // organizationId is inferred by backend
         companyCode: viewState === 'add'

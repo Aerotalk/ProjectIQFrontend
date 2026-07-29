@@ -268,7 +268,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
       {/* Sidebar - Floating Card Style */}
       <aside
-        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-primary/30 shadow-2xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        style={{ backgroundColor: user?.sidebarColor || undefined }}
+        className={`w-[220px] xl:w-[260px] ${!user?.sidebarColor ? 'bg-[#3a112b] dark:bg-[#1a0813]' : ''} text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-primary/30 shadow-2xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
           }`}
       >
         {/* Toggle Close Button (Hamburger on middle right side) */}

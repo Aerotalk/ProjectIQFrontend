@@ -15,6 +15,7 @@ export interface User {
   companyLogoId: string | null;
   primaryColor?: string | null;
   secondaryColor?: string | null;
+  sidebarColor?: string | null;
 }
 
 interface AuthContextType {
@@ -72,7 +73,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } else {
       document.documentElement.style.removeProperty('--secondary');
     }
-  }, [user?.primaryColor, user?.secondaryColor]);
+    if (user?.sidebarColor) {
+      document.documentElement.style.setProperty('--sidebar-bg', user.sidebarColor);
+    } else {
+      document.documentElement.style.removeProperty('--sidebar-bg');
+    }
+  }, [user?.primaryColor, user?.secondaryColor, user?.sidebarColor]);
 
   const login = (userData: User) => {
     setUser(userData);
