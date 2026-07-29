@@ -121,7 +121,7 @@ export default function ExpenseClaimsDashboard() {
           <h3 className="text-base font-semibold text-gray-900 dark:text-white">Recent Claims</h3>
           <button 
             onClick={() => navigate('/companydashboard/hrms/expense-claims/claims')}
-            className="text-sm text-[#792359] dark:text-[#e6a8d0] font-medium flex items-center"
+            className="text-sm text-primary dark:text-secondary font-medium flex items-center"
           >
             View All <ArrowRight size={16} className="ml-1" />
           </button>

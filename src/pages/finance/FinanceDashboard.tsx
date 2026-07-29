@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import CustomSelect from '@/components/ui/CustomSelect';
 
 const KPI_DATA = [
-  { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-[#792359]', bgColor: 'bg-purple-50 dark:bg-[#792359]/10', isPositive: true },
+  { label: 'Active Projects', value: '24', trend: '+12% vs last month', icon: Briefcase, color: 'text-primary', bgColor: 'bg-purple-50 dark:bg-primary/10', isPositive: true },
   { label: 'Project Value', value: '₹ 1,20,00,000', trend: '+18% vs last month', icon: IndianRupee, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10', isPositive: true },
   { label: 'PO Value', value: '₹ 45,00,000', trend: '+8% vs last month', icon: ShoppingCart, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-500/10', isPositive: true },
   { label: 'Expenses', value: '₹ 12,50,000', trend: '-5% vs last month', icon: CreditCard, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-500/10', isPositive: false },
@@ -191,7 +191,7 @@ export default function FinanceDashboard() {
           if (kpi.label === 'Profit (Est.)' || kpi.label === 'Project Value') displayValue = 'N/A';
           
           return (
-            <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group">
+            <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-primary/30 transition-colors group">
               <div className="flex items-center gap-3 mb-3">
                 <div className={`p-2 rounded-sm border ${kpi.bgColor} border-transparent`}>
                   <kpi.icon size={18} className={kpi.color} strokeWidth={2} />
@@ -285,7 +285,7 @@ export default function FinanceDashboard() {
           <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Project Financial Summary</h2>
           <button 
             onClick={() => navigate('/companydashboard/finance/projects')}
-            className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline"
+            className="text-xs font-semibold text-primary dark:text-secondary hover:underline"
           >
             View All Projects
           </button>
@@ -326,7 +326,7 @@ export default function FinanceDashboard() {
                     </span>
                   </td>
                   <td className="px-6 py-3 text-center">
-                    <button onClick={() => navigate(`/companydashboard/finance/projects/${p.realId}`)} className="p-1 text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-full transition-colors inline-flex">
+                    <button onClick={() => navigate(`/companydashboard/finance/projects/${p.realId}`)} className="p-1 text-primary dark:text-secondary hover:bg-primary/10 rounded-full transition-colors inline-flex">
                       <Eye size={16} />
                     </button>
                   </td>
@@ -350,12 +350,12 @@ export default function FinanceDashboard() {
         <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col min-w-0">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-purple-50 dark:bg-[#792359]/10 rounded-sm">
-                <Briefcase size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <div className="p-1.5 bg-purple-50 dark:bg-primary/10 rounded-sm">
+                <Briefcase size={14} className="text-primary dark:text-secondary" />
               </div>
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">Recent Purchase Orders</h2>
             </div>
-            <button onClick={() => navigate('/companydashboard/finance/pos')} className="text-xs font-bold text-[#792359] dark:text-[#e6a8d0] hover:underline whitespace-nowrap">View All</button>
+            <button onClick={() => navigate('/companydashboard/finance/pos')} className="text-xs font-bold text-primary dark:text-secondary hover:underline whitespace-nowrap">View All</button>
           </div>
           <div className="flex-1 space-y-3">
             {recentPOs.map((po, i) => (
@@ -363,7 +363,7 @@ export default function FinanceDashboard() {
                 <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-300 shrink-0 whitespace-nowrap">{po.id}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">{po.vendor}</span>
-                  <span className="text-[10px] font-semibold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{po.project}</span>
+                  <span className="text-[10px] font-semibold text-primary dark:text-secondary bg-primary/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{po.project}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap">{po.amount}</span>
@@ -383,7 +383,7 @@ export default function FinanceDashboard() {
               </div>
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">Recent Expenses</h2>
             </div>
-            <button onClick={() => navigate('/companydashboard/finance/expenses')} className="text-xs font-bold text-[#792359] dark:text-[#e6a8d0] hover:underline whitespace-nowrap">View All</button>
+            <button onClick={() => navigate('/companydashboard/finance/expenses')} className="text-xs font-bold text-primary dark:text-secondary hover:underline whitespace-nowrap">View All</button>
           </div>
           <div className="flex-1 space-y-3">
             {recentExpenses.map((ex, i) => (
@@ -391,7 +391,7 @@ export default function FinanceDashboard() {
                 <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
                   <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">{ex.date}</span>
                   <span className="text-xs text-gray-600 dark:text-gray-300 truncate flex-1">{ex.type}</span>
-                  <span className="text-[10px] font-semibold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{ex.project}</span>
+                  <span className="text-[10px] font-semibold text-primary dark:text-secondary bg-primary/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{ex.project}</span>
                 </div>
                 <span className="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap shrink-0">{ex.amount}</span>
               </div>
@@ -408,7 +408,7 @@ export default function FinanceDashboard() {
               </div>
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">Recent Delivery Challans</h2>
             </div>
-            <button onClick={() => navigate('/companydashboard/finance/challans')} className="text-xs font-bold text-[#792359] dark:text-[#e6a8d0] hover:underline whitespace-nowrap">View All</button>
+            <button onClick={() => navigate('/companydashboard/finance/challans')} className="text-xs font-bold text-primary dark:text-secondary hover:underline whitespace-nowrap">View All</button>
           </div>
           <div className="flex-1 space-y-3">
             {recentChallans.map((ch, i) => (
@@ -416,7 +416,7 @@ export default function FinanceDashboard() {
                 <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-300 shrink-0 whitespace-nowrap">{ch.id}</span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">{ch.vendor}</span>
-                  <span className="text-[10px] font-semibold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{ch.project}</span>
+                  <span className="text-[10px] font-semibold text-primary dark:text-secondary bg-primary/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{ch.project}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{ch.date}</span>

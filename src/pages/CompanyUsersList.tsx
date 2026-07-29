@@ -90,14 +90,14 @@ export default function CompanyUsersList() {
             placeholder="Search users by name or email..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-800 dark:text-gray-200"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-800 dark:text-gray-200"
           />
         </div>
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm">
-           <Loader2 className="animate-spin text-[#792359] mb-4" size={32} />
+           <Loader2 className="animate-spin text-primary mb-4" size={32} />
            <p className="text-gray-500 font-medium">Loading users...</p>
         </div>
       ) : (
@@ -117,7 +117,7 @@ export default function CompanyUsersList() {
                   <tr key={user.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#792359] to-[#b8458f] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-xs font-bold shrink-0">
                           {user.username?.substring(0, 2).toUpperCase() || 'U'}
                         </div>
                         <div>
@@ -139,7 +139,7 @@ export default function CompanyUsersList() {
                       <div className="flex flex-wrap gap-1.5">
                         {user.roles && user.roles.length > 0 ? (
                           user.roles.map(r => (
-                            <span key={r.id} className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0]">
+                            <span key={r.id} className="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary dark:text-secondary">
                               {r.roleName}
                             </span>
                           ))
@@ -151,7 +151,7 @@ export default function CompanyUsersList() {
                     <td className="py-3 px-4 text-right">
                       <button 
                         onClick={() => handleEditClick(user)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-50 dark:hover:bg-white/5 rounded-sm transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-secondary hover:bg-gray-50 dark:hover:bg-white/5 rounded-sm transition-colors"
                       >
                         <Edit2 size={14} />
                         Manage Access

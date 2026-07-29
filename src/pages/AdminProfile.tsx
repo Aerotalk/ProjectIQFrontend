@@ -149,7 +149,7 @@ export default function AdminProfile() {
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <User size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                <User size={18} className="text-primary dark:text-secondary" />
                 Personal Information
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Update your basic profile details and public avatar.</p>
@@ -163,7 +163,7 @@ export default function AdminProfile() {
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">{userInitials}</span>
+                      <span className="text-3xl font-bold text-primary dark:text-secondary">{userInitials}</span>
                     )}
                   </div>
                   <button 
@@ -230,7 +230,7 @@ export default function AdminProfile() {
                   <button 
                     type="submit" 
                     disabled={isSaving}
-                    className="flex items-center justify-center gap-2 bg-[#792359] hover:bg-[#52173c] disabled:bg-[#792359]/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+                    className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark disabled:bg-primary/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
                   >
                     {isSaving ? (
                       <>
@@ -258,7 +258,7 @@ export default function AdminProfile() {
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Key size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                <Key size={18} className="text-primary dark:text-secondary" />
                 Security
               </h2>
             </div>
@@ -338,7 +338,7 @@ export default function AdminProfile() {
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Bell size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                <Bell size={18} className="text-primary dark:text-secondary" />
                 Notifications
               </h2>
             </div>
@@ -357,7 +357,7 @@ export default function AdminProfile() {
                     </div>
                     <button 
                       onClick={() => setNotifications({...notifications, [item.key]: !isChecked})}
-                      className={`w-8 h-4 rounded-full relative transition-colors ${isChecked ? 'bg-[#792359]' : 'bg-gray-200 dark:bg-gray-700'}`}
+                      className={`w-8 h-4 rounded-full relative transition-colors ${isChecked ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'}`}
                     >
                       <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isChecked ? 'left-4' : 'left-0.5'}`}></span>
                     </button>

@@ -42,7 +42,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
             
             {/* Employee Info */}
             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg">
-              <div className="w-12 h-12 rounded-full bg-[#792359]/10 dark:bg-[#e6a8d0]/10 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0] font-semibold text-lg">
+              <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-secondary/10 flex items-center justify-center text-primary dark:text-secondary font-semibold text-lg">
                 {record.employeeName.charAt(0)}
               </div>
               <div>
@@ -139,7 +139,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
                     value={remarks}
                     onChange={(e) => setRemarks(e.target.value)}
                     placeholder="Add remarks for this manual edit..."
-                    className="w-full px-3 py-2 bg-white dark:bg-[#13141a] border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#792359] dark:focus:ring-[#e6a8d0] custom-scrollbar min-h-[100px] resize-none"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#13141a] border border-gray-200 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary dark:focus:ring-secondary custom-scrollbar min-h-[100px] resize-none"
                   />
                 </div>
               </div>
@@ -154,7 +154,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button className="bg-[#792359] hover:bg-[#681d4b] text-white">
+            <Button className="bg-primary hover:bg-[#681d4b] text-white">
               <Save size={16} className="mr-2" />
               Save Changes
             </Button>

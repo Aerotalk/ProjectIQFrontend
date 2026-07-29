@@ -56,7 +56,7 @@ export default function PaymentProfileView({ payment: initialPayment, onClose, o
       {/* ── 1. Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             <Banknote size={24} />
           </div>
           <div className="space-y-1">
@@ -114,7 +114,7 @@ export default function PaymentProfileView({ payment: initialPayment, onClose, o
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id 
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
@@ -199,7 +199,7 @@ export default function PaymentProfileView({ payment: initialPayment, onClose, o
                   {!isEditingNotes && (
                     <button 
                       onClick={() => setIsEditingNotes(true)}
-                      className="text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 p-1.5 rounded-md transition-colors"
+                      className="text-primary dark:text-secondary hover:bg-primary/10 p-1.5 rounded-md transition-colors"
                       title="Edit Notes"
                     >
                       <Edit size={14} />
@@ -213,7 +213,7 @@ export default function PaymentProfileView({ payment: initialPayment, onClose, o
                       <textarea
                         value={notesText}
                         onChange={e => setNotesText(e.target.value)}
-                        className="flex-1 w-full p-3 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:border-[#792359] dark:focus:border-[#e6a8d0] resize-none"
+                        className="flex-1 w-full p-3 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:border-primary dark:focus:border-secondary resize-none"
                         placeholder="Add your notes here..."
                       />
                       <div className="flex justify-end gap-2">
@@ -228,7 +228,7 @@ export default function PaymentProfileView({ payment: initialPayment, onClose, o
                         </button>
                         <button 
                           onClick={handleSaveNotes}
-                          className="px-3 py-1.5 text-xs font-medium bg-[#792359] hover:bg-[#52173c] text-white rounded-md transition-colors flex items-center gap-1.5"
+                          className="px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary-dark text-white rounded-md transition-colors flex items-center gap-1.5"
                         >
                           <Save size={14} />
                           Save

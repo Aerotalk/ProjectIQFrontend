@@ -40,7 +40,7 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
             <span className="hidden sm:inline">Payslip</span>
           </button>
           {payroll.payout !== 'Paid' ? (
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#792359] text-white rounded-sm hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
+            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
               <Send size={16} />
               Process Payout
             </button>
@@ -58,9 +58,9 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
           
           {/* Employee Info Card */}
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm p-6 flex flex-col md:flex-row items-center gap-6 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#792359]/5 rounded-bl-full -z-0"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-0"></div>
             
-            <div className="w-20 h-20 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-2xl shrink-0 z-10 border-4 border-white dark:border-[#181a1f] shadow-sm">
+            <div className="w-20 h-20 rounded-full bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-2xl shrink-0 z-10 border-4 border-white dark:border-[#181a1f] shadow-sm">
               {payroll.employee.substring(0, 2).toUpperCase()}
             </div>
             
@@ -88,10 +88,10 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 relative z-10">Total Deductions</p>
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1 relative z-10">₹35,000</h3>
             </div>
-            <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-[#792359]/30 shadow-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#792359]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <p className="text-sm font-medium text-[#792359] dark:text-[#e6a8d0] relative z-10">Net Payable</p>
-              <h3 className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0] mt-1 relative z-10">{payroll.net}</h3>
+            <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-primary/30 shadow-sm relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <p className="text-sm font-medium text-primary dark:text-secondary relative z-10">Net Payable</p>
+              <h3 className="text-3xl font-bold text-primary dark:text-secondary mt-1 relative z-10">{payroll.net}</h3>
             </div>
           </div>
 

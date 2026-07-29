@@ -19,7 +19,7 @@ export default function TicketReport() {
             <span className="px-2.5 py-1 text-xs font-semibold rounded-md text-green-700 bg-green-50 border border-green-100 dark:bg-green-500/10 dark:border-green-500/20">Resolved</span>
           </div>
         </div>
-        <button className="px-5 py-2.5 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+        <button className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
           <Download size={16} /> Download PDF
         </button>
       </div>
@@ -28,7 +28,7 @@ export default function TicketReport() {
         
         {/* Left Nav (Simulated as content flow instead of tabs for a report feel) */}
         <div className="lg:col-span-1 space-y-2">
-           <div className="bg-[#792359]/5 text-[#792359] dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] font-semibold flex items-center gap-3 px-4 py-3 rounded-md">
+           <div className="bg-primary/5 text-primary dark:bg-secondary/10 dark:text-secondary font-semibold flex items-center gap-3 px-4 py-3 rounded-md">
              <FileText size={18} /> Ticket Summary
            </div>
            <div className="text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-3 px-4 py-3 rounded-md cursor-pointer transition-colors">

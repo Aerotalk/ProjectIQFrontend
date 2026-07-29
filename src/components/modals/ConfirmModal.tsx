@@ -66,7 +66,7 @@ export default function ConfirmModal({
               onConfirm();
               onClose();
             }}
-            className={!isDestructive ? 'bg-[#792359] hover:bg-[#52173c] text-white' : ''}
+            className={!isDestructive ? 'bg-primary hover:bg-primary-dark text-white' : ''}
           >
             {confirmText}
           </Button>

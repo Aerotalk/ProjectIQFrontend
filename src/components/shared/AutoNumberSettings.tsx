@@ -74,7 +74,7 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5 rounded-md transition-colors"
+            className="p-2 text-gray-400 hover:text-primary dark:hover:text-secondary hover:bg-gray-100 dark:hover:bg-white/5 rounded-md transition-colors"
             title="Auto Numbering Settings"
           >
             <Settings size={16} />
@@ -90,19 +90,19 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Prefix</label>
-                  <input type="text" value={settings.prefix} onChange={e => setSettings({...settings, prefix: e.target.value})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:text-white" />
+                  <input type="text" value={settings.prefix} onChange={e => setSettings({...settings, prefix: e.target.value})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Suffix</label>
-                  <input type="text" value={settings.suffix} onChange={e => setSettings({...settings, suffix: e.target.value})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:text-white" />
+                  <input type="text" value={settings.suffix} onChange={e => setSettings({...settings, suffix: e.target.value})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Next Number</label>
-                  <input type="number" min="1" value={settings.nextNumber} onChange={e => setSettings({...settings, nextNumber: parseInt(e.target.value) || 1})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:text-white" />
+                  <input type="number" min="1" value={settings.nextNumber} onChange={e => setSettings({...settings, nextNumber: parseInt(e.target.value) || 1})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Padding</label>
-                  <input type="number" min="1" max="10" value={settings.padding} onChange={e => setSettings({...settings, padding: parseInt(e.target.value) || 1})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] dark:text-white" />
+                  <input type="number" min="1" max="10" value={settings.padding} onChange={e => setSettings({...settings, padding: parseInt(e.target.value) || 1})} className="w-full px-2 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary dark:text-white" />
                 </div>
               </div>
 
@@ -111,7 +111,7 @@ export function AutoNumberInput({ name, disabled, placeholder, className, defaul
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">{generatePreview()}</span>
               </div>
 
-              <button type="button" onClick={applySettings} className="w-full py-1.5 bg-[#792359] text-white text-sm rounded-sm hover:bg-[#52173c] transition-colors">Apply</button>
+              <button type="button" onClick={applySettings} className="w-full py-1.5 bg-primary text-white text-sm rounded-sm hover:bg-primary-dark transition-colors">Apply</button>
             </div>
           )}
         </div>

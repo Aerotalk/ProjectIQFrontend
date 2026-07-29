@@ -105,7 +105,7 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
                 id="roleName"
                 value={roleName}
                 onChange={(e) => setRoleName(e.target.value)}
-                className="w-full max-w-md px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#792359] dark:focus:ring-[#e6a8d0] text-gray-900 dark:text-white sm:text-sm transition-colors"
+                className="w-full max-w-md px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary text-gray-900 dark:text-white sm:text-sm transition-colors"
                 placeholder="e.g., HR Manager"
                 disabled={isLoading}
                 autoFocus
@@ -117,7 +117,7 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
               
               {isFetchingMatrix ? (
                 <div className="flex items-center justify-center h-32">
-                  <Loader2 className="animate-spin text-[#792359] w-8 h-8" />
+                  <Loader2 className="animate-spin text-primary w-8 h-8" />
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -136,12 +136,12 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
                                 onChange={() => handleToggle(perm.id)}
                                 className="peer sr-only"
                               />
-                              <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-sm peer-checked:bg-[#792359] peer-checked:border-[#792359] transition-all flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-sm peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
                                 <CheckCircle2 size={12} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                               </div>
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[#792359] dark:group-hover:text-[#e6a8d0] transition-colors leading-snug">{perm.permissionName}</span>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-secondary transition-colors leading-snug">{perm.permissionName}</span>
                               <span className="text-[10px] text-gray-400 max-w-[120px] truncate mt-0.5" title={perm.description}>{perm.description}</span>
                             </div>
                           </label>
@@ -158,7 +158,7 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent border border-gray-300 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent border border-gray-300 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
               disabled={isLoading}
             >
               Cancel
@@ -166,7 +166,7 @@ export default function CreateRoleModal({ onClose, onSuccess }: CreateRoleModalP
             <button
               type="submit"
               disabled={isLoading || isFetchingMatrix}
-              className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2 text-sm font-medium rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>

@@ -130,7 +130,7 @@ export default function TicketList() {
           </button>
           <button 
             onClick={() => navigate('create')}
-            className="shrink-0 px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+            className="shrink-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
           >
             <Plus size={14} /> New Incident
           </button>
@@ -146,7 +146,7 @@ export default function TicketList() {
             placeholder="Search incident number, subject, or client..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] focus:bg-white text-gray-900 transition-colors" 
+            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white text-gray-900 transition-colors" 
           />
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -186,7 +186,7 @@ export default function TicketList() {
       <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex justify-center py-20 text-gray-400">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="overflow-x-auto min-h-[400px]">
@@ -217,7 +217,7 @@ export default function TicketList() {
                       onClick={() => navigate(t.id || '')}
                       className="hover:bg-gray-50 cursor-pointer transition-colors group"
                     >
-                      <td className="px-6 py-3.5 text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">
+                      <td className="px-6 py-3.5 text-sm font-semibold text-primary dark:text-[#c43890] group-hover:underline">
                         {t.ticketNo || (t.id ? String(t.id).substring(0,10).toUpperCase() : 'Unknown')}
                       </td>
                       <td className="px-6 py-3.5 text-gray-900 font-medium truncate max-w-[200px]">
@@ -249,7 +249,7 @@ export default function TicketList() {
                         <Calendar size={13} className="text-gray-400" />
                         {t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Just now'}
                       </td>
-                      <td className="px-6 py-3.5 text-right text-gray-400 group-hover:text-[#792359]">
+                      <td className="px-6 py-3.5 text-right text-gray-400 group-hover:text-primary">
                         <ChevronRight size={16} />
                       </td>
                     </tr>
@@ -264,7 +264,7 @@ export default function TicketList() {
         <div className="px-6 py-3 border-t border-gray-200 bg-[#F8F9FC] flex items-center justify-between text-[13px] text-gray-600">
           <span>Showing {filteredTickets.length > 0 ? 1 : 0} to {filteredTickets.length} of {filteredTickets.length} incidents</span>
           <div className="flex gap-1">
-            <button className="px-2.5 py-1 rounded-sm bg-[#792359] text-white font-medium shadow-sm">1</button>
+            <button className="px-2.5 py-1 rounded-sm bg-primary text-white font-medium shadow-sm">1</button>
           </div>
         </div>
       </div>

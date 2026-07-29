@@ -18,11 +18,11 @@ export default function VendorIdentitySection({ readOnly }: Props) {
           <label className={formStyles.label}>Vendor Type *</label>
           <div className="flex gap-4 mt-2">
             <label htmlFor="vendor-type-business" className="flex items-center gap-2">
-              <input id="vendor-type-business" type="radio" value="Business" {...register('vendorType')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="vendor-type-business" type="radio" value="Business" {...register('vendorType')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Business</span>
             </label>
             <label htmlFor="vendor-type-individual" className="flex items-center gap-2">
-              <input id="vendor-type-individual" type="radio" value="Individual" {...register('vendorType')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="vendor-type-individual" type="radio" value="Individual" {...register('vendorType')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Individual</span>
             </label>
           </div>

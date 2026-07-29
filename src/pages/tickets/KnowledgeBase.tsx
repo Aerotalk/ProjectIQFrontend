@@ -115,7 +115,7 @@ export default function KnowledgeBase() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
-            <BookOpen size={24} className="text-[#792359] dark:text-[#e6a8d0]" />
+            <BookOpen size={24} className="text-primary dark:text-secondary" />
             Knowledge Base
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage articles, guides, and documentation.</p>
@@ -128,7 +128,7 @@ export default function KnowledgeBase() {
               placeholder="Search articles..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
+              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary text-gray-900 dark:text-white" 
             />
           </div>
           <div className="relative shrink-0 w-48">
@@ -144,7 +144,7 @@ export default function KnowledgeBase() {
           </div>
           <button 
             onClick={handleCreate}
-            className="shrink-0 px-3 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+            className="shrink-0 px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
           >
             <Plus size={16} /> New Article
           </button>
@@ -172,7 +172,7 @@ export default function KnowledgeBase() {
               {filteredArticles.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors group">
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{a.id?.substring(0,8)}</td>
-                  <td onClick={() => handleView(a)} className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0] cursor-pointer hover:underline">{a.title}</td>
+                  <td onClick={() => handleView(a)} className="px-6 py-4 font-medium text-primary dark:text-secondary cursor-pointer hover:underline">{a.title}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{a.category}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-md ${
@@ -187,15 +187,15 @@ export default function KnowledgeBase() {
                   <td className="px-6 py-4 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/10 rounded-sm transition-colors p-1 outline-none">
+                        <button className="text-primary dark:text-secondary hover:bg-primary/10 rounded-sm transition-colors p-1 outline-none">
                           <MoreHorizontal size={16} />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-40 border border-gray-100 dark:border-white/10 shadow-xl rounded-sm py-1 bg-white dark:bg-[#1f2229]">
-                        <DropdownMenuItem onClick={() => handleView(a)} className="cursor-pointer text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
+                        <DropdownMenuItem onClick={() => handleView(a)} className="cursor-pointer text-primary dark:text-secondary font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
                           Read Article
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(a)} className="cursor-pointer text-[#792359] dark:text-[#e6a8d0] font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
+                        <DropdownMenuItem onClick={() => handleEdit(a)} className="cursor-pointer text-primary dark:text-secondary font-medium hover:bg-gray-50 dark:hover:bg-white/5 py-2 px-4 rounded-none">
                           Edit Article
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => a.id && handleDelete(a.id)} className="cursor-pointer text-red-600 font-medium hover:bg-red-50 dark:hover:bg-red-500/10 py-2 px-4 rounded-none" variant="destructive">

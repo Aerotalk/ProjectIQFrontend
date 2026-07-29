@@ -26,7 +26,7 @@ export default function AdditionalContacts({ readOnly }: Props) {
           <button
             type="button"
             onClick={() => append({ name: '', email: '', phone: '', role: 'Other' })}
-            className="flex items-center gap-1.5 text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:text-[#52173c] dark:hover:text-[#f3c8e3] transition-colors"
+            className="flex items-center gap-1.5 text-xs font-medium text-primary dark:text-secondary hover:text-primary-dark dark:hover:text-[#f3c8e3] transition-colors"
           >
             <Plus size={14} /> Add Contact
           </button>

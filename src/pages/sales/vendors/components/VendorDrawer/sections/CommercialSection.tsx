@@ -90,7 +90,7 @@ export default function CommercialSection({ readOnly }: Props) {
           <label className={formStyles.label}>Status</label>
           <div className="flex gap-4">
             <label htmlFor="status-active" className="flex items-center gap-2 cursor-pointer">
-              <input id="status-active" type="radio" value="Active" {...register('status')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="status-active" type="radio" value="Active" {...register('status')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Active</span>
             </label>
             <label htmlFor="status-inactive" className="flex items-center gap-2 cursor-pointer">

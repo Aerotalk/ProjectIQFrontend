@@ -98,7 +98,7 @@ export default function PendingApprovals() {
             </button>
             <button 
               onClick={handleApprove}
-              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
+              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
             >
               Approve
             </button>

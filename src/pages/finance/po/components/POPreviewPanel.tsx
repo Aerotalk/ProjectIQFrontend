@@ -120,7 +120,7 @@ export default function POPreviewPanel({ isOpen, onClose, templateContent, data,
             <button
               onClick={handleDownload}
               disabled={isGeneratingPdf || !compiledHtml}
-              className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm transition-colors flex items-center gap-2"
             >
               {isGeneratingPdf ? (
                 <><Loader2 size={16} className="animate-spin" /> Generating PDF...</>

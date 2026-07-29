@@ -95,7 +95,7 @@ export default function BankDetailsTab({ readOnly }: Props) {
           {/* Primary Account checkbox — full width */}
           <FormRow>
             <div className="flex items-center gap-2 mt-1">
-              <input type="checkbox" id="primaryAccount" {...register('primaryAccount')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+              <input type="checkbox" id="primaryAccount" {...register('primaryAccount')} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
               <label htmlFor="primaryAccount" className="text-sm text-gray-700 dark:text-gray-300">Primary Salary Account</label>
             </div>
           </FormRow>

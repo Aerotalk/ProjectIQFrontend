@@ -117,7 +117,7 @@ export default function DailyAttendance() {
            <Edit2 size={14} /> Edit Attendance
          </button>
          <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
-         <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 dark:hover:bg-[#e6a8d0]/10 flex items-center gap-2">
+         <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 dark:hover:bg-secondary/10 flex items-center gap-2">
            <AlertCircle size={14} /> Regularize
          </button>
       </SmartActionMenu>
@@ -153,7 +153,7 @@ export default function DailyAttendance() {
             <button 
               onClick={() => setView('table')}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${
-                view === 'table' ? 'bg-white dark:bg-black/20 text-[#792359] dark:text-[#e6a8d0] shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                view === 'table' ? 'bg-white dark:bg-black/20 text-primary dark:text-secondary shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               <LayoutList size={14} /> Table
@@ -161,7 +161,7 @@ export default function DailyAttendance() {
             <button 
               onClick={() => setView('calendar')}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm transition-colors ${
-                view === 'calendar' ? 'bg-white dark:bg-black/20 text-[#792359] dark:text-[#e6a8d0] shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                view === 'calendar' ? 'bg-white dark:bg-black/20 text-primary dark:text-secondary shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               <CalendarIcon size={14} /> Calendar
@@ -227,7 +227,7 @@ export default function DailyAttendance() {
            <button onClick={handlePrevMonth} className="px-3 py-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-r border-gray-200 dark:border-white/10">
              <ChevronLeft size={16} />
            </button>
-           <button onClick={handleCurrentMonth} className="px-4 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors min-w-[130px] text-center">
+           <button onClick={handleCurrentMonth} className="px-4 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-secondary transition-colors min-w-[130px] text-center">
              {filters.monthYear}
            </button>
            <button onClick={handleNextMonth} className="px-3 py-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-l border-gray-200 dark:border-white/10">
@@ -278,7 +278,7 @@ export default function DailyAttendance() {
       <div className="flex-1 min-h-0 relative border border-gray-200 dark:border-white/10 rounded-md overflow-hidden bg-gray-50/30 dark:bg-[#181a1f] flex flex-row">
         {loading && (
            <div className="absolute inset-0 z-20 bg-white/50 dark:bg-[#181a1f]/50 backdrop-blur-[2px] flex items-center justify-center">
-              <div className="w-8 h-8 border-4 border-[#792359]/30 border-t-[#792359] rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
            </div>
         )}
         

@@ -166,7 +166,7 @@ export default function LeaveApplications() {
           </div>
           <button 
             onClick={() => handleAction(null, 'create')}
-            className="flex items-center gap-2 px-4 py-2 bg-[#792359] text-white rounded-sm hover:bg-[#52173c] transition-colors text-sm font-medium shadow-sm whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm hover:bg-primary-dark transition-colors text-sm font-medium shadow-sm whitespace-nowrap"
           >
             <Plus size={16} />
             Apply Leave

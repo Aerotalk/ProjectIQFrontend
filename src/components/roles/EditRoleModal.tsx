@@ -71,7 +71,7 @@ export default function EditRoleModal({ role, onClose, onSuccess }: EditRoleModa
                 id="roleName"
                 value={roleName}
                 onChange={(e) => setRoleName(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#792359] dark:focus:ring-[#e6a8d0] text-gray-900 dark:text-white sm:text-sm transition-colors"
+                className="w-full px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary text-gray-900 dark:text-white sm:text-sm transition-colors"
                 placeholder="e.g., HR Manager"
                 disabled={isLoading}
                 autoFocus
@@ -86,7 +86,7 @@ export default function EditRoleModal({ role, onClose, onSuccess }: EditRoleModa
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#792359] dark:focus:ring-[#e6a8d0] text-gray-900 dark:text-white sm:text-sm transition-colors"
+                className="w-full px-3 py-2 bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary text-gray-900 dark:text-white sm:text-sm transition-colors"
                 placeholder="Brief description of this role's responsibilities"
                 rows={3}
                 disabled={isLoading}
@@ -98,7 +98,7 @@ export default function EditRoleModal({ role, onClose, onSuccess }: EditRoleModa
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent border border-gray-300 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent border border-gray-300 dark:border-white/10 rounded-md hover:bg-gray-50 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
               disabled={isLoading}
             >
               Cancel
@@ -106,7 +106,7 @@ export default function EditRoleModal({ role, onClose, onSuccess }: EditRoleModa
             <button
               type="submit"
               disabled={isLoading || !roleName.trim()}
-              className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2 text-sm font-medium rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>

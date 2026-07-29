@@ -56,7 +56,7 @@ export function AddressFormGroup({ prefix, title, readOnly, isOverseas, disabled
                 {...field}
                 value={field.value || ''}
                 readOnly={readOnly || disabledState}
-                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 transition-colors ${pointerEventsClass}`} 
+                className={`w-full px-3 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${pointerEventsClass}`} 
               />
             )}
           />
@@ -289,7 +289,7 @@ export default function SharedAddressSection({
                       }
                     }}
                     disabled={readOnly}
-                    className="text-[#792359] focus:ring-[#792359] rounded-sm" 
+                    className="text-primary focus:ring-primary rounded-sm" 
                   />
                 )}
               />

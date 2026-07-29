@@ -174,7 +174,7 @@ export default function AssignRolesToEmployeeModal({ employee, onClose, onSucces
           {/* Roles List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#792359] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
               <span className="ml-3 text-sm text-gray-500">Loading roles...</span>
             </div>
           ) : (
@@ -193,7 +193,7 @@ export default function AssignRolesToEmployeeModal({ employee, onClose, onSucces
                         key={role.id} 
                         className={`flex items-start gap-3 p-3 border rounded-sm cursor-pointer transition-all ${
                           isSelected
-                            ? 'border-[#792359]/30 bg-[#792359]/5 dark:bg-[#792359]/10'
+                            ? 'border-primary/30 bg-primary/5 dark:bg-primary/10'
                             : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
                         }`}
                       >
@@ -201,7 +201,7 @@ export default function AssignRolesToEmployeeModal({ employee, onClose, onSucces
                           type="checkbox" 
                           checked={isSelected}
                           onChange={() => toggleRole(role.id)}
-                          className="mt-1 shrink-0 text-[#792359] focus:ring-[#792359] border-gray-300 rounded"
+                          className="mt-1 shrink-0 text-primary focus:ring-primary border-gray-300 rounded"
                         />
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{role.roleName}</div>
@@ -224,7 +224,7 @@ export default function AssignRolesToEmployeeModal({ employee, onClose, onSucces
           <button 
             onClick={handleSave} 
             disabled={isSaving || selectedRoleIds.length === 0 || isLoading}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />
             {isSaving ? 'Saving...' : 'Assign Roles'}

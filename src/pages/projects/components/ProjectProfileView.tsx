@@ -59,11 +59,11 @@ const getFileIcon = (mimeType?: string, fileName?: string) => {
   const mt = mimeType?.toLowerCase() || '';
   const name = fileName?.toLowerCase() || '';
 
-  if (mt.startsWith('image/') || name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tif|tiff|ico|heic|heif|avif)$/)) return <FileImage size={13} className="text-[#792359] dark:text-[#c44997]" />;
-  if (mt.includes('pdf') || name.endsWith('.pdf')) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
-  if (mt.includes('word') || name.match(/\.(doc|docx)$/)) return <FileText size={13} className="text-[#792359] dark:text-[#c44997]" />;
-  if (mt.includes('excel') || mt.includes('spreadsheet') || name.match(/\.(xls|xlsx)$/)) return <FileSpreadsheet size={13} className="text-[#792359] dark:text-[#c44997]" />;
-  return <File size={13} className="text-[#792359] dark:text-[#c44997]" />;
+  if (mt.startsWith('image/') || name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg|tif|tiff|ico|heic|heif|avif)$/)) return <FileImage size={13} className="text-primary dark:text-[#c44997]" />;
+  if (mt.includes('pdf') || name.endsWith('.pdf')) return <FileText size={13} className="text-primary dark:text-[#c44997]" />;
+  if (mt.includes('word') || name.match(/\.(doc|docx)$/)) return <FileText size={13} className="text-primary dark:text-[#c44997]" />;
+  if (mt.includes('excel') || mt.includes('spreadsheet') || name.match(/\.(xls|xlsx)$/)) return <FileSpreadsheet size={13} className="text-primary dark:text-[#c44997]" />;
+  return <File size={13} className="text-primary dark:text-[#c44997]" />;
 };
 
 export default function ProjectProfileView({ project: initialProject, onClose, onEdit }: Props) {
@@ -553,7 +553,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
       {/* ── 1. Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             {(currentProject.projectName || 'P').charAt(0).toUpperCase()}
           </div>
           <div className="space-y-1">
@@ -581,7 +581,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
             onClick={() => setIsBiModalOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#1e1e1e] border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
           >
-            <PieChart size={16} className="text-[#792359] dark:text-[#c44997]" />
+            <PieChart size={16} className="text-primary dark:text-[#c44997]" />
             <span>BI Dashboard</span>
           </button>
           <button
@@ -620,7 +620,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]'
+                ? 'border-primary text-primary dark:text-secondary dark:border-secondary'
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
           >
@@ -688,7 +688,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <Link to="/companydashboard/sales/quotations/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id, openProjectName: currentProject.projectName || currentProject.projectCode || '', openClientId: currentProject.client, openClientName: clientName }} className="px-4 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium transition-colors shadow-sm">
                     New Quotation
                   </Link>
-                  <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id, openProjectName: currentProject.projectName || currentProject.projectCode || '', openVendorId: assignedVendorsList[0]?.id || '' }} className="px-4 py-1.5 bg-[#792359] hover:bg-[#52173c] text-white rounded-md text-xs font-medium transition-colors shadow-sm flex items-center gap-1.5">
+                  <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id, openProjectName: currentProject.projectName || currentProject.projectCode || '', openVendorId: assignedVendorsList[0]?.id || '' }} className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-md text-xs font-medium transition-colors shadow-sm flex items-center gap-1.5">
                     <Plus size={14} /> New PO
                   </Link>
                 </div>
@@ -741,7 +741,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <button onClick={() => openUploadModal('Quotation')} className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1">
                     <Upload size={14} /> Upload
                   </button>
-                  <Link to="/companydashboard/sales/quotations/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
+                  <Link to="/companydashboard/sales/quotations/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-primary hover:underline">
                     + Create Quotation
                   </Link>
                 </div>
@@ -800,7 +800,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <button onClick={() => openUploadModal('Purchase Order')} className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-1">
                     <Upload size={14} /> Upload
                   </button>
-                  <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
+                  <Link to="/companydashboard/finance/pos/new" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-primary hover:underline">
                     + Create PO
                   </Link>
                 </div>
@@ -853,7 +853,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <Paperclip size={16} className="text-gray-500" />
                   Uploaded Documents
                 </h4>
-                <button onClick={() => fileInputRef.current?.click()} className="text-xs font-medium text-[#792359] hover:underline">
+                <button onClick={() => fileInputRef.current?.click()} className="text-xs font-medium text-primary hover:underline">
                   + Upload Document
                 </button>
               </div>
@@ -911,7 +911,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <ShieldAlert size={16} className="text-gray-500" />
                   Live Incidents
                 </h4>
-                <Link to="/companydashboard/tickets/create" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-[#792359] hover:underline">
+                <Link to="/companydashboard/tickets/create" state={{ returnTo: '/companydashboard/projects', openProjectId: currentProject.id }} className="text-xs font-medium text-primary hover:underline">
                   + Raise Incident
                 </Link>
               </div>
@@ -959,7 +959,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   <Users size={16} className="text-gray-500" />
                   List of Entities
                 </h4>
-                <button onClick={() => setIsAddEntityModalOpen(true)} className="text-xs font-medium text-[#792359] hover:underline">
+                <button onClick={() => setIsAddEntityModalOpen(true)} className="text-xs font-medium text-primary hover:underline">
                   + Add Entity
                 </button>
               </div>
@@ -1029,13 +1029,13 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                   onChange={e => setNoteContent(e.target.value)}
                   placeholder="Type a new internal project note..."
                   rows={3}
-                  className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:bg-white dark:focus:bg-[#1a1a1a] focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] transition-all resize-y"
+                  className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:bg-white dark:focus:bg-[#1a1a1a] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
                 />
                 <div className="flex justify-end">
                   <button
                     onClick={handleSaveNotes}
                     disabled={isSaving || !noteContent.trim()}
-                    className="px-4 py-2 bg-[#792359] hover:bg-[#611b47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                    className="px-4 py-2 bg-primary hover:bg-[#611b47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                   >
                     Post Note
                   </button>
@@ -1082,7 +1082,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-150 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2.5">
-                <Users className="text-[#792359] dark:text-[#c44997]" size={20} />
+                <Users className="text-primary dark:text-[#c44997]" size={20} />
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Add Entity to Project</h3>
               </div>
               <button
@@ -1153,7 +1153,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 text-xs font-semibold rounded-md bg-[#792359] text-white hover:bg-[#52173c] disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-semibold rounded-md bg-primary text-white hover:bg-primary-dark disabled:opacity-50"
                 >
                   Save Entity
                 </button>
@@ -1169,7 +1169,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-gray-800 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] max-w-md w-full animate-in zoom-in-95 duration-150 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
               <div className="flex items-center gap-2.5">
-                <Upload className="text-[#792359] dark:text-[#c44997]" size={20} />
+                <Upload className="text-primary dark:text-[#c44997]" size={20} />
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Upload {uploadDocType}</h3>
               </div>
               <button
@@ -1248,7 +1248,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               <button
                 onClick={handleModalUploadSubmit}
                 disabled={isSaving || !uploadFile || !uploadAmount}
-                className="px-4 py-2 bg-[#792359] hover:bg-[#611b47] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-primary hover:bg-[#611b47] disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
               >
                 {isSaving ? 'Uploading...' : 'Upload & Save'}
               </button>
@@ -1265,7 +1265,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
             {/* Modal Top Header */}
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-[#792359]/10 text-[#792359] dark:text-[#c44997] font-bold text-xl flex items-center justify-center">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary dark:text-[#c44997] font-bold text-xl flex items-center justify-center">
                   <PieChart size={24} />
                 </div>
                 <div>
@@ -1313,15 +1313,15 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
                 <p className="text-[11px] text-red-700 dark:text-red-400 mt-1">POs Issued + Site Expenses</p>
               </div>
 
-              <div className="bg-[#792359]/5 dark:bg-[#792359]/20 border border-[#792359]/20 p-4 rounded-lg">
+              <div className="bg-primary/5 dark:bg-primary/20 border border-primary/20 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#792359] dark:text-[#c44997] uppercase tracking-wider">NET PROFIT / MARGIN</span>
-                  <DollarSign size={16} className="text-[#792359] dark:text-[#c44997]" />
+                  <span className="text-[11px] font-bold text-primary dark:text-[#c44997] uppercase tracking-wider">NET PROFIT / MARGIN</span>
+                  <DollarSign size={16} className="text-primary dark:text-[#c44997]" />
                 </div>
-                <p className="text-xl font-extrabold text-[#792359] dark:text-[#e6a8d0] mt-2">
+                <p className="text-xl font-extrabold text-primary dark:text-secondary mt-2">
                   ₹{netMargin.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </p>
-                <p className="text-[11px] text-[#792359] dark:text-[#e6a8d0] mt-1">Net Margin Contribution</p>
+                <p className="text-[11px] text-primary dark:text-secondary mt-1">Net Margin Contribution</p>
               </div>
 
               <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 rounded-lg">
@@ -1410,7 +1410,7 @@ export default function ProjectProfileView({ project: initialProject, onClose, o
               </button>
               <button
                 onClick={() => setIsBiModalOpen(false)}
-                className="bg-[#792359] hover:bg-[#52173c] text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
+                className="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors"
               >
                 Close BI Dashboard
               </button>

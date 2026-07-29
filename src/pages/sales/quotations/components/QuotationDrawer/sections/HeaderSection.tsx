@@ -142,7 +142,7 @@ export default function HeaderSection({ readOnly, nextNumber }: Props) {
                     <button
                       type="button"
                       onClick={() => setValue('shippingAddress', getValues('billingAddress'), { shouldDirty: true })}
-                      className="text-[10px] uppercase tracking-wider font-semibold text-[#792359] hover:text-[#792359]/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
+                      className="text-[10px] uppercase tracking-wider font-semibold text-primary hover:text-primary/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
                       title="Copy from Billing Address"
                     >
                       <Copy className="w-3 h-3" />

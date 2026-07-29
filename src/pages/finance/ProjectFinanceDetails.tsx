@@ -105,7 +105,7 @@ export default function ProjectFinanceDetails() {
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-4 text-sm font-semibold transition-colors whitespace-nowrap border-b-2 outline-none ${
                 activeTab === tab 
-                  ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0] bg-[#792359]/5' 
+                  ? 'border-primary text-primary dark:border-secondary dark:text-secondary bg-primary/5' 
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
               }`}
             >
@@ -169,7 +169,7 @@ export default function ProjectFinanceDetails() {
               <div className="lg:col-span-2 border border-gray-200 dark:border-white/10 rounded-sm p-5 bg-white dark:bg-[#181a1f]">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white">Recent Transactions</h3>
-                  <button className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline">View All</button>
+                  <button className="text-xs font-semibold text-primary dark:text-secondary hover:underline">View All</button>
                 </div>
                 
                 <div className="overflow-x-auto">
@@ -188,7 +188,7 @@ export default function ProjectFinanceDetails() {
                       {RECENT_TRANSACTIONS.map((tx, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm">
                           <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{tx.date}</td>
-                          <td className="px-4 py-3 font-medium text-[#792359] dark:text-[#e6a8d0]">{tx.refNo}</td>
+                          <td className="px-4 py-3 font-medium text-primary dark:text-secondary">{tx.refNo}</td>
                           <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{tx.desc}</td>
                           <td className="px-4 py-3">
                             <span className="px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-sm text-[10px] font-medium">

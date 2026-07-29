@@ -66,7 +66,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       document.documentElement.style.removeProperty('--primary');
       document.documentElement.style.removeProperty('--sidebar-primary');
     }
-  }, [user?.primaryColor]);
+
+    if (user?.secondaryColor) {
+      document.documentElement.style.setProperty('--secondary', user.secondaryColor);
+    } else {
+      document.documentElement.style.removeProperty('--secondary');
+    }
+  }, [user?.primaryColor, user?.secondaryColor]);
 
   const login = (userData: User) => {
     setUser(userData);

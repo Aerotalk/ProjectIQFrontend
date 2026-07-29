@@ -26,7 +26,7 @@ export default function AddressTab({ readOnly }: Props) {
             id="sameAsPresentAddress"
             {...useFormContext().register('sameAsPresentAddress')}
             disabled={readOnly}
-            className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]"
+            className="rounded border-gray-300 text-primary focus:ring-primary"
             onChange={(e) => {
               const checked = e.target.checked;
               setValue('sameAsPresentAddress', checked);

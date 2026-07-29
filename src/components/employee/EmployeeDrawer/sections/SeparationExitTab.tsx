@@ -73,7 +73,7 @@ export default function SeparationExitTab({ readOnly }: Props) {
           {/* Exit Interview checkbox — full width */}
           <FormRow>
             <div className="flex items-center gap-2 mt-1">
-              <input type="checkbox" id="exitInterview" {...register('exitInterview')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+              <input type="checkbox" id="exitInterview" {...register('exitInterview')} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
               <label htmlFor="exitInterview" className="text-sm text-gray-700 dark:text-gray-300">Exit Interview Completed</label>
             </div>
           </FormRow>

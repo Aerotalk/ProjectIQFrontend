@@ -94,7 +94,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
         <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Shield size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <Shield size={18} className="text-primary dark:text-secondary" />
               Manage User Access
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -139,7 +139,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
                   type="radio" 
                   checked={status === 'ACTIVE'}
                   onChange={() => setStatus('ACTIVE')}
-                  className="text-[#792359] focus:ring-[#792359]"
+                  className="text-primary focus:ring-primary"
                 />
                 <span className="text-sm text-gray-900 dark:text-white">Active</span>
               </label>
@@ -148,7 +148,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
                   type="radio" 
                   checked={status === 'INACTIVE'}
                   onChange={() => setStatus('INACTIVE')}
-                  className="text-[#792359] focus:ring-[#792359]"
+                  className="text-primary focus:ring-primary"
                 />
                 <span className="text-sm text-gray-900 dark:text-white">Inactive</span>
               </label>
@@ -169,7 +169,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
                       key={role.id} 
                       className={`flex items-start gap-3 p-3 border rounded-sm cursor-pointer transition-all ${
                         isSelected
-                          ? 'border-[#792359]/30 bg-[#792359]/5 dark:bg-[#792359]/10'
+                          ? 'border-primary/30 bg-primary/5 dark:bg-primary/10'
                           : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
                       }`}
                     >
@@ -177,7 +177,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
                         type="checkbox" 
                         checked={isSelected}
                         onChange={() => toggleRole(role.id)}
-                        className="mt-1 shrink-0 text-[#792359] focus:ring-[#792359] border-gray-300 rounded"
+                        className="mt-1 shrink-0 text-primary focus:ring-primary border-gray-300 rounded"
                       />
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{role.roleName}</div>
@@ -203,7 +203,7 @@ export default function UserDrawer({ isOpen, onClose, user, onSuccess }: UserDra
           <button
             onClick={handleSave}
             disabled={loading}
-            className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
           >
             {loading ? (
               <>

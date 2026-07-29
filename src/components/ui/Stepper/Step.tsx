@@ -39,11 +39,11 @@ export const Step: React.FC<StepProps> = ({
     circleColor = `${stepperTokens.colors.brand} text-white`;
     textColor = stepperTokens.colors.textActive;
     textWeight = 'font-semibold';
-    circleRing = 'ring-4 ring-[#792359]/10';
+    circleRing = 'ring-4 ring-primary/10';
     circleShadow = 'shadow-sm';
   } else if (interactive) {
     // If interactive and upcoming, it can be clickable
-    circleColor = `hover:border-[#792359]/50 hover:bg-[#792359]/5 ${stepperTokens.colors.neutral}`;
+    circleColor = `hover:border-primary/50 hover:bg-primary/5 ${stepperTokens.colors.neutral}`;
     textWeight = 'font-medium';
   } else {
     // Upcoming
@@ -70,7 +70,7 @@ export const Step: React.FC<StepProps> = ({
         className={`
           relative flex items-center justify-center font-bold rounded-full
           ${sizeTokens.circle} ${circleColor} ${transitionClass} ${circleRing} ${circleShadow} ${circleScale}
-          ${interactive ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#792359] focus-visible:ring-offset-2' : 'cursor-default'}
+          ${interactive ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2' : 'cursor-default'}
         `}
       >
         {isCompleted && showCheckmarks ? (

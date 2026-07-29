@@ -54,7 +54,7 @@ export default function EmergencyContactTab({ readOnly }: Props) {
           {/* Primary Contact checkbox — full width */}
           <FormRow>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="emergencyPrimaryContact" {...register('emergencyPrimaryContact')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+              <input type="checkbox" id="emergencyPrimaryContact" {...register('emergencyPrimaryContact')} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
               <label htmlFor="emergencyPrimaryContact" className="text-sm text-gray-700 dark:text-gray-300">Primary Contact</label>
             </div>
           </FormRow>

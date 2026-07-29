@@ -61,7 +61,7 @@ export default function KBFormSection({ readOnly }: Props) {
             <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/10" />
 
             <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-white/5 px-2.5 py-0.5 rounded-full font-semibold text-gray-700 dark:text-gray-300 text-[10px] uppercase tracking-widest">
-              <Tag size={10} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <Tag size={10} className="text-primary dark:text-secondary" />
               <span>{categoryVal || 'General'}</span>
             </div>
 
@@ -82,7 +82,7 @@ export default function KBFormSection({ readOnly }: Props) {
           <div className="p-5 rounded-2xl bg-gradient-to-tr from-gray-50 to-gray-100 dark:from-white/[0.01] dark:to-white/[0.03] border border-gray-200/60 dark:border-white/5 shadow-xs grid grid-cols-1 md:grid-cols-2 gap-4">
             {ciVal && (
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#792359]/10 text-[#792359] dark:bg-[#792359]/20 dark:text-[#e6a8d0] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-secondary flex items-center justify-center shrink-0">
                   <Cpu size={16} />
                 </div>
                 <div>
@@ -159,7 +159,7 @@ export default function KBFormSection({ readOnly }: Props) {
             type="text"
             {...register('title')}
             placeholder="KEDB Title: e.g., Gateway 504 Timeout during checkout transaction"
-            className="w-full bg-transparent border-none border-b border-transparent focus:border-[#792359] dark:focus:border-[#c44997] focus:ring-0 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white px-0 py-2 focus:outline-none transition-colors placeholder:text-gray-300 dark:placeholder:text-gray-600"
+            className="w-full bg-transparent border-none border-b border-transparent focus:border-primary dark:focus:border-[#c44997] focus:ring-0 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white px-0 py-2 focus:outline-none transition-colors placeholder:text-gray-300 dark:placeholder:text-gray-600"
           />
           {errors.title && <p className="text-red-500 text-xs font-semibold">{errors.title.message as string}</p>}
         </div>
@@ -175,7 +175,7 @@ export default function KBFormSection({ readOnly }: Props) {
             rows={6}
             placeholder="Describe the issue symptoms. What does the user see? What are the logs or screens showing? (e.g. users see infinite spinner on checkout)"
             className={cn(
-              "w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359]",
+              "w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-primary/20 focus:border-primary",
               errors.symptoms ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-200 dark:border-white/5'
             )}
           />
@@ -192,7 +192,7 @@ export default function KBFormSection({ readOnly }: Props) {
             {...register('cause')}
             rows={5}
             placeholder="What is the root cause? Why did this error take place? Document the database block, network disconnect, memory leak, or invalid parameter..."
-            className="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border border-gray-200 dark:border-white/5 text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359]"
+            className="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border border-gray-200 dark:border-white/5 text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
 
@@ -206,7 +206,7 @@ export default function KBFormSection({ readOnly }: Props) {
             {...register('workaround')}
             rows={6}
             placeholder="What is the workaround or solution? Document step-by-step instructions for support agents or users to restore operations (e.g. restart service, run script)..."
-            className="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border border-gray-200 dark:border-white/5 text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359]"
+            className="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-black/20 border border-gray-200 dark:border-white/5 text-sm text-gray-900 dark:text-white transition-all outline-none resize-y placeholder:text-gray-400 focus:bg-white dark:focus:bg-[#0f1115] focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
 
@@ -217,7 +217,7 @@ export default function KBFormSection({ readOnly }: Props) {
         
         <div className="bg-gray-50/40 dark:bg-white/[0.01] border border-gray-200/50 dark:border-white/5 rounded-2xl p-5 space-y-5">
           <div className="flex items-center gap-2 border-b border-gray-200 dark:border-white/5 pb-2.5">
-            <Settings size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
+            <Settings size={14} className="text-primary dark:text-secondary" />
             <h4 className="text-[11px] font-black uppercase text-gray-400 tracking-wider">Publish Options</h4>
           </div>
 

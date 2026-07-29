@@ -28,7 +28,7 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
  <button
  type="button"
  onClick={() => append({ name: '', relationship: '', dateOfBirth: '', gender: '', dependent: false, nominee: false, nomineePercentage: 0, phone: '' })}
- className="flex items-center gap-1.5 text-sm font-medium text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 px-2 py-1 rounded-sm transition-colors"
+ className="flex items-center gap-1.5 text-sm font-medium text-primary dark:text-secondary hover:bg-primary/5 px-2 py-1 rounded-sm transition-colors"
  >
  <Plus size={16} /> Add Member
  </button>
@@ -105,11 +105,11 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
  <FormRow>
  <div className="flex flex-row gap-6 items-center mt-2">
  <div className="flex items-center gap-2">
- <input type="checkbox" id={`families.${index}.dependent`} {...register(`families.${index}.dependent`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+ <input type="checkbox" id={`families.${index}.dependent`} {...register(`families.${index}.dependent`)} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
  <label htmlFor={`families.${index}.dependent`} className="text-sm text-gray-700 dark:text-gray-300">Is Dependent</label>
  </div>
  <div className="flex items-center gap-2">
- <input type="checkbox" id={`families.${index}.nominee`} {...register(`families.${index}.nominee`)} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+ <input type="checkbox" id={`families.${index}.nominee`} {...register(`families.${index}.nominee`)} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
  <label htmlFor={`families.${index}.nominee`} className="text-sm text-gray-700 dark:text-gray-300">Is Nominee</label>
  </div>
  </div>

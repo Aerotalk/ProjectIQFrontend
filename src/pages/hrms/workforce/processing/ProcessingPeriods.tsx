@@ -22,7 +22,7 @@ export default function ProcessingPeriods() {
       render: (val: string, row: AttendancePeriod) => (
         <div>
           <div className="font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
-            <Settings size={14} className="text-[#792359]" />
+            <Settings size={14} className="text-primary" />
             {val}
           </div>
           <div className="text-xs text-gray-500">{row.startDate} to {row.endDate}</div>
@@ -74,7 +74,7 @@ export default function ProcessingPeriods() {
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
               {!isProcessed ? (
-                <button onClick={() => { setIsOpen(false); setIsWizardOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+                <button onClick={() => { setIsOpen(false); setIsWizardOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                   <Play size={14} /> Process Attendance
                 </button>
               ) : (
@@ -99,7 +99,7 @@ export default function ProcessingPeriods() {
         </div>
         <button 
           onClick={() => setIsWizardOpen(true)} 
-          className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors whitespace-nowrap shadow-sm"
+          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap shadow-sm"
         >
           New Processing Period
         </button>

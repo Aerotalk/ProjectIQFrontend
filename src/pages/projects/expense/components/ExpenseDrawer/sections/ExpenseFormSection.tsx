@@ -210,7 +210,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                   />
                   <div className={`w-9 h-5 rounded-full transition-colors ${
                     isGstApplicable
-                      ? 'bg-[#792359] dark:bg-[#c44997]'
+                      ? 'bg-primary dark:bg-[#c44997]'
                       : 'bg-gray-200 dark:bg-white/10 peer-hover:bg-gray-300 dark:peer-hover:bg-white/20'
                     } ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                   ></div>
@@ -246,7 +246,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                       type="checkbox"
                       {...register('isInputCreditClaimable')}
                       disabled={readOnly}
-                      className="w-4 h-4 text-[#792359] focus:ring-[#792359] border-gray-300 rounded-sm"
+                      className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded-sm"
                     />
                     <span className="text-sm text-gray-700 dark:text-gray-300">Input Credit Claimable</span>
                   </label>
@@ -304,7 +304,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                   (readOnly
                     ? 'border-gray-200 dark:border-white/5 text-gray-400 cursor-not-allowed'
                     : 'border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 ' +
-                      'hover:border-[#792359] hover:text-[#792359] dark:hover:border-[#c44997] dark:hover:text-[#c44997] cursor-pointer')
+                      'hover:border-primary hover:text-primary dark:hover:border-[#c44997] dark:hover:text-[#c44997] cursor-pointer')
                 }
               >
                 <Paperclip size={14} />
@@ -312,7 +312,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
               </button>
             ) : (
               <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50 dark:bg-white/[0.02]">
-                <Paperclip size={14} className="text-[#792359] dark:text-[#c44997] shrink-0" />
+                <Paperclip size={14} className="text-primary dark:text-[#c44997] shrink-0" />
                 <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1" title={receiptName}>
                   {receiptName}
                 </span>

@@ -49,7 +49,7 @@ export default function CustomTable({
               <div className="flex items-center gap-1">
                 {col.label}
                 {col.sortable && onSort && (
-                  <ArrowUpDown size={12} className={sortColumn === col.key ? 'text-[#792359] dark:text-[#e6a8d0]' : 'opacity-50'} />
+                  <ArrowUpDown size={12} className={sortColumn === col.key ? 'text-primary dark:text-secondary' : 'opacity-50'} />
                 )}
               </div>
             </th>

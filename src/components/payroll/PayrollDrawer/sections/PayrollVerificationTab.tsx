@@ -22,7 +22,7 @@ export default function PayrollVerificationTab({ readOnly }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-[#792359]/30 hover:bg-[#792359]/5 transition-all cursor-pointer group">
+        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group">
           <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors mb-3">
             <FileText size={24} />
           </div>
@@ -30,7 +30,7 @@ export default function PayrollVerificationTab({ readOnly }: Props) {
           <p className="text-xs text-gray-500 mt-1">View full breakdown</p>
         </div>
         
-        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-[#792359]/30 hover:bg-[#792359]/5 transition-all cursor-pointer group ring-1 ring-[#792359]/20">
+        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group ring-1 ring-primary/20">
           <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors mb-3">
             <ArrowRightLeft size={24} />
           </div>
@@ -38,7 +38,7 @@ export default function PayrollVerificationTab({ readOnly }: Props) {
           <p className="text-xs text-gray-500 mt-1">Compare with last month</p>
         </div>
 
-        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-[#792359]/30 hover:bg-[#792359]/5 transition-all cursor-pointer group">
+        <div className="bg-white dark:bg-[#1f2229] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer group">
           <div className="w-12 h-12 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-100 dark:group-hover:bg-orange-500/20 transition-colors mb-3">
             <AlertTriangle size={24} />
           </div>

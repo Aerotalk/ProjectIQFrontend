@@ -289,7 +289,7 @@ export default function ChallanDetails() {
                     setIsApiLoading(false);
                   }
                 }}
-                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
                 {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Saving...</> : 'Save & Issue'}
               </button>
@@ -314,7 +314,7 @@ export default function ChallanDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Dispatched', 'Marked as Dispatched', 3)}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
               {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Updating...</> : 'Mark as Dispatched'}
             </button>
@@ -364,9 +364,9 @@ export default function ChallanDetails() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-            <Link to="/companydashboard/finance" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Finance</Link>
+            <Link to="/companydashboard/finance" className="hover:text-primary dark:hover:text-secondary">Finance</Link>
             <ChevronRight size={14} />
-            <Link to="/companydashboard/finance/challans" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Delivery Challans</Link>
+            <Link to="/companydashboard/finance/challans" className="hover:text-primary dark:hover:text-secondary">Delivery Challans</Link>
             <ChevronRight size={14} />
             <span className="text-gray-900 dark:text-white font-medium">{isNew ? 'New Challan' : challan.challanNumber}</span>
           </div>
@@ -385,7 +385,7 @@ export default function ChallanDetails() {
             <button
               onClick={handlePreview}
               disabled={isLoadingPreview || isApiLoading}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
                 <><FunkyLoader variant="inline" className="mr-2" /> Preparing PDF...</>
@@ -439,7 +439,7 @@ export default function ChallanDetails() {
             <div className="absolute top-5 left-0 w-full h-[2px] bg-gray-200 dark:bg-gray-800 -translate-y-1/2 z-0"></div>
             {/* Active Line */}
             <div
-              className="absolute top-5 left-0 h-[2px] bg-[#792359] dark:bg-[#792359] -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
+              className="absolute top-5 left-0 h-[2px] bg-primary dark:bg-primary -translate-y-1/2 z-0 transition-all duration-500 ease-in-out"
               style={{ width: `${((currentStage - 1) / (stages.length - 1)) * 100}%` }}
             ></div>
             
@@ -452,10 +452,10 @@ export default function ChallanDetails() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300
                       ${isPast || isActive 
-                        ? 'bg-[#792359] text-white' 
+                        ? 'bg-primary text-white' 
                         : 'bg-white dark:bg-[#181a1f] border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300'
                       }
-                      ${isActive ? 'ring-[6px] ring-[#792359]/10 dark:ring-[#792359]/20' : ''}
+                      ${isActive ? 'ring-[6px] ring-primary/10 dark:ring-primary/20' : ''}
                     `}
                   >
                     {stage.id}
@@ -628,7 +628,7 @@ export default function ChallanDetails() {
                           });
                           setChallan({ ...challan, lineItems: newItems });
                         }}
-                        className="text-xs bg-[#792359] hover:bg-[#52173c] text-white px-3 py-1.5 rounded-sm transition-colors"
+                        className="text-xs bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-sm transition-colors"
                       >
                         + Add Item
                       </button>
@@ -777,7 +777,7 @@ export default function ChallanDetails() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-[#792359] text-[#792359]' : 'border-transparent text-gray-500'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
                   >
                     {tab}
                   </button>
@@ -822,7 +822,7 @@ export default function ChallanDetails() {
                           <tfoot className="bg-gray-50 dark:bg-white/[0.02] font-bold border-t border-gray-200 dark:border-white/10 text-xs">
                             <tr>
                               <td colSpan={3} className="px-4 py-2.5 text-gray-900 dark:text-white">Total Quantity</td>
-                              <td className="px-4 py-2.5 text-right text-[#792359] dark:text-[#c44997]">
+                              <td className="px-4 py-2.5 text-right text-primary dark:text-[#c44997]">
                                 {challan.lineItems.reduce((sum, i) => sum + (Number(i.dispatchedQuantity ?? i.quantity) || 1), 0)}
                               </td>
                               <td className="px-4 py-2.5"></td>

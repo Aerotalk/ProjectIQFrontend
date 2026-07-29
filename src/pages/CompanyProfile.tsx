@@ -281,7 +281,7 @@ export default function CompanyProfile() {
       <label className={`${formStyles.label} flex items-center justify-between`}>
         <span>{label}</span>
         {fileId && (
-          <a href={`${API_BASE_URL}/admin/files/${fileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+          <a href={`${API_BASE_URL}/admin/files/${fileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-primary dark:text-secondary hover:underline flex items-center gap-1">
             <Eye size={12} /> View Current
           </a>
         )}
@@ -330,7 +330,7 @@ export default function CompanyProfile() {
             type="submit"
             form="profile-form"
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm transition-colors shadow-sm disabled:opacity-80 disabled:cursor-not-allowed min-w-[140px] justify-center"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-sm transition-colors shadow-sm disabled:opacity-80 disabled:cursor-not-allowed min-w-[140px] justify-center"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             {isSaving ? 'Saving...' : 'Save Profile'}
@@ -466,7 +466,7 @@ export default function CompanyProfile() {
             <button
               type="button"
               onClick={addBank}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#792359] bg-[#792359]/10 hover:bg-[#792359]/20 rounded-sm transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-sm transition-colors"
             >
               <Plus size={14} /> Add Another Bank
             </button>
@@ -528,7 +528,7 @@ export default function CompanyProfile() {
                           name={`primaryBank-${index}`}
                           checked={bank.isPrimaryBank}
                           onChange={() => handleBankChange(bank.id, 'isPrimaryBank', true)}
-                          className="w-4 h-4 text-[#792359] border-gray-300 rounded-full focus:ring-[#792359] dark:bg-black/20 dark:border-white/10"
+                          className="w-4 h-4 text-primary border-gray-300 rounded-full focus:ring-primary dark:bg-black/20 dark:border-white/10"
                         />
                         <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Set as Primary Bank</span>
                       </label>

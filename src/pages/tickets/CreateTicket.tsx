@@ -149,7 +149,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className={formStyles.label}>Location</label>
               <div className="flex-1 relative flex">
-                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-primary bg-white dark:bg-[#181a1f] rounded-l-sm" />
                 <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
             <div className="flex items-center">
               <label className={formStyles.label}>Business Application</label>
               <div className="flex-1 relative flex">
-                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm" />
+                <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-primary bg-white dark:bg-[#181a1f] rounded-l-sm" />
                 <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-r-sm text-gray-500"><Search size={14}/></button>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
               <label className={formStyles.label}>Opened by</label>
               <div className="flex-1 flex">
                 <div className="flex-1 flex">
-                  <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-l-sm text-gray-800 dark:text-gray-200" defaultValue="System User" />
+                  <input type="text" className="flex-1 border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-primary bg-white dark:bg-[#181a1f] rounded-l-sm text-gray-800 dark:text-gray-200" defaultValue="System User" />
                   <button className="border border-l-0 border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 text-gray-500"><Search size={14}/></button>
                 </div>
                 <button className="ml-1 border border-gray-300 dark:border-white/10 px-2 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 rounded-sm text-gray-500"><Info size={14}/></button>
@@ -303,7 +303,7 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
           <div className="flex items-center">
             <label className={formStyles.label}><span className="text-red-500 mr-1">*</span>Short description</label>
             <div className="flex-1">
-              <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm" />
+              <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1 outline-none focus:border-primary bg-white dark:bg-[#181a1f] rounded-sm" />
             </div>
           </div>
 
@@ -313,21 +313,21 @@ export default function CreateTicket({ onCancel, onSubmit }: CreateTicketProps) 
               <span className="text-[10px] opacity-70">(Customer visible)</span>
             </label>
             <div className="flex-1">
-              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-[#792359] bg-white dark:bg-[#181a1f] rounded-sm resize-y" />
+              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-primary bg-white dark:bg-[#181a1f] rounded-sm resize-y" />
             </div>
           </div>
 
           <div className="flex items-start">
             <label className="w-40 text-right pr-4 pt-1.5 text-gray-600 dark:text-gray-400 text-xs">Work notes</label>
             <div className="flex-1">
-              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-[#792359] bg-[#fffdef] dark:bg-yellow-900/10 rounded-sm resize-y" />
+              <textarea rows={3} className="w-full border border-gray-300 dark:border-white/10 px-2 py-1.5 outline-none focus:border-primary bg-[#fffdef] dark:bg-yellow-900/10 rounded-sm resize-y" />
             </div>
           </div>
 
           <div className="flex items-center">
             <label className={formStyles.label}>Active</label>
             <div className="flex-1">
-              <input type="checkbox" defaultChecked className="rounded border-gray-400 text-[#792359] focus:ring-[#792359]" />
+              <input type="checkbox" defaultChecked className="rounded border-gray-400 text-primary focus:ring-primary" />
             </div>
           </div>
         </div>

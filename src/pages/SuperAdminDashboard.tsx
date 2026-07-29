@@ -122,7 +122,7 @@ export default function SuperAdminDashboard() {
               {!isFormVisible && (
                 <button 
                   onClick={() => setIsFormVisible(true)}
-                  className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
                 >
                   <Plus size={16} />
                   Add Organization
@@ -135,7 +135,7 @@ export default function SuperAdminDashboard() {
               <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center rounded-t-sm">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Building2 size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                    <Building2 size={18} className="text-primary dark:text-secondary" />
                     Add New Organization
                   </h2>
                   <button 
@@ -157,7 +157,7 @@ export default function SuperAdminDashboard() {
                         value={formData.organizationCode}
                         onChange={(e) => setFormData({...formData, organizationCode: e.target.value})}
                         placeholder="e.g. ACME" 
-                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                     </div>
                     
@@ -169,7 +169,7 @@ export default function SuperAdminDashboard() {
                         value={formData.organizationName}
                         onChange={(e) => setFormData({...formData, organizationName: e.target.value})}
                         placeholder="e.g. Acme Corp" 
-                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                     </div>
 
@@ -181,7 +181,7 @@ export default function SuperAdminDashboard() {
                         value={formData.legalName}
                         onChange={(e) => setFormData({...formData, legalName: e.target.value})}
                         placeholder="e.g. Acme Corporation Pvt Ltd" 
-                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                     </div>
 
@@ -193,7 +193,7 @@ export default function SuperAdminDashboard() {
                         value={formData.organizationEmail}
                         onChange={(e) => setFormData({...formData, organizationEmail: e.target.value})}
                         placeholder="admin@acme.com" 
-                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                     </div>
 
@@ -206,7 +206,7 @@ export default function SuperAdminDashboard() {
                           value={formData.organizationPassword}
                           onChange={(e) => setFormData({...formData, organizationPassword: e.target.value})}
                           placeholder="••••••••" 
-                          className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                          className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                         />
                         <button 
                           type="button"
@@ -256,7 +256,7 @@ export default function SuperAdminDashboard() {
                     </button>
                     <button 
                       type="submit" 
-                      className="flex items-center justify-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2.5 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+                      className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2.5 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
                     >
                       <Plus size={16} />
                       Register Organization
@@ -274,7 +274,7 @@ export default function SuperAdminDashboard() {
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Registered Organizations</h2>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                  <input type="text" placeholder="Search orgs..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-[#792359] rounded-sm transition-all outline-none w-48 xl:w-64" />
+                  <input type="text" placeholder="Search orgs..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 focus:border-primary rounded-sm transition-all outline-none w-48 xl:w-64" />
                 </div>
               </div>
               
@@ -296,7 +296,7 @@ export default function SuperAdminDashboard() {
                       <tr key={org.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#792359]/10 dark:bg-[#792359]/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0] font-bold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-secondary font-bold text-sm">
                               {org.organizationName.charAt(0)}
                             </div>
                             <div>
@@ -333,7 +333,7 @@ export default function SuperAdminDashboard() {
                         <td className="px-6 py-4 text-right">
                           <button 
                             onClick={() => openEditModal(org)}
-                            className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:text-[#52173c] dark:hover:text-white transition-colors bg-[#792359]/10 hover:bg-[#792359]/20 px-3 py-1.5 rounded-sm border border-[#792359]/20"
+                            className="text-xs font-medium text-primary dark:text-secondary hover:text-primary-dark dark:hover:text-white transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-sm border border-primary/20"
                           >
                             View Profile
                           </button>
@@ -363,14 +363,14 @@ export default function SuperAdminDashboard() {
             <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/80 dark:bg-white/[0.02] flex items-center gap-4 rounded-t-sm">
               <button 
                 onClick={() => setSelectedOrg(null)}
-                className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-[#792359]"
+                className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                 aria-label="Go back"
               >
                 <ArrowLeft size={20} />
               </button>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Building2 size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                  <Building2 size={18} className="text-primary dark:text-secondary" />
                   {selectedOrg.organizationName}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">Edit organization profile details below.</p>
@@ -389,7 +389,7 @@ export default function SuperAdminDashboard() {
                       required
                       value={editFormData.organizationName}
                       onChange={(e) => setEditFormData({...editFormData, organizationName: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white" 
                     />
                   </div>
 
@@ -400,7 +400,7 @@ export default function SuperAdminDashboard() {
                       required
                       value={editFormData.legalName}
                       onChange={(e) => setEditFormData({...editFormData, legalName: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white" 
                     />
                   </div>
 
@@ -411,7 +411,7 @@ export default function SuperAdminDashboard() {
                       required
                       value={editFormData.organizationEmail}
                       onChange={(e) => setEditFormData({...editFormData, organizationEmail: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white" 
                     />
                   </div>
 
@@ -423,7 +423,7 @@ export default function SuperAdminDashboard() {
                           value={editFormData.organizationPassword || ''}
                           onChange={(e) => setEditFormData({...editFormData, organizationPassword: e.target.value})}
                           placeholder="Leave blank to keep current"
-                          className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white" 
+                          className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white" 
                         />
                       <button 
                         type="button"
@@ -473,7 +473,7 @@ export default function SuperAdminDashboard() {
                   </button>
                   <button 
                     type="submit" 
-                    className="bg-[#792359] hover:bg-[#52173c] text-white px-8 py-2.5 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359]"
+                    className="bg-primary hover:bg-primary-dark text-white px-8 py-2.5 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                   >
                     Save Changes
                   </button>

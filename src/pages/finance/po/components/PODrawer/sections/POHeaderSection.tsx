@@ -266,7 +266,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                     <button
                       type="button"
                       onClick={() => setValue('shippingAddress', getValues('billingAddress'), { shouldDirty: true })}
-                      className="text-[10px] uppercase tracking-wider font-semibold text-[#792359] hover:text-[#792359]/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
+                      className="text-[10px] uppercase tracking-wider font-semibold text-primary hover:text-primary/80 dark:text-pink-400 dark:hover:text-pink-300 flex items-center gap-1 transition-colors"
                       title="Copy from Billing Address"
                     >
                       <Copy className="w-3 h-3" />
@@ -341,7 +341,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
                 (readOnly
                   ? 'border-gray-200 dark:border-white/5 text-gray-400 cursor-not-allowed'
                   : 'border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 ' +
-                    'hover:border-[#792359] hover:text-[#792359] dark:hover:border-[#c44997] dark:hover:text-[#c44997] cursor-pointer')
+                    'hover:border-primary hover:text-primary dark:hover:border-[#c44997] dark:hover:text-[#c44997] cursor-pointer')
               }
             >
               <Paperclip size={14} />
@@ -350,7 +350,7 @@ export default function POHeaderSection({ readOnly, nextNumber }: Props) {
           ) : (
             /* File pill — shows selected filename */
             <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-white/10 rounded-sm bg-gray-50 dark:bg-white/[0.02]">
-              <Paperclip size={14} className="text-[#792359] dark:text-[#c44997] shrink-0" />
+              <Paperclip size={14} className="text-primary dark:text-[#c44997] shrink-0" />
               <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1" title={attachmentName}>
                 {attachmentName}
               </span>

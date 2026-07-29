@@ -64,7 +64,7 @@ export default function WorkforceDashboard() {
           <div 
             key={i} 
             onClick={() => navigate(kpi.path)}
-            className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
+            className="bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-3">
               <div className={`p-2 rounded-sm border ${kpi.bgColor} border-transparent`}>
@@ -88,9 +88,9 @@ export default function WorkforceDashboard() {
         <div className="xl:col-span-2 bg-white dark:bg-[#181a1f] p-5 rounded-sm shadow-sm border border-gray-200 dark:border-white/5 flex flex-col min-h-[300px]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Fingerprint size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Today's Attendance
+              <Fingerprint size={16} className="text-primary dark:text-secondary" /> Today's Attendance
             </h2>
-            <button className="text-xs text-[#792359] hover:underline" onClick={() => navigate('../attendance/daily')}>View All</button>
+            <button className="text-xs text-primary hover:underline" onClick={() => navigate('../attendance/daily')}>View All</button>
           </div>
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -134,7 +134,7 @@ export default function WorkforceDashboard() {
                   <p className="text-xs font-semibold text-gray-900 dark:text-white">Jane Smith</p>
                   <p className="text-[10px] text-gray-500">Sick Leave • 2 Days</p>
                 </div>
-                <button className="text-xs bg-[#792359] text-white px-2 py-1 rounded-sm hover:bg-[#52173c]" onClick={() => navigate('../leave/applications')}>Review</button>
+                <button className="text-xs bg-primary text-white px-2 py-1 rounded-sm hover:bg-primary-dark" onClick={() => navigate('../leave/applications')}>Review</button>
               </div>
             ))}
           </div>

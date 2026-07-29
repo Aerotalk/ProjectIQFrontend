@@ -51,10 +51,10 @@ export default function Login() {
         ></div>
 
         {/* Geometric Floating Elements (Distinct) */}
-        <div className="absolute top-[10%] left-[10%] w-28 h-28 border-4 border-[#792359]/40 rounded-full animate-float-slow opacity-90 shadow-sm hidden sm:block"></div>
-        <div className="absolute bottom-[15%] right-[10%] w-36 h-36 border-4 border-[#792359]/30 rotate-45 animate-float-slower opacity-90 shadow-sm hidden sm:block"></div>
-        <div className="absolute top-[40%] right-[18%] w-16 h-16 border-[5px] border-[#792359]/50 rounded-full animate-float-slow opacity-100 hidden md:block" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-[30%] left-[15%] w-20 h-20 bg-[#792359]/10 rotate-12 rounded-lg animate-float-slower opacity-80 backdrop-blur-sm border border-[#792359]/20 hidden md:block" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-[10%] left-[10%] w-28 h-28 border-4 border-primary/40 rounded-full animate-float-slow opacity-90 shadow-sm hidden sm:block"></div>
+        <div className="absolute bottom-[15%] right-[10%] w-36 h-36 border-4 border-primary/30 rotate-45 animate-float-slower opacity-90 shadow-sm hidden sm:block"></div>
+        <div className="absolute top-[40%] right-[18%] w-16 h-16 border-[5px] border-primary/50 rounded-full animate-float-slow opacity-100 hidden md:block" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-[30%] left-[15%] w-20 h-20 bg-primary/10 rotate-12 rounded-lg animate-float-slower opacity-80 backdrop-blur-sm border border-primary/20 hidden md:block" style={{ animationDelay: '3s' }}></div>
       </div>
       {/* ---------------------------------- */}
 
@@ -74,10 +74,10 @@ export default function Login() {
         </div>
 
         {/* Login Card */}
-        <div className="w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-[#792359]/5 border border-white p-8 sm:p-10">
+        <div className="w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl shadow-primary/5 border border-white p-8 sm:p-10">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold text-gray-900">Log in to your account</h1>
-            <div className="w-12 h-[3px] bg-[#792359] mx-auto mt-4 mb-3 rounded-full"></div>
+            <div className="w-12 h-[3px] bg-primary mx-auto mt-4 mb-3 rounded-full"></div>
             <p className="text-sm text-gray-500 mt-2">Enter your email and password below to log in</p>
           </div>
 
@@ -128,14 +128,14 @@ export default function Login() {
           >
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 flex">
-                Email address <span className="text-[#792359] ml-1">*</span>
+                Email address <span className="text-primary ml-1">*</span>
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#792359] focus:ring-2 focus:ring-[#792359]/20 outline-none transition-all placeholder:text-gray-400 text-gray-900 bg-white/50 focus:bg-white"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 text-gray-900 bg-white/50 focus:bg-white"
                 required
               />
             </div>
@@ -143,9 +143,9 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-700 flex">
-                  Password <span className="text-[#792359] ml-1">*</span>
+                  Password <span className="text-primary ml-1">*</span>
                 </label>
-                <a href="#" className="text-sm text-[#792359] hover:text-[#52173c] font-medium transition-colors">
+                <a href="#" className="text-sm text-primary hover:text-primary-dark font-medium transition-colors">
                   Forgot password?
                 </a>
               </div>
@@ -155,7 +155,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-[#792359] focus:ring-2 focus:ring-[#792359]/20 outline-none transition-all placeholder:text-gray-400 text-gray-900 bg-white/50 focus:bg-white"
+                  className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-gray-400 text-gray-900 bg-white/50 focus:bg-white"
                   required
                 />
                 <button
@@ -172,7 +172,7 @@ export default function Login() {
               <input
                 type="checkbox"
                 id="remember"
-                className="w-4 h-4 rounded border-gray-300 text-[#792359] focus:ring-[#792359] cursor-pointer"
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
               />
               <label htmlFor="remember" className="ml-2.5 text-sm font-medium text-gray-600 cursor-pointer select-none">
                 Remember me
@@ -182,7 +182,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#792359] hover:bg-[#631c49] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:shadow-[#792359]/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-[#631c49] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

@@ -69,14 +69,14 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
       </div>
 
       {/* Sidebar - Using a deep, rich premium tone based on #792359 */}
-      <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-[#792359]/20 shadow-xl shadow-[#792359]/5">
+      <aside className="w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed h-full z-20 border-r border-primary/20 shadow-xl shadow-primary/5">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-4 py-3 border-b border-white/5 bg-black/10 box-border overflow-hidden">
           <div className="h-full max-w-[40px] mr-3 flex-shrink-0 flex items-center justify-center">
             <img src={logo} alt="BumbleERP Logo" className="w-full h-full object-contain rounded-sm shadow-sm" />
           </div>
           <span className="font-bold text-lg tracking-wide text-white">BumbleERP</span>
-          <span className="ml-2 text-[10px] font-semibold bg-[#792359]/20 text-[#e6a8d0] px-1.5 py-0.5 rounded-sm border border-[#792359]/30 flex-shrink-0">ADMIN</span>
+          <span className="ml-2 text-[10px] font-semibold bg-primary/20 text-secondary px-1.5 py-0.5 rounded-sm border border-primary/30 flex-shrink-0">ADMIN</span>
         </div>
 
         {/* Navigation */}
@@ -96,7 +96,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
                   ${isActive ? 'bg-white/5 text-white border-l-2 border-[#b8458f]' : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent'}
                 `}
               >
-                <item.icon size={18} className={isActive ? 'text-[#e6a8d0]' : 'text-gray-400'} />
+                <item.icon size={18} className={isActive ? 'text-secondary' : 'text-gray-400'} />
                 {item.name}
               </Link>
             );
@@ -105,7 +105,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs">
+            <div className="w-8 h-8 rounded-sm bg-primary flex items-center justify-center text-white font-bold text-xs">
               SA
             </div>
             <div className="flex flex-col">
@@ -125,18 +125,18 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
             <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Super Admin</span>
             <ChevronRight size={14} className="mx-2 shrink-0" />
-            <span className="text-[#792359] dark:text-[#e6a8d0] truncate">Organizations</span>
+            <span className="text-primary dark:text-secondary truncate">Organizations</span>
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3 relative shrink-0">
             <div className="relative mr-2 hidden lg:block">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
+              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-primary dark:focus:border-primary rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
             </div>
 
             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors relative">
               <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#792359] rounded-full border-2 border-white dark:border-[#181a1f]"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-[#181a1f]"></span>
             </button>
 
             {/* Theme Toggle */}
@@ -155,7 +155,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 p-1.5 rounded-sm transition-colors"
               >
-                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm">
+                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-xs rounded-sm">
                   SA
                 </div>
               </button>

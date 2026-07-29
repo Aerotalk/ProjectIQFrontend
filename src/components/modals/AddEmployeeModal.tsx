@@ -150,16 +150,16 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
             {/* Personal Details */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <User size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Personal Details
+                <User size={16} className="text-primary dark:text-secondary" /> Personal Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name *</label>
-                  <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white" />
+                  <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name *</label>
-                  <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white" />
+                  <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
@@ -181,14 +181,14 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
             {/* Account Details */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Lock size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Account Details
+                <Lock size={16} className="text-primary dark:text-secondary" /> Account Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address *</label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white" />
+                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary dark:text-white" />
                   </div>
                 </div>
                 <div className="relative">
@@ -203,7 +203,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password *</label>
                   <div className="relative">
                     <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input required type="text" name="password" value={formData.password} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] dark:text-white" />
+                    <input required type="text" name="password" value={formData.password} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary dark:text-white" />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Employee will use this to log in initially.</p>
                 </div>
@@ -215,7 +215,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
             {/* Employment Details */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Briefcase size={16} className="text-[#792359] dark:text-[#e6a8d0]" /> Employment Details
+                <Briefcase size={16} className="text-primary dark:text-secondary" /> Employment Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
@@ -277,7 +277,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
             type="submit"
             form="add-emp-form"
             disabled={loading}
-            className="px-6 py-2 bg-[#792359] hover:bg-[#5d1944] disabled:opacity-70 text-white text-sm font-medium rounded-md shadow-sm transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-primary hover:bg-[#5d1944] disabled:opacity-70 text-white text-sm font-medium rounded-md shadow-sm transition-colors flex items-center gap-2"
           >
             {loading ? <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span> : null}
             {loading ? 'Creating...' : 'Create Employee'}

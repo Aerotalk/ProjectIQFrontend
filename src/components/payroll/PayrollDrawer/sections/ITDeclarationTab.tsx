@@ -69,7 +69,7 @@ export default function ITDeclarationTab({ readOnly }: Props) {
               <button
                 type="button"
                 onClick={() => append({ taxSection: '', description: '', declaredAmount: '' })}
-                className="flex items-center gap-1.5 text-sm font-medium text-[#792359] hover:text-[#52173c] dark:text-[#e6a8d0] dark:hover:text-[#f4d1e7] transition-colors"
+                className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark dark:text-secondary dark:hover:text-[#f4d1e7] transition-colors"
               >
                 <Plus size={16} />
                 Add Item

@@ -96,7 +96,7 @@ function VendorMultiSelect({
                     className={cn(
                       'w-4 h-4 rounded-sm border flex items-center justify-center shrink-0',
                       isSelected
-                        ? 'bg-[#792359] border-[#792359]'
+                        ? 'bg-primary border-primary'
                         : 'border-gray-300 dark:border-white/20'
                     )}
                   >
@@ -261,7 +261,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/[0.02]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0]">
+          <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-primary dark:text-secondary">
             <FolderKanban size={16} />
           </div>
           <div>
@@ -393,7 +393,7 @@ export default function ProjectDrawer({ isOpen, onClose, onSave, mode, initialDa
             type="submit"
             form="project-form"
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-sm shadow-sm transition-colors disabled:opacity-70 flex items-center gap-2"
           >
             {isSubmitting ? (
               <>

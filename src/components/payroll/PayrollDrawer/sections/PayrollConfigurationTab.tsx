@@ -141,19 +141,19 @@ export default function PayrollConfigurationTab({ readOnly }: Props) {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register('payrollConfiguration.taxable')} disabled={readOnly} className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700" />
+            <input type="checkbox" {...register('payrollConfiguration.taxable')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
             <span className={formStyles.label}>Taxable</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register('payrollConfiguration.proRata')} disabled={readOnly} className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700" />
+            <input type="checkbox" {...register('payrollConfiguration.proRata')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
             <span className={formStyles.label}>Pro-rata</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register('payrollConfiguration.partOfCTC')} disabled={readOnly} className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700" />
+            <input type="checkbox" {...register('payrollConfiguration.partOfCTC')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
             <span className={formStyles.label}>Part of CTC</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register('payrollConfiguration.partOfGross')} disabled={readOnly} className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700" />
+            <input type="checkbox" {...register('payrollConfiguration.partOfGross')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
             <span className={formStyles.label}>Part of Gross</span>
           </label>
         </div>
@@ -182,7 +182,7 @@ export default function PayrollConfigurationTab({ readOnly }: Props) {
             <textarea
               {...register('payrollConfiguration.layoutHTML')}
               disabled={readOnly}
-              className="w-full h-32 p-3 text-sm font-mono bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+              className="w-full h-32 p-3 text-sm font-mono bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="<div>Payslip HTML goes here...</div>"
             />
           </div>
@@ -204,7 +204,7 @@ export default function PayrollConfigurationTab({ readOnly }: Props) {
 
           <div className="space-y-2 sm:col-span-2 mt-2">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" {...register('payrollConfiguration.setAsDefault')} disabled={readOnly} className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700" />
+              <input type="checkbox" {...register('payrollConfiguration.setAsDefault')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
               <span className={formStyles.label}>Set as Default Template</span>
             </label>
           </div>

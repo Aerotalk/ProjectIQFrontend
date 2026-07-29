@@ -43,7 +43,7 @@ export default function TicketDetails() {
               <button 
                 key={tab}
                 onClick={() => setActiveTab(tab.split(' ')[0])}
-                className={`px-6 py-3.5 transition-colors border-b-2 ${activeTab === tab.split(' ')[0] ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0] bg-gray-50/50 dark:bg-white/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
+                className={`px-6 py-3.5 transition-colors border-b-2 ${activeTab === tab.split(' ')[0] ? 'border-primary text-primary dark:text-secondary dark:border-secondary bg-gray-50/50 dark:bg-white/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
               >
                 {tab}
               </button>
@@ -72,7 +72,7 @@ export default function TicketDetails() {
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-5 border-b border-gray-100 dark:border-white/5 pb-3">Client Information</h3>
                   <div className="space-y-4 text-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-gray-100 dark:bg-white/5 text-[#792359] font-bold flex items-center justify-center rounded text-xs">TN</div>
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-white/5 text-primary font-bold flex items-center justify-center rounded text-xs">TN</div>
                       <span className="font-semibold text-gray-900 dark:text-white">TechNova Pvt Ltd</span>
                     </div>
                     <div className="flex justify-between"><span className="text-gray-500">Client ID</span> <span className="font-medium text-gray-900 dark:text-white">CL-10024</span></div>
@@ -82,7 +82,7 @@ export default function TicketDetails() {
                     <div className="flex justify-between"><span className="text-gray-500">Support Plan</span> <span className="font-medium text-gray-900 dark:text-white">Premium</span></div>
                     
                     <div className="pt-2">
-                      <a href="#" className="text-sm font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline">View Client Profile</a>
+                      <a href="#" className="text-sm font-semibold text-primary dark:text-secondary hover:underline">View Client Profile</a>
                     </div>
                   </div>
                 </div>
@@ -101,7 +101,7 @@ export default function TicketDetails() {
                   </h4>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-200 dark:border-white/10 w-64">
-                      <div className="bg-[#792359]/10 p-2 rounded text-[#792359] dark:text-[#e6a8d0]"><FileText size={20} /></div>
+                      <div className="bg-primary/10 p-2 rounded text-primary dark:text-secondary"><FileText size={20} /></div>
                       <div className="flex-1 overflow-hidden">
                         <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">error_screenshot.png</p>
                         <p className="text-[10px] text-gray-500">1.2 MB</p>
@@ -109,7 +109,7 @@ export default function TicketDetails() {
                       <Download size={14} className="text-gray-400 hover:text-gray-700 cursor-pointer" />
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-200 dark:border-white/10 w-64">
-                      <div className="bg-[#792359]/10 p-2 rounded text-[#792359] dark:text-[#e6a8d0]"><FileText size={20} /></div>
+                      <div className="bg-primary/10 p-2 rounded text-primary dark:text-secondary"><FileText size={20} /></div>
                       <div className="flex-1 overflow-hidden">
                         <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">dashboard_error.log</p>
                         <p className="text-[10px] text-gray-500">2.4 KB</p>
@@ -130,7 +130,7 @@ export default function TicketDetails() {
           <div className="bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm p-6">
             <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Assigned To</h3>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-bold text-[#792359] dark:text-[#e6a8d0] border-2 border-white dark:border-[#181a1f] shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center font-bold text-primary dark:text-secondary border-2 border-white dark:border-[#181a1f] shadow-sm">
                 RS
               </div>
               <div>
@@ -160,10 +160,10 @@ export default function TicketDetails() {
               </div>
               
               <div className="relative">
-                <Circle className="absolute -left-6 top-0 text-[#792359] dark:text-[#e6a8d0] fill-[#792359]/20 bg-white dark:bg-[#181a1f]" size={16} />
-                <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">In Progress</p>
-                <p className="text-xs text-[#792359]/70 dark:text-[#e6a8d0]/70 mt-1">May 18, 10:40 AM</p>
-                <p className="text-xs text-[#792359]/60 dark:text-[#e6a8d0]/60 mt-0.5">By Rohit Singh</p>
+                <Circle className="absolute -left-6 top-0 text-primary dark:text-secondary fill-primary/20 bg-white dark:bg-[#181a1f]" size={16} />
+                <p className="text-sm font-bold text-primary dark:text-secondary">In Progress</p>
+                <p className="text-xs text-primary/70 dark:text-secondary/70 mt-1">May 18, 10:40 AM</p>
+                <p className="text-xs text-primary/60 dark:text-secondary/60 mt-0.5">By Rohit Singh</p>
               </div>
               
               <div className="relative opacity-50">
@@ -190,10 +190,10 @@ export default function TicketDetails() {
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1">
                   <span className="text-gray-700 dark:text-gray-300">Response Time</span>
-                  <span className="text-[#792359] dark:text-[#e6a8d0]">1h 30m / 2h</span>
+                  <span className="text-primary dark:text-secondary">1h 30m / 2h</span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
-                  <div className="bg-[#792359] dark:bg-[#e6a8d0] h-1.5 rounded-full" style={{ width: '75%' }}></div>
+                  <div className="bg-primary dark:bg-secondary h-1.5 rounded-full" style={{ width: '75%' }}></div>
                 </div>
               </div>
               

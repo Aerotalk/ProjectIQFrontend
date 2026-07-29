@@ -25,7 +25,7 @@ export default function EducationTab({ readOnly }: Props) {
  <button
  type="button"
  onClick={() => append({ degree: '', qualification: '', institution: '', fieldOfStudy: '', startYear: '', endYear: '', grade: '' })}
- className="flex items-center gap-1.5 text-sm font-medium text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 px-2 py-1 rounded-sm transition-colors"
+ className="flex items-center gap-1.5 text-sm font-medium text-primary dark:text-secondary hover:bg-primary/5 px-2 py-1 rounded-sm transition-colors"
  >
  <Plus size={16} /> Add Education
  </button>

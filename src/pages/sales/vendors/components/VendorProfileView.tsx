@@ -91,7 +91,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
             {/* ── 1. Header Section ── */}
             <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+                    <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
                         {(vendor.companyName || vendor.displayName || 'V').charAt(0).toUpperCase()}
                     </div>
                     <div className="space-y-1">
@@ -146,7 +146,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                            ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]'
+                            ? 'border-primary text-primary dark:text-secondary dark:border-secondary'
                             : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                     >
@@ -302,7 +302,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                     <button onClick={() => navigate('/companydashboard/finance/challans')} className="whitespace-nowrap h-9 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
                                         New Challan
                                     </button>
-                                    <button onClick={() => navigate('/companydashboard/finance/pos')} className="whitespace-nowrap h-9 px-4 bg-[#792359] hover:bg-[#52173c] text-white rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#1a1a1a]">
+                                    <button onClick={() => navigate('/companydashboard/finance/pos')} className="whitespace-nowrap h-9 px-4 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#1a1a1a]">
                                         <Plus size={16} /> New PO
                                     </button>
                                 </div>
@@ -450,7 +450,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
 
                                             {/* Bar */}
                                             <div
-                                                className="w-full bg-[#792359]/20 dark:bg-[#792359]/30 group-hover:bg-[#792359] rounded-t-md transition-all duration-300 ease-in-out relative overflow-hidden"
+                                                className="w-full bg-primary/20 dark:bg-primary/30 group-hover:bg-primary rounded-t-md transition-all duration-300 ease-in-out relative overflow-hidden"
                                                 style={{ height: `${data.height}%` }}
                                             >
                                                 {/* Subtle gradient inside active bar */}
@@ -626,13 +626,13 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                     onChange={e => setNewComment(e.target.value)}
                                     placeholder="Type a new comment or vendor memo..."
                                     rows={3}
-                                    className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:bg-white dark:focus:bg-[#1a1a1a] focus:ring-2 focus:ring-[#792359]/20 focus:border-[#792359] transition-all resize-y"
+                                    className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#121212] border border-gray-300 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 outline-none focus:bg-white dark:focus:bg-[#1a1a1a] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
                                 />
                                 <div className="flex justify-end">
                                     <button
                                         onClick={handleAddComment}
                                         disabled={!newComment.trim()}
-                                        className="px-4 py-2 bg-[#792359] hover:bg-[#611b47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                                        className="px-4 py-2 bg-primary hover:bg-[#611b47] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                                     >
                                         Post Note
                                     </button>

@@ -71,7 +71,7 @@ export default function ManagePermissionsMatrix({ role, onClose }: Props) {
         <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Shield size={20} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <Shield size={20} className="text-primary dark:text-secondary" />
               Manage Permissions
             </h2>
             <p className="text-sm text-gray-500 mt-1">Configuring access for <span className="font-semibold text-gray-700 dark:text-gray-300">{role.roleName}</span></p>
@@ -92,7 +92,7 @@ export default function ManagePermissionsMatrix({ role, onClose }: Props) {
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
             <div className="space-y-8">
@@ -111,12 +111,12 @@ export default function ManagePermissionsMatrix({ role, onClose }: Props) {
                             onChange={() => handleToggle(perm.id)}
                             className="peer sr-only"
                           />
-                          <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-sm peer-checked:bg-[#792359] peer-checked:border-[#792359] transition-all flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-sm peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
                             <CheckCircle2 size={12} className="text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[#792359] dark:group-hover:text-[#e6a8d0] transition-colors">{perm.permissionName}</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-secondary transition-colors">{perm.permissionName}</span>
                           <span className="text-[10px] text-gray-400 max-w-[120px] truncate" title={perm.description}>{perm.description}</span>
                         </div>
                       </label>
@@ -136,7 +136,7 @@ export default function ManagePermissionsMatrix({ role, onClose }: Props) {
           <button 
             onClick={handleSave} 
             disabled={isSaving || isLoading}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />
             {isSaving ? 'Saving...' : 'Save Permissions'}

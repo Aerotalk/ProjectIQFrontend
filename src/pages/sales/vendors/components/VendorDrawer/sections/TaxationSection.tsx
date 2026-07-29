@@ -29,11 +29,11 @@ export default function TaxationSection({ readOnly }: Props) {
           <label className={formStyles.label}>Reverse Charge</label>
           <div className="flex gap-4 mt-2">
             <label htmlFor="rc-yes" className="flex items-center gap-2 cursor-pointer">
-              <input id="rc-yes" type="radio" value="true" {...register('reverseCharge')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="rc-yes" type="radio" value="true" {...register('reverseCharge')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Yes</span>
             </label>
             <label htmlFor="rc-no" className="flex items-center gap-2 cursor-pointer">
-              <input id="rc-no" type="radio" value="false" {...register('reverseCharge')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="rc-no" type="radio" value="false" {...register('reverseCharge')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">No</span>
             </label>
           </div>

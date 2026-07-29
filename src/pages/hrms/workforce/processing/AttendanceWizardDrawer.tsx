@@ -68,14 +68,14 @@ export default function AttendanceWizardDrawer({ isOpen, onClose }: { isOpen: bo
             
             <div className="space-y-3">
               <label className="flex items-center gap-3 p-3 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input type="radio" name="resolveAction" value="lop" className="text-[#792359] focus:ring-[#792359]" defaultChecked />
+                <input type="radio" name="resolveAction" value="lop" className="text-primary focus:ring-primary" defaultChecked />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Convert to LOP</p>
                   <p className="text-xs text-gray-500">Unresolved missing swipes will be marked as Loss of Pay</p>
                 </div>
               </label>
               <label className="flex items-center gap-3 p-3 border border-gray-200 dark:border-white/10 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input type="radio" name="resolveAction" value="skip" className="text-[#792359] focus:ring-[#792359]" />
+                <input type="radio" name="resolveAction" value="skip" className="text-primary focus:ring-primary" />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Skip Processing</p>
                   <p className="text-xs text-gray-500">Do not finalize employees with unresolved exceptions</p>

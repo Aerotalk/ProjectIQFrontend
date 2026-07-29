@@ -109,7 +109,7 @@ export default function PaymentDrawer({
               type="submit"
               form="payment-form"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-sm transition-colors disabled:opacity-50"
             >
               <Check size={16} />
               {isSubmitting ? 'Saving...' : 'Save Payment'}

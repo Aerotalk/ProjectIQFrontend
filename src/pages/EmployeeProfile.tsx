@@ -101,7 +101,7 @@ export default function EmployeeProfile() {
     return (
       <DashboardLayout role="employee">
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -132,7 +132,7 @@ export default function EmployeeProfile() {
             <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <User size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                  <User size={18} className="text-primary dark:text-secondary" />
                   Employee Information
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Update your basic profile details and public avatar.</p>
@@ -146,7 +146,7 @@ export default function EmployeeProfile() {
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="Company Logo" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-3xl font-bold text-[#792359] dark:text-[#e6a8d0]">AT</span>
+                        <span className="text-3xl font-bold text-primary dark:text-secondary">AT</span>
                       )}
                     </div>
                     <button 
@@ -194,7 +194,7 @@ export default function EmployeeProfile() {
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">First Name</label>
                     <div className="relative">
                       <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({...profileData, firstName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                      <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({...profileData, firstName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                     </div>
                   </div>
                   
@@ -202,7 +202,7 @@ export default function EmployeeProfile() {
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Last Name</label>
                     <div className="relative">
                       <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({...profileData, lastName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                      <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({...profileData, lastName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                     </div>
                   </div>
 
@@ -257,7 +257,7 @@ export default function EmployeeProfile() {
                       rows={3} 
                       value={profileData.bio} 
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors resize-none" 
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors resize-none" 
                     />
                   </div>
 
@@ -271,7 +271,7 @@ export default function EmployeeProfile() {
                       <button 
                         type="submit" 
                         disabled={isSaving}
-                        className="flex items-center justify-center gap-2 bg-[#792359] hover:bg-[#52173c] disabled:bg-[#792359]/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+                        className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark disabled:bg-primary/70 disabled:cursor-not-allowed text-white px-5 py-2 w-40 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
                       >
                         {isSaving ? (
                           <>
@@ -299,7 +299,7 @@ export default function EmployeeProfile() {
             <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Key size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                  <Key size={18} className="text-primary dark:text-secondary" />
                   Security
                 </h2>
               </div>
@@ -313,7 +313,7 @@ export default function EmployeeProfile() {
                         value={passwords.current}
                         onChange={(e) => setPasswords({...passwords, current: e.target.value})}
                         placeholder="••••••••" 
-                        className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                       <button 
                         type="button"
@@ -332,7 +332,7 @@ export default function EmployeeProfile() {
                         value={passwords.new}
                         onChange={(e) => setPasswords({...passwords, new: e.target.value})}
                         placeholder="••••••••" 
-                        className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" 
+                        className="w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" 
                       />
                       <button 
                         type="button"
@@ -354,7 +354,7 @@ export default function EmployeeProfile() {
                         className={`w-full pl-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border rounded-sm text-sm focus:outline-none text-gray-900 dark:text-white transition-colors ${
                           passwords.confirm && passwords.new !== passwords.confirm 
                             ? 'border-red-500 focus:border-red-500' 
-                            : 'border-gray-200 dark:border-white/10 focus:border-[#792359] dark:focus:border-[#792359]'
+                            : 'border-gray-200 dark:border-white/10 focus:border-primary dark:focus:border-primary'
                         }`} 
                       />
                       <button 
@@ -383,7 +383,7 @@ export default function EmployeeProfile() {
             <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Bell size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                  <Bell size={18} className="text-primary dark:text-secondary" />
                   Notifications
                 </h2>
               </div>
@@ -402,7 +402,7 @@ export default function EmployeeProfile() {
                       </div>
                       <button 
                         onClick={() => setNotifications({...notifications, [item.key]: !isChecked})}
-                        className={`w-8 h-4 rounded-full relative transition-colors ${isChecked ? 'bg-[#792359]' : 'bg-gray-200 dark:bg-gray-700'}`}
+                        className={`w-8 h-4 rounded-full relative transition-colors ${isChecked ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'}`}
                       >
                         <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isChecked ? 'left-4' : 'left-0.5'}`}></span>
                       </button>

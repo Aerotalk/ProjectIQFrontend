@@ -72,7 +72,7 @@ export default function SalesDashboard() {
   });
 
   const stats = [
-    { label: 'Total Quotations', value: quotations.length.toString(), trend: 'N/A', icon: FileText, color: 'text-[#792359]' },
+    { label: 'Total Quotations', value: quotations.length.toString(), trend: 'N/A', icon: FileText, color: 'text-primary' },
     { label: 'Draft', value: pipelineStages[0].count.toString(), trend: 'N/A', icon: Edit, color: 'text-gray-500' },
     { label: 'Sent for Approval', value: pipelineStages[1].count.toString(), trend: 'N/A', icon: UserCheck, color: 'text-blue-500' },
     { label: 'Approved', value: pipelineStages[2].count.toString(), trend: 'N/A', icon: CheckCircle2, color: 'text-emerald-500' },
@@ -140,7 +140,7 @@ export default function SalesDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-[#792359]/30 transition-colors group shadow-sm">
+          <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-gray-200 dark:border-white/5 flex flex-col justify-between hover:border-primary/30 transition-colors group shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <div className={`p-2 rounded-sm bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10`}>
                 <stat.icon size={16} className={stat.color} strokeWidth={2} />
@@ -300,7 +300,7 @@ export default function SalesDashboard() {
               <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                 {recentQuotations.map((q, i) => (
                   <tr key={i} onClick={() => navigate(`/companydashboard/sales/quotations/${q.id}`)} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer">
-                    <td className="py-3 text-[#792359] font-medium text-xs group-hover:underline">{q.no}</td>
+                    <td className="py-3 text-primary font-medium text-xs group-hover:underline">{q.no}</td>
                     <td className="py-3 text-gray-900 dark:text-white font-medium text-xs">{q.client}</td>
                     <td className="py-3 text-gray-500 dark:text-gray-400 text-xs">{q.project}</td>
                     <td className="py-3 text-gray-900 dark:text-white font-medium text-xs whitespace-nowrap">{q.amount}</td>
@@ -317,7 +317,7 @@ export default function SalesDashboard() {
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
             <button 
               onClick={() => navigate('/companydashboard/sales/quotations')}
-              className="text-[#792359] text-xs font-bold hover:text-[#52173c] transition-colors flex items-center gap-1"
+              className="text-primary text-xs font-bold hover:text-primary-dark transition-colors flex items-center gap-1"
             >
               View All Quotations
             </button>
@@ -340,7 +340,7 @@ export default function SalesDashboard() {
                   <div className="w-6 h-6 rounded-sm bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 flex items-center justify-center text-xs font-bold border border-gray-200/50 dark:border-white/5">
                     {client.rank}
                   </div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-[#792359] transition-colors">{client.name}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary transition-colors">{client.name}</span>
                 </div>
                 <span className="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">{client.amount}</span>
               </div>
@@ -350,7 +350,7 @@ export default function SalesDashboard() {
           <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/5">
             <button 
               onClick={() => navigate('/companydashboard/sales/clients')}
-              className="text-[#792359] text-xs font-bold hover:text-[#52173c] transition-colors flex items-center gap-1"
+              className="text-primary text-xs font-bold hover:text-primary-dark transition-colors flex items-center gap-1"
             >
               View All Clients
             </button>

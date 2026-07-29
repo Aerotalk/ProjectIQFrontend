@@ -87,7 +87,7 @@ export default function IPMappingDrawer({ isOpen, onClose, mode, initialData, on
           </button>
           
           {!readOnly && (
-            <button type="submit" form="ip-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+            <button type="submit" form="ip-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
               {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save</>}
             </button>
           )}

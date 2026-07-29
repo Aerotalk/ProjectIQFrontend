@@ -58,7 +58,7 @@ export default function RolesList() {
         <PermissionGate permission="role.create">
           <button 
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
           >
             <Plus size={16} />
             Create Role
@@ -70,7 +70,7 @@ export default function RolesList() {
       <div className={formStyles.field()}>
         <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Shield size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+            <Shield size={18} className="text-primary dark:text-secondary" />
             Available Roles
           </h2>
         </div>
@@ -114,7 +114,7 @@ export default function RolesList() {
                           <button 
                             onClick={() => setSelectedRoleForEdit(role)}
                             disabled={role.systemRole}
-                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-primary dark:hover:text-secondary hover:bg-gray-100 dark:hover:bg-white/5'}`}
                             title={role.systemRole ? "Cannot edit system role" : "Edit Role"}
                           >
                             <Edit2 size={16} />
@@ -125,7 +125,7 @@ export default function RolesList() {
                           <button 
                             onClick={() => setSelectedRoleForPermissions(role)}
                             disabled={role.systemRole}
-                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                            className={`p-1.5 transition-colors rounded-sm ${role.systemRole ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-primary dark:hover:text-secondary hover:bg-gray-100 dark:hover:bg-white/5'}`}
                             title={role.systemRole ? "Cannot manage permissions for system role" : "Manage Permissions"}
                           >
                             <Key size={16} />

@@ -34,7 +34,7 @@ export default function WaterLoader({
         /* ── CIRCULAR LIQUID VESSEL ── */
         <div className="relative w-36 h-36 flex items-center justify-center">
           {/* Outer Glowing Glass Border */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/20 via-[#792359]/20 to-pink-500/20 p-[3px] shadow-lg animate-pulse-glow">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/20 via-primary/20 to-pink-500/20 p-[3px] shadow-lg animate-pulse-glow">
             <div className="w-full h-full rounded-full bg-white/40 dark:bg-[#0f1115]/40 backdrop-blur-md" />
           </div>
 

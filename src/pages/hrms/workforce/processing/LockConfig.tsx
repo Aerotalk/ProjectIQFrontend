@@ -106,7 +106,7 @@ export default function LockConfig() {
         </div>
         <button 
           onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors whitespace-nowrap"
+          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
         >
           Add Configuration
         </button>

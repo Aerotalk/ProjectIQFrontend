@@ -36,7 +36,7 @@ function DefaultView() {
     <div className="w-full h-[calc(100vh-8rem)] bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm flex flex-col items-center justify-center p-8 text-center relative">
       
       <div className="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
-        <LayoutGrid size={28} className="text-[#792359] dark:text-[#e6a8d0]" />
+        <LayoutGrid size={28} className="text-primary dark:text-secondary" />
       </div>
       
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight mb-2">

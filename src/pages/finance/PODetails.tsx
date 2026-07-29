@@ -466,7 +466,7 @@ export default function PODetails() {
                     setIsApiLoading(false);
                   }
                 }}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+                className="bg-primary text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-primary-dark transition-colors"
               >
                 Save Draft
               </button>
@@ -499,7 +499,7 @@ export default function PODetails() {
               <button
                 disabled={isApiLoading}
                 onClick={() => handleStatusUpdate('Approved', 'PO Approved', 3)}
-                className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+                className="bg-primary text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
               >
                 Approve
               </button>
@@ -516,7 +516,7 @@ export default function PODetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Ordered', 'Marked as Ordered', 4)}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+              className="bg-primary text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
               Mark as Ordered
             </button>
@@ -593,9 +593,9 @@ export default function PODetails() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-            <Link to="/companydashboard/finance" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Finance</Link>
+            <Link to="/companydashboard/finance" className="hover:text-primary dark:hover:text-secondary">Finance</Link>
             <ChevronRight size={14} />
-            <Link to="/companydashboard/finance/pos" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Purchase Orders</Link>
+            <Link to="/companydashboard/finance/pos" className="hover:text-primary dark:hover:text-secondary">Purchase Orders</Link>
             <ChevronRight size={14} />
             <span className="text-gray-900 dark:text-white font-medium">{isNew ? 'New PO' : po.poNumber}</span>
           </div>
@@ -614,7 +614,7 @@ export default function PODetails() {
             <button
               onClick={handlePreview}
               disabled={isLoadingPreview || isApiLoading}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
                 <><Loader2 size={16} className="animate-spin" /> Preparing PDF...</>
@@ -673,7 +673,7 @@ export default function PODetails() {
                   setIsEditing(!isEditing);
                 }}
                 className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${isEditing
-                  ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
+                  ? 'bg-primary hover:bg-primary-dark text-white shadow-sm'
                   : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                 }`}
               >
@@ -810,7 +810,7 @@ export default function PODetails() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-[#792359] text-[#792359]' : 'border-transparent text-gray-500'}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-500'}`}
                   >
                     {tab}
                   </button>
@@ -876,7 +876,7 @@ export default function PODetails() {
                     </div>
                   ))}
                   {isEditing && (
-                    <button onClick={() => setLineItems([...lineItems, { id: Math.random().toString(), description: '', hsnSac: '', qty: 1, unit: 'PCS', unitPrice: 0, amount: 0 }])} className="text-[#792359] text-sm font-medium hover:underline">+ Add Item</button>
+                    <button onClick={() => setLineItems([...lineItems, { id: Math.random().toString(), description: '', hsnSac: '', qty: 1, unit: 'PCS', unitPrice: 0, amount: 0 }])} className="text-primary text-sm font-medium hover:underline">+ Add Item</button>
                   )}
                 </div>
               )}
@@ -913,7 +913,7 @@ export default function PODetails() {
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-base font-bold text-gray-900 dark:text-white">Grand Total</span>
-                      <span className="text-lg font-bold text-[#792359] dark:text-[#e6a8d0]">
+                      <span className="text-lg font-bold text-primary dark:text-secondary">
                         ₹ {calculatedGrandTotal.toLocaleString('en-IN')}
                       </span>
                     </div>

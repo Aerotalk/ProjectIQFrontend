@@ -73,7 +73,7 @@ export default function ShiftMaster() {
       sortable: false,
       render: (_val: any, row: Shift) => (
         <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-          <Clock size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
+          <Clock size={14} className="text-primary dark:text-secondary" />
           {row.startTime} - {row.endTime}
         </span>
       )
@@ -122,7 +122,7 @@ export default function ShiftMaster() {
         </div>
         <button 
           onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors whitespace-nowrap"
+          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
         >
           Add Shift
         </button>

@@ -64,7 +64,7 @@ export default function AppraisalCycles() {
       render: (val: any) => (
         <div className="flex items-center gap-2">
           <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div className="bg-[#792359] dark:bg-[#e6a8d0] h-1.5 rounded-full" style={{ width: `${val}%` }}></div>
+            <div className="bg-primary dark:bg-secondary h-1.5 rounded-full" style={{ width: `${val}%` }}></div>
           </div>
           <span className="text-xs text-gray-500">{val}%</span>
         </div>
@@ -84,7 +84,7 @@ export default function AppraisalCycles() {
       label: 'Actions',
       render: (_: any, row: AppraisalCycle) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => handleOpenDrawer(row)} className="p-1 text-gray-500 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors" title="View/Edit">
+          <button onClick={() => handleOpenDrawer(row)} className="p-1 text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors" title="View/Edit">
             <Edit size={16} />
           </button>
           {row.status === 'Draft' && (
@@ -126,14 +126,14 @@ export default function AppraisalCycles() {
               placeholder="Search cycles..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
+              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
             />
           </div>
           <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
             <Filter size={16} className="mr-2" />
             Filter
           </button>
-          <button onClick={() => handleOpenDrawer()} className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+          <button onClick={() => handleOpenDrawer()} className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
             <Plus size={16} className="mr-2" />
             New Cycle
           </button>

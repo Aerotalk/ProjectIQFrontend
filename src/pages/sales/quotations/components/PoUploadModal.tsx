@@ -156,7 +156,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                   value={entry.workOrderNumber}
                   onChange={(e) => handleUpdateRow(entry.id, 'workOrderNumber', e.target.value)}
                   placeholder="e.g. PO-2024-001"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-primary focus:outline-none"
                 />
               </div>
 
@@ -166,7 +166,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                   type="date"
                   value={entry.woDate}
                   onChange={(e) => handleUpdateRow(entry.id, 'woDate', e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-primary focus:outline-none"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
                   value={entry.woValue || ''}
                   onChange={(e) => handleUpdateRow(entry.id, 'woValue', Number(e.target.value))}
                   placeholder="Value"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-[#792359] focus:outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 rounded-md focus:ring-1 focus:ring-primary focus:outline-none"
                 />
               </div>
 
@@ -198,7 +198,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
 
           <button
             onClick={handleAddRow}
-            className="flex items-center gap-2 text-sm font-medium text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 px-4 py-2 rounded-md transition-colors border border-dashed border-[#792359]/30 w-full justify-center"
+            className="flex items-center gap-2 text-sm font-medium text-primary dark:text-secondary hover:bg-primary/5 px-4 py-2 rounded-md transition-colors border border-dashed border-primary/30 w-full justify-center"
           >
             <Plus size={16} /> Add Row
           </button>
@@ -215,7 +215,7 @@ export default function PoUploadModal({ isOpen, companyId, onClose, onSubmit }: 
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-md transition-colors disabled:opacity-70"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-md transition-colors disabled:opacity-70"
           >
             {isSubmitting ? <FunkyLoader variant="inline" className="mr-2" /> : <CheckCircle2 size={16} />}
             {isSubmitting ? 'Uploading...' : 'Submit PO'}

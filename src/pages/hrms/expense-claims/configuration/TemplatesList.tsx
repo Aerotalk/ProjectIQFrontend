@@ -72,7 +72,7 @@ export default function TemplatesList() {
     <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Expense Templates</h3>
-        <button onClick={() => { setDrawerMode('create'); setSelectedTemplate(null); setIsDrawerOpen(true); }} className="flex items-center px-4 py-2 bg-[#792359] text-white text-sm font-medium rounded-md hover:bg-[#5d1943]">
+        <button onClick={() => { setDrawerMode('create'); setSelectedTemplate(null); setIsDrawerOpen(true); }} className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943]">
           <Plus size={16} className="mr-2" />
           Add Template
         </button>

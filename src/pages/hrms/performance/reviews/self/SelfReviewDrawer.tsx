@@ -100,7 +100,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <button onClick={handleSaveDraft} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
               Save Draft
             </button>
-            <button onClick={handleSubmit} className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-sm hover:bg-[#b8458f]">
+            <button onClick={handleSubmit} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-sm hover:bg-[#b8458f]">
               Submit Review
             </button>
           </div>
@@ -145,7 +145,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
                     <div className="col-span-3">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comments on Achievement</label>
                       <textarea 
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-primary focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
                         rows={2}
                         value={ratingData?.employeeComment || ''}
                         onChange={(e) => handleGoalCommentChange(goal.id, e.target.value)}
@@ -187,7 +187,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
                     <div className="col-span-3">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Examples / Comments</label>
                       <textarea 
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-primary focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
                         rows={2}
                         value={ratingData?.employeeComment || ''}
                         onChange={(e) => handleCompetencyCommentChange(comp.id, e.target.value)}
@@ -211,7 +211,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Key Strengths & Achievements</label>
               <textarea 
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-primary focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
                 rows={4}
                 value={formData.strengths || ''}
                 onChange={(e) => setFormData({...formData, strengths: e.target.value})}
@@ -222,7 +222,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Areas for Improvement & Development Needs</label>
               <textarea 
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-[#792359] focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm focus:ring-1 focus:ring-primary focus:border-transparent bg-white dark:bg-[#1f2229] text-gray-900 dark:text-white text-sm custom-scrollbar resize-y"
                 rows={4}
                 value={formData.areasOfImprovement || ''}
                 onChange={(e) => setFormData({...formData, areasOfImprovement: e.target.value})}
@@ -234,7 +234,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/30 p-4 rounded-sm">
               <span className="font-semibold text-gray-900 dark:text-white">Calculated Overall Self Rating</span>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#792359] dark:text-[#e6a8d0]">{formData.overallRating || '0.0'}</span>
+                <span className="text-2xl font-bold text-primary dark:text-secondary">{formData.overallRating || '0.0'}</span>
                 <span className="text-sm text-gray-500">/ 5.0</span>
               </div>
             </div>

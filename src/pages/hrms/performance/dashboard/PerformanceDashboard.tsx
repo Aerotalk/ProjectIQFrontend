@@ -85,7 +85,7 @@ export default function PerformanceDashboard() {
             Create Goal
           </button>
           <button 
-            className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors" 
+            className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors" 
             onClick={() => navigate('../cycles')}
           >
             <Plus size={16} className="mr-2" />
@@ -121,7 +121,7 @@ export default function PerformanceDashboard() {
           <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                <Target size={20} className="mr-2 text-[#792359] dark:text-[#e6a8d0]" />
+                <Target size={20} className="mr-2 text-primary dark:text-secondary" />
                 Goal Completion Tracking
               </h3>
             </div>
@@ -192,11 +192,11 @@ export default function PerformanceDashboard() {
                   <span className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{cycle.name}</span>
                   <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{cycle.completionPercentage}% Completed</span>
-                    <span className="text-[#792359] dark:text-[#e6a8d0]">{cycle.status}</span>
+                    <span className="text-primary dark:text-secondary">{cycle.status}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
                     <div 
-                      className="h-1.5 rounded-full bg-[#792359] dark:bg-[#e6a8d0] animate-grow-width"
+                      className="h-1.5 rounded-full bg-primary dark:bg-secondary animate-grow-width"
                       style={{ width: `${cycle.completionPercentage}%` }}
                     ></div>
                   </div>

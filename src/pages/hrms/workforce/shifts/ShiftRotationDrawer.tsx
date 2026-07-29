@@ -75,7 +75,7 @@ export default function ShiftRotationDrawer({ isOpen, onClose, mode, initialData
                         {...register('description')} 
                         disabled={readOnly} 
                         rows={3} 
-                        className={`w-full bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-gray-800 rounded-sm px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] focus:ring-1 focus:ring-[#792359] ${errors.description ? 'border-red-500' : ''}`} 
+                        className={`w-full bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-gray-800 rounded-sm px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary ${errors.description ? 'border-red-500' : ''}`} 
                         placeholder="Description..." 
                       />
                     </FormField>
@@ -93,7 +93,7 @@ export default function ShiftRotationDrawer({ isOpen, onClose, mode, initialData
           </button>
           
           {!readOnly && (
-            <button type="submit" form="rot-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+            <button type="submit" form="rot-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
               {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save</>}
             </button>
           )}

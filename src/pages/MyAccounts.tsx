@@ -75,7 +75,7 @@ const InputField = ({
       required={required}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+      className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors"
     />
   </div>
 );
@@ -281,7 +281,7 @@ const AccountForm = ({
             type="submit"
             form="account-form"
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-[#792359] hover:bg-[#52173c] rounded-sm transition-colors shadow-sm disabled:opacity-80 disabled:cursor-not-allowed min-w-[140px] justify-center"
+            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-sm transition-colors shadow-sm disabled:opacity-80 disabled:cursor-not-allowed min-w-[140px] justify-center"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             {isSaving ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Save Account')}
@@ -295,7 +295,7 @@ const AccountForm = ({
         <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Building2 size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <Building2 size={18} className="text-primary dark:text-secondary" />
               Basic Details
             </h2>
           </div>
@@ -325,7 +325,7 @@ const AccountForm = ({
               {!isEditMode && (
                 <div className="space-y-1.5 lg:col-span-1">
                   <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1">
-                    <Lock size={12} className="text-[#792359]" />
+                    <Lock size={12} className="text-primary" />
                     Admin Login Password <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -335,7 +335,7 @@ const AccountForm = ({
                       value={formData.adminPassword as string || ''}
                       onChange={(e) => updateField('adminPassword', e.target.value)}
                       placeholder="Set password for company admin login"
-                      className="w-full px-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+                      className="w-full px-3 pr-10 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors"
                     />
                     <button
                       type="button"
@@ -355,7 +355,7 @@ const AccountForm = ({
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
                   <span>Company Logo</span>
                   {formData.logoFileId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                    <a href={`${API_BASE_URL}/admin/files/${formData.logoFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-primary dark:text-secondary hover:underline flex items-center gap-1">
                       <Eye size={12} /> View Current
                     </a>
                   )}
@@ -377,7 +377,7 @@ const AccountForm = ({
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
                   <span>Invoice Logo</span>
                   {formData.invoiceLogoId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                    <a href={`${API_BASE_URL}/admin/files/${formData.invoiceLogoId}`} target="_blank" rel="noreferrer" className="text-[10px] text-primary dark:text-secondary hover:underline flex items-center gap-1">
                       <Eye size={12} /> View Current
                     </a>
                   )}
@@ -399,7 +399,7 @@ const AccountForm = ({
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center justify-between">
                   <span>Company Stamp</span>
                   {formData.stampFileId && (
-                    <a href={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1">
+                    <a href={`${API_BASE_URL}/admin/files/${formData.stampFileId}`} target="_blank" rel="noreferrer" className="text-[10px] text-primary dark:text-secondary hover:underline flex items-center gap-1">
                       <Eye size={12} /> View Current
                     </a>
                   )}
@@ -442,7 +442,7 @@ const AccountForm = ({
                 onChange={(e) => updateField('termsAndConditions', e.target.value)}
                 rows={4}
                 placeholder="Enter default terms and conditions for quotations and invoices..."
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors"
               />
             </div>
           </div>
@@ -452,7 +452,7 @@ const AccountForm = ({
         <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <MapPin size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <MapPin size={18} className="text-primary dark:text-secondary" />
               Address Details
             </h2>
           </div>
@@ -513,13 +513,13 @@ const AccountForm = ({
         <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <CreditCard size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+              <CreditCard size={18} className="text-primary dark:text-secondary" />
               Bank Details
             </h2>
             <button 
               type="button" 
               onClick={addBank}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#792359] bg-[#792359]/10 hover:bg-[#792359]/20 rounded-sm transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-sm transition-colors"
             >
               <Plus size={14} /> Add Another Bank
             </button>
@@ -547,27 +547,27 @@ const AccountForm = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Bank Name <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.bankName} onChange={(e) => handleBankChange(bank.id, 'bankName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.bankName} onChange={(e) => handleBankChange(bank.id, 'bankName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Account Holder Name <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.accountHolderName} onChange={(e) => handleBankChange(bank.id, 'accountHolderName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.accountHolderName} onChange={(e) => handleBankChange(bank.id, 'accountHolderName', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Account Number <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.accountNumber} onChange={(e) => handleBankChange(bank.id, 'accountNumber', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.accountNumber} onChange={(e) => handleBankChange(bank.id, 'accountNumber', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">IFSC Code <span className="text-red-500">*</span></label>
-                    <input type="text" value={bank.ifscCode} onChange={(e) => handleBankChange(bank.id, 'ifscCode', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.ifscCode} onChange={(e) => handleBankChange(bank.id, 'ifscCode', e.target.value)} required className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">SWIFT Code</label>
-                    <input type="text" value={bank.swiftCode} onChange={(e) => handleBankChange(bank.id, 'swiftCode', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.swiftCode} onChange={(e) => handleBankChange(bank.id, 'swiftCode', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">UPI ID</label>
-                    <input type="text" value={bank.upiId} onChange={(e) => handleBankChange(bank.id, 'upiId', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] dark:focus:border-[#792359] text-gray-900 dark:text-white transition-colors" />
+                    <input type="text" value={bank.upiId} onChange={(e) => handleBankChange(bank.id, 'upiId', e.target.value)} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
                   
                   <div className="flex items-center pt-4 lg:col-span-3">
@@ -577,7 +577,7 @@ const AccountForm = ({
                         name={`primaryBank-${index}`}
                         checked={bank.isPrimaryBank}
                         onChange={() => handleBankChange(bank.id, 'isPrimaryBank', true)}
-                        className="w-4 h-4 text-[#792359] border-gray-300 rounded-full focus:ring-[#792359] dark:bg-black/20 dark:border-white/10" 
+                        className="w-4 h-4 text-primary border-gray-300 rounded-full focus:ring-primary dark:bg-black/20 dark:border-white/10" 
                       />
                       <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Set as Primary Bank</span>
                     </label>
@@ -700,7 +700,7 @@ export default function MyAccounts() {
           </div>
           <button
             onClick={() => { setSelectedAccount(null); setViewState('add'); }}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-5 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-sm text-sm font-medium transition-colors shadow-sm"
           >
             <Plus size={16} />
             Add Account
@@ -721,7 +721,7 @@ export default function MyAccounts() {
               {accounts.map((acc) => (
                 <tr key={acc.id} className="hover:bg-gray-50/80 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-4">
-                    <div className="w-10 h-10 min-w-[40px] rounded-sm bg-gray-100 dark:bg-black/20 text-[#792359] border border-gray-200 dark:border-white/10 flex items-center justify-center font-bold text-sm">
+                    <div className="w-10 h-10 min-w-[40px] rounded-sm bg-gray-100 dark:bg-black/20 text-primary border border-gray-200 dark:border-white/10 flex items-center justify-center font-bold text-sm">
                       {acc.companyName.substring(0, 2).toUpperCase()}
                     </div>
                     <span className="truncate">{acc.companyName}</span>

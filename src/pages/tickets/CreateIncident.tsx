@@ -154,7 +154,7 @@ export default function CreateIncident() {
           <button 
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium flex items-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -303,7 +303,7 @@ export default function CreateIncident() {
                   type="text"
                   {...register('shortDescription')}
                   placeholder="Brief summary of the issue"
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] focus:border-[#792359]"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 />
               </div>
 
@@ -313,7 +313,7 @@ export default function CreateIncident() {
                   {...register('description')}
                   rows={5}
                   placeholder="Provide all necessary details to reproduce or investigate the issue..."
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] focus:border-[#792359] resize-none"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none"
                 />
               </div>
             </div>
@@ -359,7 +359,7 @@ export default function CreateIncident() {
                   <input
                     type="datetime-local"
                     {...register('dueDate')}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] focus:border-[#792359]"
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -377,9 +377,9 @@ export default function CreateIncident() {
           ) : (
             <>
               {/* Project & Client Card */}
-              <div className="bg-white border border-[#792359]/20 rounded-sm shadow-sm overflow-hidden">
-                <div className="bg-[#792359]/5 px-4 py-3 border-b border-[#792359]/10">
-                  <h3 className="font-semibold text-[#792359] text-sm flex items-center gap-2">
+              <div className="bg-white border border-primary/20 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-primary/5 px-4 py-3 border-b border-primary/10">
+                  <h3 className="font-semibold text-primary text-sm flex items-center gap-2">
                     <Briefcase size={15} /> Project Details
                   </h3>
                 </div>
@@ -422,11 +422,11 @@ export default function CreateIncident() {
                 <div className="p-4 space-y-3 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Quotation</span>
-                    <span className="font-medium text-[#792359] cursor-pointer hover:underline">QT-2025-089</span>
+                    <span className="font-medium text-primary cursor-pointer hover:underline">QT-2025-089</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Purchase Order</span>
-                    <span className="font-medium text-[#792359] cursor-pointer hover:underline">PO-99234</span>
+                    <span className="font-medium text-primary cursor-pointer hover:underline">PO-99234</span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                     <span className="text-gray-500">Latest Invoice</span>
@@ -444,12 +444,12 @@ export default function CreateIncident() {
                 </div>
                 <div className="p-4 space-y-3">
                   <div className="text-sm pb-2 border-b border-gray-50">
-                    <div className="font-medium text-[#792359] cursor-pointer hover:underline">INC-2024099</div>
+                    <div className="font-medium text-primary cursor-pointer hover:underline">INC-2024099</div>
                     <div className="text-gray-600 truncate mt-0.5">Database connectivity timeout</div>
                     <div className="text-xs text-gray-400 mt-1">Closed on 12 Dec 2024</div>
                   </div>
                   <div className="text-sm">
-                    <div className="font-medium text-[#792359] cursor-pointer hover:underline">INC-2024045</div>
+                    <div className="font-medium text-primary cursor-pointer hover:underline">INC-2024045</div>
                     <div className="text-gray-600 truncate mt-0.5">SSO Login failing for external users</div>
                     <div className="text-xs text-gray-400 mt-1">Closed on 05 Nov 2024</div>
                   </div>

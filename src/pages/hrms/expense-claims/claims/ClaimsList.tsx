@@ -95,7 +95,7 @@ export default function ClaimsList() {
             <input 
               type="text" 
               placeholder="Search claims..." 
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-white/10 rounded-md bg-transparent text-sm w-64 focus:outline-none focus:ring-1 focus:ring-[#792359]"
+              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-white/10 rounded-md bg-transparent text-sm w-64 focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <button className="p-2 border border-gray-200 dark:border-white/10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5">
@@ -104,7 +104,7 @@ export default function ClaimsList() {
         </div>
         <button 
           onClick={() => { setDrawerMode('create'); setSelectedClaim(null); setIsDrawerOpen(true); }}
-          className="flex items-center px-4 py-2 bg-[#792359] text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
           New Claim Envelope

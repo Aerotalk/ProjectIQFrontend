@@ -54,7 +54,7 @@ export default function SelfReviewsList() {
       label: 'Self Rating',
       render: (val: any) => (
         <div className="flex items-center gap-1">
-          <span className="font-bold text-[#792359] dark:text-[#e6a8d0]">{val ? val.toFixed(1) : '-'}</span>
+          <span className="font-bold text-primary dark:text-secondary">{val ? val.toFixed(1) : '-'}</span>
           <span className="text-xs text-gray-400">/ 5.0</span>
         </div>
       )
@@ -79,7 +79,7 @@ export default function SelfReviewsList() {
       render: (_: any, row: SelfReview) => (
         <div className="flex items-center gap-2">
           {row.status === 'Submitted' || row.status === 'Finalized' ? (
-            <button onClick={() => handleOpenDrawer(row)} className="flex items-center text-xs text-gray-500 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors">
+            <button onClick={() => handleOpenDrawer(row)} className="flex items-center text-xs text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors">
               <FileText size={14} className="mr-1" /> View
             </button>
           ) : (
@@ -108,7 +108,7 @@ export default function SelfReviewsList() {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
+              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
             />
           </div>
           <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">

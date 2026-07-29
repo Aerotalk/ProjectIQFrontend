@@ -210,7 +210,7 @@ export default function ExpenseManagement() {
         </div>
         <button
           onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
         >
           <Plus size={16} />
           Add Expense
@@ -256,7 +256,7 @@ export default function ExpenseManagement() {
               placeholder="Search expenses..."
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function ExpenseManagement() {
         <div className="overflow-x-auto min-h-[320px] pb-32">
           {isLoading ? (
             <div className="flex items-center justify-center h-full py-24">
-              <Loader2 className="w-8 h-8 animate-spin text-[#792359]" />
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500">
@@ -279,7 +279,7 @@ export default function ExpenseManagement() {
               {(searchTerm || filterProject || filterCategory) && (
                 <button
                   onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterCategory(''); }}
-                  className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
+                  className="mt-3 text-sm text-primary dark:text-[#c44997] font-medium hover:underline"
                 >
                   Clear all filters
                 </button>
@@ -307,7 +307,7 @@ export default function ExpenseManagement() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => openDrawer('view', ex)}
-                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
+                        className="text-sm font-semibold text-primary dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
                         {`EXP-${ex.id.substring(0, 6).toUpperCase()}`}
                       </button>
@@ -403,7 +403,7 @@ export default function ExpenseManagement() {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
-                      ? 'bg-[#792359] text-white shadow-sm'
+                      ? 'bg-primary text-white shadow-sm'
                       : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                     }`}
                 >
@@ -426,8 +426,8 @@ export default function ExpenseManagement() {
       {!isLoading && expenses.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-[#792359]/5 dark:bg-[#792359]/10">
-              <IndianRupee size={18} className="text-[#792359] dark:text-[#c44997]" />
+            <div className="w-10 h-10 rounded-sm flex items-center justify-center shrink-0 bg-primary/5 dark:bg-primary/10">
+              <IndianRupee size={18} className="text-primary dark:text-[#c44997]" />
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Total Expenses Logged</p>

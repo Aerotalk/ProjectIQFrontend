@@ -16,7 +16,7 @@ function CompetencyDrawer({ isOpen, onClose, competency }: any) {
       footer={
         <div className="flex justify-end gap-3 w-full">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50">Cancel</button>
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-sm hover:bg-[#b8458f]">Save</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-sm hover:bg-[#b8458f]">Save</button>
         </div>
       }
     >
@@ -66,7 +66,7 @@ export default function TemplatesMain() {
       label: 'Actions',
       render: () => (
         <div className="flex items-center gap-2">
-          <button className="p-1 text-gray-500 hover:text-[#792359]"><Edit size={16} /></button>
+          <button className="p-1 text-gray-500 hover:text-primary"><Edit size={16} /></button>
           <button className="p-1 text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
         </div>
       )
@@ -79,19 +79,19 @@ export default function TemplatesMain() {
       <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm p-1 flex gap-1 flex-shrink-0">
         <button 
           onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'templates' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'templates' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           Review Templates
         </button>
         <button 
           onClick={() => setActiveTab('competencies')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'competencies' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'competencies' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           Competencies Library
         </button>
         <button 
           onClick={() => setActiveTab('scales')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'scales' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 hover:bg-gray-50'}`}
+          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'scales' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
         >
           Rating Scales
         </button>
@@ -103,10 +103,10 @@ export default function TemplatesMain() {
           <input 
             type="text"
             placeholder="Search..."
-            className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
+            className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
           />
         </div>
-        <button onClick={() => setIsDrawerOpen(true)} className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+        <button onClick={() => setIsDrawerOpen(true)} className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
           <Plus size={16} className="mr-2" />
           Add New
         </button>

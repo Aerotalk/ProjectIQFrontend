@@ -34,7 +34,7 @@ export default function FunkyLoader({
   if (activeVariant === 'section') {
     return (
       <div className={cn('w-full py-16 flex flex-col items-center justify-center gap-3', className)}>
-        <div className="w-7 h-7 border-2 border-gray-200 dark:border-white/10 border-t-[#792359] rounded-full animate-spin" />
+        <div className="w-7 h-7 border-2 border-gray-200 dark:border-white/10 border-t-primary rounded-full animate-spin" />
         {message && (
           <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
         )}
@@ -50,7 +50,7 @@ export default function FunkyLoader({
         className
       )}
     >
-      <div className="w-8 h-8 border-2 border-gray-200 dark:border-white/10 border-t-[#792359] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-gray-200 dark:border-white/10 border-t-primary rounded-full animate-spin" />
       {message && (
         <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
       )}

@@ -236,7 +236,7 @@ export default function POManagement() {
         <div className="flex gap-2">
           <button
             onClick={() => { setSelectedPO(null); setDrawerMode('create'); setIsDrawerOpen(true); }}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
           >
             <Plus size={16} />
             Create PO
@@ -295,7 +295,7 @@ export default function POManagement() {
               placeholder="Search PO no., vendor, project…"
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#792359] transition-colors"
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
@@ -316,7 +316,7 @@ export default function POManagement() {
               {(searchTerm || filterProject || filterVendor || filterStatus) && (
                 <button
                   onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); setFilterStatus(''); }}
-                  className="mt-3 text-sm text-[#792359] dark:text-[#c44997] font-medium hover:underline"
+                  className="mt-3 text-sm text-primary dark:text-[#c44997] font-medium hover:underline"
                 >
                   Clear all filters
                 </button>
@@ -345,7 +345,7 @@ export default function POManagement() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => navigate(`/companydashboard/finance/pos/${po.id || po.poNumber}`)}
-                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
+                        className="text-sm font-semibold text-primary dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
                         {po.poNumber || '—'}
                       </button>
@@ -446,7 +446,7 @@ export default function POManagement() {
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
                     currentPage === page
-                      ? 'bg-[#792359] text-white shadow-sm'
+                      ? 'bg-primary text-white shadow-sm'
                       : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                   }`}
                 >
@@ -472,8 +472,8 @@ export default function POManagement() {
             {
               label: 'Total POs',
               value: pos.length,
-              icon: <ShoppingCart size={18} className="text-[#792359] dark:text-[#c44997]" />,
-              bg: 'bg-[#792359]/5 dark:bg-[#792359]/10',
+              icon: <ShoppingCart size={18} className="text-primary dark:text-[#c44997]" />,
+              bg: 'bg-primary/5 dark:bg-primary/10',
             },
             {
               label: 'Pending Approval',

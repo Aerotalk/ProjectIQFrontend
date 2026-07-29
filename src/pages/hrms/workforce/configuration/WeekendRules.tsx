@@ -35,7 +35,7 @@ export default function WeekendRules() {
               onClick={() => toggleDay(day.id)}
               className={`flex-1 py-3 px-2 text-center rounded-sm text-sm font-semibold transition-all border ${
                 selectedDays.includes(day.id) 
-                  ? 'bg-[#792359] text-white border-[#792359] shadow-sm scale-[1.02]' 
+                  ? 'bg-primary text-white border-primary shadow-sm scale-[1.02]' 
                   : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10'
               }`}
             >
@@ -51,7 +51,7 @@ export default function WeekendRules() {
         </div>
         
         <div className="mt-8 flex justify-end">
-          <button className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium shadow-sm transition-colors">
+          <button className="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium shadow-sm transition-colors">
             Save Configuration
           </button>
         </div>

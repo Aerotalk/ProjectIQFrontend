@@ -102,7 +102,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
               placeholder="Enter Employee ID" 
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white" 
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary text-gray-900 dark:text-white" 
             />
           </div>
           <p className="text-xs text-gray-400">Note: In a full implementation, this would be a searchable dropdown of employees.</p>
@@ -116,7 +116,7 @@ export default function AssignUsersModal({ role, onClose }: Props) {
           <button 
             onClick={handleSave} 
             disabled={isSaving || !employeeId || !companyId}
-            className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />
             {isSaving ? 'Assigning...' : 'Assign Role'}

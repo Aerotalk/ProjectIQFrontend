@@ -159,7 +159,7 @@ export default function DepartmentDirectory() {
 
  <button
  onClick={() => setIsAddModalOpen(true)}
- className="flex items-center gap-2 bg-[#792359] hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-md font-medium text-sm transition-colors shadow-sm hover:shadow-md"
+ className="flex items-center gap-2 bg-primary hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-md font-medium text-sm transition-colors shadow-sm hover:shadow-md"
  >
  <Plus size={16} />
  Add Department
@@ -185,7 +185,7 @@ export default function DepartmentDirectory() {
  placeholder="Search by code or name..."
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] transition-all outline-none text-gray-800 dark:text-gray-200"
+ className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:bg-white dark:focus:bg-[#181a1f] focus:border-primary dark:focus:border-primary transition-all outline-none text-gray-800 dark:text-gray-200"
  />
  </div>
  </div>
@@ -197,7 +197,7 @@ export default function DepartmentDirectory() {
  ) : loading ? (
  <div className="flex items-center justify-center h-64 bg-white dark:bg-[#181a1f] rounded-lg border border-gray-200 dark:border-gray-800">
  <div className="flex flex-col items-center gap-3">
- <Loader2 size={32} className="text-[#792359] dark:text-[#e6a8d0] animate-spin" />
+ <Loader2 size={32} className="text-primary dark:text-secondary animate-spin" />
  <p className="text-gray-500 dark:text-gray-400 text-sm animate-pulse">Loading departments...</p>
  </div>
  </div>
@@ -214,7 +214,7 @@ export default function DepartmentDirectory() {
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
  {filteredDepartments.map((dept) => (
- <div key={dept.id} className="bg-white dark:bg-[#181a1f] p-5 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-[#792359]/30 transition-all group relative flex flex-col">
+ <div key={dept.id} className="bg-white dark:bg-[#181a1f] p-5 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group relative flex flex-col">
  <div className="flex justify-between items-start mb-3">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
@@ -275,7 +275,7 @@ export default function DepartmentDirectory() {
  type="text"
  value={newDeptCode}
  onChange={(e) => setNewDeptCode(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white"
  placeholder="e.g. IT, HR, FIN"
  />
  </div>
@@ -286,7 +286,7 @@ export default function DepartmentDirectory() {
  type="text"
  value={newDeptName}
  onChange={(e) => setNewDeptName(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white"
  placeholder="e.g. Information Technology"
  />
  </div>
@@ -295,7 +295,7 @@ export default function DepartmentDirectory() {
  <textarea
  value={newDeptDesc}
  onChange={(e) => setNewDeptDesc(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white resize-none"
  placeholder="Brief description of the department..."
  rows={3}
  />
@@ -312,7 +312,7 @@ export default function DepartmentDirectory() {
  <button
  type="submit"
  disabled={submitting}
- className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-md hover:bg-[#5d1944] transition-colors disabled:opacity-70 flex items-center gap-2"
+ className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-[#5d1944] transition-colors disabled:opacity-70 flex items-center gap-2"
  >
  {submitting && <Loader2 size={14} className="animate-spin" />}
  Save Department
@@ -345,7 +345,7 @@ export default function DepartmentDirectory() {
  type="text"
  value={editDeptCode}
  onChange={(e) => setEditDeptCode(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white"
  />
  </div>
  <div>
@@ -355,7 +355,7 @@ export default function DepartmentDirectory() {
  type="text"
  value={editDeptName}
  onChange={(e) => setEditDeptName(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white"
  />
  </div>
  <div>
@@ -363,7 +363,7 @@ export default function DepartmentDirectory() {
  <textarea
  value={editDeptDesc}
  onChange={(e) => setEditDeptDesc(e.target.value)}
- className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-[#792359] focus:ring-1 focus:ring-[#792359] outline-none transition-all dark:text-white resize-none"
+ className="w-full px-3 py-2 text-sm bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all dark:text-white resize-none"
  rows={3}
  />
  </div>
@@ -379,7 +379,7 @@ export default function DepartmentDirectory() {
  <button
  type="submit"
  disabled={submitting}
- className="px-4 py-2 text-sm font-medium text-white bg-[#792359] rounded-md hover:bg-[#5d1944] transition-colors disabled:opacity-70 flex items-center gap-2"
+ className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-[#5d1944] transition-colors disabled:opacity-70 flex items-center gap-2"
  >
  {submitting && <Loader2 size={14} className="animate-spin" />}
  Update Department

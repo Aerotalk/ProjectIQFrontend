@@ -139,7 +139,7 @@ export default function ClientsList() {
         </div>
         <button 
           onClick={() => handleOpenDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
         >
           <Plus size={16} />
           Add Client
@@ -168,7 +168,7 @@ export default function ClientsList() {
                 placeholder="Search clients..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors"
+                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               />
             </div>
           </div>
@@ -201,7 +201,7 @@ export default function ClientsList() {
                     <td className="px-6 py-4">
                       <button 
                         onClick={() => handleOpenDrawer('view', client)}
-                        className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none"
+                        className="text-sm font-semibold text-primary dark:text-[#c43890] hover:underline text-left focus:outline-none"
                       >
                         {client.displayName}
                       </button>
@@ -286,7 +286,7 @@ export default function ClientsList() {
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
                   currentPage === page 
-                    ? 'bg-[#792359] text-white shadow-sm' 
+                    ? 'bg-primary text-white shadow-sm' 
                     : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                 }`}
               >

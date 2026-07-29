@@ -116,7 +116,7 @@ export default function SalaryInputsTab({ readOnly }: Props) {
                     value={option.value}
                     {...register('salaryInputs.inputType')}
                     disabled={readOnly}
-                    className="w-4 h-4 text-[#792359] border-gray-300 focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700"
+                    className="w-4 h-4 text-primary border-gray-300 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
                   />
                   <span className={formStyles.label}>{option.label}</span>
                 </label>
@@ -148,7 +148,7 @@ export default function SalaryInputsTab({ readOnly }: Props) {
                     onBlur={onBlur}
                     ref={ref}
                     disabled={readOnly}
-                    className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359] dark:border-gray-600 dark:bg-gray-700"
+                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
                   />
                 )}
               />

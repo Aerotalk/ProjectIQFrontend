@@ -89,7 +89,7 @@ export default function LeaveTypeDrawer({ isOpen, onClose, mode, initialData, on
                               value={option}
                               {...register('category')}
                               disabled={readOnly}
-                              className="w-4 h-4 text-[#792359] border-gray-300 focus:ring-[#792359]"
+                              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
                             />
                             <span className="text-sm font-medium">{option}</span>
                           </label>
@@ -109,7 +109,7 @@ export default function LeaveTypeDrawer({ isOpen, onClose, mode, initialData, on
                               onChange={(e) => onChange(e.target.checked)}
                               ref={ref}
                               disabled={readOnly}
-                              className="w-4 h-4 text-[#792359] border-gray-300 rounded focus:ring-[#792359]"
+                              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                             />
                           )}
                         />
@@ -130,7 +130,7 @@ export default function LeaveTypeDrawer({ isOpen, onClose, mode, initialData, on
           </button>
           
           {!readOnly && (
-            <button type="submit" form="leave-type-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+            <button type="submit" form="leave-type-form" disabled={isSubmitting} className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
               {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save</>}
             </button>
           )}

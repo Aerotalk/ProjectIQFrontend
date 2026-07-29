@@ -111,7 +111,7 @@ export default function QuotationsList() {
         </div>
         <button
           onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2.5 text-sm font-medium rounded-md transition-all shadow-xs focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2.5 text-sm font-medium rounded-md transition-all shadow-xs focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
         >
           <Plus size={16} />
           Create Quotation
@@ -122,7 +122,7 @@ export default function QuotationsList() {
       {!isLoading && quotations.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl p-5 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-[#792359]/10 text-[#792359] dark:text-[#c44997] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary dark:text-[#c44997] flex items-center justify-center shrink-0">
               <FileText size={22} />
             </div>
             <div>
@@ -199,7 +199,7 @@ export default function QuotationsList() {
                     onClick={() => navigate(`/companydashboard/sales/quotations/${quotation.id}`)}
                   >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-[#792359] dark:text-[#c43890] group-hover:underline">{formatQuotationId(quotation.quotationNo || 'Unassigned')}</div>
+                      <div className="text-sm font-semibold text-primary dark:text-[#c43890] group-hover:underline">{formatQuotationId(quotation.quotationNo || 'Unassigned')}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-600 dark:text-gray-300">{new Date(quotation.date).toLocaleDateString('en-GB')}</div>
@@ -229,7 +229,7 @@ export default function QuotationsList() {
                         ${quotation.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : ''}
                         ${quotation.status === 'Sent to Client' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' : ''}
                         ${quotation.status === 'Changes Requested' || quotation.status === 'Under Negotiation' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20' : ''}
-                        ${quotation.status === 'Accepted' || quotation.status === 'Confirmed Lead' ? 'bg-[#792359]/5 text-[#792359] border-[#792359]/20 dark:bg-[#e6a8d0]/10 dark:text-[#e6a8d0] dark:border-[#e6a8d0]/20' : ''}
+                        ${quotation.status === 'Accepted' || quotation.status === 'Confirmed Lead' ? 'bg-primary/5 text-primary border-primary/20 dark:bg-secondary/10 dark:text-secondary dark:border-secondary/20' : ''}
                         ${quotation.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' : ''}
                       `}>
                         {quotation.status === 'Approved' && <CheckCircle2 size={12} />}
@@ -261,7 +261,7 @@ export default function QuotationsList() {
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page
-                    ? 'bg-[#792359] text-white shadow-sm'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'border border-gray-300 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                   }`}
               >

@@ -145,7 +145,7 @@ export default function POTotalsSection({ readOnly }: Props) {
         </div>
         <div className="flex justify-between text-base font-bold pt-1">
           <span className="text-gray-900 dark:text-white">Grand Total</span>
-          <span className="text-[#792359] dark:text-[#c44997]">₹{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className="text-primary dark:text-[#c44997]">₹{grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
       </div>
 

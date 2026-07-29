@@ -86,7 +86,7 @@ export default function ProjectQuickGlance({ project, companyId, isOpen, onClose
             onClick={() => setActiveTab('pos')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'pos' 
-                ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:border-secondary dark:text-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -99,7 +99,7 @@ export default function ProjectQuickGlance({ project, companyId, isOpen, onClose
             onClick={() => setActiveTab('quotations')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'quotations' 
-                ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:border-secondary dark:text-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -112,7 +112,7 @@ export default function ProjectQuickGlance({ project, companyId, isOpen, onClose
             onClick={() => setActiveTab('expenses')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'expenses' 
-                ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:border-secondary dark:text-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >

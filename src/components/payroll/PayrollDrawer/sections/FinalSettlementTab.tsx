@@ -90,7 +90,7 @@ export default function FinalSettlementTab({ readOnly }: Props) {
               </tr>
               <tr className="bg-gray-50 dark:bg-white/[0.02]">
                 <td colSpan={2} className="px-4 py-4 font-bold text-gray-900 dark:text-white text-right">Net Settlement Amount</td>
-                <td className="px-4 py-4 text-right font-bold text-[#792359] dark:text-[#e6a8d0] text-lg">₹31,500.00</td>
+                <td className="px-4 py-4 text-right font-bold text-primary dark:text-secondary text-lg">₹31,500.00</td>
               </tr>
             </tbody>
           </table>

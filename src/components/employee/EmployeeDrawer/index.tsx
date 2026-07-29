@@ -154,7 +154,7 @@ export default function EmployeeDrawer({ isOpen, onClose, onSave, mode, initialD
                 className={`
                   flex items-center gap-2 py-3 px-1 mr-8 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                   ${isActive 
-                    ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                    ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                     : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'}
                 `}
               >
@@ -202,7 +202,7 @@ export default function EmployeeDrawer({ isOpen, onClose, onSave, mode, initialD
               type="submit"
               form="employee-drawer-form"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
+              className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
             >
               {isSubmitting ? (
                 <>

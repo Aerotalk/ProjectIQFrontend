@@ -105,7 +105,7 @@ export default function CategoryDrawer({ isOpen, onClose, onSave, mode, initialD
                       {...form.register('receiptRequired')}
                       id="receiptRequired"
                       disabled={readOnly}
-                      className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]"
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
                     />
                     <label htmlFor="receiptRequired" className="text-sm text-gray-700 dark:text-gray-300 font-medium">Receipt Required</label>
                   </div>
@@ -129,7 +129,7 @@ export default function CategoryDrawer({ isOpen, onClose, onSave, mode, initialD
                       {...form.register('active')}
                       id="active"
                       disabled={readOnly}
-                      className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]"
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
                     />
                     <label htmlFor="active" className="text-sm text-gray-700 dark:text-gray-300 font-medium">Active</label>
                   </div>
@@ -154,7 +154,7 @@ export default function CategoryDrawer({ isOpen, onClose, onSave, mode, initialD
               type="submit"
               form="category-form"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#792359] dark:focus:ring-offset-[#181a1f]"
+              className="px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#181a1f]"
             >
               {isSubmitting ? (
                 <>

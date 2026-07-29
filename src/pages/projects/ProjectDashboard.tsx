@@ -178,7 +178,7 @@ export default function ProjectDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
-            <FolderKanban size={24} className="text-[#792359] dark:text-[#c44997]" />
+            <FolderKanban size={24} className="text-primary dark:text-[#c44997]" />
             Projects Workspace
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage client projects, budgets, active entities, and linked operations.</p>
@@ -191,7 +191,7 @@ export default function ProjectDashboard() {
               placeholder="Search projects..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-md text-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white shadow-xs" 
+              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-md text-sm focus:outline-none focus:border-primary text-gray-900 dark:text-white shadow-xs" 
             />
           </div>
           <div className="relative shrink-0 w-40">
@@ -209,7 +209,7 @@ export default function ProjectDashboard() {
           </div>
           <button 
             onClick={handleCreate}
-            className="shrink-0 px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-md text-sm font-medium transition-colors shadow-xs flex items-center gap-2"
+            className="shrink-0 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-medium transition-colors shadow-xs flex items-center gap-2"
           >
             <Plus size={16} /> Create Project
           </button>
@@ -220,7 +220,7 @@ export default function ProjectDashboard() {
       {!isLoading && projects.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg p-5 shadow-xs flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-[#792359]/10 text-[#792359] dark:text-[#c44997] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary dark:text-[#c44997] flex items-center justify-center shrink-0">
               <FolderKanban size={22} />
             </div>
             <div>
@@ -261,7 +261,7 @@ export default function ProjectDashboard() {
             <div 
               key={p.id} 
               onClick={() => handleView(p)}
-              className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 hover:border-[#792359] dark:hover:border-[#c44997] rounded-lg hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
+              className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 hover:border-primary dark:hover:border-[#c44997] rounded-lg hover:shadow-md transition-all flex flex-col group relative cursor-pointer"
             >
               <div className="p-5 flex flex-col h-full relative space-y-4">
                 
@@ -269,7 +269,7 @@ export default function ProjectDashboard() {
                 <div className="flex justify-between items-start">
                   <h3 
                     onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }}
-                    className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide cursor-pointer hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors line-clamp-2 pr-2"
+                    className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide cursor-pointer hover:text-primary dark:hover:text-secondary transition-colors line-clamp-2 pr-2"
                   >
                     {p.projectName || p.projectCode || 'Unnamed Project'}
                   </h3>
@@ -358,7 +358,7 @@ export default function ProjectDashboard() {
                     <Calendar size={14} className="text-gray-400" />
                     <span>Due: {p.expectedEndDate ? new Date(p.expectedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }} className="text-xs font-semibold text-[#792359] hover:text-[#52173c] dark:text-[#e6a8d0] dark:hover:text-[#f4d1e8] transition-colors">
+                  <button onClick={(e) => { e.stopPropagation(); handleQuickGlance(p); }} className="text-xs font-semibold text-primary hover:text-primary-dark dark:text-secondary dark:hover:text-[#f4d1e8] transition-colors">
                     Quick Glance
                   </button>
                 </div>

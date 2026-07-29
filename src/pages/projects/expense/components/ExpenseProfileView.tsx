@@ -50,7 +50,7 @@ export default function ExpenseProfileView({ expense: initialExpense, onClose, o
       {/* ── 1. Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             <Receipt size={24} />
           </div>
           <div className="space-y-1">
@@ -72,7 +72,7 @@ export default function ExpenseProfileView({ expense: initialExpense, onClose, o
         <div className="flex items-center gap-3">
           <button
             onClick={onEdit}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#792359] hover:bg-[#52173c] text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-medium transition-colors shadow-sm"
           >
             <Edit size={16} /> 
             <span>Edit Expense</span>
@@ -97,7 +97,7 @@ export default function ExpenseProfileView({ expense: initialExpense, onClose, o
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id 
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
@@ -140,7 +140,7 @@ export default function ExpenseProfileView({ expense: initialExpense, onClose, o
                     <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Attachment</span>
                     <div className="text-sm text-gray-900 dark:text-gray-200">
                       {expense.receiptName ? (
-                        <div className="flex items-center gap-1.5 text-sm text-[#792359] dark:text-[#e6a8d0]">
+                        <div className="flex items-center gap-1.5 text-sm text-primary dark:text-secondary">
                           <Paperclip size={14} />
                           <span className="truncate max-w-[200px]" title={expense.receiptName}>{expense.receiptName}</span>
                   </div>

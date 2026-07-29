@@ -109,7 +109,7 @@ export default function TemplateDrawer({ isOpen, onClose, onSave, mode, initialD
                       render={({ field }) => (
                         <div className="flex flex-wrap gap-2">
                           {categories.map(c => (
-                            <label key={c.id} className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer ${field.value?.includes(c.id) ? 'border-[#792359] bg-[#792359]/5' : 'border-gray-200 dark:border-white/10'} ${readOnly ? 'opacity-70 pointer-events-none' : ''}`}>
+                            <label key={c.id} className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer ${field.value?.includes(c.id) ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-white/10'} ${readOnly ? 'opacity-70 pointer-events-none' : ''}`}>
                               <input
                                 type="checkbox"
                                 disabled={readOnly}
@@ -122,7 +122,7 @@ export default function TemplateDrawer({ isOpen, onClose, onSave, mode, initialD
                                     field.onChange(current.filter(id => id !== c.id));
                                   }
                                 }}
-                                className="w-4 h-4 text-[#792359] rounded border-gray-300 focus:ring-[#792359]"
+                                className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
                               />
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{c.category}</span>
                             </label>
@@ -138,7 +138,7 @@ export default function TemplateDrawer({ isOpen, onClose, onSave, mode, initialD
                       type="checkbox"
                       id="active"
                       {...form.register('active')}
-                      className="w-4 h-4 text-[#792359] rounded border-gray-300 focus:ring-[#792359]"
+                      className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
                       disabled={readOnly}
                     />
                     <label htmlFor="active" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -165,7 +165,7 @@ export default function TemplateDrawer({ isOpen, onClose, onSave, mode, initialD
               type="submit"
               form="template-form"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-primary hover:bg-primary-dark disabled:opacity-70 text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
             >
               {isSubmitting ? (
                 <>

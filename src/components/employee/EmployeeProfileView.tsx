@@ -22,7 +22,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
       {/* ── Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             {avatarInitials || 'E'}
           </div>
           <div className="space-y-1">
@@ -41,7 +41,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
                 {employee.employmentStatus || 'Active'}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 ml-2">
-                <Briefcase size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
+                <Briefcase size={14} className="text-primary dark:text-secondary" />
                 {employee.designation?.designationName || 'No Designation'} 
                 {employee.department?.departmentName && ` • ${employee.department.departmentName}`}
               </span>
@@ -52,7 +52,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
         <div className="flex items-center gap-2 self-start md:self-auto">
           <button
             onClick={onEdit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-[#792359] focus:ring-offset-2 dark:focus:ring-offset-[#121212] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#121212] transition-colors"
           >
             <Edit size={16} className="text-gray-500 dark:text-gray-400" />
             Edit Profile
@@ -84,12 +84,12 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
                 className={`
                   group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
                   ${isActive 
-                    ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                    ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                   }
                 `}
               >
-                <Icon size={16} className={isActive ? 'text-[#792359] dark:text-[#e6a8d0]' : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'} />
+                <Icon size={16} className={isActive ? 'text-primary dark:text-secondary' : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'} />
                 {tab.name}
               </button>
             );
@@ -108,7 +108,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
               <div className="bg-white dark:bg-[#121212] rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <User size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                    <User size={18} className="text-primary dark:text-secondary" />
                     Personal Details
                   </h3>
                 </div>
@@ -133,7 +133,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
               <div className="bg-white dark:bg-[#121212] rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Phone size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                    <Phone size={18} className="text-primary dark:text-secondary" />
                     Contact Information
                   </h3>
                 </div>
@@ -175,7 +175,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
               <div className="bg-white dark:bg-[#121212] rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <CreditCard size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                    <CreditCard size={18} className="text-primary dark:text-secondary" />
                     Bank Details
                   </h3>
                 </div>
@@ -199,7 +199,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
               <div className="bg-white dark:bg-[#121212] rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Shield size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                    <Shield size={18} className="text-primary dark:text-secondary" />
                     Statutory Details
                   </h3>
                 </div>
@@ -225,7 +225,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
             <div className="bg-white dark:bg-[#121212] rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
               <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.02]">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <FileText size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                  <FileText size={18} className="text-primary dark:text-secondary" />
                   Uploaded Documents
                 </h3>
               </div>

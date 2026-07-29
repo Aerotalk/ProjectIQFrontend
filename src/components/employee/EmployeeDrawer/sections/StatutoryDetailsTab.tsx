@@ -95,11 +95,11 @@ export default function StatutoryDetailsTab({ readOnly }: Props) {
           <FormRow>
             <div className="flex flex-col gap-3 mt-2">
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="pfApplicable" {...register('pfApplicable')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+                <input type="checkbox" id="pfApplicable" {...register('pfApplicable')} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
                 <label htmlFor="pfApplicable" className="text-sm text-gray-700 dark:text-gray-300">PF Applicable</label>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="esiApplicable" {...register('esiApplicable')} disabled={readOnly} className="rounded border-gray-300 text-[#792359] focus:ring-[#792359]" />
+                <input type="checkbox" id="esiApplicable" {...register('esiApplicable')} disabled={readOnly} className="rounded border-gray-300 text-primary focus:ring-primary" />
                 <label htmlFor="esiApplicable" className="text-sm text-gray-700 dark:text-gray-300">ESI Applicable</label>
               </div>
             </div>

@@ -20,11 +20,11 @@ export default function ProductIdentitySection({ readOnly, nextNumber }: Props) 
           <label className={formStyles.label}>Item Type *</label>
           <div className="flex gap-4 mt-2">
             <label htmlFor="type-product" className="flex items-center gap-2 cursor-pointer">
-              <input id="type-product" type="radio" value="Product" {...register('type')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="type-product" type="radio" value="Product" {...register('type')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Product</span>
             </label>
             <label htmlFor="type-service" className="flex items-center gap-2 cursor-pointer">
-              <input id="type-service" type="radio" value="Service" {...register('type')} disabled={readOnly} className="text-[#792359] focus:ring-[#792359]" />
+              <input id="type-service" type="radio" value="Service" {...register('type')} disabled={readOnly} className="text-primary focus:ring-primary" />
               <span className="text-sm text-gray-900 dark:text-gray-200">Service</span>
             </label>
           </div>

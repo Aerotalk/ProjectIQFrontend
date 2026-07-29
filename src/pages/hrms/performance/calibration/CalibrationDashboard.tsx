@@ -81,7 +81,7 @@ export default function CalibrationDashboard() {
       key: 'finalRating', 
       label: 'Final Rating',
       render: (val: any) => val ? (
-        <span className="font-bold text-[#792359] dark:text-[#e6a8d0] bg-[#792359]/10 px-2 py-1 rounded-sm">{val.toFixed(1)}</span>
+        <span className="font-bold text-primary dark:text-secondary bg-primary/10 px-2 py-1 rounded-sm">{val.toFixed(1)}</span>
       ) : (
         <span className="text-gray-400">-</span>
       )
@@ -102,7 +102,7 @@ export default function CalibrationDashboard() {
         <div className="flex items-center gap-2">
           {row.status !== 'Finalized' && (
             <button 
-              className="px-3 py-1.5 flex items-center bg-[#792359] hover:bg-[#52173c] text-white text-xs font-medium rounded-sm shadow-sm transition-colors" 
+              className="px-3 py-1.5 flex items-center bg-primary hover:bg-primary-dark text-white text-xs font-medium rounded-sm shadow-sm transition-colors" 
               onClick={() => handleApprove(row.id)}
             >
               <CheckCircle size={14} className="mr-1" /> Approve
@@ -129,14 +129,14 @@ export default function CalibrationDashboard() {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] dark:text-white w-64"
+              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
             />
           </div>
           <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
             <Filter size={16} className="mr-2" />
             Filter
           </button>
-          <button onClick={handleFinalizeAll} className="flex items-center px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+          <button onClick={handleFinalizeAll} className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
             <CheckCircle size={16} className="mr-2" />
             Finalize All
           </button>
@@ -146,7 +146,7 @@ export default function CalibrationDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-shrink-0">
         <div className="bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm col-span-1 lg:col-span-3">
           <h3 className="text-md font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <BarChart2 size={18} className="mr-2 text-[#792359]" />
+            <BarChart2 size={18} className="mr-2 text-primary" />
             Organization Bell Curve (Mock Visualization)
           </h3>
           <div className="h-32 flex items-end justify-between px-8">
@@ -175,7 +175,7 @@ export default function CalibrationDashboard() {
         
         <div className="bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-center">
           <p className="text-sm text-gray-500 text-center mb-2">Average Proposed Rating</p>
-          <p className="text-4xl font-bold text-center text-[#792359] dark:text-[#e6a8d0]">3.8</p>
+          <p className="text-4xl font-bold text-center text-primary dark:text-secondary">3.8</p>
           <div className="mt-4 text-xs text-gray-500 space-y-1 text-center border-t border-gray-100 dark:border-gray-800 pt-2">
             <p>Target: 3.5 - 4.0</p>
             <p className="text-green-500">Currently within bounds</p>

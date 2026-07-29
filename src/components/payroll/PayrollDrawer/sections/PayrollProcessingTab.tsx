@@ -138,17 +138,17 @@ export default function PayrollProcessingTab({ readOnly }: Props) {
               </div>
               <p className="text-xl font-bold text-gray-900 dark:text-white">₹2,10,000</p>
             </div>
-            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm ring-1 ring-[#792359]/30">
+            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm ring-1 ring-primary/30">
               <div className="flex items-center gap-2 mb-2">
-                <Coins size={16} className="text-[#792359] dark:text-[#e6a8d0]" />
-                <span className="text-xs font-bold text-[#792359] dark:text-[#e6a8d0]">Est. Net Salary</span>
+                <Coins size={16} className="text-primary dark:text-secondary" />
+                <span className="text-xs font-bold text-primary dark:text-secondary">Est. Net Salary</span>
               </div>
-              <p className="text-xl font-bold text-[#792359] dark:text-[#e6a8d0]">₹11,70,000</p>
+              <p className="text-xl font-bold text-primary dark:text-secondary">₹11,70,000</p>
             </div>
           </div>
           {!readOnly && (
             <div className="mt-6 flex justify-end">
-              <button type="button" className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
+              <button type="button" className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
                 Process Payroll
               </button>
             </div>

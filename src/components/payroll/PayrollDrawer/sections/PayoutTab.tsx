@@ -23,7 +23,7 @@ export default function PayoutTab({ readOnly }: Props) {
         </div>
         <div className="text-right">
           <p className="text-sm font-medium text-gray-500">Total Payout</p>
-          <p className="text-xl font-bold text-[#792359] dark:text-[#e6a8d0]">₹11,70,000</p>
+          <p className="text-xl font-bold text-primary dark:text-secondary">₹11,70,000</p>
         </div>
       </div>
 
@@ -39,8 +39,8 @@ export default function PayoutTab({ readOnly }: Props) {
                   {step.status === 'completed' ? (
                     <CheckCircle2 size={28} className="text-green-500 bg-white dark:bg-[#181a1f]" />
                   ) : step.status === 'current' ? (
-                    <div className="w-7 h-7 rounded-full border-4 border-[#792359] bg-white dark:bg-[#181a1f] flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#792359]"></div>
+                    <div className="w-7 h-7 rounded-full border-4 border-primary bg-white dark:bg-[#181a1f] flex items-center justify-center">
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                     </div>
                   ) : (
                     <Circle size={28} className="text-gray-300 dark:text-gray-600 bg-white dark:bg-[#181a1f]" />
@@ -67,7 +67,7 @@ export default function PayoutTab({ readOnly }: Props) {
                     <button type="button" className="px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
                       Mark as Failed
                     </button>
-                    <button type="button" className="px-4 py-2 bg-[#792359] text-white rounded-sm text-sm font-medium hover:bg-[#52173c] transition-colors">
+                    <button type="button" className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
                       Confirm Transfer Success
                     </button>
                   </div>
@@ -76,7 +76,7 @@ export default function PayoutTab({ readOnly }: Props) {
                 {/* Actions for step 2 */}
                 {step.id === 2 && (
                   <div className="mt-3">
-                    <button type="button" className="flex items-center gap-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium hover:underline">
+                    <button type="button" className="flex items-center gap-2 text-sm text-primary dark:text-secondary font-medium hover:underline">
                       <Download size={14} /> Download Bank File (.csv)
                     </button>
                   </div>

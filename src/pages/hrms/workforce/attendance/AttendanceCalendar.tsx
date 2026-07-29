@@ -33,7 +33,7 @@ const ActionMenu = ({ record, onAction }: { record: AttendanceRecord, onAction?:
             <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'view')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Eye size={14} /> View Details</button>
             <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'edit')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Edit2 size={14} /> Edit Attendance</button>
             <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
-            <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 dark:hover:bg-[#e6a8d0]/10 flex items-center gap-2"><AlertCircle size={14} /> Regularize</button>
+            <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 dark:hover:bg-secondary/10 flex items-center gap-2"><AlertCircle size={14} /> Regularize</button>
             <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2"><CheckCircle size={14} /> Mark Present</button>
             <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2"><XCircle size={14} /> Mark Absent</button>
             <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><MessageSquare size={14} /> Add Remark</button>
@@ -169,7 +169,7 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
                   !isSame && "opacity-40 bg-gray-50/30 dark:bg-black/20",
                   isSame && weekend && "bg-[#f8f9fa] dark:bg-[#1a1c21]",
                   isSame && !weekend && "bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-white/5",
-                  today && "bg-[#792359]/5 dark:bg-[#e6a8d0]/5 ring-1 ring-inset ring-[#792359]/30 dark:ring-[#e6a8d0]/30 z-10 rounded-[1px]"
+                  today && "bg-primary/5 dark:bg-secondary/5 ring-1 ring-inset ring-primary/30 dark:ring-secondary/30 z-10 rounded-[1px]"
                 )}
                 onClick={() => {
                   if (record && onAction) {
@@ -181,7 +181,7 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
                   <div className="flex w-full justify-between items-start">
                     <span className={cn(
                       "font-semibold text-xs",
-                      today ? "text-[#792359] dark:text-[#e6a8d0]" : "text-gray-400 dark:text-gray-500"
+                      today ? "text-primary dark:text-secondary" : "text-gray-400 dark:text-gray-500"
                     )}>
                       {day.getDate()}
                     </span>

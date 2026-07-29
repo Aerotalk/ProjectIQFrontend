@@ -93,7 +93,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
             </button>
             <button 
               onClick={handleSubmit} 
-              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
             >
               <Check size={16} />
               Submit Assessment
@@ -116,7 +116,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
         {/* Employee Info Header */}
         <div className="bg-gray-50 dark:bg-gray-800/30 p-4 border border-gray-200 dark:border-gray-700 rounded-sm mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 flex items-center justify-center text-[#792359] dark:text-[#e6a8d0]">
+            <div className="w-12 h-12 rounded-full bg-[#f0e4ec] dark:bg-primary/20 flex items-center justify-center text-primary dark:text-secondary">
               <User size={24} />
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
                     {/* Manager Assessment Column */}
                     <div className="p-4 rounded-sm border border-blue-100 dark:border-blue-900/30 bg-blue-50/30 dark:bg-blue-900/10">
                       <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-semibold text-[#792359] dark:text-[#e6a8d0] uppercase tracking-wider">Manager Assessment</span>
+                        <span className="text-xs font-semibold text-primary dark:text-secondary uppercase tracking-wider">Manager Assessment</span>
                       </div>
                       <div className="mb-4">
                         <label className={formStyles.label}>Your Rating</label>
@@ -257,8 +257,8 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
               />
             </div>
 
-            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center bg-[#792359]/5 border border-[#792359]/20 p-4 rounded-sm">
-              <span className="font-semibold text-[#792359] dark:text-[#e6a8d0]">Final Manager Rating</span>
+            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center bg-primary/5 border border-primary/20 p-4 rounded-sm">
+              <span className="font-semibold text-primary dark:text-secondary">Final Manager Rating</span>
               <div className="flex items-center gap-4">
                 <RatingStars 
                   value={formData.overallRating || 0} 
@@ -266,7 +266,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
                   disabled={isReadOnly}
                   size={24}
                 />
-                <span className="text-xl font-bold text-[#792359] dark:text-[#e6a8d0] bg-white dark:bg-[#1f2229] px-3 py-1 rounded-sm border border-[#792359]/20">
+                <span className="text-xl font-bold text-primary dark:text-secondary bg-white dark:bg-[#1f2229] px-3 py-1 rounded-sm border border-primary/20">
                   {formData.overallRating ? formData.overallRating.toFixed(1) : '0.0'}
                 </span>
               </div>

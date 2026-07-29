@@ -259,7 +259,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       {/* Floating Toggle Button (visible when sidebar is closed) */}
       <button
         onClick={() => setIsSidebarOpen(true)}
-        className={`fixed left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full shadow-lg text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 ${isSidebarOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
+        className={`fixed left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full shadow-lg text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 ${isSidebarOpen ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
           }`}
         title="Open Sidebar"
       >
@@ -268,13 +268,13 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
       {/* Sidebar - Floating Card Style */}
       <aside
-        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-[#792359]/30 shadow-2xl shadow-[#792359]/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        className={`w-[220px] xl:w-[260px] bg-[#3a112b] dark:bg-[#1a0813] text-gray-300 flex flex-col fixed top-4 bottom-4 left-4 z-40 rounded-2xl border border-primary/30 shadow-2xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-left ${isSidebarOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
           }`}
       >
         {/* Toggle Close Button (Hamburger on middle right side) */}
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-[#792359] dark:hover:text-[#e6a8d0] hover:scale-110 shadow-lg transition-all z-50 cursor-pointer"
+          className="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-secondary hover:scale-110 shadow-lg transition-all z-50 cursor-pointer"
           title="Close Sidebar"
         >
           <Menu size={18} />
@@ -308,7 +308,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                   `}
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon size={18} className={hasActiveSub ? 'text-[#e6a8d0]' : 'text-gray-400'} />
+                    <item.icon size={18} className={hasActiveSub ? 'text-secondary' : 'text-gray-400'} />
                     {item.name}
                   </div>
                   <ChevronRight size={14} className={`transition-transform duration-200 ${isExpanded ? 'rotate-90 text-white' : 'text-gray-500'}`} />
@@ -330,7 +330,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                             ${isActive ? 'text-white bg-white/10 font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5'}
                           `}
                         >
-                          {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#e6a8d0] border-2 border-[#3a112b]" />}
+                          {isActive && <div className="absolute left-[-17px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-secondary border-2 border-[#3a112b]" />}
                           {sub.name}
                         </Link>
                       );
@@ -344,7 +344,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
 
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between rounded-b-2xl">
           <div className="flex items-center gap-3 w-full">
-            <div className="w-8 h-8 rounded-sm bg-[#792359] flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
+            <div className="w-8 h-8 rounded-sm bg-primary flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
               ) : (
@@ -384,7 +384,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                         {crumb.label}
                       </Link>
                     ) : (
-                      <span className={isLast ? "text-[#792359] dark:text-[#e6a8d0] truncate" : "truncate"}>
+                      <span className={isLast ? "text-primary dark:text-secondary truncate" : "truncate"}>
                         {crumb.label}
                       </span>
                     )}
@@ -401,12 +401,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                         {activeModuleName}
                       </span>
                       <ChevronRight size={14} className="mx-2 shrink-0" />
-                      <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                      <span className="text-primary dark:text-secondary truncate">
                         {activePageName}
                       </span>
                     </>
                   ) : (
-                    <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                    <span className="text-primary dark:text-secondary truncate">
                       {activeModuleName}
                     </span>
                   )}
@@ -415,7 +415,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 expandedMenu && (
                   <>
                     <ChevronRight size={14} className="mx-2 shrink-0" />
-                    <span className="text-[#792359] dark:text-[#e6a8d0] truncate">
+                    <span className="text-primary dark:text-secondary truncate">
                       {expandedMenu}
                     </span>
                   </>
@@ -427,12 +427,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           <div className="flex items-center gap-2 lg:gap-3 relative shrink-0">
             <div className="relative mr-2 hidden lg:block">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
+              <input type="text" placeholder="Search..." className="pl-8 pr-4 py-1.5 text-sm bg-gray-100 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-[#181a1f] focus:border-primary dark:focus:border-primary rounded-sm transition-all outline-none w-36 focus:w-48 xl:w-48 xl:focus:w-64 border" />
             </div>
 
             <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors relative">
               <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#792359] rounded-full border-2 border-white dark:border-[#181a1f]"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-[#181a1f]"></span>
             </button>
 
             {/* Theme Toggle */}
@@ -451,7 +451,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 p-1.5 rounded-sm transition-colors"
               >
-                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs rounded-sm overflow-hidden">
+                <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-xs rounded-sm overflow-hidden">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -464,7 +464,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
                       ) : (

@@ -69,8 +69,8 @@ export default function CustomTimePicker({ value, onChange, disabled, className 
           "flex items-center justify-between w-full px-3 py-2 text-sm border rounded-sm transition-colors",
           disabled 
             ? "bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 cursor-not-allowed" 
-            : "bg-white dark:bg-black/20 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:border-[#792359]/50 cursor-pointer",
-          isOpen && !disabled && "ring-1 ring-[#792359] border-[#792359]"
+            : "bg-white dark:bg-black/20 border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:border-primary/50 cursor-pointer",
+          isOpen && !disabled && "ring-1 ring-primary border-primary"
         )}
         onClick={() => !disabled && setIsOpen(!isOpen)}
       >
@@ -87,7 +87,7 @@ export default function CustomTimePicker({ value, onChange, disabled, className 
                 key={h}
                 className={cn(
                   "px-4 py-2 text-sm text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 snap-center transition-colors",
-                  time.h === h ? "bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-semibold" : "text-gray-700 dark:text-gray-300"
+                  time.h === h ? "bg-primary/10 text-primary dark:text-secondary font-semibold" : "text-gray-700 dark:text-gray-300"
                 )}
                 onClick={() => handleSelect({ h })}
               >
@@ -103,7 +103,7 @@ export default function CustomTimePicker({ value, onChange, disabled, className 
                 key={m}
                 className={cn(
                   "px-4 py-2 text-sm text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 snap-center transition-colors",
-                  time.m === m ? "bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-semibold" : "text-gray-700 dark:text-gray-300"
+                  time.m === m ? "bg-primary/10 text-primary dark:text-secondary font-semibold" : "text-gray-700 dark:text-gray-300"
                 )}
                 onClick={() => handleSelect({ m })}
               >
@@ -119,7 +119,7 @@ export default function CustomTimePicker({ value, onChange, disabled, className 
                 key={ampm}
                 className={cn(
                   "px-4 py-3 text-sm text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 snap-center transition-colors h-1/2 flex items-center justify-center",
-                  time.ampm === ampm ? "bg-[#792359]/10 text-[#792359] dark:text-[#e6a8d0] font-semibold" : "text-gray-700 dark:text-gray-300"
+                  time.ampm === ampm ? "bg-primary/10 text-primary dark:text-secondary font-semibold" : "text-gray-700 dark:text-gray-300"
                 )}
                 onClick={() => {
                   handleSelect({ ampm });

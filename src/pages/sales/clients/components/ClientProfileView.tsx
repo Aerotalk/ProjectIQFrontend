@@ -66,7 +66,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
       {/* ── 1. Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             {(client.companyName || client.primaryContactPerson || 'C').charAt(0).toUpperCase()}
           </div>
           <div className="space-y-1">
@@ -123,7 +123,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id 
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
@@ -265,7 +265,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
               {/* Financial Summary */}
               <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <Activity className="text-[#792359] dark:text-[#e6a8d0]" size={20} />
+                  <Activity className="text-primary dark:text-secondary" size={20} />
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Financial Summary</h4>
                 </div>
                 
@@ -393,7 +393,7 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                     ) : (
                       quotations.map(q => (
                         <tr key={q.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                          <td className="px-5 py-3 font-medium text-[#792359] dark:text-[#e6a8d0]">
+                          <td className="px-5 py-3 font-medium text-primary dark:text-secondary">
                             {q.quotationNo}
                           </td>
                           <td className="px-5 py-3 text-gray-700 dark:text-gray-300">
@@ -481,12 +481,12 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
                   placeholder="Type your comment here..." 
-                  className="flex-1 px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:border-[#792359]"
+                  className="flex-1 px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:border-primary"
                   onKeyDown={e => e.key === 'Enter' && handleAddComment()}
                 />
                 <button 
                   onClick={handleAddComment}
-                  className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-md transition-colors"
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-md transition-colors"
                 >
                   Post
                 </button>

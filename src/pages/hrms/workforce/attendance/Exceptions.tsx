@@ -72,7 +72,7 @@ export default function Exceptions() {
                   <button onClick={() => { setIsOpen(false); resolveMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
                     <CheckCircle size={14} /> Mark Resolved
                   </button>
-                  <button onClick={() => { setIsOpen(false); /* trigger regularization modal */ }} className="w-full text-left px-4 py-2 text-sm text-[#792359] dark:text-[#e6a8d0] hover:bg-[#792359]/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); /* trigger regularization modal */ }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 flex items-center gap-2">
                     <AlertCircle size={14} /> Request Regularization
                   </button>
                 </>

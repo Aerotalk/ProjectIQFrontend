@@ -87,7 +87,7 @@ export default function TicketDashboard() {
           <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow group cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{stat.label}</span>
-              <stat.icon size={18} className="text-gray-400 group-hover:text-[#792359] dark:group-hover:text-[#e6a8d0] transition-colors" />
+              <stat.icon size={18} className="text-gray-400 group-hover:text-primary dark:group-hover:text-secondary transition-colors" />
             </div>
             <div>
               <div className={`text-3xl font-bold tracking-tight mb-2 ${stat.textClass || 'text-gray-900 dark:text-white'}`}>{stat.value}</div>
@@ -170,7 +170,7 @@ export default function TicketDashboard() {
           <h3 className="text-base font-semibold text-gray-900 dark:text-white">Recent Tickets</h3>
           <button 
             onClick={() => navigate('/companydashboard/tickets')}
-            className="text-sm font-semibold text-[#792359] dark:text-[#e6a8d0] hover:underline flex items-center gap-1"
+            className="text-sm font-semibold text-primary dark:text-secondary hover:underline flex items-center gap-1"
           >
             View All <ChevronRight size={14} />
           </button>
@@ -191,7 +191,7 @@ export default function TicketDashboard() {
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
               {displayTickets.map((t) => (
                 <tr key={t.realId} onClick={() => navigate(`/companydashboard/tickets/${t.realId}`)} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-                  <td className="px-6 py-4 font-medium text-[#792359] dark:text-[#e6a8d0]">{t.id === t.realId ? 'Unknown Ticket' : t.id}</td>
+                  <td className="px-6 py-4 font-medium text-primary dark:text-secondary">{t.id === t.realId ? 'Unknown Ticket' : t.id}</td>
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{t.subject}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{t.client}</td>
                   <td className="px-6 py-4">

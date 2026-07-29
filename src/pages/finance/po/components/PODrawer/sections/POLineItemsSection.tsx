@@ -71,7 +71,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
           <button
             type="button"
             onClick={addNewItem}
-            className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3] transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-dark dark:text-[#c44997] dark:hover:text-[#db6cb3] transition-colors"
           >
             <Plus size={14} /> Add Item
           </button>
@@ -195,7 +195,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
                   {readOnly ? 'No line items.' : (
                     <span>
                       No items added yet.{' '}
-                      <button type="button" onClick={addNewItem} className="text-[#792359] dark:text-[#c44997] font-medium">
+                      <button type="button" onClick={addNewItem} className="text-primary dark:text-[#c44997] font-medium">
                         Add the first item
                       </button>
                     </span>

@@ -51,7 +51,7 @@ export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onS
             </button>
             <button 
               onClick={handleSave} 
-              className="px-6 py-2 bg-[#792359] hover:bg-[#52173c] text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
             >
               <Save size={16} />
               Save Goal

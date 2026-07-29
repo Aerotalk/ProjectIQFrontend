@@ -125,7 +125,7 @@ export default function CustomMonthPicker({
                 onClick={() => handleMonthClick(idx)}
                 className={`py-2 text-sm rounded-sm transition-colors ${
                   isSelected 
-                    ? 'bg-[#792359] text-white font-medium' 
+                    ? 'bg-primary text-white font-medium' 
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
                 }`}
               >

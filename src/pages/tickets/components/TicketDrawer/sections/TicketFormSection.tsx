@@ -76,7 +76,7 @@ export default function TicketFormSection({ readOnly }: Props) {
   const labelClass = 'block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1';
   const fieldClass = (hasError: boolean) => 
     `w-full px-3 py-2 bg-white dark:bg-[#0f1115] border rounded-sm text-sm text-gray-900 dark:text-white ` +
-    `focus:outline-none focus:ring-2 focus:ring-[#792359]/50 focus:border-[#792359] transition-colors appearance-none ` +
+    `focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors appearance-none ` +
     `disabled:opacity-60 disabled:cursor-not-allowed ` +
     (hasError ? 'border-red-500' : 'border-gray-300 dark:border-white/10');
 
@@ -91,12 +91,12 @@ export default function TicketFormSection({ readOnly }: Props) {
             type="button"
             onClick={() => setActiveTab(tab)}
             className={`pb-2 text-sm font-semibold uppercase tracking-wider transition-colors relative ${
-              activeTab === tab ? 'text-[#792359] dark:text-[#e6a8d0]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              activeTab === tab ? 'text-primary dark:text-secondary' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             {tab}
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#792359] dark:bg-[#e6a8d0]" />
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-secondary" />
             )}
           </button>
         ))}
@@ -239,7 +239,7 @@ export default function TicketFormSection({ readOnly }: Props) {
             <div><label className={labelClass}>Business Service</label><Input type="text" {...register('businessService')} disabled={readOnly} /></div>
             <div><label className={labelClass}>Configuration Item (CI)</label><Input type="text" {...register('configurationItem')} disabled={readOnly} /></div>
             <div className="flex items-center gap-2 mt-4">
-              <input type="checkbox" {...register('isMajorIncident')} disabled={readOnly} id="major-incident" className="w-4 h-4 text-[#792359] focus:ring-[#792359]" />
+              <input type="checkbox" {...register('isMajorIncident')} disabled={readOnly} id="major-incident" className="w-4 h-4 text-primary focus:ring-primary" />
               <label htmlFor="major-incident" className="text-sm font-medium text-gray-700 dark:text-gray-300">Is Major Incident</label>
             </div>
           </>

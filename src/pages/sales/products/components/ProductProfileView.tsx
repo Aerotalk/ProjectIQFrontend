@@ -29,7 +29,7 @@ export default function ProductProfileView({ product: initialProduct, onClose, o
       {/* ── 1. Header Section ── */}
       <div className="px-6 py-5 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#792359] text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
+          <div className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-lg text-2xl font-bold shrink-0 shadow-sm">
             {(product.itemName || 'P').charAt(0).toUpperCase()}
           </div>
           <div className="space-y-1">
@@ -84,7 +84,7 @@ export default function ProductProfileView({ product: initialProduct, onClose, o
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id 
-                ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0]' 
+                ? 'border-primary text-primary dark:text-secondary dark:border-secondary' 
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
@@ -142,7 +142,7 @@ export default function ProductProfileView({ product: initialProduct, onClose, o
                   <div className="space-y-4">
                     <div>
                       <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Selling Price</span>
-                      <span className="text-xl font-bold text-[#792359] dark:text-[#e6a8d0]">
+                      <span className="text-xl font-bold text-primary dark:text-secondary">
                         {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(product.standardRate)}
                       </span>
                     </div>

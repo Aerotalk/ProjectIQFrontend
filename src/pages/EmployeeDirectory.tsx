@@ -141,7 +141,7 @@ export default function EmployeeDirectory() {
 
         <button
           onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-sm font-medium text-sm transition-colors shadow-sm hover:shadow-md"
+          className="flex items-center gap-2 bg-primary hover:bg-[#5d1944] text-white px-4 py-2.5 rounded-sm font-medium text-sm transition-colors shadow-sm hover:shadow-md"
         >
           <Plus size={16} />
           Add Employee
@@ -156,7 +156,7 @@ export default function EmployeeDirectory() {
             placeholder="Search by name, ID, or department..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:bg-white dark:focus:bg-[#181a1f] focus:border-[#792359] dark:focus:border-[#792359] transition-all outline-none text-gray-800 dark:text-gray-200"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:bg-white dark:focus:bg-[#181a1f] focus:border-primary dark:focus:border-primary transition-all outline-none text-gray-800 dark:text-gray-200"
           />
         </div>
 
@@ -186,7 +186,7 @@ export default function EmployeeDirectory() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm">
-          <Loader2 className="animate-spin text-[#792359] mb-4" size={32} />
+          <Loader2 className="animate-spin text-primary mb-4" size={32} />
           <p className="text-gray-500 font-medium">Loading employees...</p>
         </div>
       ) : error ? (
@@ -195,7 +195,7 @@ export default function EmployeeDirectory() {
             <Mail size={24} />
           </div>
           <p className="text-red-500 font-semibold">{error}</p>
-          <button onClick={fetchEmployees} className="mt-4 text-sm font-medium text-[#792359] hover:underline">Try Again</button>
+          <button onClick={fetchEmployees} className="mt-4 text-sm font-medium text-primary hover:underline">Try Again</button>
         </div>
       ) : filteredEmployees.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm text-center px-4">
@@ -211,14 +211,14 @@ export default function EmployeeDirectory() {
             <div key={emp.id} className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#792359] to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
                     {emp.firstName.charAt(0)}{emp.lastName.charAt(0)}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
                       {emp.firstName} {emp.middleName ? emp.middleName + ' ' : ''}{emp.lastName}
                     </h3>
-                    <p className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] truncate">
+                    <p className="text-xs font-medium text-primary dark:text-secondary truncate">
                       {emp.designation?.designationName || 'No Designation'}
                     </p>
                   </div>
@@ -249,13 +249,13 @@ export default function EmployeeDirectory() {
               <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-2">
                 <button 
                   onClick={() => setViewingEmployee(emp)}
-                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
                 >
                   <Eye size={14} /> View
                 </button>
                 <button 
                   onClick={() => openDrawer('edit', emp)}
-                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-[#792359] hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
                 >
                   <Edit2 size={14} /> Edit
                 </button>

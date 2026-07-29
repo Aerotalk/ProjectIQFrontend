@@ -101,7 +101,7 @@ export default function ShiftRoster() {
         <div className="flex-1 overflow-auto custom-scrollbar bg-white dark:bg-[#181a1f]">
           {(rostersLoading || shiftsLoading) ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-4 border-[#792359]/30 border-t-[#792359] rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
@@ -134,7 +134,7 @@ export default function ShiftRoster() {
                                 {getShiftName(rosterRecord.assignedShiftId)}
                               </span>
                               <div onClick={() => handleEditCell(rosterRecord)} className="absolute inset-0 bg-black/5 dark:bg-white/5 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity rounded-sm m-1 cursor-pointer">
-                                <Edit2 size={14} className="text-[#792359] dark:text-[#e6a8d0]" />
+                                <Edit2 size={14} className="text-primary dark:text-secondary" />
                               </div>
                             </>
                           ) : (

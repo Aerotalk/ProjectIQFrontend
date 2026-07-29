@@ -69,7 +69,7 @@ export default function LineItemsSection({ readOnly }: Props) {
           <button 
             type="button" 
             onClick={() => append({ productId: '', itemName: '', hsnSac: '', quantity: 1, unit: 'Pieces', rate: 0, discount: 0, discountValue: 0, discountType: 'FLAT', gstRate: 0, taxableAmount: 0, gstAmount: 0, totalAmount: 0 })}
-            className="flex items-center gap-1 text-xs font-medium text-[#792359] hover:text-[#52173c] dark:text-[#c44997] dark:hover:text-[#db6cb3]"
+            className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-dark dark:text-[#c44997] dark:hover:text-[#db6cb3]"
           >
             <Plus size={14} /> Add Item
           </button>
@@ -165,7 +165,7 @@ export default function LineItemsSection({ readOnly }: Props) {
                     <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-2 py-1.5 align-top">
-                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-300 dark:border-white/10 overflow-hidden focus-within:border-[#792359] focus-within:ring-1 focus-within:ring-[#792359]">
+                    <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-300 dark:border-white/10 overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
                       <Controller
                         name={`lineItems.${index}.discountType`}
                         control={control}

@@ -32,8 +32,8 @@ export default function GSTTreatmentSection({ readOnly }: Props) {
                   }}
                   className={`relative flex cursor-pointer p-4 transition-colors
                     ${isSelected 
-                      ? 'border-[#792359] bg-[#792359]/5 dark:bg-[#792359]/10 ring-2 ring-[#792359]' 
-                      : 'hover:border-[#792359]/50'
+                      ? 'border-primary bg-primary/5 dark:bg-primary/10 ring-2 ring-primary' 
+                      : 'hover:border-primary/50'
                     }
                     ${readOnly ? 'pointer-events-none opacity-80' : ''}
                   `}

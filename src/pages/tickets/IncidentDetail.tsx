@@ -42,7 +42,7 @@ export default function IncidentDetail() {
       state: 'In Progress',
       time: 'Today at 09:45 AM',
       note: 'I am currently investigating the logs on the production server. The issue seems to be related to the recent auth token expiration changes.',
-      color: 'bg-[#792359]'
+      color: 'bg-primary'
     },
     {
       id: 2,
@@ -84,7 +84,7 @@ export default function IncidentDetail() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-20 text-gray-400">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#792359]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export default function IncidentDetail() {
     return (
       <div className="text-center py-20 text-gray-500">
         <h2 className="text-xl font-semibold mb-2">Incident not found</h2>
-        <button onClick={() => navigateBack('/companydashboard/tickets')} className="text-[#792359] hover:underline">
+        <button onClick={() => navigateBack('/companydashboard/tickets')} className="text-primary hover:underline">
           Return to list
         </button>
       </div>
@@ -133,7 +133,7 @@ export default function IncidentDetail() {
       action: 'added a note',
       time: 'Just now',
       note: newNote,
-      color: 'bg-[#792359]'
+      color: 'bg-primary'
     };
     setTimeline([newEntry, ...timeline]);
     toast.success('Note posted successfully');
@@ -191,7 +191,7 @@ export default function IncidentDetail() {
         <div className="flex gap-2">
           <button 
             onClick={() => handleStageChange('Resolved')}
-            className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm"
+            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm"
           >
             Resolve Incident
           </button>
@@ -209,8 +209,8 @@ export default function IncidentDetail() {
                 key={stage} 
                 onClick={() => handleStageChange(stage)}
                 className={`flex-1 relative flex items-center justify-center py-2 text-sm font-medium transition-colors cursor-pointer hover:brightness-95 ${
-                isCompleted ? 'bg-[#792359]/10 text-[#792359]' :
-                isCurrent ? 'bg-[#792359] text-white' :
+                isCompleted ? 'bg-primary/10 text-primary' :
+                isCurrent ? 'bg-primary text-white' :
                 'bg-gray-50 text-gray-400 hover:text-gray-600'
               } ${idx === 0 ? 'rounded-l-sm' : ''} ${idx === STAGES.length - 1 ? 'rounded-r-sm' : ''} mr-0.5`}
                 title={`Click to move to ${stage}`}
@@ -235,7 +235,7 @@ export default function IncidentDetail() {
           {/* Incident Information */}
           <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-              <Info size={18} className="text-[#792359]" /> Incident Details
+              <Info size={18} className="text-primary" /> Incident Details
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
               <div>
@@ -269,9 +269,9 @@ export default function IncidentDetail() {
           {/* Connected ERP Data Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Project Info */}
-            <div className="bg-white border border-[#792359]/20 rounded-sm shadow-sm overflow-hidden col-span-1 md:col-span-2">
-              <div className="bg-[#792359]/5 px-4 py-3 border-b border-[#792359]/10">
-                <h3 className="font-semibold text-[#792359] text-sm flex items-center gap-2">
+            <div className="bg-white border border-primary/20 rounded-sm shadow-sm overflow-hidden col-span-1 md:col-span-2">
+              <div className="bg-primary/5 px-4 py-3 border-b border-primary/10">
+                <h3 className="font-semibold text-primary text-sm flex items-center gap-2">
                   <Briefcase size={15} /> Linked Project (Auto-fetched)
                 </h3>
               </div>
@@ -297,13 +297,13 @@ export default function IncidentDetail() {
             <div className="flex items-center border-b border-gray-100 bg-[#F8F9FC] px-2">
               <button
                 onClick={() => setActiveTab('notes')}
-                className={`px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'notes' ? 'text-[#792359] border-[#792359]' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
+                className={`px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'notes' ? 'text-primary border-primary' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
               >
                 Worknotes / Activities
               </button>
               <button
                 onClick={() => setActiveTab('closure')}
-                className={`px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'closure' ? 'text-[#792359] border-[#792359]' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
+                className={`px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === 'closure' ? 'text-primary border-primary' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
               >
                 Closure Information
               </button>
@@ -316,7 +316,7 @@ export default function IncidentDetail() {
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 placeholder="Type your work notes, @mention users, or paste screenshots..."
-                className="w-full p-3 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#792359]/50 min-h-[100px] resize-y"
+                className="w-full p-3 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[100px] resize-y"
               ></textarea>
               <div className="flex items-center justify-between mt-3">
                 <button 
@@ -327,7 +327,7 @@ export default function IncidentDetail() {
                 </button>
                 <button 
                   onClick={handlePostNote}
-                  className="px-4 py-1.5 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                  className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
                 >
                   <Send size={14} /> Post Note
                 </button>
@@ -422,7 +422,7 @@ export default function IncidentDetail() {
                       <textarea
                         rows={3}
                         placeholder="Provide detailed closure notes here..."
-                        className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-[#792359] resize-none"
+                        className="w-2/3 p-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                       />
                     </div>
                   </div>
@@ -452,7 +452,7 @@ export default function IncidentDetail() {
                 <div className="flex justify-end mt-4">
                   <button 
                     onClick={handleSaveClosure}
-                    className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm"
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm"
                   >
                     Save Closure Details
                   </button>
@@ -516,7 +516,7 @@ export default function IncidentDetail() {
               </div>
               <div>
                 <span className="text-gray-500 block text-xs">Email</span>
-                <a href="#" className="font-medium text-[#792359] hover:underline">{ticket.contactEmail || 'N/A'}</a>
+                <a href="#" className="font-medium text-primary hover:underline">{ticket.contactEmail || 'N/A'}</a>
               </div>
               <div>
                 <span className="text-gray-500 block text-xs">Phone</span>
@@ -529,7 +529,7 @@ export default function IncidentDetail() {
           <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5">
             <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Attachments</h3>
-              <button onClick={handleAttach} className="text-[#792359] hover:bg-[#792359]/10 p-1 rounded-sm"><Plus size={14}/></button>
+              <button onClick={handleAttach} className="text-primary hover:bg-primary/10 p-1 rounded-sm"><Plus size={14}/></button>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-sm cursor-pointer border border-transparent hover:border-gray-200 transition-colors">

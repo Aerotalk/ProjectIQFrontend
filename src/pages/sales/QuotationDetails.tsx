@@ -632,7 +632,7 @@ export default function QuotationDetails() {
                     setIsApiLoading(false);
                   }
                 }}
-                className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
               >
                 {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Saving...</> : 'Save Draft'}
               </button>
@@ -672,7 +672,7 @@ export default function QuotationDetails() {
                 <button
                   disabled={isApiLoading}
                   onClick={() => handleStatusUpdate('Approved', 'Approved internally', 3)}
-                  className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
+                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
                 >
                   {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Approving...</> : 'Approve'}
                 </button>
@@ -715,7 +715,7 @@ export default function QuotationDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => handleStatusUpdate('Pending Approval', 'Revision sent for internal approval.', 2)}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 disabled:opacity-60"
             >
               {isApiLoading ? <><FunkyLoader variant="inline" className="mr-2" /> Sending...</> : 'Send Revision for Approval'}
             </button>
@@ -731,7 +731,7 @@ export default function QuotationDetails() {
             <button
               disabled={isApiLoading}
               onClick={() => setIsPoModalOpen(true)}
-              className="bg-[#792359] text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-[#52173c] transition-colors disabled:opacity-50"
+              className="bg-primary text-white px-4 py-1.5 text-sm font-medium rounded-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
               Upload Purchase Order
             </button>
@@ -774,16 +774,16 @@ export default function QuotationDetails() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-            <Link to="/companydashboard/sales" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Sales</Link>
+            <Link to="/companydashboard/sales" className="hover:text-primary dark:hover:text-secondary">Sales</Link>
             <ChevronRight size={14} />
-            <Link to="/companydashboard/sales/quotations" className="hover:text-[#792359] dark:hover:text-[#e6a8d0]">Quotations</Link>
+            <Link to="/companydashboard/sales/quotations" className="hover:text-primary dark:hover:text-secondary">Quotations</Link>
             <ChevronRight size={14} />
             <span className="text-gray-900 dark:text-white font-medium">{isNew ? 'New Quotation' : quotation.qtnNo}</span>
           </div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{isNew ? 'Create Quotation' : 'Quotation Details'}</h1>
             {!isNew && (
-              <span className="bg-[#792359]/10 text-[#792359] dark:bg-[#792359]/20 dark:text-[#e6a8d0] px-2.5 py-0.5 rounded-sm text-xs font-semibold">
+              <span className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-secondary px-2.5 py-0.5 rounded-sm text-xs font-semibold">
                 {quotation.qtnNo}
               </span>
             )}
@@ -849,7 +849,7 @@ export default function QuotationDetails() {
                 setIsEditing(!isEditing);
               }}
               className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors flex items-center gap-2 ${isEditing
-                ? 'bg-[#792359] hover:bg-[#52173c] text-white shadow-sm'
+                ? 'bg-primary hover:bg-primary-dark text-white shadow-sm'
                 : 'bg-white dark:bg-[#181a1f] border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                 }`}
             >
@@ -916,7 +916,7 @@ export default function QuotationDetails() {
             <button
               onClick={handlePreview}
               disabled={isLoadingPreview || isApiLoading}
-              className="bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
+              className="bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm flex items-center gap-2"
             >
               {isLoadingPreview ? (
                 <><FunkyLoader variant="inline" className="mr-2" /> Preparing PDF...</>
@@ -967,7 +967,7 @@ export default function QuotationDetails() {
                       options={[{ label: 'Select Client', value: '' }, ...clients.map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))]}
                     />
                   ) : (
-                    <p className="text-sm font-bold text-[#792359] dark:text-[#e6a8d0]">{quotation.client}</p>
+                    <p className="text-sm font-bold text-primary dark:text-secondary">{quotation.client}</p>
                   )}
                 </div>
                 <div>
@@ -1038,7 +1038,7 @@ export default function QuotationDetails() {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                      ? 'border-[#792359] text-[#792359] dark:border-[#e6a8d0] dark:text-[#e6a8d0]'
+                      ? 'border-primary text-primary dark:border-secondary dark:text-secondary'
                       : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                   >
@@ -1075,7 +1075,7 @@ export default function QuotationDetails() {
                                   min="1"
                                   value={item.qty}
                                   onChange={(e) => handleUpdateLineItem(item.id, 'qty', Number(e.target.value))}
-                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               ) : (
                                 item.qty
@@ -1088,7 +1088,7 @@ export default function QuotationDetails() {
                                   min="0"
                                   value={item.rate}
                                   onChange={(e) => handleUpdateLineItem(item.id, 'rate', Number(e.target.value))}
-                                  className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                  className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               ) : (
                                 item.rate.toLocaleString('en-IN')
@@ -1102,7 +1102,7 @@ export default function QuotationDetails() {
                                   max="100"
                                   value={item.gst}
                                   onChange={(e) => handleUpdateLineItem(item.id, 'gst', Number(e.target.value))}
-                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                                  className="w-16 px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
                               ) : (
                                 `${item.gst}%`
@@ -1121,7 +1121,7 @@ export default function QuotationDetails() {
                     {isEditing ? (
                       <button
                         onClick={() => setIsProductModalOpen(true)}
-                        className="flex items-center gap-2 text-sm text-[#792359] dark:text-[#e6a8d0] font-medium border border-[#792359]/20 px-3 py-1.5 rounded-sm hover:bg-[#792359]/5 transition-colors"
+                        className="flex items-center gap-2 text-sm text-primary dark:text-secondary font-medium border border-primary/20 px-3 py-1.5 rounded-sm hover:bg-primary/5 transition-colors"
                       >
                         <Plus size={16} /> Add Item
                       </button>
@@ -1156,7 +1156,7 @@ export default function QuotationDetails() {
                             type="number"
                             value={quotation.discount}
                             onChange={(e) => setQuotation({ ...quotation, discount: Number(e.target.value) })}
-                            className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                            className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
                             min="0"
                           />
                         ) : (
@@ -1170,7 +1170,7 @@ export default function QuotationDetails() {
                             type="number"
                             value={quotation.deliveryCost}
                             onChange={(e) => setQuotation({ ...quotation, deliveryCost: Number(e.target.value) })}
-                            className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                            className="w-24 px-2 py-1 text-right text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
                             min="0"
                           />
                         ) : (
@@ -1179,7 +1179,7 @@ export default function QuotationDetails() {
                       </div>
                       <div className="border-t border-gray-200 dark:border-white/10 pt-2 flex justify-between">
                         <span className="font-bold text-gray-900 dark:text-white">Grand Total</span>
-                        <span className="font-bold text-[#792359] dark:text-[#e6a8d0]">₹ {grandTotal.toLocaleString('en-IN')}</span>
+                        <span className="font-bold text-primary dark:text-secondary">₹ {grandTotal.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -1226,12 +1226,12 @@ export default function QuotationDetails() {
                   value={tempNotes}
                   onChange={(e) => setTempNotes(e.target.value)}
                   placeholder="Add a new note or communication..."
-                  className="w-full pl-3 pr-12 py-3 border border-gray-200 dark:border-white/10 rounded-sm text-sm bg-gray-50 dark:bg-[#0f1115] min-h-[80px] resize-none focus:outline-none focus:ring-1 focus:ring-[#792359]"
+                  className="w-full pl-3 pr-12 py-3 border border-gray-200 dark:border-white/10 rounded-sm text-sm bg-gray-50 dark:bg-[#0f1115] min-h-[80px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <button
                   disabled={!tempNotes.trim()}
                   onClick={handleAddCommunication}
-                  className="absolute right-3 bottom-3 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors disabled:opacity-50 bg-white dark:bg-[#0f1115] rounded-full p-1"
+                  className="absolute right-3 bottom-3 text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors disabled:opacity-50 bg-white dark:bg-[#0f1115] rounded-full p-1"
                   title="Send Note"
                 >
                   <Send size={18} />
@@ -1296,7 +1296,7 @@ export default function QuotationDetails() {
                     {uploadedDocuments.map((doc: any, idx) => (
                       <li key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-md">
                         <div className="flex items-center gap-3">
-                          <FileText size={18} className="text-[#792359] dark:text-[#e6a8d0]" />
+                          <FileText size={18} className="text-primary dark:text-secondary" />
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">PO: {doc.poNumber}</p>
                             <p className="text-xs text-gray-500">Date: {doc.date}</p>
@@ -1307,7 +1307,7 @@ export default function QuotationDetails() {
                             href={`${API_BASE_URL}/admin/files/${doc.fileId}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline"
+                            className="text-xs font-medium text-primary dark:text-secondary hover:underline"
                           >
                             View Document
                           </a>
@@ -1321,7 +1321,7 @@ export default function QuotationDetails() {
                               href={`/companydashboard/finance/pos/${doc.fileId.match(/\((.*?)\)/)?.[1]}`} 
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs font-medium text-[#792359] dark:text-[#e6a8d0] hover:underline cursor-pointer"
+                              className="text-xs font-medium text-primary dark:text-secondary hover:underline cursor-pointer"
                             >
                               View PO
                             </a>
@@ -1354,7 +1354,7 @@ export default function QuotationDetails() {
             <div className="p-4 overflow-y-auto">
               <div className="space-y-3">
                 {availableProducts.map(product => (
-                  <div key={product.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-white/10 rounded-sm hover:border-[#792359]/50 transition-colors">
+                  <div key={product.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-white/10 rounded-sm hover:border-primary/50 transition-colors">
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white text-sm">{product.name}</p>
                       <p className="text-xs text-gray-500">{product.category} • Rate: ₹ {product.rate.toLocaleString('en-IN')} (GST: {product.gst}%)</p>
@@ -1371,7 +1371,7 @@ export default function QuotationDetails() {
                         setIsProductModalOpen(false);
                         toast.success('Product added successfully');
                       }}
-                      className="bg-[#792359] text-white px-3 py-1.5 text-xs font-medium rounded-sm hover:bg-[#52173c] transition-colors"
+                      className="bg-primary text-white px-3 py-1.5 text-xs font-medium rounded-sm hover:bg-primary-dark transition-colors"
                     >
                       Add
                     </button>

@@ -21,7 +21,7 @@ export default function TicketAdmin() {
  <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Settings</h1>
  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure your ticket management system preferences.</p>
  </div>
- <button className="px-4 py-2 bg-[#792359] hover:bg-[#52173c] text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+ <button className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-sm text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
  <Plus size={16} /> Add {activeTab.replace(/s$/, '')}
  </button>
  </div>
@@ -35,7 +35,7 @@ export default function TicketAdmin() {
  <button 
  key={tab}
  onClick={() => setActiveTab(tab)}
- className={`px-5 py-3.5 transition-colors border-l-2 text-left text-sm ${activeTab === tab ? 'border-[#792359] text-[#792359] dark:text-[#e6a8d0] dark:border-[#e6a8d0] bg-[#792359]/5 dark:bg-white/5' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
+ className={`px-5 py-3.5 transition-colors border-l-2 text-left text-sm ${activeTab === tab ? 'border-primary text-primary dark:text-secondary dark:border-secondary bg-primary/5 dark:bg-white/5' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
  >
  {tab}
  </button>
@@ -51,7 +51,7 @@ export default function TicketAdmin() {
  <div className="flex gap-3">
  <div className="relative">
  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
- <input type="text" placeholder={`Search ${activeTab.toLowerCase()}...`} className="pl-8 pr-4 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] text-gray-900 dark:text-white w-full sm:w-64" />
+ <input type="text" placeholder={`Search ${activeTab.toLowerCase()}...`} className="pl-8 pr-4 py-1.5 text-sm bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary text-gray-900 dark:text-white w-full sm:w-64" />
  </div>
  <button className="px-3 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
  <Filter size={14} />
@@ -91,7 +91,7 @@ export default function TicketAdmin() {
  </td>
  <td className="px-6 py-4 text-right">
  <div className="flex justify-end gap-2 ">
- <button className="p-1.5 text-gray-400 hover:text-[#792359] dark:hover:text-[#e6a8d0] rounded-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+ <button className="p-1.5 text-gray-400 hover:text-primary dark:hover:text-secondary rounded-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
  <Edit2 size={16} />
  </button>
  <button className="p-1.5 text-gray-400 hover:text-red-600 rounded-sm hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">

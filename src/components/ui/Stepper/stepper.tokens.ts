@@ -1,14 +1,14 @@
 export const stepperTokens = {
   colors: {
-    brand: 'bg-[#792359] border-[#792359]',
+    brand: 'bg-primary border-primary',
     brandText: 'text-gray-900 dark:text-white',
-    brandLight: 'bg-[#792359]/10 border-[#792359]/20 text-[#792359] dark:bg-[#e6a8d0]/10 dark:border-[#e6a8d0]/20 dark:text-[#e6a8d0]',
+    brandLight: 'bg-primary/10 border-primary/20 text-primary dark:bg-secondary/10 dark:border-secondary/20 dark:text-secondary',
     neutral: 'bg-white dark:bg-[#181a1f] border-gray-200 dark:border-gray-700',
     neutralText: 'text-gray-400 dark:text-gray-500',
     textActive: 'text-gray-900 dark:text-white',
     textCompleted: 'text-gray-600 dark:text-gray-400',
     connectorBg: 'bg-gray-200 dark:bg-gray-700',
-    connectorFill: 'bg-[#792359] dark:bg-[#e6a8d0]',
+    connectorFill: 'bg-primary dark:bg-secondary',
   },
   sizes: {
     sm: {

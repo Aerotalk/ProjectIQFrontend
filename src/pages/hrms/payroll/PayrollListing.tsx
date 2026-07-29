@@ -62,7 +62,7 @@ export default function PayrollListing() {
  <div className="mb-4 flex items-center gap-2 shrink-0">
  <button 
  onClick={() => navigate('/companydashboard/payroll')}
- className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#792359] dark:hover:text-[#e6a8d0] transition-colors"
+ className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors"
  >
  <ArrowLeft size={16} />
  Back to Payroll Dashboard
@@ -88,14 +88,14 @@ export default function PayrollListing() {
  <div className="flex items-center gap-3">
  <button 
  onClick={() => setShowFilters(!showFilters)}
- className={`flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-white/10 rounded-md transition-colors text-sm font-medium shadow-sm shrink-0 ${showFilters ? 'bg-gray-100 dark:bg-white/10 text-[#792359] dark:text-[#e6a8d0]' : 'bg-white dark:bg-[#1f2229] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+ className={`flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-white/10 rounded-md transition-colors text-sm font-medium shadow-sm shrink-0 ${showFilters ? 'bg-gray-100 dark:bg-white/10 text-primary dark:text-secondary' : 'bg-white dark:bg-[#1f2229] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
  >
  <Filter size={16} />
  <span className="hidden sm:inline">Filters</span>
  </button>
  <button 
  onClick={() => openDrawer('create')}
- className="flex items-center gap-2 px-4 py-2 bg-[#792359] text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm shrink-0"
+ className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm shrink-0"
  >
  <Plus size={16} />
  <span className="hidden sm:inline">New Record</span>
@@ -170,7 +170,7 @@ export default function PayrollListing() {
  <tr>
  <td colSpan={9} className="px-6 py-12 text-center">
  <div className="flex flex-col items-center justify-center text-gray-400">
- <Loader2 size={24} className="animate-spin text-[#792359] mb-2" />
+ <Loader2 size={24} className="animate-spin text-primary mb-2" />
  <p>Loading payrolls...</p>
  </div>
  </td>
@@ -180,7 +180,7 @@ export default function PayrollListing() {
  <td colSpan={9} className="px-6 py-12 text-center">
  <div className="flex flex-col items-center justify-center text-gray-500">
  <p>No payroll records found.</p>
- <button onClick={clearFilters} className="text-[#792359] hover:underline mt-1">Clear filters</button>
+ <button onClick={clearFilters} className="text-primary hover:underline mt-1">Clear filters</button>
  </div>
  </td>
  </tr>
@@ -193,7 +193,7 @@ export default function PayrollListing() {
  >
  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
  <div className="flex items-center gap-3">
- <div className="w-8 h-8 rounded-full bg-[#f0e4ec] dark:bg-[#792359]/20 text-[#792359] dark:text-[#e6a8d0] flex items-center justify-center font-bold text-xs shrink-0">
+ <div className="w-8 h-8 rounded-full bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-xs shrink-0">
  {payroll.employee.substring(0, 2).toUpperCase()}
  </div>
  <span className="truncate">{payroll.employee}</span>

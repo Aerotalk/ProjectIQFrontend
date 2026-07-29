@@ -18,7 +18,7 @@ export default function PerformanceReports() {
   const deptColumns = [
     { key: 'department', label: 'Department' },
     { key: 'totalEmployees', label: 'Headcount' },
-    { key: 'avgRating', label: 'Avg. Rating', render: (v: any) => <span className="font-bold text-[#792359] dark:text-[#e6a8d0]">{v.toFixed(1)}</span> },
+    { key: 'avgRating', label: 'Avg. Rating', render: (v: any) => <span className="font-bold text-primary dark:text-secondary">{v.toFixed(1)}</span> },
     { key: 'topPerformers', label: 'Top Performers', render: (v: any) => <span className="text-green-600">{v}</span> },
     { key: 'needsImprovement', label: 'Needs Improvement', render: (v: any) => <span className="text-orange-600">{v}</span> }
   ];
@@ -39,7 +39,7 @@ export default function PerformanceReports() {
         <div className="flex items-center gap-3">
           <div className="flex items-center mr-4 border-r border-gray-200 dark:border-gray-700 pr-4">
             <span className="text-sm text-gray-500 mr-2">Cycle:</span>
-            <select className="border-gray-300 dark:border-gray-700 rounded-sm bg-white dark:bg-[#1f2229] text-sm py-1.5 px-3 focus:outline-none focus:border-[#792359]">
+            <select className="border-gray-300 dark:border-gray-700 rounded-sm bg-white dark:bg-[#1f2229] text-sm py-1.5 px-3 focus:outline-none focus:border-primary">
               {mockCycles.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
@@ -62,19 +62,19 @@ export default function PerformanceReports() {
           <div className="space-y-1">
             <button 
               onClick={() => setActiveReport('department')}
-              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'department' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'department' ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
               <BarChart2 size={16} className="mr-2" /> Department Ratings
             </button>
             <button 
               onClick={() => setActiveReport('goals')}
-              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'goals' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'goals' ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
               <PieChart size={16} className="mr-2" /> Goal Achievement
             </button>
             <button 
               onClick={() => setActiveReport('promotions')}
-              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'promotions' ? 'bg-[#792359]/10 text-[#792359]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              className={`w-full text-left px-3 py-2 rounded-sm text-sm font-medium transition-colors flex items-center ${activeReport === 'promotions' ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
               <TrendingUp size={16} className="mr-2" /> Promotion Recs.
             </button>

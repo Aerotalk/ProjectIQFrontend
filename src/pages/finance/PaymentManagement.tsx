@@ -212,7 +212,7 @@ export default function PaymentManagement() {
         </div>
         <button
           onClick={() => openDrawer('create')}
-          className="flex items-center gap-2 bg-[#792359] hover:bg-[#52173c] text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors shadow-sm"
         >
           <Plus size={16} />
           Record Payment
@@ -250,7 +250,7 @@ export default function PaymentManagement() {
               placeholder="Search ID, Ref..."
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:border-[#792359] transition-colors"
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function PaymentManagement() {
                 {currentItems.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors text-sm">
                     <td className="px-6 py-4">
-                      <button onClick={() => openDrawer('view', p)} className="font-semibold text-[#792359] dark:text-[#c44997] hover:underline">
+                      <button onClick={() => openDrawer('view', p)} className="font-semibold text-primary dark:text-[#c44997] hover:underline">
                         {p.paymentId}
                       </button>
                     </td>
@@ -341,7 +341,7 @@ export default function PaymentManagement() {
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page ? 'bg-[#792359] text-white shadow-sm' : 'border border-gray-300 dark:border-white/10 text-gray-600 hover:bg-gray-50'}`}>
+                <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${currentPage === page ? 'bg-primary text-white shadow-sm' : 'border border-gray-300 dark:border-white/10 text-gray-600 hover:bg-gray-50'}`}>
                   {page}
                 </button>
               ))}

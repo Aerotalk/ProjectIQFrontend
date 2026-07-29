@@ -55,7 +55,7 @@ export default function AdminUsersList() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-[#181a1f] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm">
-           <Loader2 className="animate-spin text-[#792359] mb-4" size={32} />
+           <Loader2 className="animate-spin text-primary mb-4" size={32} />
            <p className="text-gray-500 font-medium">Loading users...</p>
         </div>
       ) : (
@@ -75,7 +75,7 @@ export default function AdminUsersList() {
                   <tr key={emp.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#792359] to-[#b8458f] flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-xs font-bold">
                           {emp.firstName?.charAt(0)}{emp.lastName?.charAt(0)}
                         </div>
                         <div>
