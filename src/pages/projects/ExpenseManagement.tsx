@@ -191,6 +191,7 @@ export default function ExpenseManagement() {
           initialData={selectedExpense || undefined}
           expenseId={selectedExpense?.id}
           isSubmitting={isSubmitting}
+          nextNumber={getNextSequenceNumber(expenses, 'expenseNo')}
         />
       </div>
     );
@@ -309,7 +310,7 @@ export default function ExpenseManagement() {
                         onClick={() => openDrawer('view', ex)}
                         className="text-sm font-semibold text-[#792359] dark:text-[#c43890] hover:underline text-left focus:outline-none block"
                       >
-                        {`EXP-${ex.id.substring(0, 6).toUpperCase()}`}
+                        {ex.expenseNo || '—'}
                       </button>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 max-w-[150px] truncate" title={ex.description}>
                         {ex.description}
@@ -449,18 +450,6 @@ export default function ExpenseManagement() {
           </div>
         </div>
       )}
-
-      {/* ── Expense Drawer ── */}
-      <ExpenseDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveExpense}
-        mode={drawerMode}
-        initialData={selectedExpense || undefined}
-        expenseId={selectedExpense?.id}
-        isSubmitting={isSubmitting}
-        nextNumber={getNextSequenceNumber(expenses, 'id')}
-      />
     </div>
   );
 }

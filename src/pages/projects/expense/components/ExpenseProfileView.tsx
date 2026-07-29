@@ -55,7 +55,7 @@ export default function ExpenseProfileView({ expense: initialExpense, onClose, o
           </div>
           <div className="space-y-1">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              {expense.id ? `EXP-${expense.id.substring(0, 6).toUpperCase()}` : 'Expense Details'}
+              {expense.expenseNo || 'Expense Details'}
             </h2>
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">

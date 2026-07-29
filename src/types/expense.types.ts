@@ -8,7 +8,8 @@ export type ExpenseCategory =
   | 'Miscellaneous';
 
 export interface Expense {
-  id: string;                     // Auto-generated, Format: EXP-0001
+  id: string;                     // Auto-generated UUID from backend
+  expenseNo?: string;             // Human-readable number e.g. EXP/2026/001
   projectId: string;              // Project linked to expense
   projectName?: string;           // Hydrated display name
   expenseDate: string;            // ISO date string

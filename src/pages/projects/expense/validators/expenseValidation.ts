@@ -7,7 +7,11 @@ export const expenseSchema = z.object({
   expenseDate: z.string().min(1, 'Expense Date is required').refine(dateStr => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const selected = new Date(dateStr);
+    // Parse as local time — new Date("yyyy-MM-dd") treats the string as UTC midnight,
+    // which is ahead of local midnight in timezones like IST (UTC+5:30) and causes
+    // today's date to fail the "future date" check.
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const selected = new Date(year, month - 1, day);
     return selected <= today;
   }, { message: 'Expense Date cannot be in the future' }),
   category: z.enum([
