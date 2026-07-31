@@ -21,7 +21,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
   const { can } = usePermissions();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -63,7 +63,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
       <div className={`fixed top-20 right-8 flex items-center gap-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-5 py-3.5 rounded-sm shadow-xl transition-all duration-500 transform z-50 ${showWelcome ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0 pointer-events-none'}`}>
         <CheckCircle2 size={20} />
         <div>
-          <span className="block text-sm font-bold">Welcome back, Super Admin!</span>
+          <span className="block text-sm font-bold">Welcome back, {user?.username || 'Super Admin'}!</span>
           <span className="block text-xs mt-0.5 opacity-90">You have successfully logged in.</span>
         </div>
       </div>
@@ -106,10 +106,10 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
         <div className="p-4 border-t border-white/5 bg-black/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-sm bg-primary flex items-center justify-center text-white font-bold text-xs">
-              SA
+              {user?.username ? user.username.substring(0, 2).toUpperCase() : 'SA'}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white truncate max-w-[130px]" title="Super Admin">Super Admin</span>
+              <span className="text-sm font-medium text-white truncate max-w-[130px]" title={user?.username || "Super Admin"}>{user?.username || "Super Admin"}</span>
               <span className="text-[10px] text-gray-400">System Administrator</span>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
         <header className="h-16 bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-4 lg:px-6 xl:px-8 sticky top-0 z-10 transition-colors duration-200 shadow-sm">
 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
-            <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Super Admin</span>
+            <span className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">{user?.username || 'Super Admin'}</span>
             <ChevronRight size={14} className="mx-2 shrink-0" />
             <span className="text-primary dark:text-secondary truncate">Organizations</span>
           </div>
@@ -156,15 +156,15 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
                 className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-white/5 p-1.5 rounded-sm transition-colors"
               >
                 <div className="w-7 h-7 bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary flex items-center justify-center font-bold text-xs rounded-sm">
-                  SA
+                  {user?.username ? user.username.substring(0, 2).toUpperCase() : 'SA'}
                 </div>
               </button>
 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1f2229] border border-gray-100 dark:border-white/10 shadow-xl py-1 z-50 rounded-sm origin-top-right animate-in fade-in zoom-in duration-150">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">Super Admin</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">superadmin@aerotalk.in</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user?.username || 'Super Admin'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{user?.email || 'superadmin@aerotalk.in'}</p>
                   </div>
                   <div className="py-1">
                     <button 
