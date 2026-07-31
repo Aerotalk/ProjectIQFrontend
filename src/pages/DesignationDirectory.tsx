@@ -10,8 +10,13 @@ interface Designation {
  designationCode: string;
  designationName: string;
  description: string;
- hierarchyLevel: number;
+ role?: { id: string; roleName: string; };
  createdAt: string;
+}
+
+interface Role {
+ id: string;
+ roleName: string;
 }
 
 interface Company {
@@ -30,6 +35,7 @@ export default function DesignationDirectory() {
  );
 
  const [designations, setDesignations] = useState<Designation[]>([]);
+ const [roles, setRoles] = useState<Role[]>([]);
  const [loading, setLoading] = useState(true);
  const [searchTerm, setSearchTerm] = useState('');
  const [error, setError] = useState<string | null>(null);
@@ -39,7 +45,7 @@ export default function DesignationDirectory() {
  const [newDesigCode, setNewDesigCode] = useState('');
  const [newDesigName, setNewDesigName] = useState('');
  const [newDesigDesc, setNewDesigDesc] = useState('');
- const [newHierarchyLevel, setNewHierarchyLevel] = useState<number>(0);
+ const [newRoleId, setNewRoleId] = useState('');
  const [submitting, setSubmitting] = useState(false);
 
  // Edit modal state
@@ -48,19 +54,27 @@ export default function DesignationDirectory() {
  const [editDesigCode, setEditDesigCode] = useState('');
  const [editDesigName, setEditDesigName] = useState('');
  const [editDesigDesc, setEditDesigDesc] = useState('');
- const [editHierarchyLevel, setEditHierarchyLevel] = useState<number>(0);
+ const [editRoleId, setEditRoleId] = useState('');
 
  useEffect(() => {
- if (!isCompanyScopedUser) {
- api.get('/org/companies')
- .then((res: Company[]) => {
- setCompanies(res);
- if (res.length > 0 && !selectedCompanyId) {
- setSelectedCompanyId(res[0].id);
- }
- })
- .catch(console.error);
- }
+  api.get('/admin/roles/available')
+   .then((res: Role[]) => {
+    // Filter out Admin roles
+    const filteredRoles = res.filter(r => !['ROLE_SUPER_ADMIN', 'ROLE_COMPANY_ADMIN', 'ROLE_ORG_ADMIN'].includes(r.roleName));
+    setRoles(filteredRoles);
+   })
+   .catch(console.error);
+
+  if (!isCompanyScopedUser) {
+   api.get('/org/companies')
+    .then((res: Company[]) => {
+     setCompanies(res);
+     if (res.length > 0 && !selectedCompanyId) {
+      setSelectedCompanyId(res[0].id);
+     }
+    })
+    .catch(console.error);
+  }
  }, [isCompanyScopedUser]);
 
  useEffect(() => {
@@ -89,19 +103,19 @@ export default function DesignationDirectory() {
  e.preventDefault();
  try {
  setSubmitting(true);
- await api.post(`/admin/designations`, {
- designationCode: newDesigCode,
- designationName: newDesigName,
- description: newDesigDesc,
- hierarchyLevel: newHierarchyLevel,
- companyId: selectedCompanyId || undefined,
- });
+   await api.post(`/admin/designations`, {
+    designationCode: newDesigCode,
+    designationName: newDesigName,
+    description: newDesigDesc,
+    roleId: newRoleId || undefined,
+    companyId: selectedCompanyId || undefined,
+   });
  setIsAddModalOpen(false);
- setNewDesigCode('');
- setNewDesigName('');
- setNewDesigDesc('');
- setNewHierarchyLevel(0);
- fetchDesignations();
+   setNewDesigCode('');
+   setNewDesigName('');
+   setNewDesigDesc('');
+   setNewRoleId('');
+   fetchDesignations();
  } catch (err: any) {
  alert(err.message || 'Failed to add designation');
  } finally {
@@ -111,11 +125,11 @@ export default function DesignationDirectory() {
 
  const handleEditClick = (desig: Designation) => {
  setEditingDesigId(desig.id);
- setEditDesigCode(desig.designationCode);
- setEditDesigName(desig.designationName);
- setEditDesigDesc(desig.description || '');
- setEditHierarchyLevel(desig.hierarchyLevel || 0);
- setIsEditModalOpen(true);
+  setEditDesigCode(desig.designationCode);
+  setEditDesigName(desig.designationName);
+  setEditDesigDesc(desig.description || '');
+  setEditRoleId(desig.role?.id || '');
+  setIsEditModalOpen(true);
  };
 
  const handleUpdateDesignation = async (e: React.FormEvent) => {
@@ -123,12 +137,12 @@ export default function DesignationDirectory() {
  if (!editingDesigId) return;
  try {
  setSubmitting(true);
- await api.put(`/admin/designations/${editingDesigId}`, {
- designationCode: editDesigCode,
- designationName: editDesigName,
- description: editDesigDesc,
- hierarchyLevel: editHierarchyLevel,
- });
+   await api.put(`/admin/designations/${editingDesigId}`, {
+    designationCode: editDesigCode,
+    designationName: editDesigName,
+    description: editDesigDesc,
+    roleId: editRoleId || undefined,
+   });
  setIsEditModalOpen(false);
  setEditingDesigId(null);
  fetchDesignations();
@@ -228,13 +242,15 @@ export default function DesignationDirectory() {
  <div className="overflow-hidden">
  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{desig.designationName}</h3>
  <div className="flex items-center gap-2 mt-0.5">
- <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
- {desig.designationCode}
- </span>
- <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded-md">
- Level {desig.hierarchyLevel}
- </span>
- </div>
+         <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
+          {desig.designationCode}
+         </span>
+         {desig.role && (
+          <span className="text-[10px] font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded-md">
+           {desig.role.roleName.replace('ROLE_', '').replace(/_/g, ' ')}
+          </span>
+         )}
+        </div>
  </div>
  </div>
  </div>
@@ -298,18 +314,14 @@ export default function DesignationDirectory() {
  placeholder="e.g. Senior Developer"
  />
  </div>
- <div>
- <label className={formStyles.label}>Hierarchy Level *</label>
- <input
- required
- type="number"
- min="1"
- value={newHierarchyLevel || ''}
- onChange={(e) => setNewHierarchyLevel(parseInt(e.target.value) || 0)}
- className={formStyles.field()}
- placeholder="1 (Highest), 2, 3..."
- />
- </div>
+       <div>
+        <label className={formStyles.label}>Role</label>
+        <CustomSelect
+         value={newRoleId}
+         onChange={setNewRoleId}
+         options={[{ label: 'Select a Role', value: '' }, ...roles.map(r => ({ label: r.roleName.replace('ROLE_', '').replace(/_/g, ' '), value: r.id }))]}
+        />
+       </div>
  <div>
  <label className={formStyles.label}>Description</label>
  <textarea
@@ -378,17 +390,14 @@ export default function DesignationDirectory() {
  className={formStyles.field()}
  />
  </div>
- <div>
- <label className={formStyles.label}>Hierarchy Level *</label>
- <input
- required
- type="number"
- min="1"
- value={editHierarchyLevel || ''}
- onChange={(e) => setEditHierarchyLevel(parseInt(e.target.value) || 0)}
- className={formStyles.field()}
- />
- </div>
+       <div>
+        <label className={formStyles.label}>Role</label>
+        <CustomSelect
+         value={editRoleId}
+         onChange={setEditRoleId}
+         options={[{ label: 'Select a Role', value: '' }, ...roles.map(r => ({ label: r.roleName.replace('ROLE_', '').replace(/_/g, ' '), value: r.id }))]}
+        />
+       </div>
  <div>
  <label className={formStyles.label}>Description</label>
  <textarea
