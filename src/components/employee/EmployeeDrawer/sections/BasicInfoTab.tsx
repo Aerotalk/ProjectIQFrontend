@@ -23,11 +23,10 @@ export default function BasicInfoTab({ readOnly }: Props) {
     const fetchDropdownData = async () => {
       try {
         const query = companyId ? `?companyId=${companyId}` : '';
-        const managerQuery = companyId ? `?companyId=${companyId}&roleName=Manager` : '?roleName=Manager';
         const [deptRes, desigRes, managerRes] = await Promise.all([
           api.get(`/admin/departments${query}`),
           api.get(`/admin/designations${query}`),
-          api.get(`/admin/employees${managerQuery}`)
+          api.get(`/admin/employees${query}`)
         ]);
 
         setDepartments(deptRes);

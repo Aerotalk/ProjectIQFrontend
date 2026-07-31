@@ -19,8 +19,8 @@ export default function PositionChangeTab({ readOnly }: Props) {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
-        const managerQuery = companyId ? `?companyId=${companyId}&roleName=Manager` : '?roleName=Manager';
-        const res = await api.get(`/admin/employees${managerQuery}`);
+        const query = companyId ? `?companyId=${companyId}` : '';
+        const res = await api.get(`/admin/employees${query}`);
         setManagers(res);
       } catch (err) {
         console.error("Failed to load managers", err);
