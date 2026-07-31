@@ -1,6 +1,8 @@
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext, Controller, useWatch } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { api } from '../../../../lib/api';
 import { Input } from '@/components/ui/input';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
@@ -11,6 +13,22 @@ interface Props {
 
 export default function PositionChangeTab({ readOnly }: Props) {
   const { register, control } = useFormContext();
+  const companyId = useWatch({ control, name: 'companyId' });
+  const [managers, setManagers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const managerQuery = companyId ? `?companyId=${companyId}&roleName=Manager` : '?roleName=Manager';
+        const res = await api.get(`/admin/employees${managerQuery}`);
+        setManagers(res);
+      } catch (err) {
+        console.error("Failed to load managers", err);
+      }
+    };
+    
+    fetchDropdownData();
+  }, [companyId]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -66,7 +84,21 @@ export default function PositionChangeTab({ readOnly }: Props) {
           {/* Row: New Reporting Manager | (spacer) */}
           <div>
             <label className={formStyles.label}>New Reporting Manager</label>
-            <Input type="text" {...register('positionChangeReportingManagerId')} disabled={readOnly} />
+            <Controller
+              name={'positionChangeReportingManagerId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select New Reporting Manager --', value: '' },
+                    ...managers.map((m: any) => ({ label: `${m.firstName} ${m.lastName}`, value: m.id }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
           </div>
           <div /> {/* intentional spacer */}
 

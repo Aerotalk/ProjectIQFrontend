@@ -17,18 +17,22 @@ export default function BasicInfoTab({ readOnly }: Props) {
   const companyId = useWatch({ control, name: 'companyId' });
   const [departments, setDepartments] = useState<any[]>([]);
   const [designations, setDesignations] = useState<any[]>([]);
+  const [managers, setManagers] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
         const query = companyId ? `?companyId=${companyId}` : '';
-        const [deptRes, desigRes] = await Promise.all([
+        const managerQuery = companyId ? `?companyId=${companyId}&roleName=Manager` : '?roleName=Manager';
+        const [deptRes, desigRes, managerRes] = await Promise.all([
           api.get(`/admin/departments${query}`),
-          api.get(`/admin/designations${query}`)
+          api.get(`/admin/designations${query}`),
+          api.get(`/admin/employees${managerQuery}`)
         ]);
 
         setDepartments(deptRes);
         setDesignations(desigRes);
+        setManagers(managerRes);
       } catch (err) {
         console.error("Failed to load departments/designations", err);
       }
@@ -234,14 +238,42 @@ export default function BasicInfoTab({ readOnly }: Props) {
           </div>
           <div>
             <label className={formStyles.label}>Reporting Manager</label>
-            <Input type="text" {...register('reportingManagerId')} disabled={readOnly} />
+            <Controller
+              name={'reportingManagerId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select Reporting Manager --', value: '' },
+                    ...managers.map((m: any) => ({ label: `${m.firstName} ${m.lastName}`, value: m.id }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
             {errors.reportingManagerId && <p className="text-red-500 text-xs mt-1">{errors.reportingManagerId.message as string}</p>}
           </div>
 
           {/* Row: HR Manager | Weekly Off */}
           <div>
             <label className={formStyles.label}>HR Manager</label>
-            <Input type="text" {...register('hrManagerId')} disabled={readOnly} />
+            <Controller
+              name={'hrManagerId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select HR Manager --', value: '' },
+                    ...managers.map((m: any) => ({ label: `${m.firstName} ${m.lastName}`, value: m.id }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
           </div>
           <div>
             <label className={formStyles.label}>Weekly Off</label>
