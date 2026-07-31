@@ -1,11 +1,12 @@
 import SharedPhoneInput from '@/components/shared/SharedPhoneInput';
 import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext, Controller, useWatch } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { api } from '../../../../lib/api';
 import { Input } from '@/components/ui/input';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid } from '@/components/ui/FormLayout';
-
 
 interface Props {
   readOnly?: boolean;
@@ -13,6 +14,29 @@ interface Props {
 
 export default function BasicInfoTab({ readOnly }: Props) {
   const { register, control, formState: { errors } } = useFormContext();
+  const companyId = useWatch({ control, name: 'companyId' });
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [designations, setDesignations] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const query = companyId ? `?companyId=${companyId}` : '';
+        const [deptRes, desigRes] = await Promise.all([
+          api.get(`/admin/departments${query}`),
+          api.get(`/admin/designations${query}`)
+        ]);
+
+        setDepartments(deptRes);
+        setDesignations(desigRes);
+      } catch (err) {
+        console.error("Failed to load departments/designations", err);
+      }
+    };
+    
+    // Always fetch if no companyId (for org-level) or if companyId changes
+    fetchDropdownData();
+  }, [companyId]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -156,18 +180,47 @@ export default function BasicInfoTab({ readOnly }: Props) {
             <Input type="text" {...register('companyId')} disabled={readOnly} />
             {errors.companyId && <p className="text-red-500 text-xs mt-1">{errors.companyId.message as string}</p>}
           </div>
+          {/* Row: Department | Designation */}
           <div>
             <label className={formStyles.label}>Department</label>
-            <Input type="text" {...register('departmentId')} disabled={readOnly} />
+            <Controller
+              name={'departmentId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select Department --', value: '' },
+                    ...departments.map((d: any) => ({ label: d.departmentName, value: d.id }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
             {errors.departmentId && <p className="text-red-500 text-xs mt-1">{errors.departmentId.message as string}</p>}
           </div>
-
-          {/* Row: Designation | Location */}
           <div>
             <label className={formStyles.label}>Designation</label>
-            <Input type="text" {...register('designationId')} disabled={readOnly} />
+            <Controller
+              name={'designationId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select Designation --', value: '' },
+                    ...designations.map((d: any) => ({ label: d.designationName, value: d.id }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
             {errors.designationId && <p className="text-red-500 text-xs mt-1">{errors.designationId.message as string}</p>}
           </div>
+
+          {/* Row: Location | Grade / Band */}
           <div>
             <label className={formStyles.label}>Location</label>
             <Input type="text" {...register('location')} disabled={readOnly} />
