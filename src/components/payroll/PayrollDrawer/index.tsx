@@ -106,6 +106,7 @@ export default function PayrollDrawer({ isOpen, onClose, onSave, mode, initialDa
       onClose={onClose}
       isSubmitting={isSubmitting}
       readOnly={readOnly}
+      inline={true}
       form={form}
       onSubmit={onSubmit}
       onError={onError}

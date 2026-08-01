@@ -18,6 +18,7 @@ export interface WorkflowStepperProps {
   onSave?: () => void;
   isSubmitting?: boolean;
   readOnly?: boolean;
+  inline?: boolean;
   form?: UseFormReturn<any>;
   onSubmit?: (data: any) => void;
   onError?: (errors: any) => void;
@@ -33,6 +34,7 @@ export default function WorkflowStepper({
   onSave,
   isSubmitting,
   readOnly,
+  inline = false,
   form,
   onSubmit,
   onError,
@@ -57,9 +59,17 @@ export default function WorkflowStepper({
     </div>
   );
 
+  const containerClasses = inline
+    ? "w-full h-full bg-white dark:bg-[#181a1f] flex flex-col border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden animate-in fade-in duration-300 shadow-sm"
+    : "fixed inset-0 z-[100] flex justify-end bg-black/20 dark:bg-black/40 transition-opacity";
+
+  const innerClasses = inline
+    ? "w-full h-full flex flex-col"
+    : "w-full max-w-xl bg-white dark:bg-[#181a1f] h-full shadow-2xl border-l border-gray-200 dark:border-white/10 flex flex-col animate-in slide-in-from-right duration-300";
+
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end bg-black/20 dark:bg-black/40 transition-opacity">
-      <div className="w-full max-w-xl bg-white dark:bg-[#181a1f] h-full shadow-2xl border-l border-gray-200 dark:border-white/10 flex flex-col animate-in slide-in-from-right duration-300">
+    <div className={containerClasses}>
+      <div className={innerClasses}>
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] shrink-0">
         <div>
