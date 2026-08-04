@@ -63,7 +63,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
             <Input type="text" {...register('middleName')} disabled={readOnly} />
           </div>
           <div>
-            <label className={formStyles.label}>Date of Birth</label>
+            <label className={formStyles.label}>Date of Birth *</label>
             <CustomDatePicker name="dateOfBirth" disabled={readOnly} />
             {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth.message as string}</p>}
           </div>
@@ -86,7 +86,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
             <SharedPhoneInput name="alternatePhone" disabled={readOnly} />
           </div>
           <div>
-            <label className={formStyles.label}>Gender</label>
+            <label className={formStyles.label}>Gender *</label>
             <Controller
               name={'gender'}
               control={control}
@@ -109,7 +109,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
 
           {/* Row: Marital Status | Blood Group */}
           <div>
-            <label className={formStyles.label}>Marital Status</label>
+            <label className={formStyles.label}>Marital Status *</label>
             <Controller
               name={'maritalStatus'}
               control={control}
@@ -128,20 +128,24 @@ export default function BasicInfoTab({ readOnly }: Props) {
                 />
               )}
             />
+            {errors.maritalStatus && <p className="text-red-500 text-xs mt-1">{errors.maritalStatus.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Blood Group</label>
+            <label className={formStyles.label}>Blood Group *</label>
             <Input type="text" {...register('bloodGroup')} disabled={readOnly} />
+            {errors.bloodGroup && <p className="text-red-500 text-xs mt-1">{errors.bloodGroup.message as string}</p>}
           </div>
 
           {/* Row: Nationality | Profile Photo */}
           <div>
-            <label className={formStyles.label}>Nationality</label>
+            <label className={formStyles.label}>Nationality *</label>
             <Input type="text" {...register('nationality')} disabled={readOnly} />
+            {errors.nationality && <p className="text-red-500 text-xs mt-1">{errors.nationality.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Profile Photo</label>
+            <label className={formStyles.label}>Profile Photo *</label>
             <Input type="file" {...register('profilePhoto')} disabled={readOnly} />
+            {errors.profilePhoto && <p className="text-red-500 text-xs mt-1">{errors.profilePhoto.message as string}</p>}
           </div>
         </FormGrid>
       </FormSection>
@@ -150,12 +154,12 @@ export default function BasicInfoTab({ readOnly }: Props) {
         <FormGrid>
           {/* Row: Date of Joining | Employment Type */}
           <div>
-            <label className={formStyles.label}>Date of Joining</label>
+            <label className={formStyles.label}>Date of Joining *</label>
             <CustomDatePicker name="dateOfJoining" disabled={readOnly} />
             {errors.dateOfJoining && <p className="text-red-500 text-xs mt-1">{errors.dateOfJoining.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Employment Type</label>
+            <label className={formStyles.label}>Employment Type *</label>
             <Controller
               name={'employmentType'}
               control={control}
@@ -185,7 +189,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
           </div>
           {/* Row: Department | Designation */}
           <div>
-            <label className={formStyles.label}>Department</label>
+            <label className={formStyles.label}>Department *</label>
             <Controller
               name={'departmentId'}
               control={control}
@@ -204,7 +208,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
             {errors.departmentId && <p className="text-red-500 text-xs mt-1">{errors.departmentId.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Designation</label>
+            <label className={formStyles.label}>Designation *</label>
             <Controller
               name={'designationId'}
               control={control}
@@ -225,18 +229,19 @@ export default function BasicInfoTab({ readOnly }: Props) {
 
           {/* Row: Location | Grade / Band */}
           <div>
-            <label className={formStyles.label}>Location</label>
+            <label className={formStyles.label}>Location *</label>
             <Input type="text" {...register('location')} disabled={readOnly} />
             {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location.message as string}</p>}
           </div>
 
           {/* Row: Grade / Band | Reporting Manager */}
           <div>
-            <label className={formStyles.label}>Grade / Band</label>
+            <label className={formStyles.label}>Grade / Band *</label>
             <Input type="text" {...register('grade')} disabled={readOnly} />
+            {errors.grade && <p className="text-red-500 text-xs mt-1">{errors.grade.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Reporting Manager</label>
+            <label className={formStyles.label}>Reporting Manager *</label>
             <Controller
               name={'reportingManagerId'}
               control={control}
@@ -257,7 +262,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
 
           {/* Row: HR Manager | Weekly Off */}
           <div>
-            <label className={formStyles.label}>HR Manager</label>
+            <label className={formStyles.label}>HR Manager *</label>
             <Controller
               name={'hrManagerId'}
               control={control}
@@ -273,10 +278,12 @@ export default function BasicInfoTab({ readOnly }: Props) {
                 />
               )}
             />
+            {errors.hrManagerId && <p className="text-red-500 text-xs mt-1">{errors.hrManagerId.message as string}</p>}
           </div>
           <div>
-            <label className={formStyles.label}>Weekly Off</label>
+            <label className={formStyles.label}>Weekly Off *</label>
             <Input type="text" {...register('weeklyOff')} disabled={readOnly} />
+            {errors.weeklyOff && <p className="text-red-500 text-xs mt-1">{errors.weeklyOff.message as string}</p>}
           </div>
 
           {/* Row: Father's Name | Notice Period */}
@@ -285,8 +292,9 @@ export default function BasicInfoTab({ readOnly }: Props) {
             <Input type="text" {...register('fatherName')} disabled={readOnly} />
           </div>
           <div>
-            <label className={formStyles.label}>Notice Period (Days)</label>
+            <label className={formStyles.label}>Notice Period (Days) *</label>
             <Input type="number" {...register('noticePeriodDays', { valueAsNumber: true })} disabled={readOnly} />
+            {errors.noticePeriodDays && <p className="text-red-500 text-xs mt-1">{errors.noticePeriodDays.message as string}</p>}
           </div>
         </FormGrid>
       </FormSection>
