@@ -132,7 +132,28 @@ export default function BasicInfoTab({ readOnly }: Props) {
           </div>
           <div>
             <label className={formStyles.label}>Blood Group *</label>
-            <Input type="text" {...register('bloodGroup')} disabled={readOnly} />
+            <Controller
+              name={'bloodGroup'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: 'Select', value: '' },
+                    { label: 'A+', value: 'A+' },
+                    { label: 'A-', value: 'A-' },
+                    { label: 'B+', value: 'B+' },
+                    { label: 'B-', value: 'B-' },
+                    { label: 'AB+', value: 'AB+' },
+                    { label: 'AB-', value: 'AB-' },
+                    { label: 'O+', value: 'O+' },
+                    { label: 'O-', value: 'O-' }
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
             {errors.bloodGroup && <p className="text-red-500 text-xs mt-1">{errors.bloodGroup.message as string}</p>}
           </div>
 
