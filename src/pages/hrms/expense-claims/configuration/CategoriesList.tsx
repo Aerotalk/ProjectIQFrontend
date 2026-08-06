@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import CategoryDrawer from './components/CategoryDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseCategoryConfig } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -24,9 +23,9 @@ export default function CategoriesList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiCategories = await api.get('/hrms/expense-claims/categories').catch(() => []);
+      const apiCategories = await api.get('/hrms/expense-claims/categories');
       let data: ExpenseCategoryConfig[] = [];
-      if (Array.isArray(apiCategories) && apiCategories.length > 0) {
+      if (Array.isArray(apiCategories)) {
         data = apiCategories.map((c: any) => ({
           id: c.id,
           category: c.category,
@@ -35,14 +34,11 @@ export default function CategoriesList() {
           minReceiptAmount: c.minReceiptAmount || 0,
           active: c.active ?? true
         }));
-      } else {
-        data = await mockExpenseClaimsService.getCategories();
       }
       setCategories(data);
     } catch (e) {
       toast.error('Failed to load categories');
-      const fallback = await mockExpenseClaimsService.getCategories();
-      setCategories(fallback);
+      setCategories([]);
     }
     setLoading(false);
   };
@@ -56,14 +52,6 @@ export default function CategoriesList() {
           receiptRequired: formData.receiptRequired,
           minReceiptAmount: formData.minReceiptAmount,
           active: formData.active
-        }).catch(async () => {
-          await mockExpenseClaimsService.createCategory({
-            category: formData.name,
-            glCode: formData.glCode,
-            receiptRequired: formData.receiptRequired,
-            minReceiptAmount: formData.minReceiptAmount,
-            active: formData.active
-          });
         });
         toast.success('Category created successfully');
       } else if (drawerMode === 'edit' && selectedCategory) {
@@ -73,14 +61,6 @@ export default function CategoriesList() {
           receiptRequired: formData.receiptRequired,
           minReceiptAmount: formData.minReceiptAmount,
           active: formData.active
-        }).catch(async () => {
-          await mockExpenseClaimsService.updateCategory(selectedCategory.id, {
-            category: formData.name,
-            glCode: formData.glCode,
-            receiptRequired: formData.receiptRequired,
-            minReceiptAmount: formData.minReceiptAmount,
-            active: formData.active
-          });
         });
         toast.success('Category updated successfully');
       }
@@ -93,7 +73,7 @@ export default function CategoriesList() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/hrms/expense-claims/categories/${id}`).catch(() => mockExpenseClaimsService.deleteCategory(id));
+      await api.delete(`/hrms/expense-claims/categories/${id}`);
       toast.success('Category deleted');
       fetchData();
     } catch (e) {

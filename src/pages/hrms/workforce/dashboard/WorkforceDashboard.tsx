@@ -8,23 +8,8 @@ export default function WorkforceDashboard() {
   const navigate = useNavigate();
   const { kpis, loading } = useDashboardKPIs();
 
-  // Mock Data for Charts
-  const trendData = [
-    { name: 'Mon', Present: 120, Absent: 5 },
-    { name: 'Tue', Present: 118, Absent: 7 },
-    { name: 'Wed', Present: 122, Absent: 3 },
-    { name: 'Thu', Present: 121, Absent: 4 },
-    { name: 'Fri', Present: 115, Absent: 10 },
-    { name: 'Sat', Present: 40, Absent: 5 },
-    { name: 'Sun', Present: 0, Absent: 0 },
-  ];
-
-
-  const leaveData = [
-    { name: 'Casual', value: 400 },
-    { name: 'Sick', value: 300 },
-    { name: 'LOP', value: 100 },
-  ];
+  const trendData = kpis?.trendData || [];
+  const leaveData = kpis?.leaveData || [];
   const COLORS = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
 
   const KPI_CONFIG = [
@@ -215,7 +200,7 @@ export default function WorkforceDashboard() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {leaveData.map((_, index) => (
+                  {leaveData.map((_: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

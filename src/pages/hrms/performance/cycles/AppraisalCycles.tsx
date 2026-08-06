@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import CycleDrawer from './CycleDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import { mockCycles } from '../mock/mockPerformanceData';
 import type { AppraisalCycle } from '../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -23,8 +22,8 @@ export default function AppraisalCycles() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiCycles = await api.get('/hrms/performance/cycles').catch(() => []);
-      if (Array.isArray(apiCycles) && apiCycles.length > 0) {
+      const apiCycles = await api.get('/hrms/performance/cycles');
+      if (Array.isArray(apiCycles)) {
         setCycles(apiCycles.map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -43,12 +42,10 @@ export default function AppraisalCycles() {
           status: c.status || 'Active',
           description: c.description || ''
         })));
-      } else {
-        setCycles(mockCycles);
       }
     } catch (e) {
       toast.error('Failed to load appraisal cycles');
-      setCycles(mockCycles);
+      setCycles([]);
     }
     setLoading(false);
   };
@@ -67,7 +64,7 @@ export default function AppraisalCycles() {
           hrReviewDeadline: data.hrReviewDeadline,
           status: 'Active',
           description: data.description
-        }).catch(() => {});
+        });
         toast.success('Appraisal cycle created');
       } else if (drawerMode === 'edit' && selectedCycle) {
         await api.put(`/hrms/performance/cycles/${selectedCycle.id}`, {
@@ -80,7 +77,7 @@ export default function AppraisalCycles() {
           managerReviewDeadline: data.managerReviewDeadline,
           hrReviewDeadline: data.hrReviewDeadline,
           description: data.description
-        }).catch(() => {});
+        });
         toast.success('Appraisal cycle updated');
       }
       setIsDrawerOpen(false);

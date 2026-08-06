@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import CustomTable from '../../../../components/ui/CustomTable';
-import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
+import CustomTable from '../../../../../components/ui/CustomTable';
+import TableRowActionMenu from '../../../../../components/ui/TableRowActionMenu';
 import SelfReviewDrawer from './SelfReviewDrawer';
-import { Skeleton } from '../../../../components/ui/skeleton';
+import { Skeleton } from '../../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
-import { mockSelfReviews, mockGoals, mockCompetencies, mockRatingScales } from '../../mock/mockPerformanceData';
 import type { SelfReview, Goal, Competency, RatingScale } from '../../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { api } from '../../../../../lib/api';
 
 export default function SelfReviewsList() {
   const [reviews, setReviews] = useState<SelfReview[]>([]);
@@ -32,7 +31,7 @@ export default function SelfReviewsList() {
         api.get('/hrms/performance/rating-scales').catch(() => [])
       ]);
 
-      if (Array.isArray(apiReviews) && apiReviews.length > 0) {
+      if (Array.isArray(apiReviews)) {
         setReviews(apiReviews.map((r: any) => ({
           id: r.id,
           employeeId: r.employee?.id || 'EMP-01',
@@ -53,26 +52,24 @@ export default function SelfReviewsList() {
           status: r.status || 'Draft',
           submittedOn: r.submittedOn || ''
         })));
-      } else {
-        setReviews(mockSelfReviews);
       }
 
-      setGoals(Array.isArray(apiGoals) && apiGoals.length > 0 ? apiGoals : mockGoals);
-      setCompetencies(Array.isArray(apiCompetencies) && apiCompetencies.length > 0 ? apiCompetencies : mockCompetencies);
-      setRatingScales(Array.isArray(apiScales) && apiScales.length > 0 ? apiScales : mockRatingScales);
+      setGoals(Array.isArray(apiGoals) ? apiGoals : []);
+      setCompetencies(Array.isArray(apiCompetencies) ? apiCompetencies : []);
+      setRatingScales(Array.isArray(apiScales) ? apiScales : []);
     } catch (e) {
       toast.error('Failed to load self-reviews');
-      setReviews(mockSelfReviews);
-      setGoals(mockGoals);
-      setCompetencies(mockCompetencies);
-      setRatingScales(mockRatingScales);
+      setReviews([]);
+      setGoals([]);
+      setCompetencies([]);
+      setRatingScales([]);
     }
     setLoading(false);
   };
 
   const handleSave = async (data: any, submit: boolean) => {
     try {
-      await api.post(`/hrms/performance/reviews/self?submit=${submit}`, data).catch(() => {});
+      await api.post(`/hrms/performance/reviews/self?submit=${submit}`, data);
       toast.success(submit ? 'Self Review submitted successfully' : 'Draft saved');
       setIsDrawerOpen(false);
       fetchData();
@@ -126,7 +123,7 @@ export default function SelfReviewsList() {
         onSave={handleSave}
         goals={goals}
         competencies={competencies}
-        ratingScale={ratingScales[0] || mockRatingScales[0]}
+        ratingScale={ratingScales[0]}
         initialData={selectedReview || undefined}
       />
     </div>

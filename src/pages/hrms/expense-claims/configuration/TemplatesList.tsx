@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import TemplateDrawer from './components/TemplateDrawer';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseTemplate, ExpenseCategoryConfig } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -26,12 +25,12 @@ export default function TemplatesList() {
     setLoading(true);
     try {
       const [apiTemplates, apiCategories] = await Promise.all([
-        api.get('/hrms/expense-claims/templates').catch(() => []),
-        api.get('/hrms/expense-claims/categories').catch(() => [])
+        api.get('/hrms/expense-claims/templates'),
+        api.get('/hrms/expense-claims/categories')
       ]);
       
       let tpls: ExpenseTemplate[] = [];
-      if (Array.isArray(apiTemplates) && apiTemplates.length > 0) {
+      if (Array.isArray(apiTemplates)) {
         tpls = apiTemplates.map((t: any) => ({
           id: t.id,
           templateName: t.templateName,
@@ -39,12 +38,10 @@ export default function TemplatesList() {
           allowedCategories: [],
           active: t.active ?? true
         }));
-      } else {
-        tpls = await mockExpenseClaimsService.getTemplates();
       }
 
       let cats: ExpenseCategoryConfig[] = [];
-      if (Array.isArray(apiCategories) && apiCategories.length > 0) {
+      if (Array.isArray(apiCategories)) {
         cats = apiCategories.map((c: any) => ({
           id: c.id,
           category: c.category,
@@ -53,18 +50,14 @@ export default function TemplatesList() {
           minReceiptAmount: c.minReceiptAmount || 0,
           active: c.active ?? true
         }));
-      } else {
-        cats = await mockExpenseClaimsService.getCategories();
       }
 
       setTemplates(tpls);
       setCategories(cats);
     } catch (e) {
       toast.error('Failed to load templates');
-      const fallbackTemplates = await mockExpenseClaimsService.getTemplates();
-      const fallbackCats = await mockExpenseClaimsService.getCategories();
-      setTemplates(fallbackTemplates);
-      setCategories(fallbackCats);
+      setTemplates([]);
+      setCategories([]);
     }
     setLoading(false);
   };
@@ -77,8 +70,6 @@ export default function TemplatesList() {
           description: formData.description,
           allowedCategories: formData.allowedCategories,
           active: formData.active
-        }).catch(async () => {
-          await mockExpenseClaimsService.createTemplate(formData);
         });
         toast.success('Template created successfully');
       } else if (drawerMode === 'edit' && selectedTemplate) {
@@ -87,8 +78,6 @@ export default function TemplatesList() {
           description: formData.description,
           allowedCategories: formData.allowedCategories,
           active: formData.active
-        }).catch(async () => {
-          await mockExpenseClaimsService.updateTemplate(selectedTemplate.id, formData);
         });
         toast.success('Template updated successfully');
       }
@@ -101,7 +90,7 @@ export default function TemplatesList() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/hrms/expense-claims/templates/${id}`).catch(() => {});
+      await api.delete(`/hrms/expense-claims/templates/${id}`);
       toast.success('Template deleted');
       fetchData();
     } catch (e) {

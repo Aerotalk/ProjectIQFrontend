@@ -2,25 +2,28 @@ import { useState } from 'react';
 import Drawer from '../../../../../components/ui/Drawer';
 import { FormLayout } from '../../../../../components/ui/FormLayout';
 import CustomSelect from '../../../../../components/ui/CustomSelect';
-import type { ManagerReview, SelfReview } from '../../types';
-import { mockGoals, mockSelfReviews } from '../../mock/mockPerformanceData';
+import type { ManagerReview, SelfReview, Goal, Competency, RatingScale } from '../../types';
 import { formStyles } from '../../../../../components/ui/form-styles';
 import { Star, User, AlertCircle, Save, Check } from 'lucide-react';
 
 interface ManagerReviewDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  review: ManagerReview;
+  onSave: (data: any) => Promise<void>;
+  initialData: ManagerReview;
+  goals: Goal[];
+  competencies: Competency[];
+  ratingScale: RatingScale;
 }
 
-export default function ManagerReviewDrawer({ isOpen, onClose, review }: ManagerReviewDrawerProps) {
-  const [formData, setFormData] = useState<ManagerReview>(review);
+export default function ManagerReviewDrawer({ isOpen, onClose, onSave: _onSave, initialData, goals, competencies: _competencies, ratingScale: _ratingScale }: ManagerReviewDrawerProps) {
+  const [formData, setFormData] = useState<ManagerReview>(initialData);
   
-  // Find associated self review
-  const selfReview: SelfReview | undefined = mockSelfReviews.find(sr => sr.id === review.selfReviewId);
-  const employeeGoals = mockGoals.filter(g => g.employee.id === review.employee.id);
+  // Find associated self review (mocked for now since backend doesn't have it in props)
+  const selfReview = undefined as SelfReview | undefined; 
+  const employeeGoals = goals; // use goals from props
   
-  const isReadOnly = review.status === 'Submitted' || review.status === 'Finalized';
+  const isReadOnly = initialData.status === 'Submitted' || initialData.status === 'Finalized' || initialData.status === 'Manager Reviewed';
 
   const handleSaveDraft = () => {
     onClose();
@@ -73,7 +76,7 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={isReadOnly ? `View Review - ${review.employee.name}` : `Manager Assessment - ${review.employee.name}`}
+      title={isReadOnly ? `View Review - ${initialData.employee.name}` : `Manager Assessment - ${initialData.employee.name}`}
       size="xl"
       footer={
         !isReadOnly ? (
@@ -120,8 +123,8 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
               <User size={24} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{review.employee.name}</h3>
-              <p className="text-sm text-gray-500">{review.employee.designation} • {review.employee.department}</p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{initialData.employee.name}</h3>
+              <p className="text-sm text-gray-500">{initialData.employee.designation} • {initialData.employee.department}</p>
             </div>
           </div>
           <div className="text-right">
@@ -140,9 +143,9 @@ export default function ManagerReviewDrawer({ isOpen, onClose, review }: Manager
             <p className="text-sm text-gray-500">Review employee's self-assessment and provide your rating.</p>
           </div>
           <div className="p-4 space-y-6">
-            {employeeGoals.map(goal => {
-              const srRating = selfReview?.goalAchievement.find(g => g.goalId === goal.id);
-              const mgrRating = formData.goalAssessment.find(g => g.goalId === goal.id);
+            {employeeGoals.map((goal: Goal) => {
+              const srRating = selfReview?.goalAchievement?.find((g: any) => g.goalId === goal.id);
+              const mgrRating = formData.goalAssessment?.find((g: any) => g.goalId === goal.id);
               
               return (
                 <div key={goal.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">

@@ -3,7 +3,6 @@ import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import Drawer from '../../../../components/ui/Drawer';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseClaim } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -20,9 +19,9 @@ export default function PendingApprovals() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiClaims = await api.get('/hrms/expense-claims/claims').catch(() => []);
+      const apiClaims = await api.get('/hrms/expense-claims/claims');
       let data: ExpenseClaim[] = [];
-      if (Array.isArray(apiClaims) && apiClaims.length > 0) {
+      if (Array.isArray(apiClaims)) {
         data = apiClaims.filter((c: any) => c.status === 'Submitted' || c.status?.includes('Level')).map((c: any) => ({
           id: c.id,
           claimNo: c.claimNo || `CLM-${c.id.slice(0, 4)}`,
@@ -38,24 +37,18 @@ export default function PendingApprovals() {
           createdAt: c.createdAt,
           updatedAt: c.updatedAt
         }));
-      } else {
-        const mockData = await mockExpenseClaimsService.getClaims();
-        data = mockData.filter(c => c.status === 'Submitted' || c.status.includes('Level'));
       }
       setClaims(data);
     } catch (e) {
       toast.error('Failed to load pending approvals');
-      const fallback = await mockExpenseClaimsService.getClaims();
-      setClaims(fallback.filter(c => c.status === 'Submitted' || c.status.includes('Level')));
+      setClaims([]);
     }
     setLoading(false);
   };
 
   const handleApprove = async (claimId: string, amount: number) => {
     try {
-      await api.put(`/hrms/expense-claims/claims/${claimId}/approve`, { approvedAmount: amount }).catch(async () => {
-        await mockExpenseClaimsService.approveClaim(claimId, amount, 'REV-001', 'Approved via manager portal');
-      });
+      await api.put(`/hrms/expense-claims/claims/${claimId}/approve`, { approvedAmount: amount });
       toast.success('Claim Approved');
       setSelectedClaim(null);
       fetchData();
@@ -66,9 +59,7 @@ export default function PendingApprovals() {
 
   const handleReject = async (claimId: string, comment: string) => {
     try {
-      await api.put(`/hrms/expense-claims/claims/${claimId}/reject`, { comment }).catch(async () => {
-        await mockExpenseClaimsService.rejectClaim(claimId, 'REV-001', comment);
-      });
+      await api.put(`/hrms/expense-claims/claims/${claimId}/reject`, { comment });
       toast.success('Claim Rejected');
       setSelectedClaim(null);
       fetchData();

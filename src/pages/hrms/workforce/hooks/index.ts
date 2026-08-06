@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WorkforceService } from '../services';
-import type { PaginatedResponse } from '../types';
+import type { PaginatedResponse, AttendanceRecord } from '../types';
 import toast from 'react-hot-toast';
 
 // Generic Hook Factory for Data Fetching
@@ -74,7 +74,7 @@ export const useLeaveTypes = (params?: any) => useQuery(WorkforceService.getLeav
 export const useLeaveSchemes = (params?: any) => useQuery(WorkforceService.getLeaveSchemes, params);
 export const useLeaveBalances = (params?: any) => useQuery(WorkforceService.getLeaveBalances, params);
 export const useLeaveApplications = (params?: any) => useQuery(WorkforceService.getLeaveApplications, params);
-export const useAttendanceRecords = (params?: any) => useQuery(WorkforceService.getAttendanceRecords, params);
+export const useAttendanceRecords = (params?: any) => useQuery<AttendanceRecord>(WorkforceService.getAttendanceRecords, params);
 export const useShifts = (params?: any) => useQuery(WorkforceService.getShifts, params);
 export const useShiftRotations = (params?: any) => useQuery(WorkforceService.getShiftRotations, params);
 export const useHolidayLists = (params?: any) => useQuery(WorkforceService.getHolidayLists, params);

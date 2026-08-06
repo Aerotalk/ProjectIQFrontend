@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import GoalDrawer from './GoalDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import { mockGoals, mockCycles } from '../mock/mockPerformanceData';
 import type { Goal, AppraisalCycle } from '../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -29,7 +28,7 @@ export default function GoalsList() {
         api.get('/hrms/performance/cycles').catch(() => [])
       ]);
 
-      if (Array.isArray(apiGoals) && apiGoals.length > 0) {
+      if (Array.isArray(apiGoals)) {
         setGoals(apiGoals.map((g: any) => ({
           id: g.id,
           title: g.title,
@@ -52,11 +51,9 @@ export default function GoalsList() {
           status: g.status || 'In Progress',
           progress: g.progress || 0
         })));
-      } else {
-        setGoals(mockGoals);
       }
 
-      if (Array.isArray(apiCycles) && apiCycles.length > 0) {
+      if (Array.isArray(apiCycles)) {
         setCycles(apiCycles.map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -75,13 +72,11 @@ export default function GoalsList() {
           status: c.status || 'Active',
           description: c.description || ''
         })));
-      } else {
-        setCycles(mockCycles);
       }
     } catch (e) {
       toast.error('Failed to load goals');
-      setGoals(mockGoals);
-      setCycles(mockCycles);
+      setGoals([]);
+      setCycles([]);
     }
     setLoading(false);
   };
@@ -101,7 +96,7 @@ export default function GoalsList() {
           dueDate: data.dueDate,
           priority: data.priority,
           status: 'In Progress'
-        }).catch(() => {});
+        });
         toast.success('Goal created');
       } else if (drawerMode === 'edit' && selectedGoal) {
         await api.put(`/hrms/performance/goals/${selectedGoal.id}`, {
@@ -115,7 +110,7 @@ export default function GoalsList() {
           unit: data.unit,
           dueDate: data.dueDate,
           priority: data.priority
-        }).catch(() => {});
+        });
         toast.success('Goal updated');
       }
       setIsDrawerOpen(false);

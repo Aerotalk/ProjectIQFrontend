@@ -8,7 +8,7 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react';
-import { mockCycles, mockGoals, mockSelfReviews, mockManagerReviews } from '../mock/mockPerformanceData';
+import { api } from '../../../../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -17,33 +17,37 @@ export default function PerformanceDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
+  const [kpis, setKpis] = useState<any>({
+    activeCycles: 0,
+    pendingSelf: 0,
+    pendingManager: 0,
+    completedReviews: 0,
+    averageRating: 0.0,
+    topGoals: [],
+    cycleStatuses: [],
+    departmentRatings: []
+  });
+
   useEffect(() => {
-    // Simulate loading data so Recharts animations trigger cleanly on mount
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    const fetchKpis = async () => {
+      try {
+        const data = await api.get('/hrms/performance/dashboard/kpis');
+        setKpis(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKpis();
   }, []);
 
-  // Basic stats
-  const activeCycles = mockCycles.filter(c => c.status === 'Active' || c.status === 'Review Phase').length;
-  const pendingSelf = mockSelfReviews.filter(r => r.status === 'Draft' || r.status === 'Pending').length;
-  const pendingManager = mockManagerReviews.filter(r => r.status === 'Pending').length;
-  const completedReviews = mockSelfReviews.filter(r => r.status === 'Submitted').length + mockManagerReviews.filter(r => r.status === 'Submitted' || r.status === 'Finalized').length;
-  const averageRating = 4.1; // Mocked
-
   const statCards = [
-    { title: 'Active Cycles', value: activeCycles, icon: <Clock size={20} className="text-blue-500" />, bg: 'bg-blue-50 dark:bg-blue-500/10' },
-    { title: 'Pending Self Reviews', value: pendingSelf, icon: <AlertCircle size={20} className="text-orange-500" />, bg: 'bg-orange-50 dark:bg-orange-500/10' },
-    { title: 'Pending Manager Reviews', value: pendingManager, icon: <Users size={20} className="text-purple-500" />, bg: 'bg-purple-50 dark:bg-purple-500/10' },
-    { title: 'Completed Reviews', value: completedReviews, icon: <CheckCircle2 size={20} className="text-green-500" />, bg: 'bg-green-50 dark:bg-green-500/10' },
-    { title: 'Average Rating', value: averageRating, icon: <Award size={20} className="text-yellow-500" />, bg: 'bg-yellow-50 dark:bg-yellow-500/10' },
-  ];
-
-  const chartData = [
-    { name: 'Engineering', rating: 4.2 },
-    { name: 'Sales', rating: 3.8 },
-    { name: 'Marketing', rating: 4.5 },
-    { name: 'HR', rating: 4.0 },
-    { name: 'Finance', rating: 4.1 },
+    { title: 'Active Cycles', value: kpis.activeCycles, icon: <Clock size={20} className="text-blue-500" />, bg: 'bg-blue-50 dark:bg-blue-500/10' },
+    { title: 'Pending Self Reviews', value: kpis.pendingSelf, icon: <AlertCircle size={20} className="text-orange-500" />, bg: 'bg-orange-50 dark:bg-orange-500/10' },
+    { title: 'Pending Manager Reviews', value: kpis.pendingManager, icon: <Users size={20} className="text-purple-500" />, bg: 'bg-purple-50 dark:bg-purple-500/10' },
+    { title: 'Completed Reviews', value: kpis.completedReviews, icon: <CheckCircle2 size={20} className="text-green-500" />, bg: 'bg-green-50 dark:bg-green-500/10' },
+    { title: 'Average Rating', value: kpis.averageRating, icon: <Award size={20} className="text-yellow-500" />, bg: 'bg-yellow-50 dark:bg-yellow-500/10' },
   ];
 
   if (loading) {
@@ -127,7 +131,7 @@ export default function PerformanceDashboard() {
             </div>
             
             <div className="space-y-4">
-              {mockGoals.slice(0, 3).map((goal, index) => (
+              {kpis.topGoals?.slice(0, 3).map((goal: any, index: number) => (
                 <div 
                   key={goal.id} 
                   className="border border-gray-100 dark:border-white/5 rounded-sm p-4 animate-in slide-in-from-bottom fade-in duration-500 fill-mode-both"
@@ -144,7 +148,7 @@ export default function PerformanceDashboard() {
                     ></div>
                   </div>
                   <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex justify-between">
-                    <span>{goal.employee.name}</span>
+                    <span>{goal.employee?.name}</span>
                     <span>Due: {goal.dueDate}</span>
                   </div>
                 </div>
@@ -157,7 +161,7 @@ export default function PerformanceDashboard() {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Department Performance Trend</h3>
             <div className="w-full h-full pb-8">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={kpis.departmentRatings || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
@@ -187,17 +191,17 @@ export default function PerformanceDashboard() {
               Active Cycles
             </h3>
             <div className="space-y-4">
-              {mockCycles.filter(c => c.status === 'Active' || c.status === 'Review Phase').map(cycle => (
-                <div key={cycle.id} className="flex flex-col p-3 bg-gray-50 dark:bg-white/5 rounded-sm">
+              {kpis.cycleStatuses?.map((cycle: any, index: number) => (
+                <div key={index} className="flex flex-col p-3 bg-gray-50 dark:bg-white/5 rounded-sm">
                   <span className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{cycle.name}</span>
                   <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>{cycle.completionPercentage}% Completed</span>
-                    <span className="text-primary dark:text-secondary">{cycle.status}</span>
+                    <span>{cycle.value}% Completed</span>
+                    <span className="text-primary dark:text-secondary">Active</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
                     <div 
                       className="h-1.5 rounded-full bg-primary dark:bg-secondary animate-grow-width"
-                      style={{ width: `${cycle.completionPercentage}%` }}
+                      style={{ width: `${cycle.value}%` }}
                     ></div>
                   </div>
                 </div>

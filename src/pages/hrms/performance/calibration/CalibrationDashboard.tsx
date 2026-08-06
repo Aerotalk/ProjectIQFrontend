@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
-import { mockCalibrationRecords } from './../mock/mockPerformanceData';
 import type { CalibrationRecord } from './../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -18,8 +17,8 @@ export default function CalibrationDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiRecords = await api.get('/hrms/performance/calibration').catch(() => []);
-      if (Array.isArray(apiRecords) && apiRecords.length > 0) {
+      const apiRecords = await api.get('/hrms/performance/calibration');
+      if (Array.isArray(apiRecords)) {
         setRecords(apiRecords.map((r: any) => ({
           id: r.id,
           employee: {
@@ -35,19 +34,17 @@ export default function CalibrationDashboard() {
           reviewer: r.reviewer || 'HR Committee',
           status: r.status || 'Pending'
         })));
-      } else {
-        setRecords(mockCalibrationRecords);
       }
     } catch (e) {
       toast.error('Failed to load calibration records');
-      setRecords(mockCalibrationRecords);
+      setRecords([]);
     }
     setLoading(false);
   };
 
   const handleUpdateRating = async (id: string, proposedRating: number) => {
     try {
-      await api.put(`/hrms/performance/calibration/${id}`, { proposedRating, status: 'Pending' }).catch(() => {});
+      await api.put(`/hrms/performance/calibration/${id}`, { proposedRating, status: 'Pending' });
       toast.success('Calibration rating updated');
       fetchData();
     } catch (e) {
@@ -58,7 +55,7 @@ export default function CalibrationDashboard() {
   const handleFinalize = async (id: string) => {
     try {
       const target = records.find(r => r.id === id);
-      await api.put(`/hrms/performance/calibration/${id}`, { finalRating: target?.proposedRating || target?.currentRating, status: 'Finalized' }).catch(() => {});
+      await api.put(`/hrms/performance/calibration/${id}`, { finalRating: target?.proposedRating || target?.currentRating, status: 'Finalized' });
       toast.success('Rating finalized');
       fetchData();
     } catch (e) {

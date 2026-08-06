@@ -5,27 +5,28 @@ import CustomInput from '../../../../components/ui/CustomInput';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
 import { formStyles } from '../../../../components/ui/form-styles';
-import type { Goal } from '../types';
+import type { Goal, AppraisalCycle } from '../types';
 import { Target, Save } from 'lucide-react';
 
 interface GoalDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  goal?: Goal | null;
+  initialData?: Goal | null;
   mode?: 'create' | 'view' | 'edit';
-  onSave?: (data: Partial<Goal>) => void;
+  onSave?: (data: Partial<Goal>) => Promise<void>;
+  cycles?: AppraisalCycle[];
 }
 
-export default function GoalDrawer({ isOpen, onClose, goal, mode = 'create', onSave }: GoalDrawerProps) {
+export default function GoalDrawer({ isOpen, onClose, initialData, mode = 'create', onSave }: GoalDrawerProps) {
   const [formData, setFormData] = useState<Partial<Goal>>({});
 
   useEffect(() => {
-    if (goal && isOpen) {
-      setFormData(goal);
+    if (initialData && isOpen) {
+      setFormData(initialData);
     } else if (isOpen) {
       setFormData({});
     }
-  }, [goal, isOpen]);
+  }, [initialData, isOpen]);
 
   const isReadOnly = mode === 'view';
 

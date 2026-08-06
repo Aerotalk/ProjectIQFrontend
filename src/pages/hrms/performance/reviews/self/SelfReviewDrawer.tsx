@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import Drawer from '../../../../../components/ui/Drawer';
 import { FormLayout } from '../../../../../components/ui/FormLayout';
-import type { SelfReview } from '../../types';
-import { mockCycles, mockGoals, mockCompetencies } from '../../mock/mockPerformanceData';
+import type { SelfReview, Goal, Competency, RatingScale } from '../../types';
 import { Star } from 'lucide-react';
 
 interface SelfReviewDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  review: SelfReview;
+  onSave: (data: any, submit: boolean) => Promise<void>;
+  initialData?: SelfReview;
+  goals: Goal[];
+  competencies: Competency[];
+  ratingScale: RatingScale;
 }
 
-export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReviewDrawerProps) {
-  const [formData, setFormData] = useState<SelfReview>(review);
+export default function SelfReviewDrawer({ isOpen, onClose, onSave: _onSave, initialData, goals, competencies, ratingScale: _ratingScale }: SelfReviewDrawerProps) {
+  const [formData, setFormData] = useState<SelfReview>(initialData || {} as SelfReview);
   
-  const cycle = mockCycles.find(c => c.id === review.cycleId);
-  const employeeGoals = mockGoals.filter(g => g.employee.id === review.employeeId && g.cycleId === review.cycleId);
-  const isReadOnly = review.status === 'Submitted' || review.status === 'Finalized';
+  // Use passed goals and competencies
+  const employeeGoals = goals;
+  const isReadOnly = initialData?.status === 'Submitted' || initialData?.status === 'Finalized';
 
   const handleSaveDraft = () => {
     console.log('Saving Draft:', formData);
@@ -89,7 +92,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={isReadOnly ? `Self Review - ${cycle?.name}` : `Complete Self Review - ${cycle?.name}`}
+      title={isReadOnly ? `View Self Review` : `Self Assessment`}
       size="xl"
       footer={
         !isReadOnly ? (
@@ -116,8 +119,8 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <p className="text-sm text-gray-500">Rate your performance against your assigned goals.</p>
           </div>
           <div className="p-4 space-y-6">
-            {employeeGoals.map(goal => {
-              const ratingData = formData.goalAchievement.find(g => g.goalId === goal.id);
+            {employeeGoals.map((goal: Goal) => {
+              const ratingData = formData.goalAchievement?.find(g => g.goalId === goal.id);
               return (
                 <div key={goal.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
                   <div className="flex justify-between items-start mb-4">
@@ -167,8 +170,8 @@ export default function SelfReviewDrawer({ isOpen, onClose, review }: SelfReview
             <p className="text-sm text-gray-500">Evaluate yourself against the organizational core competencies.</p>
           </div>
           <div className="p-4 space-y-6">
-            {mockCompetencies.map(comp => {
-              const ratingData = formData.competencyRatings.find(c => c.competencyId === comp.id);
+            {competencies.map((comp: Competency) => {
+              const ratingData = formData.competencyRatings?.find(c => c.competencyId === comp.id);
               return (
                 <div key={comp.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
                   <div className="mb-4">

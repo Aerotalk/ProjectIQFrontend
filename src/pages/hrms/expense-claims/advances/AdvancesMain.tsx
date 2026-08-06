@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import AdvanceDrawer from './components/AdvanceDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseAdvance } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -24,9 +23,9 @@ export default function AdvancesMain() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiAdvances = await api.get('/hrms/expense-claims/advances').catch(() => []);
+      const apiAdvances = await api.get('/hrms/expense-claims/advances');
       let data: ExpenseAdvance[] = [];
-      if (Array.isArray(apiAdvances) && apiAdvances.length > 0) {
+      if (Array.isArray(apiAdvances)) {
         data = apiAdvances.map((a: any) => ({
           id: a.id,
           advanceNo: a.advanceNo || `ADV-${a.id.slice(0, 4)}`,
@@ -43,14 +42,11 @@ export default function AdvancesMain() {
           createdAt: a.createdAt,
           updatedAt: a.updatedAt
         }));
-      } else {
-        data = await mockExpenseClaimsService.getAdvances();
       }
       setAdvances(data);
     } catch (e) {
       toast.error('Failed to load advances');
-      const fallback = await mockExpenseClaimsService.getAdvances();
-      setAdvances(fallback);
+      setAdvances([]);
     }
     setLoading(false);
   };
@@ -68,15 +64,6 @@ export default function AdvancesMain() {
           status: 'Pending',
           disbursed: false,
           outstandingBalance: data.amount
-        }).catch(async () => {
-          await mockExpenseClaimsService.createAdvance({
-            ...data,
-            employeeId: data.employee,
-            requestedDate: new Date().toISOString(),
-            status: 'Pending',
-            disbursed: false,
-            outstandingBalance: data.amount,
-          });
         });
         toast.success('Advance request submitted');
       }
@@ -89,7 +76,7 @@ export default function AdvancesMain() {
 
   const handleDisburse = async (id: string) => {
     try {
-      await api.put(`/hrms/expense-claims/advances/${id}/disburse`).catch(() => {});
+      await api.put(`/hrms/expense-claims/advances/${id}/disburse`);
       toast.success('Advance marked as disbursed');
       fetchData();
     } catch (e) {

@@ -1,5 +1,5 @@
 import { api } from '@/lib/api';
-import * as Repositories from '../mock/repositories';
+
 import type { 
   LeaveType, LeaveScheme, LeaveApplication, 
   AttendanceRecord, Shift, RegularizationRequest, PermissionRequest
@@ -35,7 +35,7 @@ export const WorkforceService = {
   cancelLeaveApplication: (id: string, reason?: string) => api.put(`/hrms/leave/applications/${id}/cancel`, { reason }),
 
   // Dashboard
-  getDashboardKPIs: () => Repositories.DashboardRepo.getKPIs(),
+  getDashboardKPIs: () => api.get('/hrms/attendance/dashboard/kpis'),
 
   // Attendance
   getAttendanceRecords: (params?: any) => api.get('/hrms/attendance/records', { params }),

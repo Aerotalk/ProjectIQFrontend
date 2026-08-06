@@ -26,7 +26,7 @@ export default function ShiftRoster() {
   const rosterMatrix = useMemo(() => {
     const matrix: Record<string, { emp: { name: string, dept: string, code: string }, shifts: Record<string, ShiftRoster> }> = {};
     
-    rosters.forEach(roster => {
+    (rosters as ShiftRoster[]).forEach((roster: ShiftRoster) => {
       if (!matrix[roster.employeeId]) {
         matrix[roster.employeeId] = {
           emp: { name: roster.employeeName, dept: roster.department, code: roster.employeeCode },
@@ -49,13 +49,13 @@ export default function ShiftRoster() {
 
   const getShiftName = (shiftId: string) => {
     if (shiftId === 'OFF') return 'OFF';
-    const shift = shifts.find(s => s.id === shiftId);
+    const shift = (shifts as any[]).find((s: any) => s.id === shiftId);
     return shift ? shift.shiftCode : shiftId;
   };
 
   const getShiftColor = (shiftId: string) => {
     if (shiftId === 'OFF') return 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400';
-    const shift = shifts.find(s => s.id === shiftId);
+    const shift = (shifts as any[]).find((s: any) => s.id === shiftId);
     if (shift?.nightShift) return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400';
     return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400';
   };
@@ -65,8 +65,8 @@ export default function ShiftRoster() {
     // In reality this would open a dropdown or a modal.
     const currentShiftId = roster.assignedShiftId;
     let nextShiftId = 'OFF';
-    if (currentShiftId === 'OFF' && shifts.length > 0) {
-      nextShiftId = shifts[0].id;
+    if (currentShiftId === 'OFF' && (shifts as any[]).length > 0) {
+      nextShiftId = (shifts as any[])[0].id;
     }
     updateMutation.mutate({ id: roster.id, assignedShiftId: nextShiftId });
   };

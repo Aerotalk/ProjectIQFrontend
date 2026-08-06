@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import ClaimDrawer from './components/ClaimDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseClaim, ExpenseTemplate } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -26,12 +25,12 @@ export default function ClaimsList() {
     setLoading(true);
     try {
       const [apiClaims, apiTemplates] = await Promise.all([
-        api.get('/hrms/expense-claims/claims').catch(() => []),
-        api.get('/hrms/expense-claims/templates').catch(() => [])
+        api.get('/hrms/expense-claims/claims'),
+        api.get('/hrms/expense-claims/templates')
       ]);
       
       let claimsData: ExpenseClaim[] = [];
-      if (Array.isArray(apiClaims) && apiClaims.length > 0) {
+      if (Array.isArray(apiClaims)) {
         claimsData = apiClaims.map((c: any) => ({
           id: c.id,
           claimNo: c.claimNo || `CLM-${c.id.slice(0, 4)}`,
@@ -47,12 +46,10 @@ export default function ClaimsList() {
           createdAt: c.createdAt,
           updatedAt: c.updatedAt
         }));
-      } else {
-        claimsData = await mockExpenseClaimsService.getClaims();
       }
 
       let tplsData: ExpenseTemplate[] = [];
-      if (Array.isArray(apiTemplates) && apiTemplates.length > 0) {
+      if (Array.isArray(apiTemplates)) {
         tplsData = apiTemplates.map((t: any) => ({
           id: t.id,
           templateName: t.templateName,
@@ -60,18 +57,14 @@ export default function ClaimsList() {
           allowedCategories: [],
           active: t.active ?? true
         }));
-      } else {
-        tplsData = await mockExpenseClaimsService.getTemplates();
       }
 
       setClaims(claimsData);
       setTemplates(tplsData);
     } catch (e) {
       toast.error('Failed to load claims');
-      const fallbackClaims = await mockExpenseClaimsService.getClaims();
-      const fallbackTemplates = await mockExpenseClaimsService.getTemplates();
-      setClaims(fallbackClaims);
-      setTemplates(fallbackTemplates);
+      setClaims([]);
+      setTemplates([]);
     }
     setLoading(false);
   };
@@ -85,16 +78,6 @@ export default function ClaimsList() {
           status: 'Draft',
           totalClaimed: 0,
           approvedAmount: 0
-        }).catch(async () => {
-          await mockExpenseClaimsService.createClaim({
-            templateId: data.template,
-            title: data.title,
-            currency: data.currency,
-            employeeId: 'EMP-001',
-            status: 'Draft',
-            totalClaimed: 0,
-            approvedAmount: 0
-          });
         });
         toast.success('Claim Envelope created successfully');
       }
@@ -107,7 +90,7 @@ export default function ClaimsList() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/hrms/expense-claims/claims/${id}`).catch(() => mockExpenseClaimsService.deleteClaim(id));
+      await api.delete(`/hrms/expense-claims/claims/${id}`);
       toast.success('Claim deleted');
       fetchData();
     } catch (e) {

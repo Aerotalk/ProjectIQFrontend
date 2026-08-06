@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import CustomTable from '../../../../components/ui/CustomTable';
-import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
+import CustomTable from '../../../../../components/ui/CustomTable';
+import TableRowActionMenu from '../../../../../components/ui/TableRowActionMenu';
 import ManagerReviewDrawer from './ManagerReviewDrawer';
-import { Skeleton } from '../../../../components/ui/skeleton';
-import { mockManagerReviews, mockGoals, mockCompetencies, mockRatingScales } from '../../mock/mockPerformanceData';
+import { Skeleton } from '../../../../../components/ui/skeleton';
 import type { ManagerReview, Goal, Competency, RatingScale } from '../../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { api } from '../../../../../lib/api';
 
 export default function ManagerReviewsQueue() {
   const [reviews, setReviews] = useState<ManagerReview[]>([]);
@@ -31,7 +30,7 @@ export default function ManagerReviewsQueue() {
         api.get('/hrms/performance/rating-scales').catch(() => [])
       ]);
 
-      if (Array.isArray(apiReviews) && apiReviews.length > 0) {
+      if (Array.isArray(apiReviews)) {
         setReviews(apiReviews.map((r: any) => ({
           id: r.id,
           selfReviewId: r.selfReview?.id || '',
@@ -59,19 +58,17 @@ export default function ManagerReviewsQueue() {
           managerComments: r.managerComments || '',
           status: r.status || 'Pending'
         })));
-      } else {
-        setReviews(mockManagerReviews);
       }
 
-      setGoals(Array.isArray(apiGoals) && apiGoals.length > 0 ? apiGoals : mockGoals);
-      setCompetencies(Array.isArray(apiCompetencies) && apiCompetencies.length > 0 ? apiCompetencies : mockCompetencies);
-      setRatingScales(Array.isArray(apiScales) && apiScales.length > 0 ? apiScales : mockRatingScales);
+      setGoals(Array.isArray(apiGoals) ? apiGoals : []);
+      setCompetencies(Array.isArray(apiCompetencies) ? apiCompetencies : []);
+      setRatingScales(Array.isArray(apiScales) ? apiScales : []);
     } catch (e) {
       toast.error('Failed to load manager review queue');
-      setReviews(mockManagerReviews);
-      setGoals(mockGoals);
-      setCompetencies(mockCompetencies);
-      setRatingScales(mockRatingScales);
+      setReviews([]);
+      setGoals([]);
+      setCompetencies([]);
+      setRatingScales([]);
     }
     setLoading(false);
   };
@@ -79,7 +76,7 @@ export default function ManagerReviewsQueue() {
   const handleSave = async (data: any) => {
     try {
       if (selectedReview) {
-        await api.put(`/hrms/performance/reviews/manager/${selectedReview.id}`, data).catch(() => {});
+        await api.put(`/hrms/performance/reviews/manager/${selectedReview.id}`, data);
         toast.success('Manager review submitted');
       }
       setIsDrawerOpen(false);
@@ -100,7 +97,7 @@ export default function ManagerReviewsQueue() {
       render: (_: any, row: ManagerReview) => (
         <TableRowActionMenu
           actions={[
-            { label: row.status === 'Completed' ? 'View Review' : 'Conduct Review', onClick: () => { setSelectedReview(row); setIsDrawerOpen(true); } }
+            { label: ['Manager Reviewed', 'HR Reviewed', 'Finalized'].includes(row.status) ? 'View Review' : 'Conduct Review', onClick: () => { setSelectedReview(row); setIsDrawerOpen(true); } }
           ]}
         />
       )
@@ -128,7 +125,7 @@ export default function ManagerReviewsQueue() {
           onSave={handleSave}
           goals={goals}
           competencies={competencies}
-          ratingScale={ratingScales[0] || mockRatingScales[0]}
+          ratingScale={ratingScales[0]!}
           initialData={selectedReview}
         />
       )}

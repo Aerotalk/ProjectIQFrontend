@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import BatchDrawer from './components/BatchDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ClaimBatch } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -24,9 +23,9 @@ export default function BatchProcessingMain() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiBatches = await api.get('/hrms/expense-claims/batches').catch(() => []);
+      const apiBatches = await api.get('/hrms/expense-claims/batches');
       let data: ClaimBatch[] = [];
-      if (Array.isArray(apiBatches) && apiBatches.length > 0) {
+      if (Array.isArray(apiBatches)) {
         data = apiBatches.map((b: any) => ({
           id: b.id,
           batchNo: b.batchNo || `BAT-${b.id.slice(0, 4)}`,
@@ -39,14 +38,11 @@ export default function BatchProcessingMain() {
           paymentMethod: b.paymentMethod || 'Bank Transfer',
           createdAt: b.createdAt
         }));
-      } else {
-        data = await mockExpenseClaimsService.getBatches();
       }
       setBatches(data);
     } catch (e) {
       toast.error('Failed to load batches');
-      const fallback = await mockExpenseClaimsService.getBatches();
-      setBatches(fallback);
+      setBatches([]);
     }
     setLoading(false);
   };
@@ -60,15 +56,6 @@ export default function BatchProcessingMain() {
           claimsCount: 5,
           totalAmount: 1250.00,
           status: 'Draft'
-        }).catch(async () => {
-          await mockExpenseClaimsService.createBatch({
-            payrollPeriod: data.payrollPeriod,
-            paymentMethod: data.paymentMethod,
-            claimsCount: 5,
-            totalAmount: 1250.00,
-            status: 'Draft',
-            createdBy: 'USR-001'
-          });
         });
         toast.success('Payment batch created');
       }
@@ -81,7 +68,7 @@ export default function BatchProcessingMain() {
 
   const handleMarkPaid = async (id: string) => {
     try {
-      await api.put(`/hrms/expense-claims/batches/${id}/pay`).catch(() => {});
+      await api.put(`/hrms/expense-claims/batches/${id}/pay`);
       toast.success('Batch marked as paid');
       fetchData();
     } catch (e) {

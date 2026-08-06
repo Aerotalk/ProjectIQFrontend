@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
-import { mockCompetencies, mockRatingScales } from './../mock/mockPerformanceData';
 import type { Competency, RatingScale } from './../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
@@ -21,16 +19,16 @@ export default function TemplatesMain() {
     setLoading(true);
     try {
       const [apiCompetencies, apiScales] = await Promise.all([
-        api.get('/hrms/performance/competencies').catch(() => []),
-        api.get('/hrms/performance/rating-scales').catch(() => [])
+        api.get('/hrms/performance/competencies'),
+        api.get('/hrms/performance/rating-scales')
       ]);
 
-      setCompetencies(Array.isArray(apiCompetencies) && apiCompetencies.length > 0 ? apiCompetencies : mockCompetencies);
-      setRatingScales(Array.isArray(apiScales) && apiScales.length > 0 ? apiScales : mockRatingScales);
+      setCompetencies(Array.isArray(apiCompetencies) ? apiCompetencies : []);
+      setRatingScales(Array.isArray(apiScales) ? apiScales : []);
     } catch (e) {
       toast.error('Failed to load performance templates');
-      setCompetencies(mockCompetencies);
-      setRatingScales(mockRatingScales);
+      setCompetencies([]);
+      setRatingScales([]);
     }
     setLoading(false);
   };

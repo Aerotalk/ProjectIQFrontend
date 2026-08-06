@@ -258,8 +258,6 @@ export default function EmployeeDirectory() {
         // Step 2 — Create core employee record
         const empPayload = {
           userId: userRes.id,
-          workEmail: data.workEmail,
-          phone: data.phone,
           ...data
         };
         const empRes = await api.post('/admin/employees', empPayload);
