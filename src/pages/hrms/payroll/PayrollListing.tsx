@@ -10,22 +10,49 @@ import CustomMonthPicker from '../../../components/ui/CustomMonthPicker';
 
 export default function PayrollListing() {
  const navigate = useNavigate();
- const { payrolls, employees, departments, isLoading, filters, updateFilter, clearFilters } = usePayroll();
- 
- const [isDrawerOpen, setIsDrawerOpen] = useState(false);
- const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
- const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
- const [showFilters, setShowFilters] = useState(false);
+  const { payrolls, employees, departments, isLoading, filters, updateFilter, clearFilters, refreshData } = usePayroll();
+  
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
- const employeeOptions = employees.map(e => ({ value: e.empId, label: e.name, subtitle: e.empId }));
- const departmentOptions = departments.map(d => ({ value: d.name, label: d.name }));
- const statusOptions = ['Draft', 'Processing', 'Processed'].map(s => ({ value: s, label: s }));
- const payoutOptions = ['Unpaid', 'Pending', 'Paid'].map(s => ({ value: s, label: s }));
+  const employeeOptions = employees.map(e => ({ value: e.empId, label: e.name, subtitle: e.empId }));
+  const departmentOptions = departments.map(d => ({ value: d.name, label: d.name }));
+  const statusOptions = ['Draft', 'Processing', 'Processed'].map(s => ({ value: s, label: s }));
+  const payoutOptions = ['Unpaid', 'Pending', 'Paid'].map(s => ({ value: s, label: s }));
 
- const handleSave = async (data: PayrollFormValues) => {
- console.log('Saved payroll data:', data);
- setIsDrawerOpen(false);
- };
+  const handleSave = async (data: PayrollFormValues) => {
+    const { api } = await import('../../../lib/api');
+    
+    if (data.salaryInputs) {
+      await api.post('/hrms/payroll/salary-inputs', data.salaryInputs);
+    }
+    if (data.employeeLOP) {
+      await api.post('/hrms/payroll/employee-lop', data.employeeLOP);
+    }
+    if (data.payrollProcessing) {
+      await api.post('/hrms/payroll/runs', data.payrollProcessing);
+    }
+    if (data.salaryHold) {
+      await api.post('/hrms/payroll/salary-holds', data.salaryHold);
+    }
+    if (data.stopSalary) {
+      await api.post('/hrms/payroll/salary-stops', data.stopSalary);
+    }
+    if (data.reimbursement) {
+      await api.post('/hrms/payroll/reimbursements', data.reimbursement);
+    }
+    if (data.finalSettlement) {
+      await api.post('/hrms/payroll/final-settlements', data.finalSettlement);
+    }
+    if (data.payrollConfiguration?.componentName) {
+      await api.post('/hrms/payroll/pay-components', data.payrollConfiguration);
+    }
+
+    await refreshData();
+    setIsDrawerOpen(false);
+  };
 
  const openDrawer = (mode: 'create' | 'edit' | 'view', payroll?: any) => {
  setDrawerMode(mode);

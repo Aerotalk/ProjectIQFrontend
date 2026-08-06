@@ -24,41 +24,58 @@ export function usePayroll() {
     payout: '',
   });
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [payrollsData, rawEmployeesData, rawDeptsData] = await Promise.all([
-          mockPayrollService.fetchPayrolls(),
-          api.get('/admin/employees'),
-          api.get('/admin/departments')
-        ]);
-        
-        const employeesData = rawEmployeesData.map((e: any) => ({
-          id: e.id,
-          name: `${e.firstName} ${e.lastName}`,
-          empId: e.employeeCode
-        }));
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const [apiRuns, rawEmployeesData, rawDeptsData] = await Promise.all([
+        api.get('/hrms/payroll/runs').catch(() => []),
+        api.get('/admin/employees').catch(() => []),
+        api.get('/admin/departments').catch(() => [])
+      ]);
+      
+      const employeesData = (rawEmployeesData || []).map((e: any) => ({
+        id: e.id,
+        name: `${e.firstName} ${e.lastName}`,
+        empId: e.employeeCode
+      }));
 
-        const deptsData = rawDeptsData.map((d: any) => ({
-          id: d.id,
-          name: d.departmentName
-        }));
+      const deptsData = (rawDeptsData || []).map((d: any) => ({
+        id: d.id,
+        name: d.departmentName
+      }));
 
-        if (isMounted) {
-          setPayrolls(payrollsData);
-          setEmployees(employeesData);
-          setDepartments(deptsData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch payroll data', error);
-      } finally {
-        if (isMounted) setIsLoading(false);
+      let mappedPayrolls: PayrollRecord[] = [];
+      if (Array.isArray(apiRuns) && apiRuns.length > 0) {
+        mappedPayrolls = apiRuns.map((r: any) => ({
+          id: r.id,
+          employee: r.employeeScope === 'Department' ? `Dept: ${r.department?.departmentName || 'All'}` : 'All Employees',
+          empId: r.runType || 'Regular',
+          dept: r.department?.departmentName || 'All',
+          period: r.payrollPeriod,
+          gross: `₹${(r.totalGross || 0).toLocaleString('en-IN')}`,
+          net: `₹${(r.totalNet || 0).toLocaleString('en-IN')}`,
+          status: r.status || 'Draft',
+          payout: r.payoutStatus || 'Unpaid'
+        }));
+      } else {
+        // Fallback to mock data if backend has no runs yet
+        mappedPayrolls = await mockPayrollService.fetchPayrolls();
       }
-    };
-    fetchData();
-    return () => { isMounted = false; };
+
+      setPayrolls(mappedPayrolls);
+      setEmployees(employeesData);
+      setDepartments(deptsData);
+    } catch (error) {
+      console.error('Failed to fetch payroll data', error);
+      const fallback = await mockPayrollService.fetchPayrolls();
+      setPayrolls(fallback);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
   }, []);
 
   const filteredPayrolls = useMemo(() => {
@@ -94,6 +111,7 @@ export function usePayroll() {
     isLoading,
     filters,
     updateFilter,
-    clearFilters
+    clearFilters,
+    refreshData
   };
 }
