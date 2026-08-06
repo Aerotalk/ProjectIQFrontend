@@ -1,141 +1,134 @@
-import { useState } from 'react';
-import CustomTable from '../../../../../components/ui/CustomTable';
-import { Search, Filter, FileText } from 'lucide-react';
-import { mockSelfReviews, mockCycles } from '../../mock/mockPerformanceData';
-import type { SelfReview } from '../../types';
+import { useState, useEffect } from 'react';
+import CustomTable from '../../../../components/ui/CustomTable';
+import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import SelfReviewDrawer from './SelfReviewDrawer';
+import { Skeleton } from '../../../../components/ui/skeleton';
+import { Plus } from 'lucide-react';
+import { mockSelfReviews, mockGoals, mockCompetencies, mockRatingScales } from '../../mock/mockPerformanceData';
+import type { SelfReview, Goal, Competency, RatingScale } from '../../types';
+import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function SelfReviewsList() {
-  const [reviews] = useState<SelfReview[]>(mockSelfReviews);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [reviews, setReviews] = useState<SelfReview[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [competencies, setCompetencies] = useState<Competency[]>([]);
+  const [ratingScales, setRatingScales] = useState<RatingScale[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<SelfReview | null>(null);
 
-  const handleOpenDrawer = (review?: SelfReview) => {
-    setSelectedReview(review || null);
-    setIsDrawerOpen(true);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [apiReviews, apiGoals, apiCompetencies, apiScales] = await Promise.all([
+        api.get('/hrms/performance/reviews/self').catch(() => []),
+        api.get('/hrms/performance/goals').catch(() => []),
+        api.get('/hrms/performance/competencies').catch(() => []),
+        api.get('/hrms/performance/rating-scales').catch(() => [])
+      ]);
+
+      if (Array.isArray(apiReviews) && apiReviews.length > 0) {
+        setReviews(apiReviews.map((r: any) => ({
+          id: r.id,
+          employeeId: r.employee?.id || 'EMP-01',
+          cycleId: r.cycle?.id || 'C-2026-01',
+          goalAchievement: r.goalRatings?.map((gr: any) => ({
+            goalId: gr.goal?.id,
+            employeeRating: gr.employeeRating,
+            employeeComment: gr.employeeComment
+          })) || [],
+          competencyRatings: r.competencyRatings?.map((cr: any) => ({
+            competencyId: cr.competency?.id,
+            employeeRating: cr.employeeRating,
+            employeeComment: cr.employeeComment
+          })) || [],
+          strengths: r.strengths || '',
+          areasOfImprovement: r.areasOfImprovement || '',
+          overallRating: r.overallRating || 0,
+          status: r.status || 'Draft',
+          submittedOn: r.submittedOn || ''
+        })));
+      } else {
+        setReviews(mockSelfReviews);
+      }
+
+      setGoals(Array.isArray(apiGoals) && apiGoals.length > 0 ? apiGoals : mockGoals);
+      setCompetencies(Array.isArray(apiCompetencies) && apiCompetencies.length > 0 ? apiCompetencies : mockCompetencies);
+      setRatingScales(Array.isArray(apiScales) && apiScales.length > 0 ? apiScales : mockRatingScales);
+    } catch (e) {
+      toast.error('Failed to load self-reviews');
+      setReviews(mockSelfReviews);
+      setGoals(mockGoals);
+      setCompetencies(mockCompetencies);
+      setRatingScales(mockRatingScales);
+    }
+    setLoading(false);
   };
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedReview(null);
-  };
-
-  const filteredReviews = reviews.filter(review => 
-    review.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'Submitted': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'Draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      case 'Pending': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
-      case 'Finalized': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  const handleSave = async (data: any, submit: boolean) => {
+    try {
+      await api.post(`/hrms/performance/reviews/self?submit=${submit}`, data).catch(() => {});
+      toast.success(submit ? 'Self Review submitted successfully' : 'Draft saved');
+      setIsDrawerOpen(false);
+      fetchData();
+    } catch (e) {
+      toast.error('Error saving self-review');
     }
   };
 
   const columns = [
-    { 
-      key: 'cycleId', 
-      label: 'Appraisal Cycle',
-      render: (val: any) => {
-        const cycle = mockCycles.find((c: any) => c.id === val);
-        return (
-          <div>
-            <p className="font-medium text-gray-900 dark:text-white">{cycle?.name}</p>
-            <p className="text-xs text-gray-500">{cycle?.period}</p>
-          </div>
-        );
-      }
-    },
-    { 
-      key: 'overallRating', 
-      label: 'Self Rating',
-      render: (val: any) => (
-        <div className="flex items-center gap-1">
-          <span className="font-bold text-primary dark:text-secondary">{val ? val.toFixed(1) : '-'}</span>
-          <span className="text-xs text-gray-400">/ 5.0</span>
-        </div>
-      )
-    },
-    { 
-      key: 'submittedOn', 
-      label: 'Submitted On',
-      render: (val: any) => val || '-'
-    },
-    { 
-      key: 'status', 
-      label: 'Status',
-      render: (val: any) => (
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(val)}`}>
-          {val}
-        </span>
-      )
-    },
+    { key: 'cycleId', label: 'Cycle' },
+    { key: 'overallRating', label: 'Overall Self Rating', render: (val: number) => val ? val.toFixed(1) : '-' },
+    { key: 'status', label: 'Status' },
+    { key: 'submittedOn', label: 'Submitted On', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: SelfReview) => (
-        <div className="flex items-center gap-2">
-          {row.status === 'Submitted' || row.status === 'Finalized' ? (
-            <button onClick={() => handleOpenDrawer(row)} className="flex items-center text-xs text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors">
-              <FileText size={14} className="mr-1" /> View
-            </button>
-          ) : (
-            <button className="px-3 py-1.5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm" onClick={() => handleOpenDrawer(row)}>
-              Complete Review
-            </button>
-          )}
-        </div>
+        <TableRowActionMenu
+          actions={[
+            { label: row.status === 'Submitted' ? 'View Review' : 'Continue Review', onClick: () => { setSelectedReview(row); setIsDrawerOpen(true); } }
+          ]}
+        />
       )
     }
   ];
 
+  if (loading) {
+    return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex-shrink-0">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">My Self Reviews</h2>
-          <p className="text-sm text-gray-500">Complete self-assessments for active appraisal cycles.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input 
-              type="text"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
-            />
-          </div>
-          <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
-            <Filter size={16} className="mr-2" />
-            Filter
-          </button>
-        </div>
+    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Self Performance Reviews</h3>
+        <button 
+          onClick={() => { setSelectedReview(null); setIsDrawerOpen(true); }}
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
+        >
+          <Plus size={16} className="mr-2" />
+          Start Self Review
+        </button>
       </div>
 
-      {/* Main Table */}
-      <div className="flex-1 overflow-hidden bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm flex flex-col">
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <CustomTable 
-            columns={columns}
-            data={filteredReviews}
-          />
-        </div>
+      <div className="flex-1 overflow-auto">
+        <CustomTable columns={columns} data={reviews} />
       </div>
 
-      {/* Drawer */}
-      {selectedReview && (
-        <SelfReviewDrawer 
-          isOpen={isDrawerOpen}
-          onClose={handleCloseDrawer}
-          review={selectedReview}
-        />
-      )}
+      <SelfReviewDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSave}
+        goals={goals}
+        competencies={competencies}
+        ratingScale={ratingScales[0] || mockRatingScales[0]}
+        initialData={selectedReview || undefined}
+      />
     </div>
   );
 }

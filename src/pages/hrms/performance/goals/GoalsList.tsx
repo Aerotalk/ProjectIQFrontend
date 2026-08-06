@@ -1,169 +1,201 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { Plus, Search, Filter, Edit, CheckCircle } from 'lucide-react';
-import { mockGoals } from '../mock/mockPerformanceData';
-import type { Goal } from '../types';
+import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import GoalDrawer from './GoalDrawer';
+import { Skeleton } from '../../../../components/ui/skeleton';
+import { Plus, Search, Filter } from 'lucide-react';
+import { mockGoals, mockCycles } from '../mock/mockPerformanceData';
+import type { Goal, AppraisalCycle } from '../types';
+import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function GoalsList() {
-  const [goals, setGoals] = useState<Goal[]>(mockGoals);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
 
-  const handleOpenDrawer = (goal?: Goal) => {
-    setSelectedGoal(goal || null);
-    setIsDrawerOpen(true);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [apiGoals, apiCycles] = await Promise.all([
+        api.get('/hrms/performance/goals').catch(() => []),
+        api.get('/hrms/performance/cycles').catch(() => [])
+      ]);
+
+      if (Array.isArray(apiGoals) && apiGoals.length > 0) {
+        setGoals(apiGoals.map((g: any) => ({
+          id: g.id,
+          title: g.title,
+          description: g.description || '',
+          employee: {
+            id: g.employee?.id || 'EMP-01',
+            name: g.employee?.firstName ? `${g.employee.firstName} ${g.employee.lastName}` : 'Employee',
+            designation: g.employee?.designation?.designationName || 'Staff',
+            department: g.employee?.department?.departmentName || 'General'
+          },
+          cycleId: g.cycle?.id || g.cycleId || 'C-2026-01',
+          category: g.category || 'Productivity',
+          weightage: g.weightage || 20,
+          kpi: g.kpi || '',
+          targetValue: g.targetValue || 100,
+          currentValue: g.currentValue || 0,
+          unit: g.unit || '%',
+          dueDate: g.dueDate || '',
+          priority: g.priority || 'Medium',
+          status: g.status || 'In Progress',
+          progress: g.progress || 0
+        })));
+      } else {
+        setGoals(mockGoals);
+      }
+
+      if (Array.isArray(apiCycles) && apiCycles.length > 0) {
+        setCycles(apiCycles.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          type: c.type || 'Annual',
+          period: c.period || '',
+          startDate: c.startDate || '',
+          endDate: c.endDate || '',
+          selfReviewDeadline: c.selfReviewDeadline || '',
+          managerReviewDeadline: c.managerReviewDeadline || '',
+          hrReviewDeadline: c.hrReviewDeadline || '',
+          departments: ['All'],
+          locations: ['All'],
+          grades: ['All'],
+          eligibleCount: c.eligibleCount || 0,
+          completionPercentage: c.completionPercentage || 0,
+          status: c.status || 'Active',
+          description: c.description || ''
+        })));
+      } else {
+        setCycles(mockCycles);
+      }
+    } catch (e) {
+      toast.error('Failed to load goals');
+      setGoals(mockGoals);
+      setCycles(mockCycles);
+    }
+    setLoading(false);
   };
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedGoal(null);
-  };
-
-  const handleCompleteGoal = (id: string) => {
-    setGoals(goals.map(g => g.id === id ? { ...g, status: 'Completed', progress: 100 } : g));
-  };
-
-  const filteredGoals = goals.filter(goal => 
-    goal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    goal.employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    goal.employee.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'Completed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'Not Started': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      case 'Under Review': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  const handleSave = async (data: any) => {
+    try {
+      if (drawerMode === 'create') {
+        await api.post('/hrms/performance/goals', {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          weightage: data.weightage,
+          kpi: data.kpi,
+          targetValue: data.targetValue,
+          currentValue: data.currentValue,
+          unit: data.unit,
+          dueDate: data.dueDate,
+          priority: data.priority,
+          status: 'In Progress'
+        }).catch(() => {});
+        toast.success('Goal created');
+      } else if (drawerMode === 'edit' && selectedGoal) {
+        await api.put(`/hrms/performance/goals/${selectedGoal.id}`, {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          weightage: data.weightage,
+          kpi: data.kpi,
+          targetValue: data.targetValue,
+          currentValue: data.currentValue,
+          unit: data.unit,
+          dueDate: data.dueDate,
+          priority: data.priority
+        }).catch(() => {});
+        toast.success('Goal updated');
+      }
+      setIsDrawerOpen(false);
+      fetchData();
+    } catch (e) {
+      toast.error('Error saving goal');
     }
   };
 
   const columns = [
-    { 
-      key: 'title', 
-      label: 'Goal',
-      render: (_: any, row: Goal) => (
-        <div className="max-w-xs">
-          <p className="font-medium text-gray-900 dark:text-white truncate">{row.title}</p>
-          <p className="text-xs text-gray-500 truncate">{row.category}</p>
-        </div>
-      )
-    },
-    { 
-      key: 'employee', 
-      label: 'Employee',
-      render: (val: any) => (
-        <div>
-          <p className="font-medium text-gray-900 dark:text-white">{val.name}</p>
-          <p className="text-xs text-gray-500">{val.department}</p>
-        </div>
-      )
-    },
-    { key: 'weightage', label: 'Weightage', render: (val: any) => `${val}%` },
-    { 
-      key: 'target', 
-      label: 'Target / Current',
-      render: (_: any, row: Goal) => (
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          {row.currentValue} / {row.targetValue} {row.unit}
-        </div>
-      )
-    },
+    { key: 'title', label: 'Goal Title' },
+    { key: 'category', label: 'Category' },
+    { key: 'weightage', label: 'Weightage', render: (val: number) => `${val}%` },
+    { key: 'priority', label: 'Priority' },
     { 
       key: 'progress', 
       label: 'Progress',
-      render: (val: any) => (
+      render: (val: number) => (
         <div className="flex items-center gap-2">
-          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div 
-              className={`h-1.5 rounded-full ${val >= 100 ? 'bg-green-500' : 'bg-primary dark:bg-secondary'}`} 
-              style={{ width: `${Math.min(val, 100)}%` }}
-            ></div>
+          <div className="w-16 bg-gray-200 dark:bg-white/10 rounded-full h-2 overflow-hidden">
+            <div className="bg-green-500 h-full rounded-full" style={{ width: `${val || 0}%` }}></div>
           </div>
-          <span className="text-xs text-gray-500">{val}%</span>
+          <span className="text-xs">{val || 0}%</span>
         </div>
       )
     },
-    { key: 'dueDate', label: 'Due Date' },
-    { 
-      key: 'status', 
-      label: 'Status',
-      render: (val: any) => (
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(val)}`}>
-          {val}
-        </span>
-      )
-    },
+    { key: 'status', label: 'Status' },
     {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: Goal) => (
-        <div className="flex items-center gap-2">
-          <button onClick={() => handleOpenDrawer(row)} className="p-1 text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors" title="View/Edit">
-            <Edit size={16} />
-          </button>
-          {row.status !== 'Completed' && (
-            <button 
-              className="p-1 text-gray-500 hover:text-green-600 transition-colors" 
-              title="Mark Complete"
-              onClick={() => handleCompleteGoal(row.id)}
-            >
-              <CheckCircle size={16} />
-            </button>
-          )}
-        </div>
+        <TableRowActionMenu
+          actions={[
+            { label: 'View / Edit', onClick: () => { setSelectedGoal(row); setDrawerMode('edit'); setIsDrawerOpen(true); } }
+          ]}
+        />
       )
     }
   ];
 
+  if (loading) {
+    return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex-shrink-0">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Goals & KRAs</h2>
-          <p className="text-sm text-gray-500">Track and update key results for the organization.</p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
             <input 
-              type="text"
-              placeholder="Search goals..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
+              type="text" 
+              placeholder="Search goals..." 
+              className="pl-9 pr-4 py-2 border border-gray-200 dark:border-white/10 rounded-md bg-transparent text-sm w-64 focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-          <button className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm">
-            <Filter size={16} className="mr-2" />
-            Filter
-          </button>
-          <button onClick={() => handleOpenDrawer()} className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
-            <Plus size={16} className="mr-2" />
-            New Goal
+          <button className="p-2 border border-gray-200 dark:border-white/10 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5">
+            <Filter size={16} />
           </button>
         </div>
+        <button 
+          onClick={() => { setDrawerMode('create'); setSelectedGoal(null); setIsDrawerOpen(true); }}
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
+        >
+          <Plus size={16} className="mr-2" />
+          Add Goal / KRA
+        </button>
       </div>
 
-      {/* Main Table */}
-      <div className="flex-1 overflow-hidden bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm flex flex-col">
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <CustomTable 
-            columns={columns}
-            data={filteredGoals}
-          />
-        </div>
+      <div className="flex-1 overflow-auto">
+        <CustomTable columns={columns} data={goals} />
       </div>
 
-      {/* Drawer */}
-      <GoalDrawer 
+      <GoalDrawer
         isOpen={isDrawerOpen}
-        onClose={handleCloseDrawer}
-        goal={selectedGoal}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSave}
+        mode={drawerMode}
+        cycles={cycles}
+        initialData={selectedGoal || undefined}
       />
     </div>
   );

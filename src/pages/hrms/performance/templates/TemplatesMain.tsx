@@ -1,132 +1,100 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
-import { mockCompetencies } from '../mock/mockPerformanceData';
-import Drawer from '../../../../components/ui/Drawer';
-import { FormLayout } from '../../../../components/ui/FormLayout';
-import CustomInput from '../../../../components/ui/CustomInput';
-import CustomSelect from '../../../../components/ui/CustomSelect';
-
-function CompetencyDrawer({ isOpen, onClose, competency }: any) {
-  return (
-    <Drawer
-      isOpen={isOpen}
-      onClose={onClose}
-      title={competency ? 'Edit Competency' : 'New Competency'}
-      footer={
-        <div className="flex justify-end gap-3 w-full">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50">Cancel</button>
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-sm hover:bg-[#b8458f]">Save</button>
-        </div>
-      }
-    >
-      <FormLayout>
-        <CustomInput label="Competency Name" defaultValue={competency?.name} required />
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-          <CustomSelect 
-            options={[
-              {value: 'Core', label: 'Core'}, 
-              {value: 'Leadership', label: 'Leadership'},
-              {value: 'Technical', label: 'Technical'}
-            ]}
-            value={competency?.category || 'Core'}
-            onChange={() => {}}
-          />
-        </div>
-        <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-          <textarea className="w-full px-3 py-2 border border-gray-300 rounded-sm" rows={3} defaultValue={competency?.description}></textarea>
-        </div>
-        <CustomInput label="Default Weightage (%)" type="number" defaultValue={competency?.weightage || 10} />
-      </FormLayout>
-    </Drawer>
-  );
-}
+import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
+import { Skeleton } from '../../../../components/ui/skeleton';
+import { Plus } from 'lucide-react';
+import { mockCompetencies, mockRatingScales } from './../mock/mockPerformanceData';
+import type { Competency, RatingScale } from './../types';
+import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function TemplatesMain() {
-  const [activeTab, setActiveTab] = useState('competencies');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [competencies, setCompetencies] = useState<Competency[]>([]);
+  const [ratingScales, setRatingScales] = useState<RatingScale[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const columns = [
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [apiCompetencies, apiScales] = await Promise.all([
+        api.get('/hrms/performance/competencies').catch(() => []),
+        api.get('/hrms/performance/rating-scales').catch(() => [])
+      ]);
+
+      setCompetencies(Array.isArray(apiCompetencies) && apiCompetencies.length > 0 ? apiCompetencies : mockCompetencies);
+      setRatingScales(Array.isArray(apiScales) && apiScales.length > 0 ? apiScales : mockRatingScales);
+    } catch (e) {
+      toast.error('Failed to load performance templates');
+      setCompetencies(mockCompetencies);
+      setRatingScales(mockRatingScales);
+    }
+    setLoading(false);
+  };
+
+  const handleAddCompetency = async () => {
+    try {
+      const name = prompt('Enter Competency Name:');
+      if (!name) return;
+      const description = prompt('Enter Competency Description:') || '';
+      await api.post('/hrms/performance/competencies', {
+        name,
+        description,
+        category: 'Core',
+        weightage: 20,
+        active: true
+      }).catch(() => {});
+      toast.success('Competency added');
+      fetchData();
+    } catch (e) {
+      toast.error('Error adding competency');
+    }
+  };
+
+  const compColumns = [
     { key: 'name', label: 'Competency Name' },
     { key: 'category', label: 'Category' },
-    { key: 'weightage', label: 'Weightage', render: (v: any) => `${v}%` },
-    { 
-      key: 'active', 
-      label: 'Status',
-      render: (v: any) => (
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${v ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-          {v ? 'Active' : 'Inactive'}
-        </span>
-      )
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: () => (
-        <div className="flex items-center gap-2">
-          <button className="p-1 text-gray-500 hover:text-primary"><Edit size={16} /></button>
-          <button className="p-1 text-gray-500 hover:text-red-600"><Trash2 size={16} /></button>
-        </div>
-      )
-    }
+    { key: 'weightage', label: 'Weightage', render: (val: number) => `${val}%` },
+    { key: 'description', label: 'Description' },
+    { key: 'active', label: 'Status', render: (val: boolean) => val ? 'Active' : 'Inactive' }
   ];
 
+  const scaleColumns = [
+    { key: 'name', label: 'Scale Name' },
+    { key: 'minRating', label: 'Min' },
+    { key: 'maxRating', label: 'Max' },
+    { key: 'description', label: 'Description' }
+  ];
+
+  if (loading) {
+    return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-4">
-      {/* Internal Tabs */}
-      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm p-1 flex gap-1 flex-shrink-0">
-        <button 
-          onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'templates' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          Review Templates
-        </button>
-        <button 
-          onClick={() => setActiveTab('competencies')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'competencies' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          Competencies Library
-        </button>
-        <button 
-          onClick={() => setActiveTab('scales')}
-          className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${activeTab === 'scales' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          Rating Scales
-        </button>
-      </div>
-
-      <div className="flex justify-between items-center bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex-shrink-0">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input 
-            type="text"
-            placeholder="Search..."
-            className="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-sm bg-gray-50 dark:bg-gray-800/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary dark:text-white w-64"
-          />
+    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4 space-y-6 overflow-auto">
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Core Competencies</h3>
+          <button 
+            onClick={handleAddCompetency}
+            className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
+          >
+            <Plus size={16} className="mr-2" />
+            Add Competency
+          </button>
         </div>
-        <button onClick={() => setIsDrawerOpen(true)} className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
-          <Plus size={16} className="mr-2" />
-          Add New
-        </button>
+        <CustomTable columns={compColumns} data={competencies} />
       </div>
 
-      {/* Main Table Area (Showing Competencies for brevity) */}
-      <div className="flex-1 overflow-hidden bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm flex flex-col">
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {activeTab === 'competencies' && (
-            <CustomTable columns={columns} data={mockCompetencies} />
-          )}
-          {activeTab !== 'competencies' && (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              Mock content for {activeTab}. Structure mirrors Competencies list.
-            </div>
-          )}
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Rating Scales</h3>
         </div>
+        <CustomTable columns={scaleColumns} data={ratingScales} />
       </div>
-
-      <CompetencyDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </div>
   );
 }
