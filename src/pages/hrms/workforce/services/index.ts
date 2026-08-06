@@ -1,164 +1,174 @@
+import { api } from '@/lib/api';
 import * as Repositories from '../mock/repositories';
 import type { 
   LeaveType, LeaveScheme, LeaveApplication, 
   AttendanceRecord, Shift, RegularizationRequest, PermissionRequest
 } from '../types';
 
-// Service Layer abstracts the repository implementation.
-// Currently it delegates to the mock repositories, but later we will
-// swap these with actual API calls (e.g. axios.get('/api/workforce/leave-types'))
-
 export const WorkforceService = {
   // Leave Types
-  getLeaveTypes: (params?: any) => Repositories.LeaveTypeRepo.getAll(params),
-  getLeaveTypeById: (id: string) => Repositories.LeaveTypeRepo.getById(id),
-  createLeaveType: (data: Omit<LeaveType, 'id'>) => Repositories.LeaveTypeRepo.create(data),
-  updateLeaveType: (id: string, data: Partial<LeaveType>) => Repositories.LeaveTypeRepo.update(id, data),
-  deleteLeaveType: (id: string) => Repositories.LeaveTypeRepo.delete(id),
+  getLeaveTypes: (params?: any) => api.get('/hrms/leave/types', { params }),
+  getLeaveTypeById: (id: string) => api.get(`/hrms/leave/types/${id}`),
+  createLeaveType: (data: Omit<LeaveType, 'id'>) => api.post('/hrms/leave/types', data),
+  updateLeaveType: (id: string, data: Partial<LeaveType>) => api.put(`/hrms/leave/types/${id}`, data),
+  deleteLeaveType: (id: string) => api.delete(`/hrms/leave/types/${id}`),
 
   // Leave Schemes
-  getLeaveSchemes: (params?: any) => Repositories.LeaveSchemeRepo.getAll(params),
-  getLeaveSchemeById: (id: string) => Repositories.LeaveSchemeRepo.getById(id),
-  createLeaveScheme: (data: Omit<LeaveScheme, 'id'>) => Repositories.LeaveSchemeRepo.create(data),
-  updateLeaveScheme: (id: string, data: Partial<LeaveScheme>) => Repositories.LeaveSchemeRepo.update(id, data),
-  deleteLeaveScheme: (id: string) => Repositories.LeaveSchemeRepo.delete(id),
+  getLeaveSchemes: (params?: any) => api.get('/hrms/leave/schemes', { params }),
+  getLeaveSchemeById: (id: string) => api.get(`/hrms/leave/schemes/${id}`),
+  createLeaveScheme: (data: Omit<LeaveScheme, 'id'>) => api.post('/hrms/leave/schemes', data),
+  updateLeaveScheme: (id: string, data: Partial<LeaveScheme>) => api.put(`/hrms/leave/schemes/${id}`, data),
+  deleteLeaveScheme: (id: string) => api.delete(`/hrms/leave/schemes/${id}`),
 
   // Leave Balances
-  getLeaveBalances: (params?: any) => Repositories.LeaveBalanceRepo.getAll(params),
-  getLeaveBalanceById: (id: string) => Repositories.LeaveBalanceRepo.getById(id),
+  getLeaveBalances: (params?: any) => api.get('/hrms/leave/balances', { params }),
+  getLeaveBalanceById: (id: string) => api.get(`/hrms/leave/balances?employeeId=${id}`),
 
   // Leave Applications
-  getLeaveApplications: (params?: any) => Repositories.LeaveApplicationRepo.getAll(params),
-  getLeaveApplicationById: (id: string) => Repositories.LeaveApplicationRepo.getById(id),
-  createLeaveApplication: (data: Omit<LeaveApplication, 'id'>) => Repositories.LeaveApplicationRepo.create(data),
-  updateLeaveApplication: (id: string, data: Partial<LeaveApplication>) => Repositories.LeaveApplicationRepo.update(id, data),
-  deleteLeaveApplication: (id: string) => Repositories.LeaveApplicationRepo.delete(id),
-  
+  getLeaveApplications: (params?: any) => api.get('/hrms/leave/applications', { params }),
+  getLeaveApplicationById: (id: string) => api.get(`/hrms/leave/applications/${id}`),
+  createLeaveApplication: (data: Omit<LeaveApplication, 'id'>) => api.post('/hrms/leave/applications', data),
+  updateLeaveApplication: (id: string, data: Partial<LeaveApplication>) => api.put(`/hrms/leave/applications/${id}`, data),
+  deleteLeaveApplication: (id: string) => api.delete(`/hrms/leave/applications/${id}`),
+  approveLeaveApplication: (id: string, remarks?: string) => api.put(`/hrms/leave/applications/${id}/approve`, { remarks }),
+  rejectLeaveApplication: (id: string, remarks?: string) => api.put(`/hrms/leave/applications/${id}/reject`, { remarks }),
+  cancelLeaveApplication: (id: string, reason?: string) => api.put(`/hrms/leave/applications/${id}/cancel`, { reason }),
+
   // Dashboard
   getDashboardKPIs: () => Repositories.DashboardRepo.getKPIs(),
-  
+
   // Attendance
-  getAttendanceRecords: (params?: any) => Repositories.AttendanceRecordRepo.getAll(params),
-  getAttendanceRecordById: (id: string) => Repositories.AttendanceRecordRepo.getById(id),
-  createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => Repositories.AttendanceRecordRepo.create(data),
-  updateAttendanceRecord: (id: string, data: Partial<AttendanceRecord>) => Repositories.AttendanceRecordRepo.update(id, data),
-  deleteAttendanceRecord: (id: string) => Repositories.AttendanceRecordRepo.delete(id),
-  
+  getAttendanceRecords: (params?: any) => api.get('/hrms/attendance/records', { params }),
+  getAttendanceRecordById: (id: string) => api.get(`/hrms/attendance/records/${id}`),
+  createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => api.post('/hrms/attendance/records', data),
+  updateAttendanceRecord: (id: string, data: Partial<AttendanceRecord>) => api.put(`/hrms/attendance/records/${id}`, data),
+  deleteAttendanceRecord: (id: string) => api.delete(`/hrms/attendance/records/${id}`),
+  checkIn: (employeeId: string, source?: string) => api.post('/hrms/attendance/records/check-in', { employeeId, source }),
+  checkOut: (employeeId: string) => api.post('/hrms/attendance/records/check-out', { employeeId }),
+
   // Shifts
-  getShifts: (params?: any) => Repositories.ShiftRepo.getAll(params),
-  getShiftById: (id: string) => Repositories.ShiftRepo.getById(id),
-  createShift: (data: Omit<Shift, 'id'>) => Repositories.ShiftRepo.create(data),
-  updateShift: (id: string, data: Partial<Shift>) => Repositories.ShiftRepo.update(id, data),
-  deleteShift: (id: string) => Repositories.ShiftRepo.delete(id),
-  
+  getShifts: (params?: any) => api.get('/hrms/shifts', { params }),
+  getShiftById: (id: string) => api.get(`/hrms/shifts/${id}`),
+  createShift: (data: Omit<Shift, 'id'>) => api.post('/hrms/shifts', data),
+  updateShift: (id: string, data: Partial<Shift>) => api.put(`/hrms/shifts/${id}`, data),
+  deleteShift: (id: string) => api.delete(`/hrms/shifts/${id}`),
+
   // Regularization
-  getRegularizations: (params?: any) => Repositories.RegularizationRepo.getAll(params),
-  getRegularizationById: (id: string) => Repositories.RegularizationRepo.getById(id),
-  createRegularization: (data: Omit<RegularizationRequest, 'id'>) => Repositories.RegularizationRepo.create(data),
-  updateRegularization: (id: string, data: Partial<RegularizationRequest>) => Repositories.RegularizationRepo.update(id, data),
-  deleteRegularization: (id: string) => Repositories.RegularizationRepo.delete(id),
-  
+  getRegularizations: (params?: any) => api.get('/hrms/attendance/regularizations', { params }),
+  getRegularizationById: (id: string) => api.get(`/hrms/attendance/regularizations/${id}`),
+  createRegularization: (data: Omit<RegularizationRequest, 'id'>) => api.post('/hrms/attendance/regularizations', data),
+  updateRegularization: (id: string, data: Partial<RegularizationRequest>) => api.put(`/hrms/attendance/regularizations/${id}`, data),
+  deleteRegularization: (id: string) => api.delete(`/hrms/attendance/regularizations/${id}`),
+  approveRegularization: (id: string, remarks?: string) => api.put(`/hrms/attendance/regularizations/${id}/approve`, { remarks }),
+  rejectRegularization: (id: string, remarks?: string) => api.put(`/hrms/attendance/regularizations/${id}/reject`, { remarks }),
+
   // Permissions
-  getPermissions: (params?: any) => Repositories.PermissionRepo.getAll(params),
-  getPermissionById: (id: string) => Repositories.PermissionRepo.getById(id),
-  createPermission: (data: Omit<PermissionRequest, 'id'>) => Repositories.PermissionRepo.create(data),
-  updatePermission: (id: string, data: Partial<PermissionRequest>) => Repositories.PermissionRepo.update(id, data),
-  deletePermission: (id: string) => Repositories.PermissionRepo.delete(id),
+  getPermissions: (params?: any) => api.get('/hrms/attendance/permissions', { params }),
+  getPermissionById: (id: string) => api.get(`/hrms/attendance/permissions/${id}`),
+  createPermission: (data: Omit<PermissionRequest, 'id'>) => api.post('/hrms/attendance/permissions', data),
+  updatePermission: (id: string, data: Partial<PermissionRequest>) => api.put(`/hrms/attendance/permissions/${id}`, data),
+  deletePermission: (id: string) => api.delete(`/hrms/attendance/permissions/${id}`),
+  approvePermission: (id: string, remarks?: string) => api.put(`/hrms/attendance/permissions/${id}/approve`, { remarks }),
+  rejectPermission: (id: string, remarks?: string) => api.put(`/hrms/attendance/permissions/${id}/reject`, { remarks }),
 
   // Shift Rotation
-  getShiftRotations: (params?: any) => Repositories.ShiftRotationRepo.getAll(params),
-  getShiftRotationById: (id: string) => Repositories.ShiftRotationRepo.getById(id),
-  createShiftRotation: (data: Omit<any, 'id'>) => Repositories.ShiftRotationRepo.create(data),
-  updateShiftRotation: (id: string, data: Partial<any>) => Repositories.ShiftRotationRepo.update(id, data),
-  deleteShiftRotation: (id: string) => Repositories.ShiftRotationRepo.delete(id),
+  getShiftRotations: (params?: any) => api.get('/hrms/shifts/rotations', { params }),
+  getShiftRotationById: (id: string) => api.get(`/hrms/shifts/rotations/${id}`),
+  createShiftRotation: (data: Omit<any, 'id'>) => api.post('/hrms/shifts/rotations', data),
+  updateShiftRotation: (id: string, data: Partial<any>) => api.put(`/hrms/shifts/rotations/${id}`, data),
+  deleteShiftRotation: (id: string) => api.delete(`/hrms/shifts/rotations/${id}`),
 
   // Holiday List
-  getHolidayLists: (params?: any) => Repositories.HolidayListRepo.getAll(params),
-  getHolidayListById: (id: string) => Repositories.HolidayListRepo.getById(id),
-  createHolidayList: (data: Omit<any, 'id'>) => Repositories.HolidayListRepo.create(data),
-  updateHolidayList: (id: string, data: Partial<any>) => Repositories.HolidayListRepo.update(id, data),
-  deleteHolidayList: (id: string) => Repositories.HolidayListRepo.delete(id),
+  getHolidayLists: (params?: any) => api.get('/hrms/holidays/lists', { params }),
+  getHolidayListById: (id: string) => api.get(`/hrms/holidays/lists/${id}`),
+  createHolidayList: (data: Omit<any, 'id'>) => api.post('/hrms/holidays/lists', data),
+  updateHolidayList: (id: string, data: Partial<any>) => api.put(`/hrms/holidays/lists/${id}`, data),
+  deleteHolidayList: (id: string) => api.delete(`/hrms/holidays/lists/${id}`),
 
   // Attendance Scheme
-  getAttendanceSchemes: (params?: any) => Repositories.AttendanceSchemeRepo.getAll(params),
-  getAttendanceSchemeById: (id: string) => Repositories.AttendanceSchemeRepo.getById(id),
-  createAttendanceScheme: (data: Omit<any, 'id'>) => Repositories.AttendanceSchemeRepo.create(data),
-  updateAttendanceScheme: (id: string, data: Partial<any>) => Repositories.AttendanceSchemeRepo.update(id, data),
-  deleteAttendanceScheme: (id: string) => Repositories.AttendanceSchemeRepo.delete(id),
+  getAttendanceSchemes: (params?: any) => api.get('/hrms/attendance-config/schemes', { params }),
+  getAttendanceSchemeById: (id: string) => api.get(`/hrms/attendance-config/schemes/${id}`),
+  createAttendanceScheme: (data: Omit<any, 'id'>) => api.post('/hrms/attendance-config/schemes', data),
+  updateAttendanceScheme: (id: string, data: Partial<any>) => api.put(`/hrms/attendance-config/schemes/${id}`, data),
+  deleteAttendanceScheme: (id: string) => api.delete(`/hrms/attendance-config/schemes/${id}`),
 
   // IP Mapping
-  getIPMappings: (params?: any) => Repositories.IPMappingRepo.getAll(params),
-  getIPMappingById: (id: string) => Repositories.IPMappingRepo.getById(id),
-  createIPMapping: (data: Omit<any, 'id'>) => Repositories.IPMappingRepo.create(data),
-  updateIPMapping: (id: string, data: Partial<any>) => Repositories.IPMappingRepo.update(id, data),
-  deleteIPMapping: (id: string) => Repositories.IPMappingRepo.delete(id),
+  getIPMappings: (params?: any) => api.get('/hrms/attendance-config/ip-mappings', { params }),
+  getIPMappingById: (id: string) => api.get(`/hrms/attendance-config/ip-mappings/${id}`),
+  createIPMapping: (data: Omit<any, 'id'>) => api.post('/hrms/attendance-config/ip-mappings', data),
+  updateIPMapping: (id: string, data: Partial<any>) => api.put(`/hrms/attendance-config/ip-mappings/${id}`, data),
+  deleteIPMapping: (id: string) => api.delete(`/hrms/attendance-config/ip-mappings/${id}`),
 
   // Lock Config
-  getLockConfigs: (params?: any) => Repositories.LockConfigRepo.getAll(params),
-  getLockConfigById: (id: string) => Repositories.LockConfigRepo.getById(id),
-  createLockConfig: (data: Omit<any, 'id'>) => Repositories.LockConfigRepo.create(data),
-  updateLockConfig: (id: string, data: Partial<any>) => Repositories.LockConfigRepo.update(id, data),
-  deleteLockConfig: (id: string) => Repositories.LockConfigRepo.delete(id),
+  getLockConfigs: (params?: any) => api.get('/hrms/attendance-config/lock-config', { params }),
+  getLockConfigById: (id: string) => api.get(`/hrms/attendance-config/lock-config/${id}`),
+  createLockConfig: (data: Omit<any, 'id'>) => api.post('/hrms/attendance-config/lock-config', data),
+  updateLockConfig: (id: string, data: Partial<any>) => api.put(`/hrms/attendance-config/lock-config/${id}`, data),
+  deleteLockConfig: (id: string) => api.delete(`/hrms/attendance-config/lock-config/${id}`),
+
   // Shift Roster
-  getShiftRosters: (params?: any) => Repositories.ShiftRosterRepo.getAll(params),
-  getShiftRosterById: (id: string) => Repositories.ShiftRosterRepo.getById(id),
-  createShiftRoster: (data: Omit<any, 'id'>) => Repositories.ShiftRosterRepo.create(data),
-  updateShiftRoster: (id: string, data: Partial<any>) => Repositories.ShiftRosterRepo.update(id, data),
-  deleteShiftRoster: (id: string) => Repositories.ShiftRosterRepo.delete(id),
+  getShiftRosters: (params?: any) => api.get('/hrms/shifts/roster', { params }),
+  getShiftRosterById: (id: string) => api.get(`/hrms/shifts/roster/${id}`),
+  createShiftRoster: (data: Omit<any, 'id'>) => api.post('/hrms/shifts/roster', data),
+  updateShiftRoster: (id: string, data: Partial<any>) => api.put(`/hrms/shifts/roster/${id}`, data),
+  deleteShiftRoster: (id: string) => api.delete(`/hrms/shifts/roster/${id}`),
 
   // Holiday
-  getHolidays: (params?: any) => Repositories.HolidayRepo.getAll(params),
-  getHolidayById: (id: string) => Repositories.HolidayRepo.getById(id),
-  createHoliday: (data: Omit<any, 'id'>) => Repositories.HolidayRepo.create(data),
-  updateHoliday: (id: string, data: Partial<any>) => Repositories.HolidayRepo.update(id, data),
-  deleteHoliday: (id: string) => Repositories.HolidayRepo.delete(id),
+  getHolidays: (params?: any) => api.get('/hrms/holidays', { params }),
+  getHolidayById: (id: string) => api.get(`/hrms/holidays/${id}`),
+  createHoliday: (data: Omit<any, 'id'>) => api.post('/hrms/holidays', data),
+  updateHoliday: (id: string, data: Partial<any>) => api.put(`/hrms/holidays/${id}`, data),
+  deleteHoliday: (id: string) => api.delete(`/hrms/holidays/${id}`),
 
   // Attendance Period
-  getAttendancePeriods: (params?: any) => Repositories.AttendancePeriodRepo.getAll(params),
-  getAttendancePeriodById: (id: string) => Repositories.AttendancePeriodRepo.getById(id),
-  createAttendancePeriod: (data: Omit<any, 'id'>) => Repositories.AttendancePeriodRepo.create(data),
-  updateAttendancePeriod: (id: string, data: Partial<any>) => Repositories.AttendancePeriodRepo.update(id, data),
-  deleteAttendancePeriod: (id: string) => Repositories.AttendancePeriodRepo.delete(id),
+  getAttendancePeriods: (params?: any) => api.get('/hrms/attendance/processing/periods', { params }),
+  getAttendancePeriodById: (id: string) => api.get(`/hrms/attendance/processing/periods/${id}`),
+  createAttendancePeriod: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/processing/periods', data),
+  updateAttendancePeriod: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/processing/periods/${id}`, data),
+  deleteAttendancePeriod: (id: string) => api.delete(`/hrms/attendance/processing/periods/${id}`),
+  lockAttendancePeriod: (id: string) => api.put(`/hrms/attendance/processing/periods/${id}/lock`),
+  processAttendancePeriod: (id: string) => api.post(`/hrms/attendance/processing/periods/${id}/process`),
 
   // Processed Attendance
-  getProcessedAttendances: (params?: any) => Repositories.ProcessedAttendanceRepo.getAll(params),
-  getProcessedAttendanceById: (id: string) => Repositories.ProcessedAttendanceRepo.getById(id),
-  createProcessedAttendance: (data: Omit<any, 'id'>) => Repositories.ProcessedAttendanceRepo.create(data),
-  updateProcessedAttendance: (id: string, data: Partial<any>) => Repositories.ProcessedAttendanceRepo.update(id, data),
-  deleteProcessedAttendance: (id: string) => Repositories.ProcessedAttendanceRepo.delete(id),
+  getProcessedAttendances: (periodId?: string) => api.get(`/hrms/attendance/processing/periods/${periodId || ''}/processed`),
+  getProcessedAttendanceById: (id: string) => api.get(`/hrms/attendance/processing/processed/${id}`),
+  createProcessedAttendance: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/processing/processed', data),
+  updateProcessedAttendance: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/processing/processed/${id}`, data),
+  deleteProcessedAttendance: (id: string) => api.delete(`/hrms/attendance/processing/processed/${id}`),
 
   // Attendance Exception
-  getAttendanceExceptions: (params?: any) => Repositories.AttendanceExceptionRepo.getAll(params),
-  getAttendanceExceptionById: (id: string) => Repositories.AttendanceExceptionRepo.getById(id),
-  createAttendanceException: (data: Omit<any, 'id'>) => Repositories.AttendanceExceptionRepo.create(data),
-  updateAttendanceException: (id: string, data: Partial<any>) => Repositories.AttendanceExceptionRepo.update(id, data),
-  deleteAttendanceException: (id: string) => Repositories.AttendanceExceptionRepo.delete(id),
+  getAttendanceExceptions: (params?: any) => api.get('/hrms/attendance/exceptions', { params }),
+  getAttendanceExceptionById: (id: string) => api.get(`/hrms/attendance/exceptions/${id}`),
+  createAttendanceException: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/exceptions', data),
+  updateAttendanceException: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/exceptions/${id}`, data),
+  deleteAttendanceException: (id: string) => api.delete(`/hrms/attendance/exceptions/${id}`),
+  resolveAttendanceException: (id: string) => api.put(`/hrms/attendance/exceptions/${id}/resolve`),
 
   // Attendance Device
-  getAttendanceDevices: (params?: any) => Repositories.AttendanceDeviceRepo.getAll(params),
-  getAttendanceDeviceById: (id: string) => Repositories.AttendanceDeviceRepo.getById(id),
-  createAttendanceDevice: (data: Omit<any, 'id'>) => Repositories.AttendanceDeviceRepo.create(data),
-  updateAttendanceDevice: (id: string, data: Partial<any>) => Repositories.AttendanceDeviceRepo.update(id, data),
-  deleteAttendanceDevice: (id: string) => Repositories.AttendanceDeviceRepo.delete(id),
+  getAttendanceDevices: (params?: any) => api.get('/hrms/attendance/devices', { params }),
+  getAttendanceDeviceById: (id: string) => api.get(`/hrms/attendance/devices/${id}`),
+  createAttendanceDevice: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/devices', data),
+  updateAttendanceDevice: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/devices/${id}`, data),
+  deleteAttendanceDevice: (id: string) => api.delete(`/hrms/attendance/devices/${id}`),
 
   // Attendance Log
-  getAttendanceLogs: (params?: any) => Repositories.AttendanceLogRepo.getAll(params),
-  getAttendanceLogById: (id: string) => Repositories.AttendanceLogRepo.getById(id),
-  createAttendanceLog: (data: Omit<any, 'id'>) => Repositories.AttendanceLogRepo.create(data),
-  updateAttendanceLog: (id: string, data: Partial<any>) => Repositories.AttendanceLogRepo.update(id, data),
-  deleteAttendanceLog: (id: string) => Repositories.AttendanceLogRepo.delete(id),
+  getAttendanceLogs: (params?: any) => api.get('/hrms/attendance/logs', { params }),
+  getAttendanceLogById: (id: string) => api.get(`/hrms/attendance/logs/${id}`),
+  createAttendanceLog: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/logs', data),
+  updateAttendanceLog: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/logs/${id}`, data),
+  deleteAttendanceLog: (id: string) => api.delete(`/hrms/attendance/logs/${id}`),
 
   // Approval History
-  getApprovalHistories: (params?: any) => Repositories.ApprovalHistoryRepo.getAll(params),
-  getApprovalHistoryById: (id: string) => Repositories.ApprovalHistoryRepo.getById(id),
-  createApprovalHistory: (data: Omit<any, 'id'>) => Repositories.ApprovalHistoryRepo.create(data),
-  updateApprovalHistory: (id: string, data: Partial<any>) => Repositories.ApprovalHistoryRepo.update(id, data),
-  deleteApprovalHistory: (id: string) => Repositories.ApprovalHistoryRepo.delete(id),
+  getApprovalHistories: (params?: any) => api.get('/hrms/approval-history', { params }),
+  getApprovalHistoryById: (id: string) => api.get(`/hrms/approval-history/${id}`),
+  createApprovalHistory: (data: Omit<any, 'id'>) => api.post('/hrms/approval-history', data),
+  updateApprovalHistory: (id: string, data: Partial<any>) => api.put(`/hrms/approval-history/${id}`, data),
+  deleteApprovalHistory: (id: string) => api.delete(`/hrms/approval-history/${id}`),
 
   // Employee Attendance Summary
-  getEmployeeAttendanceSummaries: (params?: any) => Repositories.EmployeeAttendanceSummaryRepo.getAll(params),
-  getEmployeeAttendanceSummaryById: (id: string) => Repositories.EmployeeAttendanceSummaryRepo.getById(id),
-  createEmployeeAttendanceSummary: (data: Omit<any, 'id'>) => Repositories.EmployeeAttendanceSummaryRepo.create(data),
-  updateEmployeeAttendanceSummary: (id: string, data: Partial<any>) => Repositories.EmployeeAttendanceSummaryRepo.update(id, data),
-  deleteEmployeeAttendanceSummary: (id: string) => Repositories.EmployeeAttendanceSummaryRepo.delete(id),
+  getEmployeeAttendanceSummaries: (params?: any) => api.get('/hrms/attendance/summaries', { params }),
+  getEmployeeAttendanceSummaryById: (id: string) => api.get(`/hrms/attendance/summaries/${id}`),
+  createEmployeeAttendanceSummary: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/summaries', data),
+  updateEmployeeAttendanceSummary: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/summaries/${id}`, data),
+  deleteEmployeeAttendanceSummary: (id: string) => api.delete(`/hrms/attendance/summaries/${id}`),
 };
