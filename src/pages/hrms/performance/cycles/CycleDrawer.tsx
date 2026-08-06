@@ -11,38 +11,42 @@ import { Save } from 'lucide-react';
 interface CycleDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  cycle: AppraisalCycle | null;
+  onSave: (data: any) => Promise<void>;
+  mode: 'create' | 'edit' | 'view';
+  initialData?: AppraisalCycle;
 }
 
-export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps) {
+export default function CycleDrawer({ isOpen, onClose, onSave, mode, initialData }: CycleDrawerProps) {
   const [formData, setFormData] = useState<Partial<AppraisalCycle>>({
     status: 'Draft'
   });
 
   useEffect(() => {
-    if (cycle) {
-      setFormData(cycle);
+    if (initialData) {
+      setFormData(initialData);
     } else {
       setFormData({
         status: 'Draft',
         type: 'Annual'
       });
     }
-  }, [cycle, isOpen]);
+  }, [initialData, isOpen]);
 
-  const handleSave = () => {
-    // Mock save
-    console.log('Saving cycle:', formData);
-    onClose();
+  const handleSaveClick = async () => {
+    try {
+      await onSave(formData);
+    } catch (error) {
+      console.error('Failed to save cycle:', error);
+    }
   };
 
-  const isViewMode = cycle?.status === 'Completed' || cycle?.status === 'Archived';
+  const isViewMode = mode === 'view';
 
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={cycle ? (isViewMode ? 'View Cycle' : 'Edit Cycle') : 'Create New Cycle'}
+      title={initialData ? (isViewMode ? 'View Cycle' : 'Edit Cycle') : 'Create New Cycle'}
       size="lg"
       footer={
         !isViewMode ? (
@@ -54,11 +58,11 @@ export default function CycleDrawer({ isOpen, onClose, cycle }: CycleDrawerProps
               Cancel
             </button>
             <button
-              onClick={handleSave}
+              onClick={handleSaveClick}
               className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors flex items-center gap-2"
             >
               <Save size={16} />
-              {cycle ? 'Save Changes' : 'Create Cycle'}
+              {initialData ? 'Save Changes' : 'Create Cycle'}
             </button>
           </div>
         ) : (

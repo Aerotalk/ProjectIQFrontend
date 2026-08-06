@@ -3,9 +3,9 @@ import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import Drawer from '../../../../components/ui/Drawer';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseClaim } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function PendingApprovals() {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
@@ -19,107 +19,140 @@ export default function PendingApprovals() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await mockExpenseClaimsService.getClaims();
-      // Mock filter for pending approval for the current user
-      setClaims(data.filter(c => c.status === 'Submitted' || c.status.includes('Level')));
+      const apiClaims = await api.get('/hrms/expense-claims/claims');
+      let data: ExpenseClaim[] = [];
+      if (Array.isArray(apiClaims)) {
+        data = apiClaims.filter((c: any) => c.status === 'Submitted' || c.status?.includes('Level')).map((c: any) => ({
+          id: c.id,
+          claimNo: c.claimNo || `CLM-${c.id.slice(0, 4)}`,
+          employeeId: c.employee?.firstName ? `${c.employee.firstName} ${c.employee.lastName}` : (c.employeeId || 'EMP-001'),
+          departmentId: c.department?.departmentName,
+          templateId: c.template?.id || c.templateId,
+          title: c.title,
+          totalClaimed: c.totalClaimed || 0,
+          approvedAmount: c.approvedAmount || 0,
+          status: c.status || 'Submitted',
+          submittedOn: c.submittedOn || c.createdAt,
+          currency: c.currency || 'USD',
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt
+        }));
+      }
+      setClaims(data);
     } catch (e) {
       toast.error('Failed to load pending approvals');
+      setClaims([]);
     }
     setLoading(false);
   };
 
-  const handleApprove = async () => {
-    if (!selectedClaim) return;
+  const handleApprove = async (claimId: string, amount: number) => {
     try {
-      await mockExpenseClaimsService.approveClaim(selectedClaim.id, selectedClaim.totalClaimed, 'REV-001', 'Approved');
-      toast.success('Claim approved');
+      await api.put(`/hrms/expense-claims/claims/${claimId}/approve`, { approvedAmount: amount });
+      toast.success('Claim Approved');
       setSelectedClaim(null);
       fetchData();
     } catch (e) {
-      toast.error('Approval failed');
+      toast.error('Error approving claim');
     }
   };
 
-  const handleReject = async () => {
-    if (!selectedClaim) return;
+  const handleReject = async (claimId: string, comment: string) => {
     try {
-      await mockExpenseClaimsService.rejectClaim(selectedClaim.id, 'REV-001', 'Rejected');
-      toast.success('Claim rejected');
+      await api.put(`/hrms/expense-claims/claims/${claimId}/reject`, { comment });
+      toast.success('Claim Rejected');
       setSelectedClaim(null);
       fetchData();
     } catch (e) {
-      toast.error('Rejection failed');
+      toast.error('Error rejecting claim');
     }
   };
 
   const columns = [
     { key: 'claimNo', label: 'Claim No' },
+    { key: 'title', label: 'Title' },
     { key: 'employeeId', label: 'Employee' },
     { 
       key: 'totalClaimed', 
-      label: 'Amount',
-      render: (val: number, row: any) => `${row.currency} ${val.toFixed(2)}`
+      label: 'Total Claimed',
+      render: (val: number, row: any) => `${row.currency} ${(val || 0).toFixed(2)}`
     },
-    { key: 'submittedOn', label: 'Submitted', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
-    { key: 'status', label: 'Current Level' },
+    { key: 'status', label: 'Status' },
+    { key: 'submittedOn', label: 'Submitted On', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: ExpenseClaim) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View & Action', onClick: () => setSelectedClaim(row) }
+            { label: 'Review Claim', onClick: () => setSelectedClaim(row) }
           ]}
         />
       )
     }
   ];
 
-  if (loading) return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+  if (loading) {
+    return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+  }
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pending Approvals</h3>
+    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Claims Pending Approval</h3>
+      </div>
+
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={claims} />
       </div>
 
-      <Drawer
-        isOpen={!!selectedClaim}
-        onClose={() => setSelectedClaim(null)}
-        title={`Approval Action - ${selectedClaim?.claimNo}`}
-        footer={
-          <>
-            <button 
-              onClick={handleReject}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-sm transition-colors"
-            >
-              Reject
-            </button>
-            <button 
-              onClick={handleApprove}
-              className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors"
-            >
-              Approve
-            </button>
-          </>
-        }
-      >
-        <div className="space-y-6">
-          <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-md">
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Summary</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="text-gray-500">Employee:</span> {selectedClaim?.employeeId}</div>
-              <div><span className="text-gray-500">Amount:</span> {selectedClaim?.currency} {selectedClaim?.totalClaimed.toFixed(2)}</div>
-              <div><span className="text-gray-500">Title:</span> {selectedClaim?.title}</div>
+      {selectedClaim && (
+        <Drawer
+          isOpen={!!selectedClaim}
+          onClose={() => setSelectedClaim(null)}
+          title={`Review Claim: ${selectedClaim.claimNo}`}
+          width="max-w-xl"
+        >
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Claim Details</h4>
+              <div className="mt-2 grid grid-cols-2 gap-4 text-sm bg-gray-50 dark:bg-white/5 p-4 rounded-md">
+                <div>
+                  <span className="text-gray-500 block">Title</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedClaim.title}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Employee</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedClaim.employeeId}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Total Claimed</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedClaim.currency} {selectedClaim.totalClaimed.toFixed(2)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Status</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{selectedClaim.status}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-white/10">
+              <button
+                onClick={() => handleReject(selectedClaim.id, 'Policy violation / insufficient receipts')}
+                className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
+              >
+                Reject Claim
+              </button>
+              <button
+                onClick={() => handleApprove(selectedClaim.id, selectedClaim.totalClaimed)}
+                className="px-4 py-2 bg-primary text-white hover:bg-[#5d1943] rounded-md text-sm font-medium transition-colors"
+              >
+                Approve Full Amount
+              </button>
             </div>
           </div>
-          <div className="border border-gray-200 dark:border-white/10 rounded-md p-4">
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Expense Items</h4>
-            <p className="text-sm text-gray-500">No items mock data available for this view.</p>
-          </div>
-        </div>
-      </Drawer>
+        </Drawer>
+      )}
     </div>
   );
 }

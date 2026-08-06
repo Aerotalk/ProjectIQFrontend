@@ -4,13 +4,27 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
 interface RequestOptions extends RequestInit {
   data?: any;
+  params?: Record<string, any>;
   responseType?: 'text' | 'json' | 'blob' | 'arraybuffer';
   skipCache?: boolean;
 }
 
 export const api = {
   async request(endpoint: string, options: RequestOptions = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
+    let url = `${API_BASE_URL}${endpoint}`;
+    
+    if (options.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(options.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.append(key, String(value));
+        }
+      });
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += `${url.includes('?') ? '&' : '?'}${queryString}`;
+      }
+    }
     
     // For GET requests, check cache if not explicitly skipped
     const isGet = !options.method || options.method === 'GET';

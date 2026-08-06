@@ -15,9 +15,36 @@ interface Props {
 export default function BasicInfoTab({ readOnly }: Props) {
   const { register, control, formState: { errors } } = useFormContext();
   const companyId = useWatch({ control, name: 'companyId' });
+  const [companies, setCompanies] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [designations, setDesignations] = useState<any[]>([]);
   const [managers, setManagers] = useState<any[]>([]);
+
+  // Load company list once on mount
+  useEffect(() => {
+    api.get('/org/companies').then(setCompanies).catch(() => {});
+  }, []);
+
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const { setValue, watch } = useFormContext();
+  const profilePhotoValue = watch('profilePhoto');
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('module', 'profile_pictures');
+      const res = await api.request('/admin/files/upload', { method: 'POST', data: formData });
+      if (res?.id) setValue('profilePhoto', res.id);
+    } catch (err) {
+      console.warn('Profile photo upload failed', err);
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -165,7 +192,19 @@ export default function BasicInfoTab({ readOnly }: Props) {
           </div>
           <div>
             <label className={formStyles.label}>Profile Photo *</label>
-            <Input type="file" {...register('profilePhoto')} disabled={readOnly} />
+            {!readOnly && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={photoUploading}
+                className="block w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors"
+              />
+            )}
+            {photoUploading && <p className="text-xs text-gray-400 mt-1">Uploading...</p>}
+            {profilePhotoValue && typeof profilePhotoValue === 'string' && !photoUploading && (
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Photo uploaded</p>
+            )}
             {errors.profilePhoto && <p className="text-red-500 text-xs mt-1">{errors.profilePhoto.message as string}</p>}
           </div>
         </FormGrid>
@@ -205,7 +244,21 @@ export default function BasicInfoTab({ readOnly }: Props) {
           {/* Row: Company / Legal Entity | Department */}
           <div>
             <label className={formStyles.label}>Company / Legal Entity *</label>
-            <Input type="text" {...register('companyId')} disabled={readOnly} />
+            <Controller
+              name={'companyId'}
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  options={[
+                    { label: '-- Select Company --', value: '' },
+                    ...companies.map((c: any) => ({ label: c.companyName, value: String(c.id) }))
+                  ]}
+                  disabled={readOnly}
+                />
+              )}
+            />
             {errors.companyId && <p className="text-red-500 text-xs mt-1">{errors.companyId.message as string}</p>}
           </div>
           {/* Row: Department | Designation */}

@@ -33,8 +33,8 @@ const STEPS = [
   { id: 'statutory',  label: 'Statutory' },
   { id: 'bank',       label: 'Bank Details' },
   { id: 'documents',  label: 'Documents' },
-  // { id: 'position',   label: 'Position' },
-  // { id: 'separation', label: 'Separation' },
+  { id: 'position',   label: 'Position' },
+  { id: 'separation', label: 'Separation' },
   { id: 'salary',     label: 'Salary' },
   { id: 'education',  label: 'Education' },
   { id: 'family',     label: 'Family' },
@@ -104,8 +104,8 @@ export default function EmployeeDrawer({ isOpen, onClose, onSave, mode, initialD
       case 'statutory':  return <StatutoryDetailsTab readOnly={readOnly} />;
       case 'bank':       return <BankDetailsTab readOnly={readOnly} />;
       case 'documents':  return <DocumentsTab readOnly={readOnly} />;
-      // case 'position':   return <PositionChangeTab readOnly={readOnly} />;
-      // case 'separation': return <SeparationExitTab readOnly={readOnly} />;
+      case 'position':   return <PositionChangeTab readOnly={readOnly} />;
+      case 'separation': return <SeparationExitTab readOnly={readOnly} />;
       case 'salary':     return <SalaryRevisionTab readOnly={readOnly} />;
       case 'education':  return <EducationTab readOnly={readOnly} />;
       case 'family':     return <FamilyNomineeTab readOnly={readOnly} />;

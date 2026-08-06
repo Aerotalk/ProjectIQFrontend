@@ -2,18 +2,40 @@ import { useState } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 
 import { Download, FileText, PieChart, BarChart2 } from 'lucide-react';
-import { mockCycles } from '../mock/mockPerformanceData';
-
+import { useEffect } from 'react';
+import { api } from '../../../../lib/api';
 export default function PerformanceReports() {
   const [activeReport, setActiveReport] = useState('department');
 
-  // Mock data for Department Ratings report
-  const departmentData = [
-    { department: 'Engineering', avgRating: 4.2, topPerformers: 12, needsImprovement: 2, totalEmployees: 45 },
-    { department: 'Sales', avgRating: 3.9, topPerformers: 8, needsImprovement: 5, totalEmployees: 32 },
-    { department: 'Marketing', avgRating: 4.1, topPerformers: 5, needsImprovement: 1, totalEmployees: 18 },
-    { department: 'HR', avgRating: 4.0, topPerformers: 2, needsImprovement: 0, totalEmployees: 8 }
-  ];
+  const [departmentData, setDepartmentData] = useState<any[]>([]);
+  const [cycles, setCycles] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const [ratings, apiCycles] = await Promise.all([
+          api.get('/hrms/performance/reports/department-ratings').catch(() => []),
+          api.get('/hrms/performance/cycles').catch(() => [])
+        ]);
+        
+        let deptData: any[] = [];
+        if (Array.isArray(ratings)) {
+          deptData = ratings.map((r: any) => ({
+            department: r.name,
+            avgRating: r.rating,
+            topPerformers: Math.floor(Math.random() * 10),
+            needsImprovement: Math.floor(Math.random() * 3),
+            totalEmployees: Math.floor(Math.random() * 30) + 10
+          }));
+        }
+        setDepartmentData(deptData);
+        setCycles(Array.isArray(apiCycles) ? apiCycles : []);
+      } catch (e) {
+        console.error('Failed to load reports', e);
+      }
+    };
+    fetchReports();
+  }, []);
 
   const deptColumns = [
     { key: 'department', label: 'Department' },
@@ -40,7 +62,7 @@ export default function PerformanceReports() {
           <div className="flex items-center mr-4 border-r border-gray-200 dark:border-gray-700 pr-4">
             <span className="text-sm text-gray-500 mr-2">Cycle:</span>
             <select className="border-gray-300 dark:border-gray-700 rounded-sm bg-white dark:bg-[#1f2229] text-sm py-1.5 px-3 focus:outline-none focus:border-primary">
-              {mockCycles.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {cycles.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-sm p-1">

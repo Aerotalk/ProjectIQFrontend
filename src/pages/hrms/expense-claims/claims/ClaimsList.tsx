@@ -4,9 +4,9 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import ClaimDrawer from './components/ClaimDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseClaim, ExpenseTemplate } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function ClaimsList() {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
@@ -24,14 +24,47 @@ export default function ClaimsList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [claimsData, tpls] = await Promise.all([
-        mockExpenseClaimsService.getClaims(),
-        mockExpenseClaimsService.getTemplates()
+      const [apiClaims, apiTemplates] = await Promise.all([
+        api.get('/hrms/expense-claims/claims'),
+        api.get('/hrms/expense-claims/templates')
       ]);
+      
+      let claimsData: ExpenseClaim[] = [];
+      if (Array.isArray(apiClaims)) {
+        claimsData = apiClaims.map((c: any) => ({
+          id: c.id,
+          claimNo: c.claimNo || `CLM-${c.id.slice(0, 4)}`,
+          employeeId: c.employee?.firstName ? `${c.employee.firstName} ${c.employee.lastName}` : (c.employeeId || 'EMP-001'),
+          departmentId: c.department?.departmentName,
+          templateId: c.template?.id || c.templateId,
+          title: c.title,
+          totalClaimed: c.totalClaimed || 0,
+          approvedAmount: c.approvedAmount || 0,
+          status: c.status || 'Draft',
+          submittedOn: c.submittedOn || c.createdAt,
+          currency: c.currency || 'USD',
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt
+        }));
+      }
+
+      let tplsData: ExpenseTemplate[] = [];
+      if (Array.isArray(apiTemplates)) {
+        tplsData = apiTemplates.map((t: any) => ({
+          id: t.id,
+          templateName: t.templateName,
+          description: t.description || '',
+          allowedCategories: [],
+          active: t.active ?? true
+        }));
+      }
+
       setClaims(claimsData);
-      setTemplates(tpls);
+      setTemplates(tplsData);
     } catch (e) {
       toast.error('Failed to load claims');
+      setClaims([]);
+      setTemplates([]);
     }
     setLoading(false);
   };
@@ -39,11 +72,9 @@ export default function ClaimsList() {
   const handleSave = async (data: any) => {
     try {
       if (drawerMode === 'create') {
-        await mockExpenseClaimsService.createClaim({
-          templateId: data.template,
+        await api.post('/hrms/expense-claims/claims', {
           title: data.title,
           currency: data.currency,
-          employeeId: 'EMP-001',
           status: 'Draft',
           totalClaimed: 0,
           approvedAmount: 0
@@ -57,6 +88,16 @@ export default function ClaimsList() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/hrms/expense-claims/claims/${id}`);
+      toast.success('Claim deleted');
+      fetchData();
+    } catch (e) {
+      toast.error('Failed to delete claim');
+    }
+  };
+
   const columns = [
     { key: 'claimNo', label: 'Claim No' },
     { key: 'title', label: 'Title' },
@@ -64,7 +105,7 @@ export default function ClaimsList() {
     { 
       key: 'totalClaimed', 
       label: 'Total Claimed',
-      render: (val: number, row: any) => `${row.currency} ${val.toFixed(2)}`
+      render: (val: number, row: any) => `${row.currency} ${(val || 0).toFixed(2)}`
     },
     { key: 'status', label: 'Status' },
     { key: 'submittedOn', label: 'Submitted On', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
@@ -75,7 +116,7 @@ export default function ClaimsList() {
         <TableRowActionMenu
           actions={[
             { label: 'View / Edit', onClick: () => { setSelectedClaim(row); setDrawerMode('view'); setIsDrawerOpen(true); } },
-            { label: 'Delete', onClick: () => mockExpenseClaimsService.deleteClaim(row.id).then(fetchData), danger: true }
+            { label: 'Delete', onClick: () => handleDelete(row.id), danger: true }
           ]}
         />
       )
