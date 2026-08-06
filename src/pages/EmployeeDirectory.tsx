@@ -13,8 +13,11 @@ interface Employee {
   middleName?: string;
   lastName: string;
   employeeCode: string;
+  workEmail?: string;
+  phone?: string;
   user?: {
     email: string;
+    mobile?: string;
   };
   department?: {
     departmentName: string;
@@ -35,6 +38,8 @@ export default function EmployeeDirectory() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editInitialData, setEditInitialData] = useState<Partial<EmployeeFormValues> | null>(null);
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -57,17 +62,188 @@ export default function EmployeeDirectory() {
     emp.department?.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const openDrawer = (mode: 'create' | 'edit' | 'view', emp?: Employee) => {
+  /**
+   * Opens the employee drawer. For edit/view mode, first fetches all sub-resource
+   * sections (address, statutory, bank, etc.) so every tab is pre-populated.
+   */
+  const openDrawer = async (mode: 'create' | 'edit' | 'view', emp?: Employee) => {
     setDrawerMode(mode);
     setSelectedEmployee(emp || null);
+
+    if ((mode === 'edit' || mode === 'view') && emp?.id) {
+      try {
+        // Fetch core employee + all sub-resources in parallel
+        const [
+          address,
+          emergency,
+          statutory,
+          bank,
+          documents,
+          salaryRevisions,
+          educations,
+          families,
+          contract,
+        ] = await Promise.allSettled([
+          api.get(`/admin/employees/${emp.id}/address`),
+          api.get(`/admin/employees/${emp.id}/emergency-contact`),
+          api.get(`/admin/employees/${emp.id}/statutory`),
+          api.get(`/admin/employees/${emp.id}/bank-account`),
+          api.get(`/admin/employees/${emp.id}/documents`),
+          api.get(`/admin/employees/${emp.id}/salary-revision`),
+          api.get(`/admin/employees/${emp.id}/educations`),
+          api.get(`/admin/employees/${emp.id}/families`),
+          api.get(`/admin/employees/${emp.id}/contract`),
+        ]);
+
+        const val = <T,>(r: PromiseSettledResult<T>) =>
+          r.status === 'fulfilled' ? r.value : null;
+
+        // Parse address rows into flat present/permanent fields
+        const addressRows: any[] = val(address) || [];
+        const presentAddr = addressRows.find((a: any) => a.addressType === 'PRESENT') || {};
+        const permanentAddr = addressRows.find((a: any) => a.addressType === 'PERMANENT') || {};
+
+        // Emergency contact (first record)
+        const emergencyRows: any[] = val(emergency) || [];
+        const ec = emergencyRows[0] || {};
+
+        const stat: any = val(statutory) || {};
+        const bankRows: any[] = val(bank) || [];
+        const bk = bankRows[0] || {};
+        const docs: any[] = val(documents) || [];
+        const edus: any[] = val(educations) || [];
+        const fams: any[] = val(families) || [];
+        const ctr: any = val(contract) || {};
+        const salaries: any[] = val(salaryRevisions) || [];
+        const latestSalary = salaries[0] || {}; // Most recent revision shown in form
+
+        const merged: Partial<EmployeeFormValues> = {
+          // Core employee fields (already on emp)
+          ...(emp as any),
+          // workEmail: prefer the column on Employee, fall back to linked User email
+          workEmail: emp.workEmail || emp.user?.email || '',
+          // phone: prefer the column on Employee, fall back to linked User mobile
+          phone: emp.phone || emp.user?.mobile || '',
+
+          // Address
+          presentCountry: presentAddr.country || 'IN',
+          presentState: presentAddr.state || '',
+          presentCity: presentAddr.city || '',
+          presentAddressLine1: presentAddr.addressLine1 || '',
+          presentAddressLine2: presentAddr.addressLine2 || '',
+          presentPinCode: presentAddr.pinCode || '',
+          presentPhone: presentAddr.phone || '',
+          permanentCountry: permanentAddr.country || 'IN',
+          permanentState: permanentAddr.state || '',
+          permanentCity: permanentAddr.city || '',
+          permanentAddressLine1: permanentAddr.addressLine1 || '',
+          permanentAddressLine2: permanentAddr.addressLine2 || '',
+          permanentPinCode: permanentAddr.pinCode || '',
+          permanentPhone: permanentAddr.phone || '',
+
+          // Emergency contact
+          emergencyContactName: ec.name || '',
+          emergencyRelationship: ec.relationship || '',
+          emergencyPhone: ec.phone || '',
+          emergencyAlternatePhone: ec.alternatePhone || '',
+          emergencyEmail: ec.email || '',
+          emergencyAddress: ec.address || '',
+          emergencyPrimaryContact: ec.primaryContact ?? true,
+
+          // Statutory
+          panNumber: stat.panNumber || '',
+          aadhaarNumber: stat.aadhaarNumber || '',
+          uan: stat.uan || '',
+          pfNumber: stat.pfNumber || '',
+          esiNumber: stat.esiNumber || '',
+          passportNumber: stat.passportNumber || '',
+          passportExpiry: stat.passportExpiry || '',
+          voterId: stat.voterId || '',
+          drivingLicense: stat.drivingLicense || '',
+          drivingLicenseExpiry: stat.drivingLicenseExpiry || '',
+          pfApplicable: stat.pfApplicable ?? false,
+          esiApplicable: stat.esiApplicable ?? false,
+          taxRegime: stat.taxRegime || '',
+
+          // Bank
+          bankName: bk.bankName || '',
+          branchName: bk.branchName || '',
+          accountNumber: bk.accountNumber || '',
+          confirmAccountNumber: bk.accountNumber || '',
+          ifscCode: bk.ifscCode || '',
+          accountType: bk.accountType || 'Savings',
+          accountHolderName: bk.accountHolderName || '',
+          paymentMode: bk.paymentMode || 'Bank Transfer',
+          primaryAccount: bk.primaryAccount ?? true,
+
+          // Documents
+          documents: docs.map((d: any) => ({
+            documentCategory: d.documentCategory || '',
+            documentName: d.documentName || '',
+            fileUrl: d.fileId || null,
+            expiryDate: d.expiryDate || '',
+          })),
+
+          // Salary (most recent shown)
+          revisionType: latestSalary.revisionType || '',
+          revisionEffectiveDate: latestSalary.effectiveDate || '',
+          revisionAnnualCTC: latestSalary.annualCTC || '',
+          revisionIncrementPercentage: latestSalary.incrementPercentage || '',
+          revisionSalaryComponents: latestSalary.salaryComponents || '',
+          revisionReason: latestSalary.reason || '',
+
+          // Educations
+          educations: edus.map((e: any) => ({
+            degree: e.degree || '',
+            qualification: e.qualification || '',
+            institution: e.institution || '',
+            fieldOfStudy: e.fieldOfStudy || '',
+            startYear: e.startYear || '',
+            endYear: e.endYear || '',
+            grade: e.grade || '',
+          })),
+
+          // Families
+          families: fams.map((f: any) => ({
+            name: f.name || '',
+            relationship: f.relationship || '',
+            dateOfBirth: f.dateOfBirth || '',
+            gender: f.gender || '',
+            phone: f.phone || '',
+            dependent: f.dependent ?? false,
+            nominee: f.nominee ?? false,
+            nomineePercentage: f.nomineePercentage || '',
+          })),
+
+          // Contract
+          contractType: ctr.contractType || '',
+          contractStartDate: ctr.startDate || '',
+          contractEndDate: ctr.endDate || '',
+          contractAnnualCTC: ctr.annualCTC || '',
+          contractNoticePeriod: ctr.noticePeriodDays || '',
+          contractTerms: ctr.contractTerms || '',
+          signedContractUpload: ctr.signedContractFileId || null,
+        };
+
+        setEditInitialData(merged);
+      } catch (err) {
+        console.warn('Failed to load sub-resources for edit', err);
+        setEditInitialData(emp as any);
+      }
+    } else {
+      setEditInitialData(null);
+    }
+
     setIsDrawerOpen(true);
   };
 
   const handleSaveEmployee = async (data: EmployeeFormValues) => {
     try {
       setIsSubmitting(true);
+      let employeeId: string;
+
       if (drawerMode === 'create') {
-        // Create user account first
+        // Step 1 — Create user account first
         const userPayload = {
           username: data.workEmail,
           email: data.workEmail,
@@ -78,19 +254,177 @@ export default function EmployeeDirectory() {
           companyId: data.companyId || null
         };
         const userRes = await api.post('/admin/users', userPayload);
-        
-        // Create employee profile
+
+        // Step 2 — Create core employee record
         const empPayload = {
           userId: userRes.id,
+          workEmail: data.workEmail,
+          phone: data.phone,
           ...data
         };
-        await api.post(`/admin/employees`, empPayload);
+        const empRes = await api.post('/admin/employees', empPayload);
+        employeeId = empRes.id;
         toast.success('Employee created successfully');
       } else if (drawerMode === 'edit' && selectedEmployee) {
-        // Update employee
+        // Update core employee record
         await api.put(`/admin/employees/${selectedEmployee.id}`, data);
+        employeeId = selectedEmployee.id;
         toast.success('Employee updated successfully');
+      } else {
+        return;
       }
+
+      // Step 3 — Save sub-resource sections in parallel (failures are non-fatal per section)
+      const subSaveTasks: Promise<any>[] = [];
+
+      // Address (Tab 2)
+      const hasAddress = data.presentAddressLine1 || data.permanentAddressLine1 ||
+        data.presentCity || data.permanentCity;
+      if (hasAddress) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/address`, {
+            presentCountry: data.presentCountry,
+            presentState: data.presentState,
+            presentCity: data.presentCity,
+            presentAddressLine1: data.presentAddressLine1,
+            presentAddressLine2: data.presentAddressLine2,
+            presentPinCode: data.presentPinCode,
+            presentPhone: data.presentPhone,
+            permanentCountry: data.permanentCountry,
+            permanentState: data.permanentState,
+            permanentCity: data.permanentCity,
+            permanentAddressLine1: data.permanentAddressLine1,
+            permanentAddressLine2: data.permanentAddressLine2,
+            permanentPinCode: data.permanentPinCode,
+            permanentPhone: data.permanentPhone,
+          }).catch(e => console.warn('Address save failed', e))
+        );
+      }
+
+      // Emergency Contact (Tab 3)
+      if (data.emergencyContactName || data.emergencyPhone) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/emergency-contact`, {
+            name: data.emergencyContactName,
+            relationship: data.emergencyRelationship,
+            phone: data.emergencyPhone,
+            alternatePhone: data.emergencyAlternatePhone,
+            email: data.emergencyEmail,
+            address: data.emergencyAddress,
+            primaryContact: data.emergencyPrimaryContact,
+          }).catch(e => console.warn('Emergency contact save failed', e))
+        );
+      }
+
+      // Statutory Details (Tab 4)
+      if (data.panNumber || data.aadhaarNumber || data.uan) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/statutory`, {
+            panNumber: data.panNumber,
+            aadhaarNumber: data.aadhaarNumber,
+            uan: data.uan,
+            pfNumber: data.pfNumber,
+            esiNumber: data.esiNumber,
+            passportNumber: data.passportNumber,
+            passportExpiry: data.passportExpiry,
+            voterId: data.voterId,
+            drivingLicense: data.drivingLicense,
+            drivingLicenseExpiry: data.drivingLicenseExpiry,
+            pfApplicable: data.pfApplicable,
+            esiApplicable: data.esiApplicable,
+            taxRegime: data.taxRegime,
+          }).catch(e => console.warn('Statutory save failed', e))
+        );
+      }
+
+      // Bank Account (Tab 5)
+      if (data.bankName || data.accountNumber) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/bank-account`, {
+            bankName: data.bankName,
+            branchName: data.branchName,
+            accountNumber: data.accountNumber,
+            ifscCode: data.ifscCode,
+            accountType: data.accountType,
+            accountHolderName: data.accountHolderName,
+            paymentMode: data.paymentMode,
+            primaryAccount: data.primaryAccount,
+          }).catch(e => console.warn('Bank account save failed', e))
+        );
+      }
+
+      // Documents (Tab 6) — always send even if empty to clear server state
+      if (data.documents && data.documents.length > 0) {
+        const docPayload = data.documents.map((doc: any) => ({
+          documentCategory: doc.documentCategory,
+          documentName: doc.documentName,
+          fileId: doc.fileUrl || null, // fileUrl holds UUID after upload
+          expiryDate: doc.expiryDate,
+        }));
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/documents`, docPayload)
+            .catch(e => console.warn('Documents save failed', e))
+        );
+      }
+
+      // Salary Revision (Tab 7) — POST (append) only if filled
+      if (data.revisionType && data.revisionEffectiveDate) {
+        subSaveTasks.push(
+          api.post(`/admin/employees/${employeeId}/salary-revision`, {
+            revisionType: data.revisionType,
+            effectiveDate: data.revisionEffectiveDate,
+            annualCTC: data.revisionAnnualCTC,
+            incrementPercentage: data.revisionIncrementPercentage,
+            salaryComponents: data.revisionSalaryComponents,
+            reason: data.revisionReason,
+          }).catch(e => console.warn('Salary revision save failed', e))
+        );
+      }
+
+      // Education (Tab 8)
+      if (data.educations && data.educations.length > 0) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/educations`, data.educations)
+            .catch(e => console.warn('Educations save failed', e))
+        );
+      }
+
+      // Family / Nominee (Tab 9)
+      if (data.families && data.families.length > 0) {
+        const familyPayload = (data.families as any[]).map(f => ({
+          name: f.name,
+          relationship: f.relationship,
+          dateOfBirth: f.dateOfBirth,
+          gender: f.gender,
+          phone: f.phone,
+          dependent: f.dependent,
+          nominee: f.nominee,
+          nomineePercentage: f.nomineePercentage,
+        }));
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/families`, familyPayload)
+            .catch(e => console.warn('Family save failed', e))
+        );
+      }
+
+      // Contract (Tab 10)
+      if (data.contractType || data.contractStartDate) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/contract`, {
+            contractType: data.contractType,
+            contractStartDate: data.contractStartDate,
+            contractEndDate: data.contractEndDate,
+            contractAnnualCTC: data.contractAnnualCTC,
+            contractNoticePeriod: data.contractNoticePeriod,
+            contractTerms: data.contractTerms,
+            // signedContractUpload holds UUID after upload-on-select in the form
+            signedContractFileId: data.signedContractUpload || null,
+          }).catch(e => console.warn('Contract save failed', e))
+        );
+      }
+
+      await Promise.all(subSaveTasks);
+
       setIsDrawerOpen(false);
       fetchEmployees();
     } catch (err: any) {
@@ -105,10 +439,10 @@ export default function EmployeeDirectory() {
       <div className="max-w-[1400px] mx-auto">
         <EmployeeDrawer
           isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
+          onClose={() => { setIsDrawerOpen(false); setEditInitialData(null); }}
           onSave={handleSaveEmployee}
           mode={drawerMode}
-          initialData={selectedEmployee as any}
+          initialData={(drawerMode === 'edit' || drawerMode === 'view') ? editInitialData as any : undefined}
           employeeId={selectedEmployee?.employeeCode}
           isSubmitting={isSubmitting}
         />
