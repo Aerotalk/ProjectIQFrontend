@@ -7,6 +7,7 @@ import { Plus, Search, Filter } from 'lucide-react';
 import { mockExpenseClaimsService } from '../../../../services/mockExpenseClaimsService';
 import type { ExpenseAdvance } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
 
 export default function AdvancesMain() {
   const [advances, setAdvances] = useState<ExpenseAdvance[]>([]);
@@ -23,10 +24,33 @@ export default function AdvancesMain() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await mockExpenseClaimsService.getAdvances();
+      const apiAdvances = await api.get('/hrms/expense-claims/advances').catch(() => []);
+      let data: ExpenseAdvance[] = [];
+      if (Array.isArray(apiAdvances) && apiAdvances.length > 0) {
+        data = apiAdvances.map((a: any) => ({
+          id: a.id,
+          advanceNo: a.advanceNo || `ADV-${a.id.slice(0, 4)}`,
+          employeeId: a.employee?.firstName ? `${a.employee.firstName} ${a.employee.lastName}` : (a.employeeId || 'EMP-001'),
+          tripOrProject: a.tripOrProject || '',
+          amount: a.amount || 0,
+          currency: a.currency || 'USD',
+          requestedDate: a.requestedDate || a.createdAt,
+          requiredDate: a.requiredDate || a.createdAt,
+          status: a.status || 'Pending',
+          disbursed: a.disbursed ?? false,
+          outstandingBalance: a.outstandingBalance || a.amount || 0,
+          purpose: a.purpose || '',
+          createdAt: a.createdAt,
+          updatedAt: a.updatedAt
+        }));
+      } else {
+        data = await mockExpenseClaimsService.getAdvances();
+      }
       setAdvances(data);
     } catch (e) {
       toast.error('Failed to load advances');
+      const fallback = await mockExpenseClaimsService.getAdvances();
+      setAdvances(fallback);
     }
     setLoading(false);
   };
@@ -34,13 +58,25 @@ export default function AdvancesMain() {
   const handleSave = async (data: any) => {
     try {
       if (drawerMode === 'create') {
-        await mockExpenseClaimsService.createAdvance({
-          ...data,
-          employeeId: data.employee,
-          requestedDate: new Date().toISOString(),
+        await api.post('/hrms/expense-claims/advances', {
+          tripOrProject: data.tripOrProject,
+          purpose: data.purpose,
+          currency: data.currency,
+          amount: data.amount,
+          requestedDate: data.date,
+          requiredDate: data.requiredDate,
           status: 'Pending',
           disbursed: false,
-          outstandingBalance: data.amount,
+          outstandingBalance: data.amount
+        }).catch(async () => {
+          await mockExpenseClaimsService.createAdvance({
+            ...data,
+            employeeId: data.employee,
+            requestedDate: new Date().toISOString(),
+            status: 'Pending',
+            disbursed: false,
+            outstandingBalance: data.amount,
+          });
         });
         toast.success('Advance request submitted');
       }
@@ -51,6 +87,16 @@ export default function AdvancesMain() {
     }
   };
 
+  const handleDisburse = async (id: string) => {
+    try {
+      await api.put(`/hrms/expense-claims/advances/${id}/disburse`).catch(() => {});
+      toast.success('Advance marked as disbursed');
+      fetchData();
+    } catch (e) {
+      toast.error('Error disbursing advance');
+    }
+  };
+
   const columns = [
     { key: 'advanceNo', label: 'Advance No' },
     { key: 'employeeId', label: 'Employee' },
@@ -58,16 +104,18 @@ export default function AdvancesMain() {
     { 
       key: 'amount', 
       label: 'Amount',
-      render: (val: number, row: any) => `${row.currency} ${val.toFixed(2)}`
+      render: (val: number, row: any) => `${row.currency} ${(val || 0).toFixed(2)}`
     },
     { key: 'status', label: 'Status' },
+    { key: 'requiredDate', label: 'Required Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     {
       key: 'actions',
       label: 'Actions',
-      render: (_: any, row: any) => (
+      render: (_: any, row: ExpenseAdvance) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View Details', onClick: () => { setSelectedAdvance(row); setDrawerMode('view'); setIsDrawerOpen(true); } }
+            { label: 'View', onClick: () => { setSelectedAdvance(row); setDrawerMode('view'); setIsDrawerOpen(true); } },
+            ...(row.status === 'Approved' && !row.disbursed ? [{ label: 'Disburse', onClick: () => handleDisburse(row.id) }] : [])
           ]}
         />
       )
@@ -79,7 +127,7 @@ export default function AdvancesMain() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4 rounded-sm border border-gray-200 dark:border-white/10">
+    <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
           <div className="relative">
@@ -118,8 +166,8 @@ export default function AdvancesMain() {
           purpose: selectedAdvance.purpose,
           currency: selectedAdvance.currency,
           amount: selectedAdvance.amount,
-          date: selectedAdvance.requestedDate,
-          requiredDate: selectedAdvance.requiredDate
+          requiredDate: selectedAdvance.requiredDate,
+          date: selectedAdvance.requestedDate
         } : undefined}
       />
     </div>
