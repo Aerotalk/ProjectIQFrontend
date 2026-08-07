@@ -36,9 +36,9 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
     if (isMulti) {
       const arr = (value as string[]) || [];
       if (arr.length === 0) return placeholder || "Select...";
-      const labels = options.filter(opt => arr.includes(getOptionValue(opt))).map(getOptionLabel);
+      const labels = (options || []).filter(opt => arr.includes(getOptionValue(opt))).map(getOptionLabel);
       if (labels.length > 0) return labels.join(', ');
-      return options.length === 0 ? "Loading options..." : (placeholder || "Select...");
+      return options?.length === 0 ? "Loading options..." : (placeholder || "Select...");
     } else {
       const selectedOpt = options.find(opt => getOptionValue(opt) === (value as string));
       return selectedOpt 
@@ -152,10 +152,10 @@ export default function CustomSelect({ value, onChange, options, icon, disabled,
                 <Loader2 size={16} className="animate-spin text-primary" />
                 <span>{loadingText || 'Loading...'}</span>
               </div>
-            ) : filteredOptions.length === 0 ? (
+            ) : (filteredOptions?.length ?? 0) === 0 ? (
               <div className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">{emptyText || 'No results found'}</div>
             ) : (
-              filteredOptions.map((option, index) => {
+              (filteredOptions || []).map((option, index) => {
                 const optValue = getOptionValue(option);
                 const optLabel = getOptionLabel(option);
                 const isSelected = isMulti ? ((value as string[]) || []).includes(optValue) : (value as string) === optValue;

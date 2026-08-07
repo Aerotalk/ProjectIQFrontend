@@ -23,6 +23,7 @@ const ModuleLoader = () => (
 export default function WorkforceMain() {
   const navigate = useNavigate();
   const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -40,7 +41,7 @@ export default function WorkforceMain() {
     : pathParts.find(p => tabs.some(t => t.id === p)) || 'dashboard';
 
   const handleTabChange = (tabId: string) => {
-    navigate(`/companydashboard/hrms/workforce/${tabId}`);
+    navigate(`${basePath}/hrms/workforce/${tabId}`);
   };
 
   return (

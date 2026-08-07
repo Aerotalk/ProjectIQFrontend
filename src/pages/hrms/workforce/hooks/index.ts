@@ -11,13 +11,13 @@ function useQuery<T>(fetcher: (params?: any) => Promise<PaginatedResponse<T>>, d
   const [error, setError] = useState<string | null>(null);
   const [params, setParams] = useState(defaultParams || { page: 1, limit: 10 });
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetcher(params);
-      setData(res.data);
-      setTotal(res.totalCount);
-      setError(null);
+    const fetchData = useCallback(async () => {
+      try {
+        setLoading(true);
+        const res = await fetcher(params);
+        setData(Array.isArray(res) ? res : (res?.data || []));
+        setTotal(res?.totalCount || (Array.isArray(res) ? res.length : 0));
+        setError(null);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
       toast.error('Failed to fetch data');

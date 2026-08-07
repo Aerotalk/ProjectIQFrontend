@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, Plus, Filter, Edit, ArrowLeft, Loader2, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PayrollDrawer from '../../../components/payroll/PayrollDrawer';
 import PayrollProfileView from '../../../components/payroll/PayrollProfileView';
 import type { PayrollFormValues } from '../../../components/payroll/PayrollDrawer/validators/payrollValidation';
@@ -9,7 +9,9 @@ import CustomSelect from '../../../components/ui/CustomSelect';
 import CustomMonthPicker from '../../../components/ui/CustomMonthPicker';
 
 export default function PayrollListing() {
- const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
   const { payrolls, employees, departments, isLoading, filters, updateFilter, clearFilters, refreshData } = usePayroll();
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -128,7 +130,7 @@ export default function PayrollListing() {
  <div className="flex flex-col h-[calc(100vh-8rem)]">
  <div className="mb-4 flex items-center gap-2 shrink-0">
  <button 
- onClick={() => navigate('/companydashboard/payroll')}
+ onClick={() => navigate(`${basePath}/hrms/payroll`)}
  className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary dark:hover:text-secondary transition-colors"
  >
  <ArrowLeft size={16} />

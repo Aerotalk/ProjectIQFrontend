@@ -197,7 +197,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         return sub;
       })
     }))
-    .filter(item => item.subItems.length > 0 || !item.subItems);
+    .filter(item => (item.subItems?.length ?? 0) > 0 || !item.subItems);
 
   console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
 
@@ -223,7 +223,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     for (const item of navItems) {
       for (const sub of item.subItems) {
         if (sub.path && sub.path !== basePath && location.pathname.startsWith(sub.path)) {
-          if (sub.path.length > longestMatchLen) {
+          if ((sub.path?.length ?? 0) > longestMatchLen) {
             longestMatchLen = sub.path.length;
             activeModuleName = item.name;
             activePageName = sub.name;
@@ -374,9 +374,9 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 font-medium min-w-0 mr-4">
             <Link to={basePath} className="hover:text-gray-800 dark:hover:text-gray-200 cursor-pointer shrink-0">Dashboard</Link>
 
-            {breadcrumbs.length > 0 ? (
+            {breadcrumbs?.length > 0 ? (
               breadcrumbs.map((crumb, index) => {
-                const isLast = index === breadcrumbs.length - 1;
+                const isLast = index === (breadcrumbs?.length ?? 0) - 1;
                 return (
                   <React.Fragment key={index}>
                     <ChevronRight size={14} className="mx-2 shrink-0" />
