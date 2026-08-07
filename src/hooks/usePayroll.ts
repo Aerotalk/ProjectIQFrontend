@@ -1,6 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
-import { mockPayrollService, type PayrollRecord } from '../services/mockPayrollService';
 import { api } from '../lib/api';
+
+export interface PayrollRecord {
+  id: string;
+  employee: string;
+  empId: string;
+  dept: string;
+  period: string;
+  gross: string;
+  net: string;
+  status: string;
+  payout: string;
+}
 
 export interface PayrollFilters {
   searchTerm: string;
@@ -46,20 +57,30 @@ export function usePayroll() {
 
       let mappedPayrolls: PayrollRecord[] = [];
       if (Array.isArray(apiRuns) && apiRuns.length > 0) {
-        mappedPayrolls = apiRuns.map((r: any) => ({
-          id: r.id,
-          employee: r.employeeScope === 'Department' ? `Dept: ${r.department?.departmentName || 'All'}` : 'All Employees',
-          empId: r.runType || 'Regular',
-          dept: r.department?.departmentName || 'All',
-          period: r.payrollPeriod,
-          gross: `₹${(r.totalGross || 0).toLocaleString('en-IN')}`,
-          net: `₹${(r.totalNet || 0).toLocaleString('en-IN')}`,
-          status: r.status || 'Draft',
-          payout: r.payoutStatus || 'Unpaid'
-        }));
-      } else {
-        // Fallback to mock data if backend has no runs yet
-        mappedPayrolls = await mockPayrollService.fetchPayrolls();
+        // Fetch details for each run
+        const detailPromises = apiRuns.map((r: any) => 
+          api.get(`/hrms/payroll/runs/${r.id}/details`).then((details: any) => ({ run: r, details }))
+             .catch(() => ({ run: r, details: [] }))
+        );
+        const runsWithDetails = await Promise.all(detailPromises);
+        
+        runsWithDetails.forEach(({ run, details }) => {
+          if (Array.isArray(details) && details.length > 0) {
+            details.forEach((d: any) => {
+              mappedPayrolls.push({
+                id: d.id,
+                employee: d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : 'Unknown',
+                empId: d.employee?.employeeCode || 'Unknown',
+                dept: d.employee?.department?.departmentName || run.department?.departmentName || 'Unknown',
+                period: run.payrollPeriod,
+                gross: `₹${(d.gross || 0).toLocaleString('en-IN')}`,
+                net: `₹${(d.net || 0).toLocaleString('en-IN')}`,
+                status: run.status || 'Draft',
+                payout: run.payoutStatus || 'Unpaid'
+              });
+            });
+          }
+        });
       }
 
       setPayrolls(mappedPayrolls);
@@ -67,8 +88,7 @@ export function usePayroll() {
       setDepartments(deptsData);
     } catch (error) {
       console.error('Failed to fetch payroll data', error);
-      const fallback = await mockPayrollService.fetchPayrolls();
-      setPayrolls(fallback);
+      setPayrolls([]);
     } finally {
       setIsLoading(false);
     }

@@ -22,29 +22,69 @@ export default function PayrollListing() {
   const statusOptions = ['Draft', 'Processing', 'Processed'].map(s => ({ value: s, label: s }));
   const payoutOptions = ['Unpaid', 'Pending', 'Paid'].map(s => ({ value: s, label: s }));
 
+  const parseCurrency = (val: string | undefined): number => {
+    if (!val) return 0;
+    return Number(val.replace(/[^0-9.-]+/g,""));
+  };
+
   const handleSave = async (data: PayrollFormValues) => {
     const { api } = await import('../../../lib/api');
     
     if (data.salaryInputs) {
-      await api.post('/hrms/payroll/salary-inputs', data.salaryInputs);
+      const payload = {
+        ...data.salaryInputs,
+        employee: { id: data.salaryInputs.employee },
+        amount: parseCurrency(data.salaryInputs.amount)
+      };
+      await api.post('/hrms/payroll/salary-inputs', payload);
     }
     if (data.employeeLOP) {
-      await api.post('/hrms/payroll/employee-lop', data.employeeLOP);
+      const payload = {
+        ...data.employeeLOP,
+        employee: { id: data.employeeLOP.employee },
+        lopDays: Number(data.employeeLOP.lopDays)
+      };
+      await api.post('/hrms/payroll/employee-lop', payload);
     }
     if (data.payrollProcessing) {
-      await api.post('/hrms/payroll/runs', data.payrollProcessing);
+      const payload = {
+        ...data.payrollProcessing,
+        department: data.payrollProcessing.departmentId ? { id: data.payrollProcessing.departmentId } : null,
+      };
+      await api.post('/hrms/payroll/runs', payload);
     }
     if (data.salaryHold) {
-      await api.post('/hrms/payroll/salary-holds', data.salaryHold);
+      const payload = {
+        ...data.salaryHold,
+        employee: { id: data.salaryHold.employee },
+        holdAmount: parseCurrency(data.salaryHold.holdAmount)
+      };
+      await api.post('/hrms/payroll/salary-holds', payload);
     }
     if (data.stopSalary) {
-      await api.post('/hrms/payroll/salary-stops', data.stopSalary);
+      const payload = {
+        ...data.stopSalary,
+        employee: { id: data.stopSalary.employee }
+      };
+      await api.post('/hrms/payroll/salary-stops', payload);
     }
     if (data.reimbursement) {
-      await api.post('/hrms/payroll/reimbursements', data.reimbursement);
+      const payload = {
+        ...data.reimbursement,
+        claimedAmount: parseCurrency(data.reimbursement.claimedAmount)
+      };
+      await api.post('/hrms/payroll/reimbursements', payload);
     }
     if (data.finalSettlement) {
-      await api.post('/hrms/payroll/final-settlements', data.finalSettlement);
+      const payload = {
+        ...data.finalSettlement,
+        employee: { id: data.finalSettlement.employee },
+        items: data.finalSettlement.items?.map(i => ({
+          ...i,
+          amount: parseCurrency(i.amount)
+        })) || []
+      };
+      await api.post('/hrms/payroll/final-settlements', payload);
     }
     if (data.payrollConfiguration?.componentName) {
       await api.post('/hrms/payroll/pay-components', data.payrollConfiguration);

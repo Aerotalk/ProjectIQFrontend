@@ -83,34 +83,28 @@ export default function GoalsList() {
 
   const handleSave = async (data: any) => {
     try {
+      const payload = {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        weightage: data.weightage,
+        kpi: data.kpi,
+        targetValue: data.targetValue,
+        currentValue: data.currentValue,
+        unit: data.unit,
+        dueDate: data.dueDate,
+        priority: data.priority,
+        // Wrap IDs for backend JPA entity mapping. Since the form currently doesn't 
+        // have employee/cycle selectors, we use a placeholder that a real auth context would provide.
+        employee: { id: '00000000-0000-0000-0000-000000000001' }, 
+        cycle: { id: '00000000-0000-0000-0000-000000000002' }
+      };
+
       if (drawerMode === 'create') {
-        await api.post('/hrms/performance/goals', {
-          title: data.title,
-          description: data.description,
-          category: data.category,
-          weightage: data.weightage,
-          kpi: data.kpi,
-          targetValue: data.targetValue,
-          currentValue: data.currentValue,
-          unit: data.unit,
-          dueDate: data.dueDate,
-          priority: data.priority,
-          status: 'In Progress'
-        });
+        await api.post('/hrms/performance/goals', { ...payload, status: 'In Progress' });
         toast.success('Goal created');
       } else if (drawerMode === 'edit' && selectedGoal) {
-        await api.put(`/hrms/performance/goals/${selectedGoal.id}`, {
-          title: data.title,
-          description: data.description,
-          category: data.category,
-          weightage: data.weightage,
-          kpi: data.kpi,
-          targetValue: data.targetValue,
-          currentValue: data.currentValue,
-          unit: data.unit,
-          dueDate: data.dueDate,
-          priority: data.priority
-        });
+        await api.put(`/hrms/performance/goals/${selectedGoal.id}`, payload);
         toast.success('Goal updated');
       }
       setIsDrawerOpen(false);

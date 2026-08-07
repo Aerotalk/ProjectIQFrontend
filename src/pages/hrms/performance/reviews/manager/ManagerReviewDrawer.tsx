@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Drawer from '../../../../../components/ui/Drawer';
 import { FormLayout } from '../../../../../components/ui/FormLayout';
 import CustomSelect from '../../../../../components/ui/CustomSelect';
 import type { ManagerReview, SelfReview, Goal, Competency, RatingScale } from '../../types';
 import { formStyles } from '../../../../../components/ui/form-styles';
 import { Star, User, AlertCircle, Save, Check } from 'lucide-react';
+import { api } from '../../../../../lib/api';
 
 interface ManagerReviewDrawerProps {
   isOpen: boolean;
@@ -18,9 +19,21 @@ interface ManagerReviewDrawerProps {
 
 export default function ManagerReviewDrawer({ isOpen, onClose, onSave: _onSave, initialData, goals, competencies: _competencies, ratingScale: _ratingScale }: ManagerReviewDrawerProps) {
   const [formData, setFormData] = useState<ManagerReview>(initialData);
-  
-  // Find associated self review (mocked for now since backend doesn't have it in props)
-  const selfReview = undefined as SelfReview | undefined; 
+  const [selfReview, setSelfReview] = useState<SelfReview | undefined>();
+
+  useEffect(() => {
+    if (initialData?.employee?.id && initialData?.cycle) {
+      api.get(`/hrms/performance/reviews/self?employeeId=${initialData.employee.id}&cycleId=${initialData.cycle}`)
+        .then(res => {
+          if (Array.isArray(res) && res.length > 0) {
+            setSelfReview(res[0]);
+          } else if (res && !Array.isArray(res)) {
+            setSelfReview(res as any);
+          }
+        })
+        .catch(err => console.error('Failed to load self review', err));
+    }
+  }, [initialData]);
   const employeeGoals = goals; // use goals from props
   
   const isReadOnly = initialData.status === 'Submitted' || initialData.status === 'Finalized' || initialData.status === 'Manager Reviewed';

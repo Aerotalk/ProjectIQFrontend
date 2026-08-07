@@ -45,6 +45,38 @@ export default function Profile() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      alert('Please fill all password fields');
+      return;
+    }
+    if (passwords.new !== passwords.confirm) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await api.request('/auth/password', {
+        method: 'PUT',
+        data: {
+          currentPassword: passwords.current,
+          newPassword: passwords.new,
+        }
+      });
+      alert('Password updated successfully');
+      setPasswords({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      console.error('Failed to update password', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.message || 'Failed to update password. Please check your current password and try again.';
+      alert(errorMessage);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   // Fetch real org data on mount
   useEffect(() => {
@@ -64,22 +96,25 @@ export default function Profile() {
           bio: ''
         });
       } catch (err) {
-        console.error('Failed to fetch org profile', err);
+        console.error('Failed to fetch profile', err);
       }
     };
     fetchProfile();
   }, []);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await api.put('/org/profile', {
-        organizationName: profileData.name,
-        organizationEmail: profileData.email,
-        legalName: profileData.legalName,
-        organizationType: profileData.orgType,
-        industry: profileData.industry,
+      await api.request('/org/profile', {
+        method: 'PUT',
+        data: {
+          organizationName: profileData.name,
+          organizationEmail: profileData.email,
+          legalName: profileData.legalName,
+          organizationType: profileData.orgType,
+          industry: profileData.industry,
+        }
       });
       // Refresh auth context so the sidebar reflects new name immediately
       await refetchUser();
@@ -111,93 +146,75 @@ export default function Profile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column - Profile Info */}
+          {/* Left Column - Main Profile Info */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Profile Information Card */}
+            {/* Basic Info Card */}
             <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/5 rounded-sm shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <User size={18} className="text-primary dark:text-secondary" />
-                  Company Information
+                  Basic Information
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Update your basic profile details and public avatar.</p>
               </div>
-              
               <div className="p-6">
-                {/* Avatar Section */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
-                  <div className="relative group">
-                    <div className="w-24 h-24 bg-gray-100 dark:bg-black/20 rounded-sm flex items-center justify-center border border-gray-200 dark:border-white/10 overflow-hidden">
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt="Company Logo" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-3xl font-bold text-primary dark:text-secondary">{orgName ? orgName.substring(0,2).toUpperCase() : 'ORG'}</span>
-                      )}
-                    </div>
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-sm"
-                    >
-                      <Camera size={20} />
-                    </button>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">Company Logo</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Recommended size is 256x256px. Max file size 2MB.</p>
-                    <div className="flex gap-2">
+                <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5" onSubmit={handleSaveProfile}>
+                  <div className="md:col-span-2 flex items-center gap-6 mb-2">
+                    <div className="relative group">
+                      <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl font-bold text-gray-400 dark:text-gray-500">
+                            {profileData.name.charAt(0) || 'U'}
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-full text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors shadow-sm"
+                      >
+                        <Camera size={14} />
+                      </button>
                       <input 
                         type="file" 
-                        ref={fileInputRef} 
+                        ref={fileInputRef}
                         className="hidden" 
                         accept="image/*"
                         onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const url = URL.createObjectURL(e.target.files[0]);
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = URL.createObjectURL(file);
                             setAvatarUrl(url);
                           }
                         }}
                       />
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-sm transition-colors border border-gray-200 dark:border-white/5"
-                      >
-                        Change Logo
-                      </button>
-                      <button 
-                        onClick={() => setAvatarUrl(null)}
-                        className="px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-medium rounded-sm transition-colors"
-                      >
-                        Remove
-                      </button>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Profile Photo</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">JPG, GIF or PNG. Max size of 2MB.</p>
                     </div>
                   </div>
-                </div>
 
-                {/* Form Fields */}
-                <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5" onSubmit={handleSave}>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 md:col-span-2">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Organization Name</label>
+                    <input type="text" value={profileData.name} onChange={(e) => setProfileData({...profileData, name: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Email Address</label>
                     <div className="relative">
-                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.name} onChange={(e) => setProfileData({...profileData, name: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail size={14} className="text-gray-400" />
+                      </div>
+                      <input type="email" value={profileData.email} onChange={(e) => setProfileData({...profileData, email: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Legal Name</label>
-                    <div className="relative">
-                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={profileData.legalName} onChange={(e) => setProfileData({...profileData, legalName: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contact Email</label>
-                    <div className="relative">
-                      <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="email" value={profileData.email} onChange={(e) => setProfileData({...profileData, email: e.target.value})} className="w-full pl-9 pr-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
-                    </div>
+                    <input type="text" value={profileData.legalName} onChange={(e) => setProfileData({...profileData, legalName: e.target.value})} className="w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:border-primary dark:focus:border-primary text-gray-900 dark:text-white transition-colors" />
                   </div>
 
                   <div className="space-y-1.5">
@@ -271,7 +288,7 @@ export default function Profile() {
                 </h2>
               </div>
               <div className="p-6">
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Current Password</label>
                     <div className="relative">
@@ -338,8 +355,15 @@ export default function Profile() {
                   </div>
                   
                   <div className="pt-2">
-                    <button type="submit" className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 dark:bg-white/10 dark:hover:bg-white/20 text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors border border-transparent dark:border-white/5">
-                      Update Password
+                    <button type="submit" disabled={isUpdatingPassword} className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 dark:bg-white/10 dark:hover:bg-white/20 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium rounded-sm transition-colors border border-transparent dark:border-white/5">
+                      {isUpdatingPassword ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        'Update Password'
+                      )}
                     </button>
                   </div>
                 </form>

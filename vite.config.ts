@@ -16,4 +16,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://projectiqbackend-production.up.railway.app',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })

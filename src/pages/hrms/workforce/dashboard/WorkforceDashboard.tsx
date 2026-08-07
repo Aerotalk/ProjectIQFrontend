@@ -1,12 +1,16 @@
 import { Users, UserMinus, Clock, Calendar, CheckSquare, FileText, ShieldAlert, Fingerprint } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
-import { useDashboardKPIs } from '../hooks';
+import { useDashboardKPIs, useAttendanceRecords, useLeaveApplications } from '../hooks';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 
 export default function WorkforceDashboard() {
   const navigate = useNavigate();
-  const { kpis, loading } = useDashboardKPIs();
+  const { kpis, loading: kpisLoading } = useDashboardKPIs();
+  const { data: attendanceData, loading: attLoading } = useAttendanceRecords({ page: 1, limit: 5 });
+  const { data: leaveDataRes, loading: leaveLoading } = useLeaveApplications({ page: 1, limit: 5, status: 'Pending' });
+
+  const loading = kpisLoading || attLoading || leaveLoading;
 
   const trendData = kpis?.trendData || [];
   const leaveData = kpis?.leaveData || [];
@@ -89,17 +93,30 @@ export default function WorkforceDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                {[1,2,3,4].map(i => (
+                {attendanceData?.slice(0, 5).map((att: any, i: number) => (
                   <tr key={i} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                    <td className="px-3 py-2 text-gray-900 dark:text-gray-100 font-medium">John Doe {i}</td>
-                    <td className="px-3 py-2 text-gray-500">GS</td>
-                    <td className="px-3 py-2 text-gray-500">09:00 AM</td>
-                    <td className="px-3 py-2 text-gray-500">--:--</td>
+                    <td className="px-3 py-2 text-gray-900 dark:text-gray-100 font-medium">
+                      {att.employee?.firstName ? `${att.employee.firstName} ${att.employee.lastName}` : 'John Doe'}
+                    </td>
+                    <td className="px-3 py-2 text-gray-500">{att.shift?.shiftName || 'GS'}</td>
+                    <td className="px-3 py-2 text-gray-500">{att.checkInTime ? new Date(att.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
+                    <td className="px-3 py-2 text-gray-500">{att.checkOutTime ? new Date(att.checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
                     <td className="px-3 py-2 text-right">
-                      <span className="px-2 py-0.5 rounded-sm text-[10px] bg-emerald-100 text-emerald-700">Present</span>
+                      <span className={`px-2 py-0.5 rounded-sm text-[10px] ${
+                        att.status === 'Present' ? 'bg-emerald-100 text-emerald-700' :
+                        att.status === 'Absent' ? 'bg-red-100 text-red-700' :
+                        'bg-amber-100 text-amber-700'
+                      }`}>
+                        {att.status || 'Present'}
+                      </span>
                     </td>
                   </tr>
                 ))}
+                {(!attendanceData || attendanceData.length === 0) && (
+                  <tr>
+                    <td colSpan={5} className="px-3 py-6 text-center text-gray-500">No attendance data found for today.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -113,15 +130,22 @@ export default function WorkforceDashboard() {
             </h2>
           </div>
           <div className="flex-1 flex flex-col gap-3">
-            {[1,2,3].map(i => (
+            {leaveDataRes?.slice(0, 4).map((leave: any, i: number) => (
               <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-white/5 p-2 rounded-sm border border-transparent hover:border-gray-200 dark:hover:border-white/10">
                 <div>
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white">Jane Smith</p>
-                  <p className="text-[10px] text-gray-500">Sick Leave • 2 Days</p>
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                    {leave.employee?.firstName ? `${leave.employee.firstName} ${leave.employee.lastName}` : 'Jane Smith'}
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    {leave.leaveType?.name || 'Leave'} • {leave.numberOfDays || 1} Day(s)
+                  </p>
                 </div>
-                <button className="text-xs bg-primary text-white px-2 py-1 rounded-sm hover:bg-primary-dark" onClick={() => navigate('../leave/applications')}>Review</button>
+                <button className="text-xs bg-primary text-white px-2 py-1 rounded-sm hover:bg-primary-dark" onClick={() => navigate('../leave/approval-queue')}>Review</button>
               </div>
             ))}
+            {(!leaveDataRes || leaveDataRes.length === 0) && (
+              <p className="text-sm text-gray-500 text-center py-4">No pending leave requests.</p>
+            )}
           </div>
         </div>
 

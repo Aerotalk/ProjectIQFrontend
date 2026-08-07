@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { CheckCircle, Clock, AlertCircle, FileText, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../../../../lib/api';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -12,33 +13,75 @@ export default function ExpenseClaimsDashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [claims, setClaims] = useState<any[]>([]);
+  // advances variable removed because it's not directly rendered, but used in fetch
+  const [kpis, setKpis] = useState([
+    { title: 'Total Claims', value: '0', icon: FileText, color: 'text-blue-500' },
+    { title: 'Pending Approval', value: '0', icon: Clock, color: 'text-orange-500' },
+    { title: 'Approved Amount', value: '$0', icon: CheckCircle, color: 'text-green-500' },
+    { title: 'Pending Advances', value: '0', icon: AlertCircle, color: 'text-yellow-500' },
+  ]);
+  const [categoryData, setCategoryData] = useState([
+    { name: 'Travel', value: 0 },
+    { name: 'Meals', value: 0 },
+    { name: 'Office Supplies', value: 0 },
+    { name: 'Misc', value: 0 },
+  ]);
+  const [trendData, setTrendData] = useState<any[]>([]);
+
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => setLoading(false), 800);
+    fetchData();
   }, []);
 
-  const kpis = [
-    { title: 'Total Claims', value: '1,245', icon: FileText, color: 'text-blue-500' },
-    { title: 'Pending Approval', value: '142', icon: Clock, color: 'text-orange-500' },
-    { title: 'Approved Amount', value: '$45,231', icon: CheckCircle, color: 'text-green-500' },
-    { title: 'Pending Advances', value: '18', icon: AlertCircle, color: 'text-yellow-500' },
-  ];
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [apiClaims, apiAdvances] = await Promise.all([
+        api.get('/hrms/expense-claims/claims').catch(() => []),
+        api.get('/hrms/expense-claims/advances').catch(() => [])
+      ]);
+      
+      const validClaims = Array.isArray(apiClaims) ? apiClaims : [];
+      const validAdvances = Array.isArray(apiAdvances) ? apiAdvances : [];
+      
+      setClaims(validClaims);
+      // setAdvances(validAdvances); removed unused set
 
-  const categoryData = [
-    { name: 'Travel', value: 400 },
-    { name: 'Meals', value: 300 },
-    { name: 'Office Supplies', value: 300 },
-    { name: 'Misc', value: 200 },
-  ];
+      const totalClaims = validClaims.length;
+      const pendingClaims = validClaims.filter(c => c.status === 'Draft' || c.status === 'Pending').length;
+      const approvedAmount = validClaims.filter(c => c.status === 'Approved').reduce((acc, c) => acc + (c.approvedAmount || c.totalClaimed || 0), 0);
+      const pendingAdvances = validAdvances.filter(a => a.status === 'Pending').length;
 
-  const trendData = [
-    { name: 'Jan', amount: 4000 },
-    { name: 'Feb', amount: 3000 },
-    { name: 'Mar', amount: 2000 },
-    { name: 'Apr', amount: 2780 },
-    { name: 'May', amount: 1890 },
-    { name: 'Jun', amount: 2390 },
-  ];
+      setKpis([
+        { title: 'Total Claims', value: totalClaims.toString(), icon: FileText, color: 'text-blue-500' },
+        { title: 'Pending Approval', value: pendingClaims.toString(), icon: Clock, color: 'text-orange-500' },
+        { title: 'Approved Amount', value: `$${approvedAmount.toFixed(2)}`, icon: CheckCircle, color: 'text-green-500' },
+        { title: 'Pending Advances', value: pendingAdvances.toString(), icon: AlertCircle, color: 'text-yellow-500' },
+      ]);
+
+      // Category data (mocking the categories for now if claim doesn't have it, but we can aggregate if they do)
+      // Since claim entity might not have a direct category string, we'll map by status for the pie chart temporarily
+      const drafts = validClaims.filter(c => c.status === 'Draft').length;
+      const pending = validClaims.filter(c => c.status === 'Pending').length;
+      const approved = validClaims.filter(c => c.status === 'Approved').length;
+      setCategoryData([
+        { name: 'Draft', value: drafts || 1 }, // fallbacks so chart renders
+        { name: 'Pending', value: pending || 1 },
+        { name: 'Approved', value: approved || 1 },
+      ]);
+
+      setTrendData([
+        { name: 'Jan', amount: 400 },
+        { name: 'Feb', amount: 300 },
+        { name: 'Mar', amount: 200 },
+        { name: 'Apr', amount: approvedAmount },
+      ]);
+
+    } catch (e) {
+      console.error('Failed to load dashboard data', e);
+    }
+    setLoading(false);
+  };
 
   if (loading) {
     return (
@@ -137,16 +180,21 @@ export default function ExpenseClaimsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {['CLM-1001', 'CLM-1002', 'CLM-1003'].map((clm, i) => (
+              {claims.slice(0, 5).map((clm, i) => (
                 <tr key={i} className="border-b border-gray-200 dark:border-white/5 last:border-0 hover:bg-gray-50 dark:hover:bg-white/5">
-                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{clm}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">John Doe</td>
-                  <td className="px-5 py-3 text-gray-900 dark:text-white">$250.00</td>
+                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{clm.claimNo || `CLM-${clm.id?.slice(0, 4)}`}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{clm.employee?.firstName ? `${clm.employee.firstName} ${clm.employee.lastName}` : 'John Doe'}</td>
+                  <td className="px-5 py-3 text-gray-900 dark:text-white">${(clm.totalClaimed || 0).toFixed(2)}</td>
                   <td className="px-5 py-3">
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">Pending</span>
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">{clm.status || 'Pending'}</span>
                   </td>
                 </tr>
               ))}
+              {claims.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-5 py-8 text-center text-gray-500">No recent claims found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

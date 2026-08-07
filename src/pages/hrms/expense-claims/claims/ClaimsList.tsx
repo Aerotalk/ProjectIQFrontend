@@ -77,7 +77,10 @@ export default function ClaimsList() {
           currency: data.currency,
           status: 'Draft',
           totalClaimed: 0,
-          approvedAmount: 0
+          approvedAmount: 0,
+          // Wrap IDs for JPA entity mapping. (Placeholder for auth context employee ID)
+          employee: { id: '00000000-0000-0000-0000-000000000001' },
+          template: data.template ? { id: data.template } : null
         });
         toast.success('Claim Envelope created successfully');
       }

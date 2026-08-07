@@ -27,7 +27,15 @@ export const WorkforceService = {
   // Leave Applications
   getLeaveApplications: (params?: any) => api.get('/hrms/leave/applications', { params }),
   getLeaveApplicationById: (id: string) => api.get(`/hrms/leave/applications/${id}`),
-  createLeaveApplication: (data: Omit<LeaveApplication, 'id'>) => api.post('/hrms/leave/applications', data),
+  createLeaveApplication: (data: Omit<LeaveApplication, 'id'>) => {
+    const payload = {
+      ...data,
+      employee: data.employeeId ? { id: data.employeeId } : null,
+      leaveType: data.leaveTypeId ? { id: data.leaveTypeId } : null,
+      approver: data.approverId ? { id: data.approverId } : null
+    };
+    return api.post('/hrms/leave/applications', payload);
+  },
   updateLeaveApplication: (id: string, data: Partial<LeaveApplication>) => api.put(`/hrms/leave/applications/${id}`, data),
   deleteLeaveApplication: (id: string) => api.delete(`/hrms/leave/applications/${id}`),
   approveLeaveApplication: (id: string, remarks?: string) => api.put(`/hrms/leave/applications/${id}/approve`, { remarks }),
@@ -40,7 +48,17 @@ export const WorkforceService = {
   // Attendance
   getAttendanceRecords: (params?: any) => api.get('/hrms/attendance/records', { params }),
   getAttendanceRecordById: (id: string) => api.get(`/hrms/attendance/records/${id}`),
-  createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => api.post('/hrms/attendance/records', data),
+  createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => {
+    const payload = {
+      ...data,
+      employee: data.employeeId ? { id: data.employeeId } : null,
+      department: data.departmentId ? { id: data.departmentId } : null,
+      designation: data.designationId ? { id: data.designationId } : null,
+      location: data.locationId ? { id: data.locationId } : null,
+      shift: data.shiftId ? { id: data.shiftId } : null
+    };
+    return api.post('/hrms/attendance/records', payload);
+  },
   updateAttendanceRecord: (id: string, data: Partial<AttendanceRecord>) => api.put(`/hrms/attendance/records/${id}`, data),
   deleteAttendanceRecord: (id: string) => api.delete(`/hrms/attendance/records/${id}`),
   checkIn: (employeeId: string, source?: string) => api.post('/hrms/attendance/records/check-in', { employeeId, source }),
@@ -56,7 +74,14 @@ export const WorkforceService = {
   // Regularization
   getRegularizations: (params?: any) => api.get('/hrms/attendance/regularizations', { params }),
   getRegularizationById: (id: string) => api.get(`/hrms/attendance/regularizations/${id}`),
-  createRegularization: (data: Omit<RegularizationRequest, 'id'>) => api.post('/hrms/attendance/regularizations', data),
+  createRegularization: (data: Omit<RegularizationRequest, 'id'>) => {
+    const payload = {
+      ...data,
+      employee: data.employeeId ? { id: data.employeeId } : null,
+      shift: data.shift ? { id: data.shift } : null
+    };
+    return api.post('/hrms/attendance/regularizations', payload);
+  },
   updateRegularization: (id: string, data: Partial<RegularizationRequest>) => api.put(`/hrms/attendance/regularizations/${id}`, data),
   deleteRegularization: (id: string) => api.delete(`/hrms/attendance/regularizations/${id}`),
   approveRegularization: (id: string, remarks?: string) => api.put(`/hrms/attendance/regularizations/${id}/approve`, { remarks }),
@@ -65,7 +90,13 @@ export const WorkforceService = {
   // Permissions
   getPermissions: (params?: any) => api.get('/hrms/attendance/permissions', { params }),
   getPermissionById: (id: string) => api.get(`/hrms/attendance/permissions/${id}`),
-  createPermission: (data: Omit<PermissionRequest, 'id'>) => api.post('/hrms/attendance/permissions', data),
+  createPermission: (data: Omit<PermissionRequest, 'id'>) => {
+    const payload = {
+      ...data,
+      employee: data.employeeId ? { id: data.employeeId } : null
+    };
+    return api.post('/hrms/attendance/permissions', payload);
+  },
   updatePermission: (id: string, data: Partial<PermissionRequest>) => api.put(`/hrms/attendance/permissions/${id}`, data),
   deletePermission: (id: string) => api.delete(`/hrms/attendance/permissions/${id}`),
   approvePermission: (id: string, remarks?: string) => api.put(`/hrms/attendance/permissions/${id}/approve`, { remarks }),

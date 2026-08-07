@@ -13,19 +13,41 @@ export default function PerformanceReports() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const [ratings, apiCycles] = await Promise.all([
-          api.get('/hrms/performance/reports/department-ratings').catch(() => []),
+        const [apiGoals, apiCycles] = await Promise.all([
+          api.get('/hrms/performance/goals').catch(() => []),
           api.get('/hrms/performance/cycles').catch(() => [])
         ]);
         
         let deptData: any[] = [];
-        if (Array.isArray(ratings)) {
-          deptData = ratings.map((r: any) => ({
-            department: r.name,
-            avgRating: r.rating,
-            topPerformers: Math.floor(Math.random() * 10),
-            needsImprovement: Math.floor(Math.random() * 3),
-            totalEmployees: Math.floor(Math.random() * 30) + 10
+        if (Array.isArray(apiGoals)) {
+          // Aggregate goals by department
+          const deptMap = new Map<string, { totalEmployees: Set<string>, completed: number, needsImprovement: number, totalRating: number }>();
+          
+          apiGoals.forEach(g => {
+            const dept = g.employee?.department?.departmentName || 'Unknown';
+            const empId = g.employee?.id || 'Unknown';
+            if (!deptMap.has(dept)) {
+              deptMap.set(dept, { totalEmployees: new Set(), completed: 0, needsImprovement: 0, totalRating: 0 });
+            }
+            const data = deptMap.get(dept)!;
+            data.totalEmployees.add(empId);
+            if (g.status === 'Completed' || g.progress >= 100) {
+              data.completed++;
+              data.totalRating += 5; // mock 5 for completed
+            } else if (g.progress < 50 && g.status !== 'Draft') {
+              data.needsImprovement++;
+              data.totalRating += 2; // mock 2 for needs improvement
+            } else {
+              data.totalRating += 3.5; // avg
+            }
+          });
+
+          deptData = Array.from(deptMap.entries()).map(([department, data]) => ({
+            department,
+            avgRating: (data.totalRating / Math.max(1, data.completed + data.needsImprovement + data.totalEmployees.size)) || 3.0,
+            topPerformers: data.completed,
+            needsImprovement: data.needsImprovement,
+            totalEmployees: data.totalEmployees.size
           }));
         }
         setDepartmentData(deptData);
@@ -112,11 +134,21 @@ export default function PerformanceReports() {
             {activeReport === 'department' && (
               <CustomTable columns={deptColumns} data={departmentData} />
             )}
-            {activeReport !== 'department' && (
+            {activeReport === 'goals' && (
+              <CustomTable 
+                columns={[
+                  { key: 'department', label: 'Department' },
+                  { key: 'topPerformers', label: 'Goals Completed' },
+                  { key: 'needsImprovement', label: 'Goals Behind' }
+                ]} 
+                data={departmentData} 
+              />
+            )}
+            {activeReport === 'promotions' && (
               <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
                 <BarChart2 size={48} className="text-gray-300 dark:text-gray-700 mb-4" />
-                <p>Mock visualization for {activeReport} report.</p>
-                <p className="text-sm mt-2">In a full implementation, this area would render specific charts or data grids for the selected report type.</p>
+                <p>No promotion recommendation data available yet.</p>
+                <p className="text-sm mt-2">Data will appear once reviews are finalized.</p>
               </div>
             )}
           </div>
