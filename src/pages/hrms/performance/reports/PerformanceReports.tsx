@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { api } from '../../../../lib/api';
 export default function PerformanceReports() {
   const [activeReport, setActiveReport] = useState('department');
-
+  const [selectedCycle, setSelectedCycle] = useState('');
   const [departmentData, setDepartmentData] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
 
@@ -51,7 +51,11 @@ export default function PerformanceReports() {
           }));
         }
         setDepartmentData(deptData);
-        setCycles(Array.isArray(apiCycles) ? apiCycles : []);
+        const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : [];
+        setCycles(fetchedCycles);
+        if (fetchedCycles.length > 0) {
+          setSelectedCycle(fetchedCycles[0].id);
+        }
       } catch (e) {
         console.error('Failed to load reports', e);
       }
@@ -68,8 +72,40 @@ export default function PerformanceReports() {
   ];
 
   const handleExport = (format: string) => {
-    // Mock export functionality
-    console.log(`Exporting ${activeReport} report as ${format}...`);
+    if (departmentData.length === 0 || activeReport === 'promotions') {
+      alert(`No data available to export for ${activeReport.replace('-', ' ')} report.`);
+      return;
+    }
+
+    if (format === 'PDF') {
+      window.print();
+    } else if (format === 'Excel') {
+      let headers = '';
+      let rows = '';
+      
+      if (activeReport === 'department') {
+        headers = ['Department', 'Headcount', 'Avg. Rating', 'Top Performers', 'Needs Improvement'].join(',');
+        rows = departmentData.map(d => 
+          `"${d.department}",${d.totalEmployees},${d.avgRating.toFixed(1)},${d.topPerformers},${d.needsImprovement}`
+        ).join('\n');
+      } else if (activeReport === 'goals') {
+        headers = ['Department', 'Goals Completed', 'Goals Behind'].join(',');
+        rows = departmentData.map(d => 
+          `"${d.department}",${d.topPerformers},${d.needsImprovement}`
+        ).join('\n');
+      } else {
+        return;
+      }
+      
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${activeReport}-report.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -83,15 +119,27 @@ export default function PerformanceReports() {
         <div className="flex items-center gap-3">
           <div className="flex items-center mr-4 border-r border-gray-200 dark:border-gray-700 pr-4">
             <span className="text-sm text-gray-500 mr-2">Cycle:</span>
-            <select className="border-gray-300 dark:border-gray-700 rounded-sm bg-white dark:bg-[#1f2229] text-sm py-1.5 px-3 focus:outline-none focus:border-primary">
+            <select 
+              value={selectedCycle}
+              onChange={(e) => setSelectedCycle(e.target.value)}
+              className="border-gray-300 dark:border-gray-700 rounded-sm bg-white dark:bg-[#1f2229] text-sm py-1.5 px-3 focus:outline-none focus:border-primary"
+            >
               {cycles.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-sm p-1">
-            <button onClick={() => handleExport('PDF')} className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-sm transition-colors flex items-center">
+            <button 
+              onClick={() => handleExport('PDF')} 
+              disabled={departmentData.length === 0 || activeReport === 'promotions'}
+              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${departmentData.length > 0 && activeReport !== 'promotions' ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
+            >
               <FileText size={14} className="mr-1" /> PDF
             </button>
-            <button onClick={() => handleExport('Excel')} className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-sm transition-colors flex items-center">
+            <button 
+              onClick={() => handleExport('Excel')} 
+              disabled={departmentData.length === 0 || activeReport === 'promotions'}
+              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${departmentData.length > 0 && activeReport !== 'promotions' ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
+            >
               <Download size={14} className="mr-1" /> Excel
             </button>
           </div>

@@ -19,6 +19,8 @@ export default function PayrollListing() {
   const [selectedPayroll, setSelectedPayroll] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  const hasActiveFilters = Boolean(filters.searchTerm || filters.department || filters.period || filters.status || filters.payout);
+
   const employeeOptions = employees.map(e => ({ value: e.empId, label: e.name, subtitle: e.empId }));
   const departmentOptions = departments.map(d => ({ value: d.name, label: d.name }));
   const statusOptions = ['Draft', 'Processing', 'Processed'].map(s => ({ value: s, label: s }));
@@ -249,7 +251,14 @@ export default function PayrollListing() {
  <td colSpan={9} className="px-6 py-12 text-center">
  <div className="flex flex-col items-center justify-center text-gray-500">
  <p>No payroll records found.</p>
- <button onClick={clearFilters} className="text-primary hover:underline mt-1">Clear filters</button>
+ {hasActiveFilters ? (
+   <button onClick={clearFilters} className="text-primary hover:underline mt-2">Clear filters</button>
+ ) : (
+   <button onClick={() => openDrawer('create')} className="flex items-center gap-1 text-primary hover:underline mt-2">
+     <Plus size={16} />
+     Create New Record
+   </button>
+ )}
  </div>
  </td>
  </tr>

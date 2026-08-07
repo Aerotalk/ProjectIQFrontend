@@ -156,7 +156,12 @@ export default function ManagerReviewDrawer({ isOpen, onClose, onSave: _onSave, 
             <p className="text-sm text-gray-500">Review employee's self-assessment and provide your rating.</p>
           </div>
           <div className="p-4 space-y-6">
-            {employeeGoals.map((goal: Goal) => {
+            {employeeGoals.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <p>No active goals assigned for this cycle.</p>
+              </div>
+            ) : (
+              employeeGoals.map((goal: Goal) => {
               const srRating = selfReview?.goalAchievement?.find((g: any) => g.goalId === goal.id);
               const mgrRating = formData.goalAssessment?.find((g: any) => g.goalId === goal.id);
               
@@ -209,7 +214,88 @@ export default function ManagerReviewDrawer({ isOpen, onClose, onSave: _onSave, 
                   </div>
                 </div>
               );
-            })}
+            }))}
+          </div>
+        </div>
+
+        {/* Competencies Assessment */}
+        <div className="mb-8 border border-gray-200 dark:border-gray-700 rounded-sm overflow-hidden">
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Competency Assessment</h3>
+            <p className="text-sm text-gray-500">Evaluate employee's competencies for this role.</p>
+          </div>
+          <div className="p-4 space-y-6">
+            {_competencies.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <p>No competencies defined for this role.</p>
+              </div>
+            ) : (
+              _competencies.map((comp: Competency) => {
+              const srRating = selfReview?.competencyRatings?.find((c: any) => c.competencyId === comp.id);
+              const mgrRating = formData.competencyAssessment?.find((c: any) => c.competencyId === comp.id);
+              
+              return (
+                <div key={comp.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-900 dark:text-white text-md">{comp.name}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{comp.description}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    {/* Self Review Column */}
+                    <div className="bg-gray-50 dark:bg-[#1a1c23] p-4 rounded-sm border border-gray-100 dark:border-gray-800">
+                      <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee Self Review</span>
+                        <RatingStars value={srRating?.employeeRating || 0} disabled size={14} />
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+                        "{srRating?.employeeComment || 'No comment provided.'}"
+                      </p>
+                    </div>
+
+                    {/* Manager Assessment Column */}
+                    <div className="p-4 rounded-sm border border-blue-100 dark:border-blue-900/30 bg-blue-50/30 dark:bg-blue-900/10">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-semibold text-primary dark:text-secondary uppercase tracking-wider">Manager Assessment</span>
+                      </div>
+                      <div className="mb-4">
+                        <label className={formStyles.label}>Your Rating</label>
+                        <RatingStars 
+                          value={mgrRating?.managerRating || 0} 
+                          onChange={(v) => {
+                            if(isReadOnly) return;
+                            const newComps = [...formData.competencyAssessment];
+                            const index = newComps.findIndex(c => c.competencyId === comp.id);
+                            if(index >= 0) newComps[index].managerRating = v;
+                            else newComps.push({ competencyId: comp.id, managerRating: v, managerComment: '' });
+                            setFormData({ ...formData, competencyAssessment: newComps });
+                          }} 
+                          disabled={isReadOnly}
+                        />
+                      </div>
+                      <div>
+                        <label className={formStyles.label}>Your Comments</label>
+                        <textarea 
+                          className={formStyles.textarea(false, isReadOnly)}
+                          rows={2}
+                          value={mgrRating?.managerComment || ''}
+                          onChange={(e) => {
+                            if(isReadOnly) return;
+                            const newComps = [...formData.competencyAssessment];
+                            const index = newComps.findIndex(c => c.competencyId === comp.id);
+                            if(index >= 0) newComps[index].managerComment = e.target.value;
+                            else newComps.push({ competencyId: comp.id, managerRating: 0, managerComment: e.target.value });
+                            setFormData({ ...formData, competencyAssessment: newComps });
+                          }}
+                          disabled={isReadOnly}
+                          placeholder="Provide constructive feedback..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }))}
           </div>
         </div>
 

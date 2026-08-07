@@ -119,8 +119,13 @@ export default function SelfReviewDrawer({ isOpen, onClose, onSave: _onSave, ini
             <p className="text-sm text-gray-500">Rate your performance against your assigned goals.</p>
           </div>
           <div className="p-4 space-y-6">
-            {employeeGoals.map((goal: Goal) => {
-              const ratingData = formData.goalAchievement?.find(g => g.goalId === goal.id);
+            {employeeGoals.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <p>No active goals assigned for this cycle.</p>
+              </div>
+            ) : (
+              employeeGoals.map((goal: Goal) => {
+                const ratingData = formData.goalAchievement?.find(g => g.goalId === goal.id);
               return (
                 <div key={goal.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
                   <div className="flex justify-between items-start mb-4">
@@ -159,7 +164,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, onSave: _onSave, ini
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
 
@@ -170,8 +175,13 @@ export default function SelfReviewDrawer({ isOpen, onClose, onSave: _onSave, ini
             <p className="text-sm text-gray-500">Evaluate yourself against the organizational core competencies.</p>
           </div>
           <div className="p-4 space-y-6">
-            {competencies.map((comp: Competency) => {
-              const ratingData = formData.competencyRatings?.find(c => c.competencyId === comp.id);
+            {competencies.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                <p>No competencies defined for this role.</p>
+              </div>
+            ) : (
+              competencies.map((comp: Competency) => {
+                const ratingData = formData.competencyRatings?.find(c => c.competencyId === comp.id);
               return (
                 <div key={comp.id} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-0 last:pb-0">
                   <div className="mb-4">
@@ -201,7 +211,7 @@ export default function SelfReviewDrawer({ isOpen, onClose, onSave: _onSave, ini
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
 

@@ -54,9 +54,10 @@ export default function SelfReviewsList() {
         })));
       }
 
-      setGoals(Array.isArray(apiGoals) ? apiGoals : []);
-      setCompetencies(Array.isArray(apiCompetencies) ? apiCompetencies : []);
-      setRatingScales(Array.isArray(apiScales) ? apiScales : []);
+      const getArray = (res: any) => Array.isArray(res) ? res : (res?.data || res?.content || []);
+      setGoals(getArray(apiGoals));
+      setCompetencies(getArray(apiCompetencies));
+      setRatingScales(getArray(apiScales));
     } catch (e) {
       toast.error('Failed to load self-reviews');
       setReviews([]);
