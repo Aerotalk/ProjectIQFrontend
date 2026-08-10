@@ -13,62 +13,62 @@ interface Props {
 }
 
 export default function DocumentsTab({ readOnly }: Props) {
- const { register, control, setValue, formState: { errors } } = useFormContext();
- const { fields, append, remove } = useFieldArray({
-  control,
-  name: "documents"
- });
+  const { register, control, setValue, watch, formState: { errors } } = useFormContext();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "documents"
+  });
 
- // Track upload state per document index
- const [uploadingIdx, setUploadingIdx] = useState<Record<number, boolean>>({});
+  // Track upload state per document index
+  const [uploadingIdx, setUploadingIdx] = useState<Record<number, boolean>>({});
 
- const handleFileUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  setUploadingIdx(prev => ({ ...prev, [index]: true }));
-  try {
-   const formData = new FormData();
-   formData.append('file', file);
-   formData.append('module', 'employee_documents');
-   const res = await api.request('/admin/files/upload', { method: 'POST', data: formData });
-   if (res?.id) {
-    setValue(`documents.${index}.fileUrl`, res.id);
-   }
-  } catch (err) {
-   console.warn('Document upload failed', err);
-  } finally {
-   setUploadingIdx(prev => ({ ...prev, [index]: false }));
-  }
- };
+  const handleFileUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingIdx(prev => ({ ...prev, [index]: true }));
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('module', 'employee_documents');
+      const res = await api.request('/admin/files/upload', { method: 'POST', data: formData });
+      if (res?.id) {
+        setValue(`documents.${index}.fileUrl`, res.id);
+      }
+    } catch (err) {
+      console.warn('Document upload failed', err);
+    } finally {
+      setUploadingIdx(prev => ({ ...prev, [index]: false }));
+    }
+  };
 
- return (
- <div className="space-y-6 animate-in fade-in duration-300">
- <div className="flex items-center justify-between">
- <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
- Documents
- </h3>
- {!readOnly && (
- <button
- type="button"
- onClick={() => append({ documentCategory: '', documentName: '', fileUrl: null, expiryDate: '' })}
- className="flex items-center gap-1.5 text-sm font-medium text-primary dark:text-secondary hover:bg-primary/5 px-2 py-1 rounded-sm transition-colors"
- >
- <Plus size={16} /> Add Document
- </button>
- )}
- </div>
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Documents
+        </h3>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => append({ documentCategory: '', documentName: '', fileUrl: null, expiryDate: '' })}
+            className="flex items-center gap-1.5 text-sm font-medium text-primary dark:text-secondary hover:bg-primary/5 px-2 py-1 rounded-sm transition-colors"
+          >
+            <Plus size={16} /> Add Document
+          </button>
+        )}
+      </div>
 
- {fields.length === 0 && (
- <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 dark:bg-black/10 rounded-lg border border-dashed border-gray-200 dark:border-white/10">
- No documents added yet. Click 'Add Document' to include a record.
- </div>
- )}
+      {fields.length === 0 && (
+        <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 dark:bg-black/10 rounded-lg border border-dashed border-gray-200 dark:border-white/10">
+          No documents added yet. Click 'Add Document' to include a record.
+        </div>
+      )}
 
- <div className="space-y-4 pt-2 border-t border-gray-200 dark:border-white/10">
- {fields.map((item, index) => {
-  const docErrors = (errors.documents as any)?.[index];
-  const fileUuid = (item as any).fileUrl;
-  const isUploading = uploadingIdx[index];
+      <div className="space-y-4 pt-2 border-t border-gray-200 dark:border-white/10">
+        {fields.map((item, index) => {
+          const docErrors = (errors.documents as any)?.[index];
+          const fileUuid = watch(`documents.${index}.fileUrl`);
+          const isUploading = uploadingIdx[index];
   return (
   <div key={item.id} className="p-4 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 relative group">
   {!readOnly && (

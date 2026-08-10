@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function BasicInfoTab({ readOnly }: Props) {
-  const { register, control, formState: { errors } } = useFormContext();
+  const { register, control, setValue, watch, formState: { errors } } = useFormContext();
   const companyId = useWatch({ control, name: 'companyId' });
   const [companies, setCompanies] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -22,11 +22,15 @@ export default function BasicInfoTab({ readOnly }: Props) {
 
   // Load company list once on mount
   useEffect(() => {
-    api.get('/org/companies').then(setCompanies).catch(() => {});
-  }, []);
+    api.get('/org/companies').then((res: any) => {
+      setCompanies(res || []);
+      if (res && res.length === 1 && !companyId) {
+        setValue('companyId', String(res[0].id));
+      }
+    }).catch(() => {});
+  }, [companyId, setValue]);
 
   const [photoUploading, setPhotoUploading] = useState(false);
-  const { setValue, watch } = useFormContext();
   const profilePhotoValue = watch('profilePhoto');
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

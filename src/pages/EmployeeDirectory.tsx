@@ -127,6 +127,13 @@ export default function EmployeeDirectory() {
         const merged: Partial<EmployeeFormValues> = {
           // Core employee fields (already on emp)
           ...(emp as any),
+          dateOfJoining: (emp as any).dateOfJoining || (emp as any).joiningDate || '',
+          profilePhoto: (emp as any).profilePhoto || (emp as any).profilePicture || '',
+          companyId: (emp as any).companyId || (emp as any).company?.id || '',
+          departmentId: (emp as any).departmentId || (emp as any).department?.id || '',
+          designationId: (emp as any).designationId || (emp as any).designation?.id || '',
+          reportingManagerId: (emp as any).reportingManagerId || (emp as any).reportingManager?.id || '',
+          hrManagerId: (emp as any).hrManagerId || (emp as any).hrManager?.id || '',
           // workEmail: prefer the column on Employee, fall back to linked User email
           workEmail: emp.workEmail || emp.user?.email || '',
           // phone: prefer the column on Employee, fall back to linked User mobile
@@ -283,15 +290,34 @@ export default function EmployeeDirectory() {
 
         // Step 2 — Create core employee record
         const empPayload = {
+          ...data,
           userId: userRes.id,
-          ...data
+          companyId: data.companyId || null,
+          departmentId: data.departmentId || null,
+          designationId: data.designationId || null,
+          reportingManagerId: data.reportingManagerId || null,
+          hrManagerId: data.hrManagerId || null,
+          joiningDate: data.dateOfJoining || null,
+          dateOfBirth: data.dateOfBirth || null,
+          profilePicture: data.profilePhoto || null,
         };
         const empRes = await api.post('/admin/employees', empPayload);
         employeeId = empRes.id;
         toast.success('Employee created successfully');
       } else if (drawerMode === 'edit' && selectedEmployee) {
         // Update core employee record
-        await api.put(`/admin/employees/${selectedEmployee.id}`, data);
+        const updatePayload = {
+          ...data,
+          companyId: data.companyId || null,
+          departmentId: data.departmentId || null,
+          designationId: data.designationId || null,
+          reportingManagerId: data.reportingManagerId || null,
+          hrManagerId: data.hrManagerId || null,
+          joiningDate: data.dateOfJoining || null,
+          dateOfBirth: data.dateOfBirth || null,
+          profilePicture: data.profilePhoto || null,
+        };
+        await api.put(`/admin/employees/${selectedEmployee.id}`, updatePayload);
         employeeId = selectedEmployee.id;
         toast.success('Employee updated successfully');
       } else {
