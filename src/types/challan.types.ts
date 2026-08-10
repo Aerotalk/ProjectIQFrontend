@@ -17,12 +17,10 @@ export interface DeliveryChallan {
   challanNumber: string;      // As printed on the physical document
   projectId: string;          // Selected project
   projectName?: string;       // Hydrated for display
-  vendorId: string;           // Selected vendor (filtered by project)
-  vendorName?: string;        // Hydrated for display
+  clientId: string;           // Selected client (filtered by project)
+  clientName?: string;        // Hydrated for display
   challanDate: string;        // ISO date string
   description: string;        // What was delivered / milestone completed
-  linkedVendorPoId?: string;  // Optional trace to Vendor PO
-  linkedVendorPoNumber?: string; // Hydrated for display
   attachmentName?: string;    // Optional uploaded file name
   ewayBillNo?: string;        // Optional E-way bill number
   templateName?: string;      // Optional PDF template selection

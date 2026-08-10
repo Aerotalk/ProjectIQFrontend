@@ -2,18 +2,16 @@ import CustomDatePicker from '@/components/ui/CustomDatePicker';
 "use no memo";
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useFormContext, useWatch, Controller, useFieldArray } from 'react-hook-form';
-import { Plus } from 'lucide-react'; // Wait, let me just add the imports without replacing the rest of the file
+import { Plus } from 'lucide-react';
 import { Loader2, Paperclip, X as XIcon } from 'lucide-react';
 import { AutoNumberInput } from '@/components/shared/AutoNumberSettings';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 import { cn } from '@/lib/utils';
-import { VendorService } from '@/services/vendor.service';
-import { POService } from '@/services/po.service';
+import { ClientService } from '@/services/client.service';
 import { useProjects } from '@/hooks/useProjects';
 import CustomSelect from '@/components/ui/CustomSelect';
-import type { Vendor } from '@/types/vendor.types';
-import type { PurchaseOrder } from '@/types/po.types';
+import type { Client } from '@/types/client.types';
 import { ProductService } from '@/services/product.service';
 import type { Product } from '@/types/product.types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,8 +34,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     name: 'lineItems'
   });
 
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
@@ -47,8 +44,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
 
   // Watch for dependent fields
   const selectedProjectId = useWatch({ control, name: 'projectId' });
-  const selectedVendorId = useWatch({ control, name: 'vendorId' });
-  const selectedPoId = useWatch({ control, name: 'linkedVendorPoId' });
+  const selectedClientId = useWatch({ control, name: 'clientId' });
   const attachmentName = useWatch({ control, name: 'attachmentName' });
 
   const { selectedCompanyId: companyId } = useAuth();
@@ -56,12 +52,10 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
   useEffect(() => {
     if (!companyId) return;
     Promise.all([
-      VendorService.getVendors(companyId),
-      POService.getAll(companyId),
+      ClientService.getClients(companyId),
       ProductService.getProducts(companyId)
-    ]).then(([vendorData, poData, productData]) => {
-      setVendors(vendorData);
-      setPurchaseOrders(poData);
+    ]).then(([clientData, productData]) => {
+      setClients(clientData);
       setProducts(productData);
       setIsLoadingData(false);
     });
@@ -75,58 +69,110 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     });
   }, [companyId]);
 
-  const filteredVendors = useMemo(() => {
+  const filteredClients = useMemo(() => {
     if (!selectedProjectId) return [];
     
     const proj = projects.find(p => p.id === selectedProjectId);
-    return proj?.assignedVendors?.length 
-      ? vendors.filter(v => proj.assignedVendors!.includes(v.id))
-      : [];
-  }, [selectedProjectId, vendors, projects]);
+    if (!proj) return [];
 
-  // Filter POs based on selected vendor
-  const filteredPOs = purchaseOrders.filter(po => {
-    if (selectedVendorId && po.vendorId !== selectedVendorId) return false;
-    return true;
-  });
+    if (proj.client) {
+      const matched = clients.filter(c => c.id === proj.client || c.displayName === proj.client || c.companyName === proj.client);
+      if (matched.length > 0) return matched;
+    }
+    return clients;
+  }, [selectedProjectId, clients, projects]);
 
   // Sync display names when selection changes
   useEffect(() => {
     const project = projects.find(p => p.id === selectedProjectId);
-    if (project) setValue('projectName', project.projectName, { shouldValidate: false });
+    if (project) {
+      setValue('projectName', project.projectName, { shouldValidate: false });
+      if (project.client && clients.length > 0) {
+        const matchedClient = clients.find(c => c.id === project.client || c.displayName === project.client || c.companyName === project.client);
+        if (matchedClient) {
+          setValue('clientId', matchedClient.id, { shouldValidate: true });
+          setValue('clientName', matchedClient.displayName || matchedClient.companyName || '', { shouldValidate: false });
+        }
+      }
+    }
     
-    // If project changes, clear dependent fields if they don't match the new filters
+    // If project changes, clear client if it doesn't match the new project
     if (selectedProjectId) {
-      if (selectedVendorId && !filteredVendors.find(v => v.id === selectedVendorId)) {
-        setValue('vendorId', '');
-        setValue('vendorName', '');
-      }
-      if (selectedPoId && !filteredPOs.find(po => po.id === selectedPoId)) {
-        setValue('linkedVendorPoId', '');
-        setValue('linkedVendorPoNumber', '');
+      if (selectedClientId && !filteredClients.find(c => c.id === selectedClientId)) {
+        setValue('clientId', '');
+        setValue('clientName', '');
       }
     }
-  }, [selectedProjectId, filteredVendors, filteredPOs, setValue, selectedVendorId, selectedPoId]);
+  }, [selectedProjectId, filteredClients, clients, setValue, selectedClientId, projects]);
 
-  useEffect(() => {
-    const vendor = vendors.find(v => v.id === selectedVendorId);
-    if (vendor) setValue('vendorName', vendor.displayName, { shouldValidate: false });
-    
-    // If vendor changes, clear linked PO if it doesn't match
-    if (selectedVendorId) {
-      if (selectedPoId && !filteredPOs.find(po => po.id === selectedPoId)) {
-        setValue('linkedVendorPoId', '');
-        setValue('linkedVendorPoNumber', '');
-      }
+  const getClientDeliveryLocation = (client?: Client): string => {
+    if (!client) return '';
+    const parts = [];
+    if (client.shippingAddressLine1 || client.shippingCity) {
+      if (client.shippingAddressLine1) parts.push(client.shippingAddressLine1);
+      if (client.shippingAddressLine2) parts.push(client.shippingAddressLine2);
+      if (client.shippingCity) parts.push(client.shippingCity);
+      if (client.shippingState) parts.push(client.shippingState);
+      if (client.shippingPinCode) parts.push(client.shippingPinCode);
+      if (client.shippingCountry) parts.push(client.shippingCountry);
+    } else if (client.billingAddressLine1 || client.billingCity) {
+      if (client.billingAddressLine1) parts.push(client.billingAddressLine1);
+      if (client.billingAddressLine2) parts.push(client.billingAddressLine2);
+      if (client.billingCity) parts.push(client.billingCity);
+      if (client.billingState) parts.push(client.billingState);
+      if (client.billingPinCode) parts.push(client.billingPinCode);
+      if (client.billingCountry) parts.push(client.billingCountry);
     }
-  }, [selectedVendorId, vendors, filteredPOs, setValue, selectedPoId]);
+    return parts.filter(Boolean).join(', ');
+  };
+
+  const getClientPlaceOfSupply = (client?: Client): string => {
+    if (!client) return '';
+    return client.shippingState || client.billingState || client.placeOfSupply || '';
+  };
+
+  const getFormattedClientAddress = (client: Client | undefined, isShipping: boolean): string => {
+    if (!client) return '';
+    if (isShipping && !client.sameAsBillingAddress && client.shippingAddressLine1) {
+      return [
+        client.shippingAttention || client.displayName || client.companyName,
+        client.shippingAddressLine1,
+        client.shippingAddressLine2,
+        [client.shippingCity, client.shippingState, client.shippingPinCode].filter(Boolean).join(', '),
+        client.shippingCountry
+      ].filter(Boolean).join('\n');
+    }
+    return [
+      client.billingAttention || client.displayName || client.companyName,
+      client.billingAddressLine1,
+      client.billingAddressLine2,
+      [client.billingCity, client.billingState, client.billingPinCode].filter(Boolean).join(', '),
+      client.billingCountry
+    ].filter(Boolean).join('\n');
+  };
 
   useEffect(() => {
-    const po = purchaseOrders.find(p => p.id === selectedPoId);
-    if (po) setValue('linkedVendorPoNumber', po.poNumber, { shouldValidate: false });
-  }, [selectedPoId, purchaseOrders, setValue]);
+    const client = clients.find(c => c.id === selectedClientId);
+    if (client) {
+      setValue('clientName', client.displayName || client.companyName || '', { shouldValidate: false });
 
+      const deliveryLoc = getClientDeliveryLocation(client);
+      const placeOfSupply = getClientPlaceOfSupply(client);
+      const contactName = client.primaryContactPerson || client.displayName || '';
+      const contactEmail = client.email || '';
+      const contactMobile = client.phone || '';
+      const billingAddr = getFormattedClientAddress(client, false);
+      const shippingAddr = getFormattedClientAddress(client, true);
 
+      if (deliveryLoc) setValue('deliveryLocation', deliveryLoc, { shouldDirty: true });
+      if (placeOfSupply) setValue('placeOfSupply', placeOfSupply, { shouldDirty: true });
+      if (contactName) setValue('contactName', contactName, { shouldDirty: true });
+      if (contactEmail) setValue('contactEmail', contactEmail, { shouldDirty: true });
+      if (contactMobile) setValue('contactMobile', contactMobile, { shouldDirty: true });
+      if (billingAddr) setValue('billingAddress', billingAddr, { shouldDirty: true });
+      if (shippingAddr) setValue('shippingAddress', shippingAddr, { shouldDirty: true });
+    }
+  }, [selectedClientId, clients, setValue]);
 
   // File selection handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,19 +188,13 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-
-
   const PROJECT_OPTIONS = useMemo(() => {
     return projects.map(p => ({ label: `${p.projectCode} – ${p.projectName}`, value: p.id }));
   }, [projects]);
 
-  const VENDOR_OPTIONS = useMemo(() => {
-    return filteredVendors.map(v => ({ label: v.displayName, value: v.id }));
-  }, [filteredVendors]);
-
-  const PO_OPTIONS = useMemo(() => {
-    return filteredPOs.map(po => ({ label: po.poNumber, value: po.id }));
-  }, [filteredPOs]);
+  const CLIENT_OPTIONS = useMemo(() => {
+    return filteredClients.map(c => ({ label: c.displayName || c.companyName || c.id, value: c.id }));
+  }, [filteredClients]);
 
   return (
     <div className="space-y-6">
@@ -243,21 +283,21 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
             )}
           </div>
 
-          {/* Vendor */}
+          {/* Client */}
           <div>
             <label className={formStyles.label}>
-              Vendor <span className="text-red-500 normal-case font-normal">*</span>
+              Client <span className="text-red-500 normal-case font-normal">*</span>
             </label>
             <div className="relative">
               <div className={readOnly || isLoadingData || !selectedProjectId ? 'opacity-80 pointer-events-none' : ''}>
                 <Controller
-                  name="vendorId"
+                  name="clientId"
                   control={control}
                   render={({ field }) => (
                     <CustomSelect
                       value={field.value || ''}
                       onChange={field.onChange}
-                      options={VENDOR_OPTIONS}
+                      options={CLIENT_OPTIONS}
                     />
                   )}
                 />
@@ -266,32 +306,9 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                 <Loader2 className="absolute right-3 top-2.5 w-4 h-4 animate-spin text-gray-400" />
               )}
             </div>
-            {errors.vendorId && (
-              <p className="text-red-500 text-xs mt-1">{errors.vendorId.message as string}</p>
+            {errors.clientId && (
+              <p className="text-red-500 text-xs mt-1">{errors.clientId.message as string}</p>
             )}
-          </div>
-          
-          {/* Linked Vendor PO */}
-          <div>
-            <label className={formStyles.label}>
-              Linked Vendor PO
-              <span className="ml-1 text-[10px] text-gray-400 dark:text-gray-500 normal-case font-normal tracking-normal">(optional)</span>
-            </label>
-            <div className="relative">
-              <div className={readOnly || isLoadingData || !selectedProjectId || !selectedVendorId ? 'opacity-80 pointer-events-none' : ''}>
-                <Controller
-                  name="linkedVendorPoId"
-                  control={control}
-                  render={({ field }) => (
-                    <CustomSelect
-                      value={field.value || ''}
-                      onChange={field.onChange}
-                      options={PO_OPTIONS}
-                    />
-                  )}
-                />
-              </div>
-            </div>
           </div>
 
           {/* E-Way Bill Number */}

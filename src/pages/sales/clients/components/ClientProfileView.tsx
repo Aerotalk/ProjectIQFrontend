@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { X, Edit, User, Phone, Mail, MapPin, Building2, FileText, MessageSquare, Activity, AlertCircle, FileStack, Settings } from 'lucide-react';
+import { X, Edit, User, Phone, Mail, MapPin, Building2, FileText, MessageSquare, Activity, AlertCircle, FileStack, Settings, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Client } from '../../../../types/client.types';
 import { QuotationService } from '../../../../services/quotation.service';
+import { ChallanService } from '../../../../services/challan.service';
 import type { Quotation } from '../../../../types/quotation.types';
+import type { DeliveryChallan } from '../../../../types/challan.types';
 import { useAuth } from '../../../../contexts/AuthContext';
 
 interface Props {
@@ -12,9 +15,11 @@ interface Props {
 }
 
 export default function ClientProfileView({ client, onClose, onEdit }: Props) {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, selectedCompanyId } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'comments'>('overview');
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [challans, setChallans] = useState<DeliveryChallan[]>([]);
   const [comments, setComments] = useState<string[]>([]);
   const [newComment, setNewComment] = useState('');
   
@@ -24,18 +29,24 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
   ];
 
   useEffect(() => {
-    // Fetch quotations for this client
+    // Fetch quotations and delivery challans for this client
     const loadData = async () => {
       try {
         const allQuots = await QuotationService.getQuotations(client.id);
         const clientQuots = allQuots.filter((q: any) => q.clientId === client.id || q.clientName === client.companyName);
         setQuotations(clientQuots);
+
+        if (selectedCompanyId) {
+          const allChallans = await ChallanService.getAll(selectedCompanyId);
+          const clientChals = allChallans.filter(c => c.clientId === client.id || c.clientName === client.displayName || c.clientName === client.companyName);
+          setChallans(clientChals);
+        }
       } catch (err) {
         console.error(err);
       }
     };
     loadData();
-  }, [client.id, client.companyName]);
+  }, [client.id, client.companyName, client.displayName, selectedCompanyId]);
 
   // Load comments
   useEffect(() => {
@@ -405,6 +416,72 @@ export default function ClientProfileView({ client, onClose, onEdit }: Props) {
                           <td className="px-5 py-3 text-center">
                             <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                               {q.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Delivery Challans Table */}
+            <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#121212]">
+                <div className="flex items-center gap-2">
+                  <Activity className="text-gray-400" size={18} />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Delivery Challans</h4>
+                </div>
+                <span className="text-xs font-medium px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full">
+                  {challans.length} records
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="bg-gray-50 dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800">
+                    <tr>
+                      <th className="px-5 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Challan No</th>
+                      <th className="px-5 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                      <th className="px-5 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
+                      <th className="px-5 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-Way Bill</th>
+                      <th className="px-5 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {challans.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
+                          No delivery challans logged for this client
+                        </td>
+                      </tr>
+                    ) : (
+                      challans.map(c => (
+                        <tr
+                          key={c.id}
+                          onClick={() => navigate(`/companydashboard/finance/challans/${c.id || c.challanNumber}`)}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="px-5 py-3 font-medium text-primary dark:text-secondary group-hover:underline flex items-center gap-1.5">
+                            {c.challanNumber} <ExternalLink size={13} className="text-gray-400" />
+                          </td>
+                          <td className="px-5 py-3 text-gray-700 dark:text-gray-300">
+                            {new Date(c.challanDate).toLocaleDateString('en-GB')}
+                          </td>
+                          <td className="px-5 py-3 text-gray-700 dark:text-gray-300">
+                            {c.projectName || '—'}
+                          </td>
+                          <td className="px-5 py-3 text-gray-600 dark:text-gray-400 font-mono text-xs">
+                            {c.ewayBillNo || '—'}
+                          </td>
+                          <td className="px-5 py-3 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${
+                              c.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400' :
+                              c.status === 'Dispatched' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400' :
+                              c.status === 'Issued' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400' :
+                              'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300'
+                            }`}>
+                              {c.status || 'Draft'}
                             </span>
                           </td>
                         </tr>

@@ -9,12 +9,12 @@ import toast from 'react-hot-toast';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChallanService } from '../../services/challan.service';
-import { VendorService } from '../../services/vendor.service';
+import { ClientService } from '../../services/client.service';
 import { ProjectService } from '../../services/project.service';
 import { ProductService } from '../../services/product.service';
 import { api } from '../../lib/api';
 import type { DeliveryChallan } from '../../types/challan.types';
-import type { Vendor } from '../../types/vendor.types';
+import type { Client } from '../../types/client.types';
 import type { Project } from '../../types/project.types';
 import type { Product } from '../../types/product.types';
 import ChallanPreviewPanel from './challan/components/ChallanPreviewPanel';
@@ -26,7 +26,7 @@ export default function ChallanDetails() {
   const { selectedCompanyId: companyId } = useAuth();
   
   const [isApiLoading, setIsApiLoading] = useState(false);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   
@@ -52,8 +52,8 @@ export default function ChallanDetails() {
   const [challan, setChallan] = useState<DeliveryChallan>({
     id: '',
     challanNumber: isNew ? 'Unassigned' : '',
-    vendorId: '',
-    vendorName: '',
+    clientId: '',
+    clientName: '',
     projectId: '',
     projectName: '',
     challanDate: new Date().toISOString().split('T')[0],
@@ -66,7 +66,7 @@ export default function ChallanDetails() {
   useEffect(() => {
     if (companyId) {
       api.get(`/admin/companies/${companyId}`).then(res => setCompany(res)).catch(console.error);
-      VendorService.getVendors(companyId).then(setVendors).catch(console.error);
+      ClientService.getClients(companyId).then(setClients).catch(console.error);
       ProjectService.getAll(companyId).then((data: any) => {
         const pData = Array.isArray(data) ? data : (data?.data || data?.content || []);
         setProjects(pData);
@@ -98,6 +98,94 @@ export default function ChallanDetails() {
       setIsApiLoading(false);
     }
   };
+
+  const getClientDeliveryLocation = (client?: Client): string => {
+    if (!client) return '';
+    const parts = [];
+    if (client.shippingAddressLine1 || client.shippingCity) {
+      if (client.shippingAddressLine1) parts.push(client.shippingAddressLine1);
+      if (client.shippingAddressLine2) parts.push(client.shippingAddressLine2);
+      if (client.shippingCity) parts.push(client.shippingCity);
+      if (client.shippingState) parts.push(client.shippingState);
+      if (client.shippingPinCode) parts.push(client.shippingPinCode);
+      if (client.shippingCountry) parts.push(client.shippingCountry);
+    } else if (client.billingAddressLine1 || client.billingCity) {
+      if (client.billingAddressLine1) parts.push(client.billingAddressLine1);
+      if (client.billingAddressLine2) parts.push(client.billingAddressLine2);
+      if (client.billingCity) parts.push(client.billingCity);
+      if (client.billingState) parts.push(client.billingState);
+      if (client.billingPinCode) parts.push(client.billingPinCode);
+      if (client.billingCountry) parts.push(client.billingCountry);
+    }
+    return parts.filter(Boolean).join(', ');
+  };
+
+  const getClientPlaceOfSupply = (client?: Client): string => {
+    if (!client) return '';
+    return client.shippingState || client.billingState || client.placeOfSupply || '';
+  };
+
+  const getFormattedClientAddress = (client: Client | undefined, isShipping: boolean): string => {
+    if (!client) return '';
+    if (isShipping && !client.sameAsBillingAddress && client.shippingAddressLine1) {
+      return [
+        client.shippingAttention || client.displayName || client.companyName,
+        client.shippingAddressLine1,
+        client.shippingAddressLine2,
+        [client.shippingCity, client.shippingState, client.shippingPinCode].filter(Boolean).join(', '),
+        client.shippingCountry
+      ].filter(Boolean).join('\n');
+    }
+    return [
+      client.billingAttention || client.displayName || client.companyName,
+      client.billingAddressLine1,
+      client.billingAddressLine2,
+      [client.billingCity, client.billingState, client.billingPinCode].filter(Boolean).join(', '),
+      client.billingCountry
+    ].filter(Boolean).join('\n');
+  };
+
+  // Auto-populate deliveryLocation and placeOfSupply from client if not set
+  useEffect(() => {
+    if ((challan.clientId || challan.clientName) && clients.length > 0) {
+      const client = clients.find(c => c.id === challan.clientId || c.displayName === challan.clientName || c.companyName === challan.clientName);
+      if (client) {
+        setChallan(prev => {
+          let changed = false;
+          const next = { ...prev };
+          if (!next.deliveryLocation) {
+            const dl = getClientDeliveryLocation(client);
+            if (dl) { next.deliveryLocation = dl; changed = true; }
+          }
+          if (!next.placeOfSupply) {
+            const pos = getClientPlaceOfSupply(client);
+            if (pos) { next.placeOfSupply = pos; changed = true; }
+          }
+          if (!next.contactName) {
+            const cn = client.primaryContactPerson || client.displayName || '';
+            if (cn) { next.contactName = cn; changed = true; }
+          }
+          if (!next.contactEmail && client.email) {
+            next.contactEmail = client.email;
+            changed = true;
+          }
+          if (!next.contactMobile && client.phone) {
+            next.contactMobile = client.phone;
+            changed = true;
+          }
+          if (!next.billingAddress) {
+            const ba = getFormattedClientAddress(client, false);
+            if (ba) { next.billingAddress = ba; changed = true; }
+          }
+          if (!next.shippingAddress) {
+            const sa = getFormattedClientAddress(client, true);
+            if (sa) { next.shippingAddress = sa; changed = true; }
+          }
+          return changed ? next : prev;
+        });
+      }
+    }
+  }, [clients, challan.clientId, challan.clientName]);
 
   useEffect(() => {
     if (!isNew && id && companyId) {
@@ -182,7 +270,7 @@ export default function ChallanDetails() {
         }
       }
       
-      const vendor = vendors.find(v => v.id === currentChallan.vendorId);
+      const client = clients.find(c => c.id === currentChallan.clientId);
       
       const payload = {
         primary_color_hex: '#792359',
@@ -195,26 +283,26 @@ export default function ChallanDetails() {
         company_gstin: company?.gstNumber || '',
         company_pan: company?.panNumber || '',
         
-        client_name: vendor?.displayName || vendor?.companyName || currentChallan.vendorName || '',
-        client_address_line1: vendor?.billingAddressLine1 || vendor?.shippingAddressLine1 || '',
-        client_address_line2: vendor?.billingCity || vendor?.shippingCity || '',
-        client_gstin: vendor?.gstin || (vendor as any)?.gstNumber || (vendor as any)?.gst || (currentChallan as any).vendorGst || '',
-        client_state: vendor?.billingState || vendor?.shippingState || '',
+        client_name: client?.displayName || client?.companyName || currentChallan.clientName || '',
+        client_address_line1: client?.billingAddressLine1 || client?.shippingAddressLine1 || '',
+        client_address_line2: client?.billingCity || client?.shippingCity || '',
+        client_gstin: client?.gstin || (client as any)?.gstNumber || (client as any)?.gst || '',
+        client_state: client?.billingState || client?.shippingState || '',
         
-        has_shipping: !!vendor?.shippingAddressLine1,
-        ship_to_name: vendor?.displayName || vendor?.companyName || currentChallan.vendorName || '',
-        ship_to_address_line1: vendor?.shippingAddressLine1 || '',
-        ship_to_address_line2: vendor?.shippingCity || '',
-        ship_to_state: vendor?.shippingState || '',
+        has_shipping: !!client?.shippingAddressLine1,
+        ship_to_name: client?.shippingAttention || client?.displayName || client?.companyName || currentChallan.clientName || '',
+        ship_to_address_line1: client?.shippingAddressLine1 || '',
+        ship_to_address_line2: client?.shippingCity || '',
+        ship_to_state: client?.shippingState || '',
         
         transport_mode: currentChallan.transportMode || '',
         delivery_location: currentChallan.deliveryLocation || '',
-        po_number: currentChallan.poNumber || currentChallan.linkedVendorPoNumber || '',
+        po_number: currentChallan.poNumber || '',
         po_date: currentChallan.poDate || '',
         
         challan_number: challan.challanNumber || '',
         challan_date: challan.challanDate || new Date().toLocaleDateString('en-GB'),
-        place_of_supply: challan.placeOfSupply || vendor?.billingState || '',
+        place_of_supply: challan.placeOfSupply || client?.billingState || '',
         
         contact_name: challan.contactName || '',
         contact_email: challan.contactEmail || company?.email || '',
@@ -270,7 +358,7 @@ export default function ChallanDetails() {
               <button
                 disabled={isApiLoading}
                 onClick={async () => {
-                  if (!challan.vendorId || !challan.projectId) {
+                  if (!challan.clientId || !challan.projectId) {
                     toast.error('Please fill required fields');
                     return;
                   }
@@ -406,7 +494,7 @@ export default function ChallanDetails() {
                 <button
                   disabled={isApiLoading}
                   onClick={async () => {
-                    if (!challan.vendorId || !challan.projectId) {
+                    if (!challan.clientId || !challan.projectId) {
                       toast.error('Please fill required fields');
                       return;
                     }
@@ -481,27 +569,45 @@ export default function ChallanDetails() {
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Challan Overview</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vendor</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Client</p>
                   {isEditing ? (
                     <CustomSelect
-                      value={challan.vendorId}
+                      value={challan.clientId}
                       onChange={(val) => {
-                        const vendor = vendors.find(v => v.id === val);
-                        setChallan({ ...challan, vendorId: val, vendorName: vendor?.displayName || '' });
+                        const client = clients.find(c => c.id === val);
+                        const dl = getClientDeliveryLocation(client);
+                        const pos = getClientPlaceOfSupply(client);
+                        const cn = client?.primaryContactPerson || client?.displayName || '';
+                        const ce = client?.email || '';
+                        const cm = client?.phone || '';
+                        const ba = getFormattedClientAddress(client, false);
+                        const sa = getFormattedClientAddress(client, true);
+                        setChallan({
+                          ...challan,
+                          clientId: val,
+                          clientName: client?.displayName || client?.companyName || '',
+                          deliveryLocation: dl || challan.deliveryLocation || '',
+                          placeOfSupply: pos || challan.placeOfSupply || '',
+                          contactName: cn || challan.contactName || '',
+                          contactEmail: ce || challan.contactEmail || '',
+                          contactMobile: cm || challan.contactMobile || '',
+                          billingAddress: ba || challan.billingAddress || '',
+                          shippingAddress: sa || challan.shippingAddress || '',
+                        });
                       }}
                       options={[
-                        { label: 'Select Vendor', value: '' },
+                        { label: 'Select Client', value: '' },
                         ...(challan.projectId
-                          ? vendors.filter(v => {
+                          ? clients.filter(c => {
                               const proj = projects.find(p => p.id === challan.projectId);
-                              return proj?.assignedVendors?.includes(v.id);
+                              return proj?.client ? (c.id === proj.client || c.displayName === proj.client || c.companyName === proj.client) : true;
                             })
-                          : []
-                        ).map(v => ({ label: v.displayName || v.companyName || '', value: v.id }))
+                          : clients
+                        ).map(c => ({ label: c.displayName || c.companyName || '', value: c.id }))
                       ]}
                     />
                   ) : (
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.vendorName}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.clientName}</p>
                   )}
                 </div>
                 <div>
@@ -511,7 +617,44 @@ export default function ChallanDetails() {
                       value={challan.projectId}
                       onChange={(val) => {
                         const proj = projects.find(p => p.id === val);
-                        setChallan({ ...challan, projectId: val, projectName: proj?.projectName || '' });
+                        let matchedClientId = challan.clientId;
+                        let matchedClientName = challan.clientName;
+                        let matchedDeliveryLoc = challan.deliveryLocation;
+                        let matchedPlaceOfSupply = challan.placeOfSupply;
+                        let matchedContactName = challan.contactName;
+                        let matchedContactEmail = challan.contactEmail;
+                        let matchedContactMobile = challan.contactMobile;
+                        let matchedBilling = challan.billingAddress;
+                        let matchedShipping = challan.shippingAddress;
+
+                        if (proj?.client) {
+                          const matched = clients.find(c => c.id === proj.client || c.displayName === proj.client || c.companyName === proj.client);
+                          if (matched) {
+                            matchedClientId = matched.id;
+                            matchedClientName = matched.displayName || matched.companyName || '';
+                            matchedDeliveryLoc = getClientDeliveryLocation(matched) || matchedDeliveryLoc;
+                            matchedPlaceOfSupply = getClientPlaceOfSupply(matched) || matchedPlaceOfSupply;
+                            matchedContactName = matched.primaryContactPerson || matched.displayName || matchedContactName;
+                            matchedContactEmail = matched.email || matchedContactEmail;
+                            matchedContactMobile = matched.phone || matchedContactMobile;
+                            matchedBilling = getFormattedClientAddress(matched, false) || matchedBilling;
+                            matchedShipping = getFormattedClientAddress(matched, true) || matchedShipping;
+                          }
+                        }
+                        setChallan({
+                          ...challan,
+                          projectId: val,
+                          projectName: proj?.projectName || '',
+                          clientId: matchedClientId,
+                          clientName: matchedClientName,
+                          deliveryLocation: matchedDeliveryLoc || '',
+                          placeOfSupply: matchedPlaceOfSupply || '',
+                          contactName: matchedContactName || '',
+                          contactEmail: matchedContactEmail || '',
+                          contactMobile: matchedContactMobile || '',
+                          billingAddress: matchedBilling || '',
+                          shippingAddress: matchedShipping || '',
+                        });
                       }}
                       options={[{label: 'Select Project', value: ''}, ...projects.map(p => ({ label: p.projectName, value: p.id }))]}
                     />
@@ -540,7 +683,9 @@ export default function ChallanDetails() {
                   {isEditing ? (
                     <input type="text" value={challan.deliveryLocation || ''} onChange={e => setChallan({...challan, deliveryLocation: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.deliveryLocation}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {challan.deliveryLocation || getClientDeliveryLocation(clients.find(c => c.id === challan.clientId || c.displayName === challan.clientName || c.companyName === challan.clientName)) || '—'}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -548,7 +693,9 @@ export default function ChallanDetails() {
                   {isEditing ? (
                     <input type="text" value={challan.placeOfSupply || ''} onChange={e => setChallan({...challan, placeOfSupply: e.target.value})} className="w-full px-2 py-1 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-sm" />
                   ) : (
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{challan.placeOfSupply}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {challan.placeOfSupply || getClientPlaceOfSupply(clients.find(c => c.id === challan.clientId || c.displayName === challan.clientName || c.companyName === challan.clientName)) || '—'}
+                    </p>
                   )}
                 </div>
                 <div>

@@ -6,7 +6,6 @@ import {
 import type { Vendor } from '../../../../types/vendor.types';
 import { VendorService } from '../../../../services/vendor.service';
 import { POService } from '../../../../services/po.service';
-import { ChallanService } from '../../../../services/challan.service';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,7 +23,6 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
 
     // Transaction states
     const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
-    const [challans, setChallans] = useState<any[]>([]);
 
     // Local comments state
     const [comments, setComments] = useState<string[]>([]);
@@ -39,19 +37,13 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
         }
     }, [initialVendor.id]);
 
-    // Fetch POs & Challans for the vendor
+    // Fetch POs for the vendor
     useEffect(() => {
         if (!selectedCompanyId || !vendor.id) return;
 
-        Promise.all([
-            POService.getAll(selectedCompanyId).catch(() => []),
-            ChallanService.getAll(selectedCompanyId).catch(() => [])
-        ]).then(([pos, chals]) => {
+        POService.getAll(selectedCompanyId).then(pos => {
             const filteredPOs = pos.filter(po => po.vendorId === vendor.id || po.vendorName === vendor.displayName);
-            const filteredChallans = chals.filter(c => c.vendorId === vendor.id || c.vendorName === vendor.displayName);
-
             setPurchaseOrders(filteredPOs);
-            setChallans(filteredChallans);
         }).catch(console.error);
     }, [selectedCompanyId, vendor.id, vendor.displayName]);
 
@@ -77,7 +69,6 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
 
     // Finance calculations
     const totalPOsAmount = purchaseOrders.reduce((sum, po) => sum + (po.grandTotal || 0), 0);
-    const totalChallansAmount = challans.reduce((sum, c) => sum + (c.grandTotal || 0), 0);
 
     // Outstanding payables (POs that are Ordered or Partially Received)
     const outstandingPayables = purchaseOrders
@@ -295,13 +286,10 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                             {/* Purchase Actions Callout */}
                             <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Create Purchase Document</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Quickly generate a new PO or Challan for this vendor.</p>
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Create Purchase Order</h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Quickly generate a new Purchase Order for this vendor.</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button onClick={() => navigate('/companydashboard/finance/challans')} className="whitespace-nowrap h-9 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
-                                        New Challan
-                                    </button>
                                     <button onClick={() => navigate('/companydashboard/finance/pos')} className="whitespace-nowrap h-9 px-4 bg-primary hover:bg-primary-dark text-white rounded-md text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-[#1a1a1a]">
                                         <Plus size={16} /> New PO
                                     </button>
@@ -468,7 +456,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                         Total Purchase Orders: <span className="font-semibold text-gray-900 dark:text-gray-200">{purchaseOrders.length} documents</span>
                                     </div>
                                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        Total Expenses Incurred: <span className="font-semibold text-gray-900 dark:text-gray-200">₹{(totalPOsAmount + totalChallansAmount).toLocaleString('en-IN')}</span>
+                                        Total Expenses Incurred: <span className="font-semibold text-gray-900 dark:text-gray-200">₹{totalPOsAmount.toLocaleString('en-IN')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -486,7 +474,7 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#121212]">
                                 <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                     <FileText size={16} className="text-gray-500" />
-                                    Purchase Orders
+                                    Purchase Orders (POs)
                                 </h4>
                                 <span className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700">
                                     {purchaseOrders.length} records
@@ -497,10 +485,10 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                     <thead className="bg-gray-50 dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800">
                                         <tr>
                                             <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">PO Number</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
                                             <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Amount (₹)</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
+                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Grand Total</th>
+                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -514,17 +502,17 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                                     {po.poNumber} <ExternalLink size={14} className="text-gray-400" />
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                                                    {po.projectName || '—'}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
                                                     {new Date(po.poDate).toLocaleDateString('en-GB')}
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
-                                                    {po.grandTotal?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                                                    {po.projectName || '—'}
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${po.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' :
-                                                        po.status === 'Ordered' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50' :
+                                                <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100">
+                                                    ₹{po.grandTotal?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${po.status === 'Ordered' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50' :
+                                                        po.status === 'Fully Received' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' :
                                                             'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                                                         }`}>
                                                         {po.status}
@@ -536,69 +524,6 @@ export default function VendorProfileView({ vendor: initialVendor, onClose, onEd
                                             <tr>
                                                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500 bg-gray-50/50 dark:bg-transparent">
                                                     No purchase orders logged for this vendor.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        {/* Delivery Challans Table */}
-                        <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#121212]">
-                                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                    <Activity size={16} className="text-gray-500" />
-                                    Delivery Challans
-                                </h4>
-                                <span className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700">
-                                    {challans.length} records
-                                </span>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm whitespace-nowrap">
-                                    <thead className="bg-gray-50 dark:bg-[#121212] border-b border-gray-200 dark:border-gray-800">
-                                        <tr>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Challan No</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-way Bill No</th>
-                                            <th className="px-6 py-3 font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                        {challans.map(c => (
-                                            <tr
-                                                key={c.id}
-                                                onClick={() => navigate(`/companydashboard/finance/challans`)}
-                                                className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group"
-                                            >
-                                                <td className="px-6 py-4 font-medium text-blue-600 dark:text-blue-400 group-hover:underline flex items-center gap-2">
-                                                    {c.challanNumber} <ExternalLink size={14} className="text-gray-400" />
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                                                    {new Date(c.challanDate).toLocaleDateString('en-GB')}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                                                    {c.projectName || '—'}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600 dark:text-gray-400 font-mono text-xs">
-                                                    {c.ewayBillNo || '—'}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium border ${c.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' :
-                                                        c.status === 'Dispatched' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/50' :
-                                                            'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                                                        }`}>
-                                                        {c.status || 'Draft'}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {challans.length === 0 && (
-                                            <tr>
-                                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500 bg-gray-50/50 dark:bg-transparent">
-                                                    No delivery challans logged for this vendor.
                                                 </td>
                                             </tr>
                                         )}

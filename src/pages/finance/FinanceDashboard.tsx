@@ -101,11 +101,11 @@ export default function FinanceDashboard() {
           const proj = projs.find(p => p.id === ch.projectId);
           return {
             id: ch.challanNumber || `DC-${ch.id.substring(0,6).toUpperCase()}`,
-            vendor: ch.vendorName || 'Vendor',
+            client: ch.clientName || 'Client',
             project: proj ? (proj.projectCode || proj.projectName) : (ch.projectId ? `PRJ-${ch.projectId.substring(0,6).toUpperCase()}` : 'General'),
             date: new Date(ch.challanDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-            status: 'Received',
-            statusColor: 'bg-green-100 text-green-700'
+            status: ch.status || 'Draft',
+            statusColor: ch.status === 'Delivered' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
           };
         });
         setRecentChallans(formattedChallans);
@@ -415,7 +415,7 @@ export default function FinanceDashboard() {
               <div key={i} className="flex items-center justify-between group">
                 <div className="flex items-center gap-2 flex-1 min-w-0 mr-3">
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-300 shrink-0 whitespace-nowrap">{ch.id}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">{ch.vendor}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">{ch.client}</span>
                   <span className="text-[10px] font-semibold text-primary dark:text-secondary bg-primary/10 px-1.5 rounded-sm shrink-0 whitespace-nowrap">{ch.project}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

@@ -29,12 +29,10 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
           challanNumber: initialData.challanNumber || '',
           projectId: initialData.projectId || '',
           projectName: initialData.projectName || '',
-          vendorId: initialData.vendorId || '',
-          vendorName: initialData.vendorName || '',
+          clientId: initialData.clientId || '',
+          clientName: initialData.clientName || '',
           challanDate: initialData.challanDate || new Date().toISOString().split('T')[0],
           description: initialData.description || '',
-          linkedVendorPoId: initialData.linkedVendorPoId || '',
-          linkedVendorPoNumber: initialData.linkedVendorPoNumber || '',
           attachmentName: initialData.attachmentName || '',
           templateName: initialData.templateName || '',
           remarks: initialData.remarks || '',
@@ -54,10 +52,11 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
         form.reset({
           challanNumber: '',
           projectId: '',
-          vendorId: '',
+          projectName: '',
+          clientId: '',
+          clientName: '',
           challanDate: new Date().toISOString().split('T')[0],
           description: '',
-          linkedVendorPoId: '',
           attachmentName: '',
           templateName: '',
           remarks: '',
@@ -91,7 +90,7 @@ export default function ChallanDrawer({ isOpen, onClose, onSave, mode, initialDa
       : 'View Delivery Challan';
 
   const drawerSubtitle = mode === 'create'
-    ? 'Record an inbound delivery from a vendor.'
+    ? 'Record an outbound delivery to a client.'
     : `Challan Number: ${challanNumber || initialData?.challanNumber || '—'}`;
 
   if (!isOpen) return null;
