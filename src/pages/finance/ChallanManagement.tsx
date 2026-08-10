@@ -10,9 +10,9 @@ import { useBreadcrumbs } from '../../hooks/useBreadcrumbs';
 import ChallanDrawer from './challan/components/ChallanDrawer';
 import type { ChallanFormValues } from './challan/validators/challanValidation';
 import FunkyLoader from '@/components/ui/FunkyLoader';
-import { VendorService } from '../../services/vendor.service';
+import { ClientService } from '../../services/client.service';
 import { useProjects } from '../../hooks/useProjects';
-import type { Vendor } from '../../types/vendor.types';
+import type { Client } from '../../types/client.types';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -47,7 +47,7 @@ export default function ChallanManagement() {
   const { projects } = useProjects();
   const [challans, setChallans] = useState<DeliveryChallan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -59,7 +59,7 @@ export default function ChallanManagement() {
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
   const [filterProject, setFilterProject] = useState('');
-  const [filterVendor, setFilterVendor] = useState('');
+  const [filterClient, setFilterClient] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
   // Pagination
@@ -78,12 +78,12 @@ export default function ChallanManagement() {
     setIsLoading(true);
     try {
       if (!selectedCompanyId) return;
-      const [challanData, vendorData] = await Promise.all([
+      const [challanData, clientData] = await Promise.all([
         ChallanService.getAll(selectedCompanyId),
-        VendorService.getVendors(selectedCompanyId),
+        ClientService.getClients(selectedCompanyId),
       ]);
       setChallans(challanData);
-      setVendors(vendorData);
+      setClients(clientData);
     } catch {
       toast.error('Failed to load delivery challans');
     } finally {
@@ -106,12 +106,12 @@ export default function ChallanManagement() {
   const handleSaveChallan = async (data: ChallanFormValues) => {
     setIsSubmitting(true);
     try {
-      const vendor = vendors.find(v => v.id === data.vendorId);
+      const client = clients.find(c => c.id === data.clientId);
       const project = projects.find(p => p.id === data.projectId);
 
       const payload = {
         ...data,
-        vendorName: vendor?.displayName || data.vendorName || '',
+        clientName: client?.displayName || client?.companyName || data.clientName || '',
         projectName: project?.projectName || '',
         status: (data as any).status || 'Draft'
       };
@@ -149,12 +149,12 @@ export default function ChallanManagement() {
 
   const filtered = challans.filter(ch => {
     const searchMatch = (ch.challanNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                        (ch.vendorName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                        (ch.clientName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                         (ch.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const projectMatch = filterProject ? ch.projectId === filterProject : true;
-    const vendorMatch = filterVendor ? ch.vendorId === filterVendor : true;
+    const clientMatch = filterClient ? ch.clientId === filterClient : true;
     const statusMatch = filterStatus ? (ch.status || 'Draft') === filterStatus : true;
-    return searchMatch && projectMatch && vendorMatch && statusMatch;
+    return searchMatch && projectMatch && clientMatch && statusMatch;
   });
 
   const sortedChallans = useMemo(() => {
@@ -209,7 +209,7 @@ export default function ChallanManagement() {
             Delivery Challans
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Track deliveries received from vendors.
+            Track deliveries sent to clients.
           </p>
         </div>
         <div className="flex gap-2">
@@ -241,14 +241,14 @@ export default function ChallanManagement() {
               />
             </div>
 
-            {/* Vendor filter */}
+            {/* Client filter */}
             <div className="w-48 shrink-0">
               <CustomSelect
-                value={filterVendor}
-                onChange={val => { setFilterVendor(val); resetPage(); }}
+                value={filterClient}
+                onChange={val => { setFilterClient(val); resetPage(); }}
                 options={[
-                  { label: 'All Vendors', value: '' },
-                  ...vendors.map(v => ({ label: v.displayName || v.id, value: v.id }))
+                  { label: 'All Clients', value: '' },
+                  ...clients.map(c => ({ label: c.displayName || c.companyName || c.id, value: c.id }))
                 ]}
               />
             </div>
@@ -271,7 +271,7 @@ export default function ChallanManagement() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
             <input
               type="text"
-              placeholder="Search challan no., vendor…"
+              placeholder="Search challan no., client…"
               value={searchTerm}
               onChange={e => { setSearchTerm(e.target.value); resetPage(); }}
               className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-[#0f1115] border border-gray-300 dark:border-white/10 rounded-md text-gray-900 dark:text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-xs"
@@ -288,13 +288,13 @@ export default function ChallanManagement() {
               <Truck size={48} className="mb-4 opacity-20" />
               <p className="text-base font-medium text-gray-900 dark:text-white">No Delivery Challans found</p>
               <p className="text-sm mt-1">
-                {searchTerm || filterProject || filterVendor || filterStatus
+                {searchTerm || filterProject || filterClient || filterStatus
                   ? 'Try adjusting your filters or search term.'
                   : 'Add your first challan by clicking "Add Challan".'}
               </p>
-              {(searchTerm || filterProject || filterVendor || filterStatus) && (
+              {(searchTerm || filterProject || filterClient || filterStatus) && (
                 <button
-                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterVendor(''); setFilterStatus(''); }}
+                  onClick={() => { setSearchTerm(''); setFilterProject(''); setFilterClient(''); setFilterStatus(''); }}
                   className="mt-3 text-sm text-primary dark:text-[#c44997] font-medium hover:underline"
                 >
                   Clear all filters
@@ -306,7 +306,7 @@ export default function ChallanManagement() {
               <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/5">
                 <tr>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Number</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendor</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Client</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Project</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Challan Date</th>
                   <th className="px-6 py-3 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
@@ -334,9 +334,9 @@ export default function ChallanManagement() {
                       )}
                     </td>
 
-                    {/* Vendor */}
+                    {/* Client */}
                     <td className="px-6 py-4 dark:text-white">
-                      {ch.vendorName || 'Unknown Vendor'}
+                      {ch.clientName || 'Unknown Client'}
                     </td>
 
                     {/* Project */}

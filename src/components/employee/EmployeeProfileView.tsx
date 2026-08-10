@@ -119,7 +119,7 @@ export default function EmployeeProfileView({ employee, onClose, onEdit }: Emplo
                     { label: 'Marital Status', value: employee.maritalStatus },
                     { label: 'Blood Group', value: employee.bloodGroup },
                     { label: 'Nationality', value: employee.nationality },
-                    { label: 'Date of Joining', value: employee.dateOfJoining }
+                    { label: 'Date of Joining', value: employee.dateOfJoining || employee.joiningDate }
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
                       <span className="text-gray-500 dark:text-gray-400">{item.label}</span>
