@@ -83,6 +83,8 @@ export default function EmployeeDirectory() {
           educations,
           families,
           contract,
+          positionChanges,
+          separation,
         ] = await Promise.allSettled([
           api.get(`/admin/employees/${emp.id}/address`),
           api.get(`/admin/employees/${emp.id}/emergency-contact`),
@@ -93,6 +95,8 @@ export default function EmployeeDirectory() {
           api.get(`/admin/employees/${emp.id}/educations`),
           api.get(`/admin/employees/${emp.id}/families`),
           api.get(`/admin/employees/${emp.id}/contract`),
+          api.get(`/admin/employees/${emp.id}/position-change`),
+          api.get(`/admin/employees/${emp.id}/separation`),
         ]);
 
         const val = <T,>(r: PromiseSettledResult<T>) =>
@@ -116,6 +120,9 @@ export default function EmployeeDirectory() {
         const ctr: any = val(contract) || {};
         const salaries: any[] = val(salaryRevisions) || [];
         const latestSalary = salaries[0] || {}; // Most recent revision shown in form
+        const posChanges: any[] = val(positionChanges) || [];
+        const latestPos = posChanges[0] || {};
+        const sep: any = val(separation) || {};
 
         const merged: Partial<EmployeeFormValues> = {
           // Core employee fields (already on emp)
@@ -214,6 +221,25 @@ export default function EmployeeDirectory() {
             nominee: f.nominee ?? false,
             nomineePercentage: f.nomineePercentage || '',
           })),
+
+          // Position Change
+          positionChangeType: latestPos.changeType || '',
+          positionChangeEffectiveDate: latestPos.effectiveDate || '',
+          positionChangeDepartmentId: latestPos.departmentId || '',
+          positionChangeDesignationId: latestPos.designationId || '',
+          positionChangeGrade: latestPos.grade || '',
+          positionChangeLocation: latestPos.location || '',
+          positionChangeReportingManagerId: latestPos.reportingManagerId || '',
+          positionChangeRemarks: latestPos.remarks || '',
+
+          // Separation / Exit
+          separationType: sep.separationType || '',
+          resignationDate: sep.resignationDate || '',
+          lastWorkingDate: sep.lastWorkingDate || '',
+          exitNoticePeriod: sep.noticePeriodDays || '',
+          separationReason: sep.separationReason || '',
+          exitInterview: sep.exitInterview ?? false,
+          separationRemarks: sep.separationRemarks || '',
 
           // Contract
           contractType: ctr.contractType || '',
@@ -418,6 +444,37 @@ export default function EmployeeDirectory() {
             // signedContractUpload holds UUID after upload-on-select in the form
             signedContractFileId: data.signedContractUpload || null,
           }).catch(e => console.warn('Contract save failed', e))
+        );
+      }
+
+      // Position Change
+      if (data.positionChangeType || data.positionChangeEffectiveDate) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/position-change`, {
+            positionChangeType: data.positionChangeType,
+            positionChangeEffectiveDate: data.positionChangeEffectiveDate,
+            positionChangeDepartmentId: data.positionChangeDepartmentId,
+            positionChangeDesignationId: data.positionChangeDesignationId,
+            positionChangeGrade: data.positionChangeGrade,
+            positionChangeLocation: data.positionChangeLocation,
+            positionChangeReportingManagerId: data.positionChangeReportingManagerId || null,
+            positionChangeRemarks: data.positionChangeRemarks,
+          }).catch(e => console.warn('Position change save failed', e))
+        );
+      }
+
+      // Separation / Exit
+      if (data.separationType || data.resignationDate || data.lastWorkingDate) {
+        subSaveTasks.push(
+          api.put(`/admin/employees/${employeeId}/separation`, {
+            separationType: data.separationType,
+            resignationDate: data.resignationDate,
+            lastWorkingDate: data.lastWorkingDate,
+            exitNoticePeriod: data.exitNoticePeriod,
+            separationReason: data.separationReason,
+            exitInterview: data.exitInterview,
+            separationRemarks: data.separationRemarks,
+          }).catch(e => console.warn('Separation save failed', e))
         );
       }
 
