@@ -202,5 +202,4 @@ export const WorkforceService = {
   createEmployeeAttendanceSummary: (data: Omit<any, 'id'>) => api.post('/hrms/attendance/summaries', data),
   updateEmployeeAttendanceSummary: (id: string, data: Partial<any>) => api.put(`/hrms/attendance/summaries/${id}`, data),
   deleteEmployeeAttendanceSummary: (id: string) => api.delete(`/hrms/attendance/summaries/${id}`),
-  getDashboardKPIs: () => api.get('/hrms/attendance/dashboard/kpis'),
 };

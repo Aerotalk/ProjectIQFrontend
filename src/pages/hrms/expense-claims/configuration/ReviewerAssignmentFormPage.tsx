@@ -122,7 +122,7 @@ export default function ReviewerAssignmentFormPage() {
                 <div>
                   <label className={formStyles.label}>Level 1 Approver</label>
                   <EmployeeSelector 
-                    value={form.watch('reviewer1Id')}
+                    value={form.watch('reviewer1Id') || ''}
                     onChange={(val) => form.setValue('reviewer1Id', val)}
                   />
                   {form.formState.errors.reviewer1Id && <p className="text-red-500 text-xs mt-1">{form.formState.errors.reviewer1Id.message}</p>}
@@ -131,7 +131,7 @@ export default function ReviewerAssignmentFormPage() {
                 <div>
                   <label className={formStyles.label}>Level 2 Approver (Optional)</label>
                   <EmployeeSelector 
-                    value={form.watch('reviewer2Id')}
+                    value={form.watch('reviewer2Id') || ''}
                     onChange={(val) => form.setValue('reviewer2Id', val)}
                   />
                 </div>
@@ -139,7 +139,7 @@ export default function ReviewerAssignmentFormPage() {
                 <div>
                   <label className={formStyles.label}>Level 3 Approver (Optional)</label>
                   <EmployeeSelector 
-                    value={form.watch('reviewer3Id')}
+                    value={form.watch('reviewer3Id') || ''}
                     onChange={(val) => form.setValue('reviewer3Id', val)}
                   />
                 </div>

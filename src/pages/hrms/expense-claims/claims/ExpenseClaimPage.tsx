@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Save, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { claimSchema } from '../validators/expenseValidation';
 import type { ClaimFormValues } from '../validators/expenseValidation';
 import { formStyles } from '../../../../components/ui/form-styles';
@@ -173,7 +173,8 @@ export default function ExpenseClaimPage() {
               </div>
             </div>
           </div>
-        </form>
+        </div>
+      </form>
       </FormProvider>
 
       {isEdit && (
