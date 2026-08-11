@@ -124,6 +124,16 @@ export default function EmployeeDirectory() {
         const latestPos = posChanges[0] || {};
         const sep: any = val(separation) || {};
 
+        // Parse salary components (JSON string -> array)
+        let parsedComponents: any[] = [];
+        if (latestSalary.salaryComponents) {
+          try {
+            parsedComponents = JSON.parse(latestSalary.salaryComponents);
+          } catch (e) {
+            parsedComponents = [];
+          }
+        }
+
         const merged: Partial<EmployeeFormValues> = {
           // Core employee fields (already on emp)
           ...(emp as any),
@@ -203,7 +213,7 @@ export default function EmployeeDirectory() {
           revisionEffectiveDate: latestSalary.effectiveDate || '',
           revisionAnnualCTC: latestSalary.annualCTC || '',
           revisionIncrementPercentage: latestSalary.incrementPercentage || '',
-          revisionSalaryComponents: latestSalary.salaryComponents || '',
+          revisionSalaryComponents: parsedComponents,
           revisionReason: latestSalary.reason || '',
 
           // Educations
@@ -425,7 +435,7 @@ export default function EmployeeDirectory() {
             effectiveDate: data.revisionEffectiveDate,
             annualCTC: data.revisionAnnualCTC,
             incrementPercentage: data.revisionIncrementPercentage,
-            salaryComponents: data.revisionSalaryComponents,
+            salaryComponents: Array.isArray(data.revisionSalaryComponents) ? JSON.stringify(data.revisionSalaryComponents) : data.revisionSalaryComponents,
             reason: data.revisionReason,
           }).catch(e => console.warn('Salary revision save failed', e))
         );

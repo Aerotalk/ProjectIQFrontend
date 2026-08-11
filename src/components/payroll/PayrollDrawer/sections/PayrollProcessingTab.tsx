@@ -112,48 +112,6 @@ export default function PayrollProcessingTab({ readOnly }: Props) {
             </div>
           )}
         </FormGrid>
-
-        {/* Dummy Estimate Summary Panel */}
-        <div className="mt-8 bg-[#f8f9fc] dark:bg-[#1a1c23] border border-gray-200 dark:border-white/10 rounded-md p-6">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Run Estimate</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <Users size={16} className="text-blue-500" />
-                <span className="text-xs font-medium text-gray-500">Employee Count</span>
-              </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">142</p>
-            </div>
-            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <Wallet size={16} className="text-green-500" />
-                <span className="text-xs font-medium text-gray-500">Est. Gross</span>
-              </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">₹13,80,000</p>
-            </div>
-            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <Calculator size={16} className="text-orange-500" />
-                <span className="text-xs font-medium text-gray-500">Est. Deductions</span>
-              </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">₹2,10,000</p>
-            </div>
-            <div className="bg-white dark:bg-[#1f2229] p-4 rounded-sm border border-gray-100 dark:border-white/5 shadow-sm ring-1 ring-primary/30">
-              <div className="flex items-center gap-2 mb-2">
-                <Coins size={16} className="text-primary dark:text-secondary" />
-                <span className="text-xs font-bold text-primary dark:text-secondary">Est. Net Salary</span>
-              </div>
-              <p className="text-xl font-bold text-primary dark:text-secondary">₹11,70,000</p>
-            </div>
-          </div>
-          {!readOnly && (
-            <div className="mt-6 flex justify-end">
-              <button type="button" className="px-6 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors">
-                Process Payroll
-              </button>
-            </div>
-          )}
-        </div>
       </FormSection>
     </div>
   );

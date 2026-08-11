@@ -13,44 +13,12 @@ export default function PerformanceReports() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const [apiGoals, apiCycles] = await Promise.all([
-          api.get('/hrms/performance/goals').catch(() => []),
+        const [apiDeptData, apiCycles] = await Promise.all([
+          api.get('/hrms/performance/reports/department-ratings').catch(() => []),
           api.get('/hrms/performance/cycles').catch(() => [])
         ]);
         
-        let deptData: any[] = [];
-        if (Array.isArray(apiGoals)) {
-          // Aggregate goals by department
-          const deptMap = new Map<string, { totalEmployees: Set<string>, completed: number, needsImprovement: number, totalRating: number }>();
-          
-          apiGoals.forEach(g => {
-            const dept = g.employee?.department?.departmentName || 'Unknown';
-            const empId = g.employee?.id || 'Unknown';
-            if (!deptMap.has(dept)) {
-              deptMap.set(dept, { totalEmployees: new Set(), completed: 0, needsImprovement: 0, totalRating: 0 });
-            }
-            const data = deptMap.get(dept)!;
-            data.totalEmployees.add(empId);
-            if (g.status === 'Completed' || g.progress >= 100) {
-              data.completed++;
-              data.totalRating += (g.rating || (g.progress / 20)); // scale 100 to 5
-            } else if (g.progress < 50 && g.status !== 'Draft') {
-              data.needsImprovement++;
-              data.totalRating += (g.rating || (g.progress / 20)); 
-            } else {
-              data.totalRating += (g.rating || (g.progress / 20) || 3.5); 
-            }
-          });
-
-          deptData = Array.from(deptMap.entries()).map(([department, data]) => ({
-            department,
-            avgRating: (data.totalRating / Math.max(1, data.completed + data.needsImprovement + data.totalEmployees.size)) || 3.0,
-            topPerformers: data.completed,
-            needsImprovement: data.needsImprovement,
-            totalEmployees: data.totalEmployees.size
-          }));
-        }
-        setDepartmentData(deptData);
+        setDepartmentData(Array.isArray(apiDeptData) ? apiDeptData : (apiDeptData.data || []));
         const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : [];
         setCycles(fetchedCycles);
         if (fetchedCycles.length > 0) {
@@ -66,7 +34,7 @@ export default function PerformanceReports() {
   const deptColumns = [
     { key: 'department', label: 'Department' },
     { key: 'totalEmployees', label: 'Headcount' },
-    { key: 'avgRating', label: 'Avg. Rating', render: (v: any) => <span className="font-bold text-primary dark:text-secondary">{v.toFixed(1)}</span> },
+    { key: 'avgRating', label: 'Avg. Rating', render: (v: any) => <span className="font-bold text-primary dark:text-secondary">{v ? Number(v).toFixed(1) : '0.0'}</span> },
     { key: 'topPerformers', label: 'Top Performers', render: (v: any) => <span className="text-green-600">{v}</span> },
     { key: 'needsImprovement', label: 'Needs Improvement', render: (v: any) => <span className="text-orange-600">{v}</span> }
   ];
@@ -86,7 +54,7 @@ export default function PerformanceReports() {
       if (activeReport === 'department') {
         headers = ['Department', 'Headcount', 'Avg. Rating', 'Top Performers', 'Needs Improvement'].join(',');
         rows = departmentData.map(d => 
-          `"${d.department}",${d.totalEmployees},${d.avgRating.toFixed(1)},${d.topPerformers},${d.needsImprovement}`
+          `"${d.department}",${d.totalEmployees},${d.avgRating ? Number(d.avgRating).toFixed(1) : '0.0'},${d.topPerformers},${d.needsImprovement}`
         ).join('\n');
       } else if (activeReport === 'goals') {
         headers = ['Department', 'Goals Completed', 'Goals Behind'].join(',');
