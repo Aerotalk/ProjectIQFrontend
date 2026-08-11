@@ -100,64 +100,17 @@ export const useDashboardKPIs = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRawData = async () => {
+    const fetchKPIs = async () => {
       try {
-        const [attendances, leaves, regularizations] = await Promise.all([
-          WorkforceService.getAttendanceRecords().catch(() => ({ data: [] })),
-          WorkforceService.getLeaveApplications().catch(() => ({ data: [] })),
-          WorkforceService.getRegularizations().catch(() => ({ data: [] }))
-        ]);
-
-        const attendanceData = Array.isArray(attendances) ? attendances : (attendances?.data || []);
-        const leaveDataRaw = Array.isArray(leaves) ? leaves : (leaves?.data || []);
-        const regData = Array.isArray(regularizations) ? regularizations : (regularizations?.data || []);
-
-        const present = attendanceData.filter((a: any) => a.status === 'Present').length;
-        const absent = attendanceData.filter((a: any) => a.status === 'Absent').length;
-        const late = attendanceData.filter((a: any) => a.status === 'Late' || a.lateBy > 0).length;
-        const onLeave = leaveDataRaw.filter((l: any) => l.status === 'Approved').length;
-        const pendingRequests = leaveDataRaw.filter((l: any) => l.status === 'Pending').length;
-        const regularization = regData.filter((r: any) => r.status === 'Pending').length;
-
-        // Real Trend Data: aggregate last 7 days from attendance records
-        const last7Days = [...Array(7)].map((_, i) => {
-          const d = new Date();
-          d.setDate(d.getDate() - (6 - i));
-          return d;
-        });
-
-        const trendData = last7Days.map(dateObj => {
-          const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-          const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD for matching
-
-          let dayPresent = 0;
-          let dayAbsent = 0;
-
-          attendanceData.forEach((a: any) => {
-            // Check if record date matches our target date
-            if (a.date && a.date.startsWith(dateStr)) {
-              if (a.status === 'Present') dayPresent++;
-              else if (a.status === 'Absent') dayAbsent++;
-            }
-          });
-
-          return { name: dayName, Present: dayPresent, Absent: dayAbsent };
-        });
-
-        const leaveData = [
-          { name: 'Sick', value: leaveDataRaw.filter((l: any) => l.leaveType?.name === 'Sick').length || 1 },
-          { name: 'Casual', value: leaveDataRaw.filter((l: any) => l.leaveType?.name === 'Casual').length || 1 },
-          { name: 'Privilege', value: leaveDataRaw.filter((l: any) => l.leaveType?.name === 'Privilege').length || 1 },
-        ];
-
-        setKpis({ present, absent, late, onLeave, pendingRequests, regularization, trendData, leaveData });
+        const response: any = await WorkforceService.getDashboardKPIs();
+        setKpis(response?.data || response || {});
       } catch (err) {
-        console.error('Failed to fetch dashboard KPIs', err);
+        console.error('Failed to load dashboard KPIs', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchRawData();
+    fetchKPIs();
   }, []);
 
   return { kpis, loading };

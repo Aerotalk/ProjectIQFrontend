@@ -8,6 +8,7 @@ import type { AdvanceFormValues } from '../validators/expenseValidation';
 import { formStyles } from '../../../../components/ui/form-styles';
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
 import CustomSelect from '../../../../components/ui/CustomSelect';
+import EmployeeSelector from '../../../../components/hrms/EmployeeSelector';
 import { api } from '../../../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -43,7 +44,7 @@ export default function AdvanceFormPage() {
     try {
       const data = await api.get(`/hrms/expense-claims/advances/${id}`);
       form.reset({
-        employee: data.employeeId || 'EMP-001',
+        employee: data.employee?.id || data.employeeId || '',
         tripOrProject: data.tripOrProject,
         purpose: data.purpose,
         currency: data.currency,
@@ -69,11 +70,20 @@ export default function AdvanceFormPage() {
           requiredDate: data.requiredDate,
           status: 'Pending',
           disbursed: false,
-          outstandingBalance: data.amount
+          outstandingBalance: data.amount,
+          employee: { id: data.employee }
         });
         toast.success('Advance request submitted');
       } else {
-        await api.put(`/hrms/expense-claims/advances/${id}`, data);
+        await api.put(`/hrms/expense-claims/advances/${id}`, {
+          tripOrProject: data.tripOrProject,
+          purpose: data.purpose,
+          currency: data.currency,
+          amount: data.amount,
+          requestedDate: data.date,
+          requiredDate: data.requiredDate,
+          employee: { id: data.employee }
+        });
         toast.success('Advance updated');
       }
       navigate(`${basePath}/hrms/expense-claims/advances`);
@@ -138,10 +148,9 @@ export default function AdvanceFormPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={formStyles.label}>Employee *</label>
-                    <CustomSelect
-                      options={[{label: 'John Doe', value: 'EMP-001'}, {label: 'Jane Smith', value: 'EMP-002'}]}
+                    <EmployeeSelector
                       value={form.watch('employee')}
-                      onChange={(val) => form.setValue('employee', val as any)}
+                      onChange={(val) => form.setValue('employee', val)}
                       disabled={readOnly}
                     />
                     {form.formState.errors.employee && <p className="text-red-500 text-xs mt-1">{form.formState.errors.employee.message}</p>}

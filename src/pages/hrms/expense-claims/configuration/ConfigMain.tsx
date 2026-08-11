@@ -8,6 +8,8 @@ const PoliciesList = React.lazy(() => import('./PoliciesList'));
 const ReviewerAssignment = React.lazy(() => import('./ReviewerAssignment'));
 const TemplateFormPage = React.lazy(() => import('./TemplateFormPage'));
 const CategoryFormPage = React.lazy(() => import('./CategoryFormPage'));
+const PolicyFormPage = React.lazy(() => import('./PolicyFormPage'));
+const ReviewerAssignmentFormPage = React.lazy(() => import('./ReviewerAssignmentFormPage'));
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center p-12 w-full h-64">
@@ -50,7 +52,9 @@ export default function ConfigMain() {
             <Route path="templates" element={<TemplatesList />} />
             <Route path="template/:id" element={<TemplateFormPage />} />
             <Route path="policies" element={<PoliciesList />} />
+            <Route path="policy/:id" element={<PolicyFormPage />} />
             <Route path="reviewer-assignment" element={<ReviewerAssignment />} />
+            <Route path="reviewer-assignment/:id" element={<ReviewerAssignmentFormPage />} />
           </Routes>
         </Suspense>
       </div>
