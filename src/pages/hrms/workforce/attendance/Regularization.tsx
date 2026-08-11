@@ -2,43 +2,20 @@ import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import { WorkforceService } from '../services';
 import { useRegularizations, useMutation } from '../hooks';
-import RegularizationDrawer from './RegularizationDrawer';
-import { Edit2, Eye, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Edit2, Eye, AlertCircle, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import { ApprovalStatus } from '../types';
 import type { RegularizationRequest } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Regularization() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedItem, setSelectedItem] = useState<RegularizationRequest | null>(null);
   const [filters, setFilters] = useState({ search: '', status: '' });
-
   const { data, loading, refresh } = useRegularizations(filters);
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createRegularization(newData),
-    {
-      successMessage: 'Regularization request submitted successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateRegularization(selectedItem?.id as string, newData),
-    {
-      successMessage: 'Regularization request updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const approveMutation = useMutation(
     (id: string) => WorkforceService.approveRegularization(id),
@@ -55,20 +32,6 @@ export default function Regularization() {
       onSuccess: () => refresh()
     }
   );
-
-  const handleAction = (item: RegularizationRequest | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
 
   const columns = useMemo(() => [
     { key: 'requestNumber', label: 'Req #', sortable: true },
@@ -117,12 +80,12 @@ export default function Regularization() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/regularization/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
               {row.status === ApprovalStatus.Pending && (
                 <>
-                  <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/regularization/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                     <Edit2 size={14} /> Edit Request
                   </button>
                   <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -140,7 +103,7 @@ export default function Regularization() {
         return <ActionCell />;
       }
     }
-  ], [approveMutation, rejectMutation]);
+  ], [approveMutation, rejectMutation, navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -150,9 +113,10 @@ export default function Regularization() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Review and manage employee attendance regularizations</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          onClick={() => navigate(`${basePath}/hrms/workforce/regularization/new`)}
+          className="flex items-center px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Request Regularization
         </button>
       </div>
@@ -195,14 +159,6 @@ export default function Regularization() {
           )}
         </div>
       </div>
-
-      <RegularizationDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

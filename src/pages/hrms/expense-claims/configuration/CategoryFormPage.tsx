@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Save, Loader2, ListTree } from 'lucide-react';
-import { categorySchema } from '../../validators/expenseValidation';
-import type { CategoryFormValues } from '../../validators/expenseValidation';
+import { categorySchema } from '../validators/expenseValidation';
+import type { CategoryFormValues } from '../validators/expenseValidation';
 import { formStyles } from '../../../../components/ui/form-styles';
 import { api } from '../../../../lib/api';
 import toast from 'react-hot-toast';
@@ -122,7 +122,7 @@ export default function CategoryFormPage() {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <FormProvider {...form}>
             <form id="category-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="bg-white dark:bg-[#181a1f] rounded-lg border border-gray-200 dark:border-white/10 p-6 shadow-sm">

@@ -6,15 +6,16 @@ import { WorkforceService } from '../services';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
-import RegularizationDrawer from './RegularizationDrawer';
 import type { AttendanceException } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Exceptions() {
   const [filters, setFilters] = useState({ search: '', resolved: '' });
   const { data, loading, refresh } = useAttendanceExceptions(filters);
 
-  const [isRegDrawerOpen, setIsRegDrawerOpen] = useState(false);
-  const [regInitialData, setRegInitialData] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const resolveMutation = useMutation(
     (id: string) => WorkforceService.updateAttendanceException(id, { resolved: true }),
@@ -24,25 +25,8 @@ export default function Exceptions() {
     }
   );
 
-  const createRegMutation = useMutation(
-    (newData: any) => WorkforceService.createRegularization(newData),
-    {
-      successMessage: 'Regularization request submitted successfully',
-      onSuccess: () => {
-        refresh();
-        setIsRegDrawerOpen(false);
-      }
-    }
-  );
-
-  const handleRequestRegularization = (row: AttendanceException) => {
-    setRegInitialData({
-      employeeId: row.employeeId,
-      employeeName: row.employeeName,
-      reason: `Exception regularization: ${row.exceptionType} - ${row.description || ''}`,
-      date: new Date().toISOString().split('T')[0]
-    });
-    setIsRegDrawerOpen(true);
+  const handleRequestRegularization = () => {
+    navigate(`${basePath}/hrms/workforce/regularization/new`);
   };
 
   const columns = useMemo(() => [
@@ -97,7 +81,7 @@ export default function Exceptions() {
                   <button onClick={() => { setIsOpen(false); resolveMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
                     <CheckCircle size={14} /> Mark Resolved
                   </button>
-                  <button onClick={() => { setIsOpen(false); handleRequestRegularization(row); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); handleRequestRegularization(); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 flex items-center gap-2">
                     <AlertCircle size={14} /> Request Regularization
                   </button>
                 </>
@@ -157,15 +141,6 @@ export default function Exceptions() {
         </div>
       </div>
 
-      <RegularizationDrawer
-        isOpen={isRegDrawerOpen}
-        onClose={() => setIsRegDrawerOpen(false)}
-        mode="create"
-        initialData={regInitialData}
-        onSave={async (formData) => {
-          await createRegMutation.mutate(formData);
-        }}
-      />
     </div>
   );
 }

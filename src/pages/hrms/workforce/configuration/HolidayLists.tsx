@@ -1,56 +1,18 @@
 import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { WorkforceService } from '../services';
-import { useHolidayLists, useMutation } from '../hooks';
-import HolidayDrawer from './HolidayDrawer';
-import { Edit2, Eye, Palmtree } from 'lucide-react';
+import { useHolidayLists } from '../hooks';
+import { Edit2, Eye, Palmtree, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import type { HolidayList } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function HolidayLists() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedItem, setSelectedItem] = useState<HolidayList | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { data, loading, refresh } = useHolidayLists({ search: searchTerm });
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createHolidayList(newData),
-    {
-      successMessage: 'Holiday list created successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateHolidayList(selectedItem?.id as string, newData),
-    {
-      successMessage: 'Holiday list updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const handleAction = (item: HolidayList | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
+  const { data, loading } = useHolidayLists({ search: searchTerm });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const columns = useMemo(() => [
     { 
@@ -74,10 +36,10 @@ export default function HolidayLists() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/holiday/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/holiday/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Edit2 size={14} /> Edit List
               </button>
             </SmartActionMenu>
@@ -86,7 +48,7 @@ export default function HolidayLists() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -96,9 +58,10 @@ export default function HolidayLists() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Manage public and restricted holidays per location</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          onClick={() => navigate(`${basePath}/hrms/workforce/holiday/new`)}
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Create Holiday List
         </button>
       </div>
@@ -129,14 +92,6 @@ export default function HolidayLists() {
           )}
         </div>
       </div>
-
-      <HolidayDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

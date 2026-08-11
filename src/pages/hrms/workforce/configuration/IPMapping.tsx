@@ -2,41 +2,18 @@ import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import { WorkforceService } from '../services';
 import { useIPMappings, useMutation } from '../hooks';
-import IPMappingDrawer from './IPMappingDrawer';
-import { Edit2, Trash2, Globe, MapPin } from 'lucide-react';
+import { Edit2, Trash2, Globe, MapPin, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import type { IPMapping } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function IPMappingComponent() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create');
-  const [selectedItem, setSelectedItem] = useState<IPMapping | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
   const { data, loading, refresh } = useIPMappings({ search: searchTerm });
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createIPMapping(newData),
-    {
-      successMessage: 'IP mapping created successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateIPMapping(selectedItem?.id as string, newData),
-    {
-      successMessage: 'IP mapping updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const deleteMutation = useMutation(
     (id: string) => WorkforceService.deleteIPMapping(id),
@@ -48,23 +25,9 @@ export default function IPMappingComponent() {
     }
   );
 
-  const handleAction = (item: IPMapping | null, mode: 'create' | 'edit') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this IP Mapping?')) {
       await deleteMutation.mutate(id);
-    }
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
     }
   };
 
@@ -102,7 +65,7 @@ export default function IPMappingComponent() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/ip-mapping/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Edit2 size={14} /> Edit Mapping
               </button>
               <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -115,7 +78,7 @@ export default function IPMappingComponent() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -125,9 +88,10 @@ export default function IPMappingComponent() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Configure allowed IP ranges for web check-in</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          onClick={() => navigate(`${basePath}/hrms/workforce/ip-mapping/new`)}
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Add IP Address
         </button>
       </div>
@@ -158,14 +122,6 @@ export default function IPMappingComponent() {
           )}
         </div>
       </div>
-
-      <IPMappingDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

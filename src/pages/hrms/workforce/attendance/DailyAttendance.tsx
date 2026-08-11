@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutList, Calendar as CalendarIcon, Eye, Edit2, AlertCircle, Clock, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addMonths, subMonths, parse } from 'date-fns';
 import CustomTable from '../../../../components/ui/CustomTable';
@@ -7,7 +7,6 @@ import AttendanceCalendar from './AttendanceCalendar';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import EmployeeSelector from '../../../../components/hrms/EmployeeSelector';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
-import AttendanceDrawer from './AttendanceDrawer';
 import { useAttendanceRecords } from '../hooks';
 import { AttendanceStatus, ApprovalStatus } from '../types';
 import type { AttendanceRecord } from '../types';
@@ -23,6 +22,10 @@ export default function DailyAttendance() {
     status: searchParams.get('status') || '', 
     monthYear: format(new Date(), 'MMMM yyyy')
   });
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const handleResetFilters = () => {
     setFilters({
@@ -42,17 +45,7 @@ export default function DailyAttendance() {
     }
   }, [searchParams]);
 
-  const [drawerState, setDrawerState] = useState<{ isOpen: boolean; record: AttendanceRecord | null; mode: 'view' | 'edit' }>({
-    isOpen: false,
-    record: null,
-    mode: 'view'
-  });
-
-  const { data, loading, refresh } = useAttendanceRecords(filters);
-
-  const handleAction = (record: AttendanceRecord, mode: 'view' | 'edit') => {
-    setDrawerState({ isOpen: true, record, mode });
-  };
+  const { data, loading } = useAttendanceRecords(filters);
 
   const currentMonthDate = useMemo(() => {
     return parse(filters.monthYear, 'MMMM yyyy', new Date());
@@ -104,16 +97,16 @@ export default function DailyAttendance() {
       label: '',
       render: (_: any, row: AttendanceRecord) => <ActionCell row={row} />
     }
-  ], []);
+  ], [navigate, basePath]);
 
   const ActionCell = ({ row }: { row: AttendanceRecord }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
       <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-         <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+         <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/attendance/record/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
            <Eye size={14} /> View Details
          </button>
-         <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+         <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/attendance/record/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
            <Edit2 size={14} /> Edit Attendance
          </button>
          <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -299,20 +292,10 @@ export default function DailyAttendance() {
                <AttendanceCalendar 
                  data={data} 
                  monthYear={filters.monthYear} 
-                 onAction={handleAction} 
                />
             </div>
           )}
         </div>
-        
-        {/* Inspector Panel */}
-        <AttendanceDrawer 
-          isOpen={drawerState.isOpen}
-          onClose={() => setDrawerState(prev => ({ ...prev, isOpen: false }))}
-          record={drawerState.record}
-          mode={drawerState.mode}
-          onSaveSuccess={refresh}
-        />
       </div>
     </div>
   );

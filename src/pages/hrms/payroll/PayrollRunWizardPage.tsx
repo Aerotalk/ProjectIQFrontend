@@ -226,7 +226,7 @@ export default function PayrollRunWizardPage() {
 
       {/* Stepper Nav */}
       <div className="bg-white dark:bg-[#181a1f] border-b border-gray-200 dark:border-white/10 px-8 py-4 shrink-0">
-        <div className="flex items-center justify-between max-w-3xl mx-auto relative">
+        <div className="flex items-center justify-between w-full relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-200 dark:bg-gray-800 z-0"></div>
           {STEPS.map((step, idx) => (
             <div key={step.id} className="relative z-10 flex flex-col items-center gap-2 bg-white dark:bg-[#181a1f] px-2">
@@ -249,7 +249,7 @@ export default function PayrollRunWizardPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-8 bg-gray-50/30 dark:bg-[#121212]/50">
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
           <FormProvider {...form}>
             <form id="wizard-form" onSubmit={form.handleSubmit(onSubmit)}>
               <div key={currentStep} className="animate-in fade-in slide-in-from-right-4 duration-300">

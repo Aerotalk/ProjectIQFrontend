@@ -268,7 +268,7 @@ export default function PayrollListing() {
               {/* Tab Content Area */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-gray-50/50 dark:bg-[#121317]/50 relative">
                 <FormProvider {...methods}>
-                  <form onSubmit={methods.handleSubmit(onSubmit)} className="max-w-4xl mx-auto space-y-6 pb-20">
+                  <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-6 pb-20">
                     
                     {/* The individual sections from PayrollDrawer */}
                     <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">

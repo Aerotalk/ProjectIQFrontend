@@ -33,6 +33,7 @@ import DepartmentDirectory from './DepartmentDirectory';
 import DesignationDirectory from './DesignationDirectory';
 import PayrollDashboard from './hrms/payroll/PayrollDashboard';
 import PayrollListing from './hrms/payroll/PayrollListing';
+import PayrollRunWizardPage from './hrms/payroll/PayrollRunWizardPage';
 import WorkforceMain from './hrms/workforce/WorkforceMain';
 import ExpenseClaimsMain from './hrms/expense-claims/ExpenseClaimsMain';
 import PerformanceMain from './hrms/performance/PerformanceMain';
@@ -183,6 +184,11 @@ export default function CompanyDashboard() {
         <Route path="/hrms/payroll" element={
           <PermissionGate permission="employee.view">
             <PayrollDashboard />
+          </PermissionGate>
+        } />
+        <Route path="/hrms/payroll/run" element={
+          <PermissionGate permission="employee.view">
+            <PayrollRunWizardPage />
           </PermissionGate>
         } />
         <Route path="/hrms/payroll/list" element={

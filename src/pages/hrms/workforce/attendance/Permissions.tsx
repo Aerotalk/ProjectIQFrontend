@@ -2,43 +2,20 @@ import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import { WorkforceService } from '../services';
 import { usePermissions, useMutation } from '../hooks';
-import PermissionDrawer from './PermissionDrawer';
-import { Edit2, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Edit2, Eye, CheckCircle, XCircle, Clock, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import { ApprovalStatus } from '../types';
 import type { PermissionRequest } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Permissions() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedItem, setSelectedItem] = useState<PermissionRequest | null>(null);
   const [filters, setFilters] = useState({ search: '', status: '' });
-
   const { data, loading, refresh } = usePermissions(filters);
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createPermission(newData),
-    {
-      successMessage: 'Permission request submitted successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updatePermission(selectedItem?.id as string, newData),
-    {
-      successMessage: 'Permission request updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const approveMutation = useMutation(
     (id: string) => WorkforceService.approvePermission(id),
@@ -55,20 +32,6 @@ export default function Permissions() {
       onSuccess: () => refresh()
     }
   );
-
-  const handleAction = (item: PermissionRequest | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
 
   const columns = useMemo(() => [
     { key: 'permissionNumber', label: 'Perm #', sortable: true },
@@ -126,12 +89,12 @@ export default function Permissions() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/permission/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
               {row.status === ApprovalStatus.Pending && (
                 <>
-                  <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/permission/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                     <Edit2 size={14} /> Edit Request
                   </button>
                   <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -149,7 +112,7 @@ export default function Permissions() {
         return <ActionCell />;
       }
     }
-  ], [approveMutation, rejectMutation]);
+  ], [approveMutation, rejectMutation, navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -159,9 +122,10 @@ export default function Permissions() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Manage short leaves and permissions for employees</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          onClick={() => navigate(`${basePath}/hrms/workforce/permission/new`)}
+          className="flex items-center px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Request Permission
         </button>
       </div>
@@ -204,14 +168,6 @@ export default function Permissions() {
           )}
         </div>
       </div>
-
-      <PermissionDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

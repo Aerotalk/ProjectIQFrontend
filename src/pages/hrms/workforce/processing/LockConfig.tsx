@@ -1,56 +1,18 @@
 import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { WorkforceService } from '../services';
-import { useLockConfigs, useMutation } from '../hooks';
-import LockConfigDrawer from '../configuration/LockConfigDrawer';
-import { Edit2, Eye, Lock } from 'lucide-react';
+import { useLockConfigs } from '../hooks';
+import { Edit2, Eye, Lock, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import type { LockConfiguration as LockConfigType } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function LockConfig() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedItem, setSelectedItem] = useState<LockConfigType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { data, loading, refresh } = useLockConfigs({ search: searchTerm });
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createLockConfig(newData),
-    {
-      successMessage: 'Lock configuration created successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLockConfig(selectedItem?.id as string, newData),
-    {
-      successMessage: 'Lock configuration updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const handleAction = (item: LockConfigType | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
+  const { data, loading } = useLockConfigs({ search: searchTerm });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const columns = useMemo(() => [
     { 
@@ -83,10 +45,10 @@ export default function LockConfig() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/lock-config/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/lock-config/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Edit2 size={14} /> Edit Config
               </button>
             </SmartActionMenu>
@@ -95,7 +57,7 @@ export default function LockConfig() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -105,9 +67,10 @@ export default function LockConfig() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Configure cutoff days for retrospective actions</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          onClick={() => navigate(`${basePath}/hrms/workforce/lock-config/new`)}
+          className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Add Configuration
         </button>
       </div>
@@ -138,14 +101,6 @@ export default function LockConfig() {
           )}
         </div>
       </div>
-
-      <LockConfigDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

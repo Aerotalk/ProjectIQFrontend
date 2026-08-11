@@ -6,38 +6,16 @@ import CustomTable from '../../../../components/ui/CustomTable';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
-import LeaveApplicationDrawer from './LeaveApplicationDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { LeaveStatus } from '../types';
 import type { LeaveApplication } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function LeaveApplications() {
   const { data, loading, params, setParams, refresh } = useLeaveApplications();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedApp, setSelectedApp] = useState<LeaveApplication | null>(null);
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createLeaveApplication(newData),
-    {
-      successMessage: 'Leave application submitted successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLeaveApplication(selectedApp?.id as string, newData),
-    {
-      successMessage: 'Leave application updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const approveMutation = useMutation(
     (id: string) => WorkforceService.approveLeaveApplication(id),
@@ -54,20 +32,6 @@ export default function LeaveApplications() {
       onSuccess: () => refresh()
     }
   );
-
-  const handleAction = (item: LeaveApplication | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedApp(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
 
   const columns = useMemo(() => [
     { key: 'leaveNumber', label: 'Leave #', sortable: true },
@@ -127,12 +91,12 @@ export default function LeaveApplications() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/leave-application/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
               {row.status === LeaveStatus.Pending && (
                 <>
-                  <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/leave-application/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                     <Edit2 size={14} /> Edit Request
                   </button>
                   <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
@@ -150,7 +114,7 @@ export default function LeaveApplications() {
         return <ActionCell />;
       }
     }
-  ], [approveMutation, rejectMutation]);
+  ], [approveMutation, rejectMutation, navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -182,7 +146,7 @@ export default function LeaveApplications() {
             />
           </div>
           <button 
-            onClick={() => handleAction(null, 'create')}
+            onClick={() => navigate(`${basePath}/hrms/workforce/leave-application/new`)}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm hover:bg-primary-dark transition-colors text-sm font-medium shadow-sm whitespace-nowrap"
           >
             <Plus size={16} />
@@ -220,7 +184,7 @@ export default function LeaveApplications() {
                   There are currently no leave requests to display. Click "Apply Leave" to create your first request.
                 </p>
                 <button 
-                  onClick={() => handleAction(null, 'create')}
+                  onClick={() => navigate(`${basePath}/hrms/workforce/leave-application/new`)}
                   className="mt-6 px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-sm text-sm font-medium hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
                 >
                   Apply Leave
@@ -230,16 +194,6 @@ export default function LeaveApplications() {
           </div>
         )}
       </div>
-
-      <LeaveApplicationDrawer 
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedApp}
-        onSave={handleSave}
-      />
     </div>
   );
 }
-
-

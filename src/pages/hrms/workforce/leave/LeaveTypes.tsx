@@ -1,56 +1,18 @@
 import { useState, useMemo } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
-import { WorkforceService } from '../services';
-import { useLeaveTypes, useMutation } from '../hooks';
-import LeaveTypeDrawer from './LeaveTypeDrawer';
-import { Edit2, Eye, Briefcase } from 'lucide-react';
+import { useLeaveTypes } from '../hooks';
+import { Edit2, Eye, Briefcase, Plus } from 'lucide-react';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import type { LeaveType } from '../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function LeaveTypes() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedItem, setSelectedItem] = useState<LeaveType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { data, loading, refresh } = useLeaveTypes({ search: searchTerm });
-
-  const createMutation = useMutation(
-    (newData: any) => WorkforceService.createLeaveType(newData),
-    {
-      successMessage: 'Leave type created successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const updateMutation = useMutation(
-    (newData: any) => WorkforceService.updateLeaveType(selectedItem?.id as string, newData),
-    {
-      successMessage: 'Leave type updated successfully',
-      onSuccess: () => {
-        refresh();
-        setIsDrawerOpen(false);
-      }
-    }
-  );
-
-  const handleAction = (item: LeaveType | null, mode: 'create' | 'edit' | 'view') => {
-    setDrawerMode(mode);
-    setSelectedItem(item);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (formData: any) => {
-    if (drawerMode === 'create') {
-      await createMutation.mutate(formData);
-    } else {
-      await updateMutation.mutate(formData);
-    }
-  };
+  const { data, loading } = useLeaveTypes({ search: searchTerm });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   const columns = useMemo(() => [
     { 
@@ -84,10 +46,10 @@ export default function LeaveTypes() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'view'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/leave-type/${row.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
-              <button onClick={() => { setIsOpen(false); handleAction(row, 'edit'); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/leave-type/${row.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Edit2 size={14} /> Edit Type
               </button>
             </SmartActionMenu>
@@ -96,7 +58,7 @@ export default function LeaveTypes() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [navigate, basePath]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -106,9 +68,10 @@ export default function LeaveTypes() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Manage different types of leaves available</p>
         </div>
         <button 
-          onClick={() => handleAction(null, 'create')}
+          onClick={() => navigate(`${basePath}/hrms/workforce/leave-type/new`)}
           className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
         >
+          <Plus size={16} className="mr-2" />
           Add Leave Type
         </button>
       </div>
@@ -139,14 +102,6 @@ export default function LeaveTypes() {
           )}
         </div>
       </div>
-
-      <LeaveTypeDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        mode={drawerMode}
-        initialData={selectedItem}
-        onSave={handleSave}
-      />
     </div>
   );
 }

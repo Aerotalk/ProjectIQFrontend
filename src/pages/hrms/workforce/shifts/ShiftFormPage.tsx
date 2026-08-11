@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,7 +52,7 @@ export default function ShiftFormPage() {
 
   const fetchData = async () => {
     try {
-      const data = await WorkforceService.getShift(id!);
+      const data = await WorkforceService.getShiftById(id!);
       reset({
         shiftName: data.shiftName,
         shiftCode: data.shiftCode,
@@ -72,8 +72,8 @@ export default function ShiftFormPage() {
   const onSubmit = async (data: ShiftValues) => {
     try {
       if (mode === 'create') {
-        await WorkforceService.createShift(data);
-        toast.success('Shift created');
+        await WorkforceService.createShift(data as any);
+        toast.success('Shift created successfully');
       } else {
         await WorkforceService.updateShift(id!, data);
         toast.success('Shift updated');
@@ -124,7 +124,7 @@ export default function ShiftFormPage() {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           <FormProvider {...form}>
             <form id="shift-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="bg-white dark:bg-[#181a1f] rounded-lg border border-gray-200 dark:border-white/10 p-6 shadow-sm">

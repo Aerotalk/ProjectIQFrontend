@@ -133,7 +133,7 @@ export default function GoalFormPage() {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <div className="bg-white dark:bg-[#181a1f] rounded-lg border border-gray-200 dark:border-white/10 p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-white/5">
               <div className="h-10 w-10 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg flex items-center justify-center flex-shrink-0">

@@ -11,6 +11,16 @@ const ConfigMain = React.lazy(() => import('./configuration/ConfigMain'));
 const ProcessingMain = React.lazy(() => import('./processing/ProcessingMain'));
 const ShiftFormPage = React.lazy(() => import('./shifts/ShiftFormPage'));
 const ShiftRotationFormPage = React.lazy(() => import('./shifts/ShiftRotationFormPage'));
+const LeaveTypeFormPage = React.lazy(() => import('./leave/LeaveTypeFormPage'));
+const LeaveSchemeFormPage = React.lazy(() => import('./leave/LeaveSchemeFormPage'));
+const LeaveApplicationFormPage = React.lazy(() => import('./leave/LeaveApplicationFormPage'));
+const HolidayFormPage = React.lazy(() => import('./configuration/HolidayFormPage'));
+const AttendanceSchemeFormPage = React.lazy(() => import('./configuration/AttendanceSchemeFormPage'));
+const IPMappingFormPage = React.lazy(() => import('./configuration/IPMappingFormPage'));
+const LockConfigFormPage = React.lazy(() => import('./processing/LockConfigFormPage'));
+const PermissionFormPage = React.lazy(() => import('./attendance/PermissionFormPage'));
+const RegularizationFormPage = React.lazy(() => import('./attendance/RegularizationFormPage'));
+const AttendanceFormPage = React.lazy(() => import('./attendance/AttendanceFormPage'));
 
 // Fallback loader for lazy-loaded modules
 const ModuleLoader = () => (
@@ -58,10 +68,20 @@ export default function WorkforceMain() {
             <Route path="/" element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<WorkforceDashboard />} />
             <Route path="leave/*" element={<LeaveMain />} />
+            <Route path="leave-type/:id" element={<LeaveTypeFormPage />} />
+            <Route path="leave-scheme/:id" element={<LeaveSchemeFormPage />} />
+            <Route path="leave-application/:id" element={<LeaveApplicationFormPage />} />
             <Route path="attendance/*" element={<AttendanceMain />} />
             <Route path="shifts/*" element={<ShiftsMain />} />
             <Route path="shift/:id" element={<ShiftFormPage />} />
             <Route path="shift-rotation/:id" element={<ShiftRotationFormPage />} />
+            <Route path="holiday/:id" element={<HolidayFormPage />} />
+            <Route path="attendance-scheme/:id" element={<AttendanceSchemeFormPage />} />
+            <Route path="ip-mapping/:id" element={<IPMappingFormPage />} />
+            <Route path="lock-config/:id" element={<LockConfigFormPage />} />
+            <Route path="permission/:id" element={<PermissionFormPage />} />
+            <Route path="regularization/:id" element={<RegularizationFormPage />} />
+            <Route path="attendance/record/:id" element={<AttendanceFormPage />} />
             <Route path="configuration/*" element={<ConfigMain />} />
             <Route path="processing/*" element={<ProcessingMain />} />
           </Routes>

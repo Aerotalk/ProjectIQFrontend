@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -118,7 +118,7 @@ export default function TemplateFormPage() {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <FormProvider {...form}>
             <form id="template-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="bg-white dark:bg-[#181a1f] rounded-lg border border-gray-200 dark:border-white/10 p-6 shadow-sm">

@@ -17,21 +17,25 @@ import { AttendanceStatus } from '../types';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
 import { Eye, Edit2, AlertCircle, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AttendanceCalendarProps {
   data: AttendanceRecord[];
   monthYear?: string;
-  onAction?: (record: AttendanceRecord, mode: 'view' | 'edit') => void;
 }
 
-const ActionMenu = ({ record, onAction }: { record: AttendanceRecord, onAction?: (record: AttendanceRecord, mode: 'view'|'edit') => void }) => {
+const ActionMenu = ({ record }: { record: AttendanceRecord }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
+
   return (
     <div onClick={(e) => e.stopPropagation()}>
       <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
          <div className="w-48 bg-white dark:bg-[#181a1f] rounded-sm shadow-lg border border-gray-200 dark:border-white/10 py-1 z-50 relative">
-            <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'view')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Eye size={14} /> View Details</button>
-            <button onClick={() => { setIsOpen(false); onAction && onAction(record, 'edit')}} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Edit2 size={14} /> Edit Attendance</button>
+            <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/attendance/record/${record.id}?mode=view`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Eye size={14} /> View Details</button>
+            <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/attendance/record/${record.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2"><Edit2 size={14} /> Edit Attendance</button>
             <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
             <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 dark:hover:bg-secondary/10 flex items-center gap-2"><AlertCircle size={14} /> Regularize</button>
             <button onClick={() => setIsOpen(false)} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2"><CheckCircle size={14} /> Mark Present</button>
@@ -43,7 +47,11 @@ const ActionMenu = ({ record, onAction }: { record: AttendanceRecord, onAction?:
   );
 };
 
-export default function AttendanceCalendar({ data, monthYear, onAction }: AttendanceCalendarProps) {
+export default function AttendanceCalendar({ data, monthYear }: AttendanceCalendarProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
+  
   const currentMonth = useMemo(() => {
     if (!monthYear) return new Date();
     const parsed = parse(monthYear, 'MMMM yyyy', new Date());
@@ -86,7 +94,7 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
         <div className="flex w-full justify-between items-start mb-1">
            <span className="font-semibold text-xs text-gray-900 dark:text-gray-100">{date.getDate()}</span>
            {/* Add empty div to keep spacing if no action menu is active */}
-           {record.status !== AttendanceStatus.Weekend ? <ActionMenu record={record} onAction={onAction} /> : <div className="w-5" />}
+           {record.status !== AttendanceStatus.Weekend ? <ActionMenu record={record} /> : <div className="w-5" />}
         </div>
 
         <div className="flex items-center gap-1.5 mb-1.5">
@@ -172,8 +180,8 @@ export default function AttendanceCalendar({ data, monthYear, onAction }: Attend
                   today && "bg-primary/5 dark:bg-secondary/5 ring-1 ring-inset ring-primary/30 dark:ring-secondary/30 z-10 rounded-[1px]"
                 )}
                 onClick={() => {
-                  if (record && onAction) {
-                    onAction(record, 'view');
+                  if (record) {
+                    navigate(`${basePath}/hrms/workforce/attendance/record/${record.id}?mode=view`);
                   }
                 }}
               >
