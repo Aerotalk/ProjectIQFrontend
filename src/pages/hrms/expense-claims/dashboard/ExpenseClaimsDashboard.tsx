@@ -59,23 +59,39 @@ export default function ExpenseClaimsDashboard() {
         { title: 'Pending Advances', value: pendingAdvances.toString(), icon: AlertCircle, color: 'text-yellow-500' },
       ]);
 
-      // Category data (mocking the categories for now if claim doesn't have it, but we can aggregate if they do)
-      // Since claim entity might not have a direct category string, we'll map by status for the pie chart temporarily
-      const drafts = validClaims.filter(c => c.status === 'Draft').length;
-      const pending = validClaims.filter(c => c.status === 'Pending').length;
-      const approved = validClaims.filter(c => c.status === 'Approved').length;
-      setCategoryData([
-        { name: 'Draft', value: drafts || 1 }, // fallbacks so chart renders
-        { name: 'Pending', value: pending || 1 },
-        { name: 'Approved', value: approved || 1 },
-      ]);
+      // Real Category grouping based on claim type/category
+      const categoryMap = new Map<string, number>();
+      validClaims.forEach(c => {
+        const catName = c.expenseCategory?.name || c.claimType || 'Uncategorized';
+        const amount = c.approvedAmount || c.totalClaimed || 0;
+        categoryMap.set(catName, (categoryMap.get(catName) || 0) + amount);
+      });
+      
+      const realCategoryData = Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value }));
+      if (realCategoryData.length === 0) {
+        realCategoryData.push({ name: 'No Claims', value: 1 });
+      }
+      setCategoryData(realCategoryData);
 
-      setTrendData([
-        { name: 'Jan', amount: 400 },
-        { name: 'Feb', amount: 300 },
-        { name: 'Mar', amount: 200 },
-        { name: 'Apr', amount: approvedAmount },
-      ]);
+      // Real Monthly Trend grouping based on claim creation/submission date
+      const trendMap = new Map<string, number>();
+      validClaims.forEach(c => {
+        const dateStr = c.createdAt || c.submittedAt || c.date;
+        if (dateStr) {
+          const date = new Date(dateStr);
+          const monthName = date.toLocaleString('default', { month: 'short' });
+          const amount = c.approvedAmount || c.totalClaimed || 0;
+          trendMap.set(monthName, (trendMap.get(monthName) || 0) + amount);
+        }
+      });
+      
+      // Sort by chronological order if possible, or just map them
+      const realTrendData = Array.from(trendMap.entries()).map(([name, amount]) => ({ name, amount }));
+      if (realTrendData.length === 0) {
+         // Empty state fallback for chart
+         realTrendData.push({ name: 'Current', amount: 0 });
+      }
+      setTrendData(realTrendData);
 
     } catch (e) {
       console.error('Failed to load dashboard data', e);
@@ -183,7 +199,7 @@ export default function ExpenseClaimsDashboard() {
               {claims.slice(0, 5).map((clm, i) => (
                 <tr key={i} className="border-b border-gray-200 dark:border-white/5 last:border-0 hover:bg-gray-50 dark:hover:bg-white/5">
                   <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{clm.claimNo || `CLM-${clm.id?.slice(0, 4)}`}</td>
-                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{clm.employee?.firstName ? `${clm.employee.firstName} ${clm.employee.lastName}` : 'John Doe'}</td>
+                  <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{clm.employee?.firstName ? `${clm.employee.firstName} ${clm.employee.lastName}` : 'Unknown Employee'}</td>
                   <td className="px-5 py-3 text-gray-900 dark:text-white">${(clm.totalClaimed || 0).toFixed(2)}</td>
                   <td className="px-5 py-3">
                     <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full dark:bg-yellow-900/30 dark:text-yellow-400">{clm.status || 'Pending'}</span>

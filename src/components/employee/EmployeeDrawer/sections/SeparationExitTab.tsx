@@ -50,7 +50,7 @@ export default function SeparationExitTab({ readOnly }: Props) {
           </div>
           <div>
             <label className={formStyles.label}>Notice Period Served (Days)</label>
-            <Input type="number" {...register('exitNoticePeriod', { valueAsNumber: true })} disabled={readOnly} />
+            <Input type="number" {...register('exitNoticePeriod', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
           </div>
 
           {/* Reason — full width */}

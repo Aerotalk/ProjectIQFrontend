@@ -148,7 +148,7 @@ export default function LineItemsSection({ readOnly }: Props) {
                       type="number" 
                       step={unitConfig.step} 
                       min={unitConfig.min} 
-                      {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} 
+                      {...register(`lineItems.${index}.quantity`, { setValueAs: (v) => v === "" || isNaN(v) ? undefined : Number(v) })} 
                       onKeyDown={(e) => {
                         if (unitConfig.isDiscrete && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
                           e.preventDefault();
@@ -162,7 +162,7 @@ export default function LineItemsSection({ readOnly }: Props) {
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
                   </td>
                   <td className="px-2 py-1.5 align-top">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { setValueAs: (v) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-2 py-1.5 align-top">
                     <div className="flex items-stretch rounded-sm shadow-sm group/disc border border-gray-300 dark:border-white/10 overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
@@ -180,21 +180,20 @@ export default function LineItemsSection({ readOnly }: Props) {
                             <option value="FLAT">₹</option>
                             <option value="PERCENTAGE">%</option>
                           </select>
-
                         )}
                       />
                       <input 
                         type="number" 
                         step="0.01" 
                         placeholder="0"
-                        {...register(`lineItems.${index}.discount`, { valueAsNumber: true })} 
+                        {...register(`lineItems.${index}.discount`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} 
                         disabled={readOnly} 
                         className="w-full px-2 py-1.5 text-sm bg-white dark:bg-[#0f1115] outline-none text-gray-900 dark:text-white min-w-0"
                       />
                     </div>
                   </td>
                   <td className="px-2 py-1.5 align-top">
-                    <input type="number" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <input type="number" {...register(`lineItems.${index}.gstRate`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-2 py-1.5 text-right align-top">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white block mt-2">

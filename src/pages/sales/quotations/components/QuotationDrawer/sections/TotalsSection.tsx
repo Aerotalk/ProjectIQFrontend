@@ -120,7 +120,7 @@ export default function TotalsSection({ readOnly }: Props) {
             <span className="text-gray-500">₹</span>
             <input 
               type="number" 
-              {...useFormContext().register('deliveryCost', { valueAsNumber: true })}
+              {...useFormContext().register('deliveryCost', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
               disabled={readOnly}
               className={cn(formStyles.field(false, readOnly), "w-24 text-right py-1 hide-arrows")}
               min="0"

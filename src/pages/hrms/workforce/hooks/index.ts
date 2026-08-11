@@ -119,14 +119,30 @@ export const useDashboardKPIs = () => {
         const pendingRequests = leaveDataRaw.filter((l: any) => l.status === 'Pending').length;
         const regularization = regData.filter((r: any) => r.status === 'Pending').length;
 
-        // Mock trend data for UI since we can't easily build 7 days trend from just a flat list without proper dates
-        const trendData = [
-          { name: 'Mon', Present: Math.max(0, present - 5), Absent: absent + 1 },
-          { name: 'Tue', Present: Math.max(0, present - 2), Absent: absent },
-          { name: 'Wed', Present: present, Absent: absent },
-          { name: 'Thu', Present: Math.max(0, present - 3), Absent: absent + 2 },
-          { name: 'Fri', Present: present, Absent: absent },
-        ];
+        // Real Trend Data: aggregate last 7 days from attendance records
+        const last7Days = [...Array(7)].map((_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (6 - i));
+          return d;
+        });
+
+        const trendData = last7Days.map(dateObj => {
+          const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+          const dateStr = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD for matching
+
+          let dayPresent = 0;
+          let dayAbsent = 0;
+
+          attendanceData.forEach((a: any) => {
+            // Check if record date matches our target date
+            if (a.date && a.date.startsWith(dateStr)) {
+              if (a.status === 'Present') dayPresent++;
+              else if (a.status === 'Absent') dayAbsent++;
+            }
+          });
+
+          return { name: dayName, Present: dayPresent, Absent: dayAbsent };
+        });
 
         const leaveData = [
           { name: 'Sick', value: leaveDataRaw.filter((l: any) => l.leaveType?.name === 'Sick').length || 1 },

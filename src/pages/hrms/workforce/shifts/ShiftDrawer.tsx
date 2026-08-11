@@ -114,17 +114,17 @@ export default function ShiftDrawer({ isOpen, onClose, mode, initialData, onSave
 
                   <FormGrid>
                     <FormField label="Grace Time (Minutes)" error={errors.graceTime?.message}>
-                      <Input type="number" {...register('graceTime', { valueAsNumber: true })} disabled={readOnly} className={errors.graceTime ? 'border-red-500' : ''} />
+                      <Input type="number" {...register('graceTime', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={errors.graceTime ? 'border-red-500' : ''} />
                     </FormField>
                   </FormGrid>
 
-                  <FormGrid>
-                    <FormField label="Half Day Hours" error={errors.halfDayHours?.message}>
-                      <Input type="number" step="0.1" {...register('halfDayHours', { valueAsNumber: true })} disabled={readOnly} className={errors.halfDayHours ? 'border-red-500' : ''} />
+                  <FormGrid columns={2}>
+                    <FormField label="Half Day Hours" error={errors.halfDayHours?.message} required>
+                      <Input type="number" step="0.1" {...register('halfDayHours', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={errors.halfDayHours ? 'border-red-500' : ''} />
                     </FormField>
-
-                    <FormField label="Full Day Hours" error={errors.fullDayHours?.message}>
-                      <Input type="number" step="0.1" {...register('fullDayHours', { valueAsNumber: true })} disabled={readOnly} className={errors.fullDayHours ? 'border-red-500' : ''} />
+                    
+                    <FormField label="Full Day Hours" error={errors.fullDayHours?.message} required>
+                      <Input type="number" step="0.1" {...register('fullDayHours', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={errors.fullDayHours ? 'border-red-500' : ''} />
                     </FormField>
                   </FormGrid>
 

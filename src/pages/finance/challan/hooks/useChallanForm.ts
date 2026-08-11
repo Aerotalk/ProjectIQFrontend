@@ -29,7 +29,7 @@ export const useChallanForm = (defaultValues?: Partial<ChallanFormValues>) => {
       lineItems: [],
       ...defaultValues,
     },
-    mode: 'onTouched',
+    mode: 'onChange',
   });
 
   return form;

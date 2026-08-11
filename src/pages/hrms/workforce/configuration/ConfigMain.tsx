@@ -3,7 +3,6 @@ import Tabs from '../../../../components/Tabs';
 import HolidayLists from './HolidayLists';
 import AttendanceSchemes from './AttendanceSchemes';
 import WeekendRules from './WeekendRules';
-import IPMapping from './IPMapping';
 
 export default function ConfigMain() {
   const [activeTab, setActiveTab] = useState('holidays');
@@ -12,7 +11,7 @@ export default function ConfigMain() {
     { id: 'holidays', label: 'Holiday Lists' },
     { id: 'schemes', label: 'Attendance Schemes' },
     { id: 'weekends', label: 'Weekend Rules' },
-    { id: 'ips', label: 'IP Mapping' },
+    // { id: 'ips', label: 'IP Mapping' },
   ];
 
   const renderContent = () => {
@@ -20,7 +19,7 @@ export default function ConfigMain() {
       case 'holidays': return <HolidayLists />;
       case 'schemes': return <AttendanceSchemes />;
       case 'weekends': return <WeekendRules />;
-      case 'ips': return <IPMapping />;
+      // case 'ips': return <IPMapping />;
       default: return null;
     }
   };

@@ -261,6 +261,7 @@ export default function FinanceDashboard() {
                 dy={10}
               />
               <YAxis 
+                width={80}
                 tick={{ fontSize: 11, fill: '#6b7280' }} 
                 axisLine={false} 
                 tickLine={false} 

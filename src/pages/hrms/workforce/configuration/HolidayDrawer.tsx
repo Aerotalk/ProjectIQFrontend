@@ -74,7 +74,7 @@ export default function HolidayDrawer({ isOpen, onClose, mode, initialData, onSa
                     </FormField>
 
                     <FormField label="Year" error={errors.year?.message} required>
-                      <Input type="number" {...register('year', { valueAsNumber: true })} disabled={readOnly} className={errors.year ? 'border-red-500' : ''} />
+                      <Input type="number" {...register('year', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={errors.year ? 'border-red-500' : ''} />
                     </FormField>
                   </FormGrid>
                 </FormSection>

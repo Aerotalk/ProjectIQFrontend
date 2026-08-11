@@ -46,11 +46,11 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
           {/* Row: Annual CTC | Increment % */}
           <div>
             <label className={formStyles.label}>Annual CTC</label>
-            <Input type="number" step="0.01" {...register('revisionAnnualCTC', { valueAsNumber: true })} disabled={readOnly} />
+            <Input type="number" step="0.01" {...register('revisionAnnualCTC', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
           </div>
           <div>
-            <label className={formStyles.label}>Increment %</label>
-            <Input type="number" step="0.01" {...register('revisionIncrementPercentage', { valueAsNumber: true })} disabled={readOnly} />
+            <label className={formStyles.label}>Increment Percentage (%)</label>
+            <Input type="number" step="0.01" {...register('revisionIncrementPercentage', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
           </div>
 
           {/* Salary Components — full width */}

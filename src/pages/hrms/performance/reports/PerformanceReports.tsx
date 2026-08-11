@@ -33,12 +33,12 @@ export default function PerformanceReports() {
             data.totalEmployees.add(empId);
             if (g.status === 'Completed' || g.progress >= 100) {
               data.completed++;
-              data.totalRating += 5; // mock 5 for completed
+              data.totalRating += (g.rating || (g.progress / 20)); // scale 100 to 5
             } else if (g.progress < 50 && g.status !== 'Draft') {
               data.needsImprovement++;
-              data.totalRating += 2; // mock 2 for needs improvement
+              data.totalRating += (g.rating || (g.progress / 20)); 
             } else {
-              data.totalRating += 3.5; // avg
+              data.totalRating += (g.rating || (g.progress / 20) || 3.5); 
             }
           });
 

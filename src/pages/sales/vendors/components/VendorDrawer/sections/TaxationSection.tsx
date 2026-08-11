@@ -19,7 +19,7 @@ export default function TaxationSection({ readOnly }: Props) {
           <input 
             type="number" 
             step="0.01"
-            {...register('tdsPercentage', { valueAsNumber: true })} 
+            {...register('tdsPercentage', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
             disabled={readOnly}
             className={cn(formStyles.field(false, readOnly), "hide-arrows")}
           />

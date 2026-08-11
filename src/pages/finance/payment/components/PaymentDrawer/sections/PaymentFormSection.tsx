@@ -130,7 +130,7 @@ export default function PaymentFormSection({ readOnly, nextNumber }: Props) {
             <input
               type="number"
               step="0.01"
-              {...register('amountPaid', { valueAsNumber: true })}
+              {...register('amountPaid', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
               disabled={readOnly}
               placeholder="0.00"
               className={formStyles.field(!!errors.amountPaid, readOnly)}

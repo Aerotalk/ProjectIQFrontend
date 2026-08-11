@@ -23,6 +23,7 @@ interface Props {
   mode: 'create' | 'edit' | 'view';
   initialData?: Partial<PayrollFormValues>;
   isSubmitting?: boolean;
+  initialStep?: number;
 }
 
 const STEPS = [
@@ -42,7 +43,7 @@ const STEPS = [
 
 import WorkflowStepper from '../../WorkflowStepper';
 
-export default function PayrollDrawer({ isOpen, onClose, onSave, mode, initialData, isSubmitting }: Props) {
+export default function PayrollDrawer({ isOpen, onClose, onSave, mode, initialData, isSubmitting, initialStep = 0 }: Props) {
   const form = usePayrollForm(initialData);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -53,9 +54,9 @@ export default function PayrollDrawer({ isOpen, onClose, onSave, mode, initialDa
       } else {
         form.reset();
       }
-      setCurrentStep(0);
+      setCurrentStep(initialStep);
     }
-  }, [isOpen, initialData, mode]);
+  }, [isOpen, initialData, mode, initialStep]);
 
   if (!isOpen) return null;
 

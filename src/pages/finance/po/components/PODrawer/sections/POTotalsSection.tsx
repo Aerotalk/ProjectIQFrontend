@@ -134,7 +134,7 @@ export default function POTotalsSection({ readOnly }: Props) {
             <span className="text-gray-500">₹</span>
             <input 
               type="number" 
-              {...register('deliveryCost', { valueAsNumber: true })}
+              {...register('deliveryCost', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
               disabled={readOnly}
               className={cn(formStyles.field(false, readOnly), "w-24 px-2 py-1 text-right hide-arrows h-8")}
               min="0"

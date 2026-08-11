@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Plus, Save, Trash2, CheckCircle2, Loader2, Eye } from 'lucide-react';
 import { api } from '../lib/api';
@@ -91,9 +91,9 @@ export default function CompanyProfile() {
   const [invoiceLogoFile, setInvoiceLogoFile] = useState<File | null>(null);
   const [stampFile, setStampFile] = useState<File | null>(null);
 
-  const countries = Country.getAllCountries();
-  const selectedCountryCode = countries.find(c => c.name === (formData.country || 'India'))?.isoCode || 'IN';
-  const statesList = State.getStatesOfCountry(selectedCountryCode);
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const selectedCountryCode = useMemo(() => countries.find(c => c.name === (formData.country || 'India'))?.isoCode || 'IN', [countries, formData.country]);
+  const statesList = useMemo(() => State.getStatesOfCountry(selectedCountryCode), [selectedCountryCode]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);

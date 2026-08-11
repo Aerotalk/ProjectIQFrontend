@@ -43,7 +43,7 @@ export default function CommercialSection({ readOnly }: Props) {
           <label className={formStyles.label}>Credit Limit (₹)</label>
           <input 
             type="number" 
-            {...register('creditLimit', { valueAsNumber: true })} 
+            {...register('creditLimit', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
             disabled={readOnly}
             className={formStyles.field(false, readOnly)} 
           />

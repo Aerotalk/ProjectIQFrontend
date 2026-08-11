@@ -186,7 +186,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
             <input
               type="number"
               step="0.01"
-              {...register('amount', { valueAsNumber: true })}
+              {...register('amount', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
               disabled={readOnly}
               placeholder="0.00"
               className={cn(formStyles.field(!!errors.amount, readOnly), "hide-arrows")}
@@ -238,7 +238,7 @@ export default function ExpenseFormSection({ readOnly, nextNumber }: Props) {
                     <input
                       type="number"
                       step="0.01"
-                      {...register('gstAmount', { valueAsNumber: true })}
+                      {...register('gstAmount', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
                       disabled={readOnly}
                       placeholder="0.00"
                       className={cn(formStyles.field(!!errors.gstAmount, readOnly), "hide-arrows")}

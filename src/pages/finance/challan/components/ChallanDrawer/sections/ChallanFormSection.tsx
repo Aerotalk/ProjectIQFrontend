@@ -462,7 +462,7 @@ export default function ChallanFormSection({ readOnly, nextNumber }: Props) {
                       type="number"
                       step="0.01"
                       min="0"
-                      {...register(`lineItems.${index}.dispatchedQuantity`, { valueAsNumber: true })}
+                      {...register(`lineItems.${index}.dispatchedQuantity`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
                       disabled={readOnly}
                       className={cn(formStyles.field(false, readOnly), "py-1.5")}
                     />

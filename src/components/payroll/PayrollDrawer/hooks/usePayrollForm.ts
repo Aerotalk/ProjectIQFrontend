@@ -60,14 +60,11 @@ export function usePayrollForm(initialData?: Partial<PayrollFormValues>) {
         items: [],
       },
       payrollConfiguration: {
-        taxable: false,
-        proRata: false,
-        partOfCTC: false,
-        partOfGross: false,
+        components: [],
         setAsDefault: false,
       },
       ...initialData,
     },
-    mode: 'onTouched',
+    mode: 'onChange',
   });
 }

@@ -22,7 +22,7 @@ export const usePOForm = (defaultValues?: Partial<POFormValues>) => {
       attachmentName: '',
       ...defaultValues,
     },
-    mode: 'onTouched',
+    mode: 'onChange',
   });
 
   const { control, setValue } = form;

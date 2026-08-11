@@ -19,7 +19,7 @@ interface Props {
   onClose: () => void;
   mode: 'create' | 'edit' | 'view';
   initialData?: any;
-  onSave: (data: LeaveSchemeValues) => Promise<void>;
+  onSave: (data: any) => Promise<void>;
 }
 
 export default function LeaveSchemeDrawer({ isOpen, onClose, mode, initialData, onSave }: Props) {
@@ -76,7 +76,7 @@ export default function LeaveSchemeDrawer({ isOpen, onClose, mode, initialData, 
                     </FormField>
                     
                     <FormField label="Rules Count" error={errors.rulesCount?.message}>
-                      <Input type="number" {...register('rulesCount', { valueAsNumber: true })} disabled={readOnly} placeholder="e.g. 2" className={errors.rulesCount ? 'border-red-500' : ''} />
+                      <Input type="number" {...register('rulesCount', { setValueAs: (v) => v === "" || isNaN(v) ? 0 : Number(v) })} disabled={readOnly} placeholder="e.g. 2" className={errors.rulesCount ? 'border-red-500' : ''} />
                     </FormField>
 
                     <FormField label="Default Scheme" error={errors.defaultScheme?.message}>

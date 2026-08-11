@@ -77,7 +77,7 @@ export default function LockConfigDrawer({ isOpen, onClose, mode, initialData, o
                     </FormField>
 
                     <FormField label="Lock Days" error={errors.lockDays?.message} required>
-                      <Input type="number" {...register('lockDays', { valueAsNumber: true })} disabled={readOnly} placeholder="e.g. 5" className={errors.lockDays ? 'border-red-500' : ''} />
+                      <Input type="number" {...register('lockDays', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} placeholder="e.g. 5" className={errors.lockDays ? 'border-red-500' : ''} />
                     </FormField>
 
                     <FormField label="Status" error={errors.active?.message}>

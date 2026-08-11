@@ -20,7 +20,7 @@ interface Props {
   onClose: () => void;
   mode: 'create' | 'edit' | 'view';
   initialData?: any;
-  onSave: (data: LeaveTypeValues) => Promise<void>;
+  onSave: (data: any) => Promise<void>;
 }
 
 export default function LeaveTypeDrawer({ isOpen, onClose, mode, initialData, onSave }: Props) {
@@ -68,7 +68,22 @@ export default function LeaveTypeDrawer({ isOpen, onClose, mode, initialData, on
         {/* Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
           <FormProvider {...form}>
-            <form id="leave-type-form" onSubmit={handleSubmit(onSave)}>
+            <form id="leave-type-form" onSubmit={handleSubmit((data) => {
+              onSave({
+                ...data,
+                color: '#3b82f6',
+                icon: 'FileText',
+                requiresApproval: true,
+                requiresAttachment: false,
+                minimumDays: 0.5,
+                maximumDays: 30,
+                probationAllowed: true,
+                noticePeriodRequired: 0,
+                allowHalfDay: true,
+                allowHourlyLeave: false,
+                unit: 'Days'
+              });
+            })}>
               <FormLayout>
                 <FormSection title="Basic Details">
                   <FormGrid columns={1}>

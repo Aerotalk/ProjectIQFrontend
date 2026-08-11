@@ -154,7 +154,7 @@ export default function POLineItemsSection({ readOnly }: Props) {
                       type="number" 
                       step={unitConfig.step} 
                       min={unitConfig.min} 
-                      {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })} 
+                      {...register(`lineItems.${index}.quantity`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} 
                       onKeyDown={(e) => {
                         if (unitConfig.isDiscrete && (e.key === '.' || e.key === 'e' || e.key === 'E')) {
                           e.preventDefault();
@@ -168,10 +168,10 @@ export default function POLineItemsSection({ readOnly }: Props) {
                     <input type="text" {...register(`lineItems.${index}.unit`)} disabled={readOnly} className={`${cellClass} !bg-gray-50 dark:!bg-white/[0.02]`} readOnly />
                   </td>
                   <td className="px-2 py-1.5 align-top">
-                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { valueAsNumber: true })} disabled={readOnly} className={`${cellClass} ${lineErrors?.rate ? 'border-red-400' : ''}`} />
+                    <input type="number" step="0.01" {...register(`lineItems.${index}.rate`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={`${cellClass} ${lineErrors?.rate ? 'border-red-400' : ''}`} />
                   </td>
                   <td className="px-2 py-1.5 align-top">
-                    <input type="number" step="0.01" min="0" {...register(`lineItems.${index}.gstRate`, { valueAsNumber: true })} disabled={readOnly} className={cellClass} />
+                    <input type="number" step="0.01" min="0" {...register(`lineItems.${index}.gstRate`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} className={cellClass} />
                   </td>
                   <td className="px-2 py-1.5 align-top text-right">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">

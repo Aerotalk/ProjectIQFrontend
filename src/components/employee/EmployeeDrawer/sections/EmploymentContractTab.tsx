@@ -75,11 +75,11 @@ export default function EmploymentContractTab({ readOnly }: Props) {
           {/* Row: Annual CTC | Notice Period */}
           <div>
             <label className={formStyles.label}>Annual CTC</label>
-            <Input type="number" step="0.01" {...register('contractAnnualCTC', { valueAsNumber: true })} disabled={readOnly} />
+            <Input type="number" step="0.01" {...register('contractAnnualCTC', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
           </div>
           <div>
             <label className={formStyles.label}>Notice Period (Days)</label>
-            <Input type="number" {...register('contractNoticePeriod', { valueAsNumber: true })} disabled={readOnly} />
+            <Input type="number" {...register('contractNoticePeriod', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
           </div>
 
           {/* Contract Terms — full width */}

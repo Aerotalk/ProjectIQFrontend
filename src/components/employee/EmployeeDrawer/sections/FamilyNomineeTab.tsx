@@ -98,7 +98,7 @@ export default function FamilyNomineeTab({ readOnly }: Props) {
  </div>
  <div>
  <label className={formStyles.label}>Nominee %</label>
- <Input type="number" step="1" max="100" min="0" {...register(`families.${index}.nomineePercentage`, { valueAsNumber: true })} disabled={readOnly} />
+ <Input type="number" step="1" max="100" min="0" {...register(`families.${index}.nomineePercentage`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
  </div>
 
  {/* Checkboxes — full width */}

@@ -1,12 +1,6 @@
+import { useState, useEffect } from 'react';
 import CustomSelect, { type SelectOption } from '../ui/CustomSelect';
-
-const MOCK_DEPARTMENTS = [
-  { id: 'dept-1', name: 'Engineering', head: 'John Doe' },
-  { id: 'dept-2', name: 'Human Resources', head: 'Emily Davis' },
-  { id: 'dept-3', name: 'Sales', head: 'Mark Wilson' },
-  { id: 'dept-4', name: 'Marketing', head: 'Sarah Taylor' },
-  { id: 'dept-5', name: 'Finance', head: 'James Anderson' },
-];
+import { api } from '../../lib/api';
 
 interface DepartmentSelectorProps {
   value: string;
@@ -17,21 +11,43 @@ interface DepartmentSelectorProps {
 }
 
 export default function DepartmentSelector({ value, onChange, disabled, className, placeholder = 'Select Department' }: DepartmentSelectorProps) {
-  const options: SelectOption[] = MOCK_DEPARTMENTS.map(dept => ({
-    label: dept.name,
-    value: dept.id,
-    subtitle: `Head: ${dept.head}`,
-    subLabel: dept.id
-  }));
+  const [departments, setDepartments] = useState<SelectOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchDepartments = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/admin/departments');
+        if (mounted && Array.isArray(response)) {
+          setDepartments(response.map(dept => ({
+            label: dept.departmentName || 'Unknown Department',
+            value: dept.id,
+            subtitle: dept.departmentHead?.firstName 
+              ? `Head: ${dept.departmentHead.firstName} ${dept.departmentHead.lastName}` 
+              : 'No Head Assigned',
+            subLabel: dept.id
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch departments:', error);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+    fetchDepartments();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <CustomSelect
-      options={options}
+      options={departments}
       value={value}
       onChange={onChange}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       className={className}
-      placeholder={placeholder}
+      placeholder={isLoading ? 'Loading...' : placeholder}
     />
   );
 }

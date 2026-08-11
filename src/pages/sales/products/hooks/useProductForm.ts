@@ -16,7 +16,7 @@ export const useProductForm = (defaultValues?: Partial<ProductFormValues>) => {
       description: '',
       ...defaultValues
     },
-    mode: 'onTouched'
+    mode: 'onChange'
   });
 
   return form;

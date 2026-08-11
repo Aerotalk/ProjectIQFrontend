@@ -34,7 +34,7 @@ export default function PricingSection({ readOnly }: Props) {
             type="number"
             step="0.01"
             placeholder="0.00"
-            {...register('standardRate', { valueAsNumber: true })}
+            {...register('standardRate', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
             disabled={readOnly}
             className={cn(formStyles.field(!!errors.standardRate, readOnly), "hide-arrows")}
           />

@@ -371,7 +371,7 @@ export default function BasicInfoTab({ readOnly }: Props) {
           </div>
           <div>
             <label className={formStyles.label}>Notice Period (Days) *</label>
-            <Input type="number" {...register('noticePeriodDays', { valueAsNumber: true })} disabled={readOnly} />
+            <Input type="number" {...register('noticePeriodDays', { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })} disabled={readOnly} />
             {errors.noticePeriodDays && <p className="text-red-500 text-xs mt-1">{errors.noticePeriodDays.message as string}</p>}
           </div>
         </FormGrid>

@@ -1,4 +1,4 @@
-import { FileText, Edit, UserCheck, CheckCircle2, Send, Trophy, ChevronDown, ArrowUpRight } from 'lucide-react';
+import { FileText, Edit, UserCheck, CheckCircle2, Send, Trophy, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ export default function SalesDashboard() {
   const [trendQuarter, setTrendQuarter] = useState<string>('All');
   const [pipelineYear, setPipelineYear] = useState<number>(new Date().getFullYear());
   const [pipelineQuarter, setPipelineQuarter] = useState<string>('All');
+  const [topClientsRange, setTopClientsRange] = useState<string>('This Month');
   
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +97,17 @@ export default function SalesDashboard() {
   });
 
   const topClients = clients.map((c) => {
-    const clientQuotations = quotations.filter(q => q.clientId === c.id && ['Accepted', 'Confirmed Lead', 'Converted'].includes(q.status));
+    const clientQuotations = quotations.filter(q => {
+      if (q.clientId !== c.id || !['Accepted', 'Confirmed Lead', 'Converted'].includes(q.status)) return false;
+      if (topClientsRange === 'All') return true;
+      const dateStr = q.date || q.createdAt;
+      if (!dateStr) return false;
+      const qDate = new Date(dateStr);
+      const now = new Date();
+      if (topClientsRange === 'This Month') return qDate.getMonth() === now.getMonth() && qDate.getFullYear() === now.getFullYear();
+      if (topClientsRange === 'This Year') return qDate.getFullYear() === now.getFullYear();
+      return true;
+    });
     const totalSales = clientQuotations.reduce((acc, q) => acc + (q.grandTotal || 0), 0);
     return {
       name: c.companyName || c.displayName || 'Unknown Client',
@@ -201,6 +212,7 @@ export default function SalesDashboard() {
                 dy={10}
               />
               <YAxis 
+                width={80}
                 tick={{ fontSize: 11, fill: '#6b7280' }} 
                 axisLine={false} 
                 tickLine={false} 
@@ -264,6 +276,7 @@ export default function SalesDashboard() {
                 dy={10}
               />
               <YAxis 
+                width={80}
                 tick={{ fontSize: 11, fill: '#6b7280' }} 
                 axisLine={false} 
                 tickLine={false} 
@@ -328,9 +341,16 @@ export default function SalesDashboard() {
         <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/5 flex flex-col shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white">Top Clients</h2>
-            <button className="flex items-center gap-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-              This Month <ChevronDown size={14} />
-            </button>
+            <CustomSelect
+              value={topClientsRange}
+              onChange={setTopClientsRange}
+              className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 px-2 py-1 min-h-0 h-auto rounded-sm border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 w-32"
+              options={[
+                { label: 'This Month', value: 'This Month' },
+                { label: 'This Year', value: 'This Year' },
+                { label: 'All Time', value: 'All' }
+              ]}
+            />
           </div>
           
           <div className="space-y-4 flex-1">

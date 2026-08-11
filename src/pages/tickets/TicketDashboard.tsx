@@ -11,28 +11,9 @@ import { TicketService } from '../../services/ticket.service';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const trendData = [
-  { name: 'May 12', created: 40, resolved: 24 },
-  { name: 'May 13', created: 30, resolved: 13 },
-  { name: 'May 14', created: 20, resolved: 38 },
-  { name: 'May 15', created: 27, resolved: 39 },
-  { name: 'May 16', created: 18, resolved: 48 },
-  { name: 'May 17', created: 23, resolved: 38 },
-  { name: 'May 18', created: 34, resolved: 43 },
-];
-
-const recentActivities = [
-  { id: 1, text: 'Ticket #TK-100245 updated to In Progress', time: '10m ago', type: 'update' },
-  { id: 2, text: 'New ticket #TK-100289 created', time: '35m ago', type: 'create' },
-  { id: 3, text: 'Ticket #TK-100121 resolved', time: '1h ago', type: 'resolve' },
-  { id: 4, text: 'SLA breached for Ticket #TK-100175', time: '2h ago', type: 'breach' },
-];
-
-
-
 export default function TicketDashboard() {
   const [trendRange, setTrendRange] = useState('Last 7 Days');
-  const { selectedCompanyId: companyId } = useAuth();
+  const { selectedCompanyId: companyId, user } = useAuth();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<any[]>([]);
 
@@ -41,7 +22,7 @@ export default function TicketDashboard() {
       if (!companyId) return;
       try {
         const data = await TicketService.getAll(companyId);
-        setTickets(data);
+        setTickets(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to fetch tickets:', err);
       }
@@ -52,9 +33,47 @@ export default function TicketDashboard() {
   const openTicketsCount = tickets.filter(t => t.state === 'Open' || t.state === 'New').length;
   const inProgressCount = tickets.filter(t => t.state === 'In Progress').length;
   const closedCount = tickets.filter(t => t.state === 'Resolved' || t.state === 'Closed').length;
-  // SLA breach is mock for now since it might require complex date math
-  const slaBreachedCount = 0; 
-  const assignedToMeCount = 0; // Mock until user tracking is complete
+  
+  // Real SLA calculations (assuming backend provides slaStatus or breach timestamp)
+  const slaBreachedCount = tickets.filter(t => t.slaStatus === 'Breached' || (t.slaDeadline && new Date(t.slaDeadline) < new Date())).length; 
+  
+  // Real Assigned to me
+  // @ts-ignore
+  const currentUserName = user?.name || user?.displayName || user?.email;
+  const assignedToMeCount = tickets.filter(t => t.assignedTo === currentUserName || t.assignedToId === user?.id).length;
+
+  // Real Trend Data (grouping by last 7 days)
+  const last7Days = [...Array(7)].map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+
+  const realTrendData = last7Days.map(dateStr => {
+    let created = 0;
+    let resolved = 0;
+    tickets.forEach(t => {
+      const createdDate = t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+      const resolvedDate = t.resolvedAt ? new Date(t.resolvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+      if (createdDate === dateStr) created++;
+      if (resolvedDate === dateStr) resolved++;
+    });
+    return { name: dateStr, created, resolved };
+  });
+
+  // Real Recent Activities from latest updated tickets
+  const realActivities = [...tickets]
+    .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
+    .slice(0, 5)
+    .map((t, idx) => {
+      const isNew = new Date(t.updatedAt).getTime() - new Date(t.createdAt).getTime() < 1000;
+      return {
+        id: idx,
+        text: isNew ? `New ticket #${t.ticketNo || t.id} created` : `Ticket #${t.ticketNo || t.id} updated to ${t.state || 'In Progress'}`,
+        time: t.updatedAt ? new Date(t.updatedAt).toLocaleString() : 'Just now',
+        type: isNew ? 'create' : (t.state === 'Resolved' ? 'resolve' : 'update')
+      };
+    });
 
   const displayTickets = tickets.slice(0, 5).map(t => ({
     id: t.ticketNo || t.id,
@@ -118,7 +137,7 @@ export default function TicketDashboard() {
           </div>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={realTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#792359" stopOpacity={0.3}/>
@@ -146,7 +165,7 @@ export default function TicketDashboard() {
         <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm lg:col-span-1">
           <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Recent Activities</h3>
           <div className="space-y-5">
-            {recentActivities.map((act) => (
+            {realActivities.map((act) => (
               <div key={act.id} className="flex gap-4">
                 <div className="mt-0.5">
                   {act.type === 'update' && <div className="w-2 h-2 rounded-full bg-blue-500 ring-4 ring-blue-50 dark:ring-blue-900/20"></div>}

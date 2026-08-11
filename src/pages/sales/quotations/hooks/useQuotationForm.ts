@@ -21,7 +21,7 @@ export const useQuotationForm = (defaultValues?: Partial<QuotationFormValues>) =
       taxType: 'CGST_SGST',
       ...defaultValues
     },
-    mode: 'onTouched'
+    mode: 'onChange'
   });
 
   const { control, setValue } = form;

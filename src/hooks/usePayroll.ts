@@ -22,6 +22,7 @@ export interface PayrollFilters {
 }
 
 export function usePayroll() {
+  const [payrollRuns, setPayrollRuns] = useState<any[]>([]);
   const [payrolls, setPayrolls] = useState<PayrollRecord[]>([]);
   const [employees, setEmployees] = useState<{id: string, name: string, empId: string}[]>([]);
   const [departments, setDepartments] = useState<{id: string, name: string}[]>([]);
@@ -83,12 +84,14 @@ export function usePayroll() {
         });
       }
 
+      setPayrollRuns(apiRuns);
       setPayrolls(mappedPayrolls);
       setEmployees(employeesData);
       setDepartments(deptsData);
     } catch (error) {
       console.error('Failed to fetch payroll data', error);
       setPayrolls([]);
+      setPayrollRuns([]);
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +129,7 @@ export function usePayroll() {
   return {
     payrolls: filteredPayrolls,
     allPayrolls: payrolls,
+    payrollRuns,
     employees,
     departments,
     isLoading,
