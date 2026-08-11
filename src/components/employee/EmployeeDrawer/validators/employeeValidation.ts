@@ -141,7 +141,11 @@ const baseEmployeeFormSchema = z.object({
   revisionEffectiveDate: z.string().optional(),
   revisionAnnualCTC: z.number().optional(),
   revisionIncrementPercentage: z.number().optional(),
-  revisionSalaryComponents: z.string().optional(),
+  revisionSalaryComponents: z.array(z.object({
+    componentName: z.string().min(1, 'Name is required'),
+    percentage: z.number().optional(),
+    amount: z.number().optional()
+  })).optional(),
   revisionReason: z.string().optional(),
 
   // Tab 10 - Education

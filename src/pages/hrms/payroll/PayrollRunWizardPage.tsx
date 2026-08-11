@@ -56,14 +56,10 @@ export default function PayrollRunWizardPage() {
     setEligibilityChecked(false);
     
     try {
-      // Fetch all payroll configurations from backend to see who is missing them
-      const configsRes = await api.get('/hrms/payroll/configurations').catch(() => []);
-      const configs = Array.isArray(configsRes) ? configsRes : (configsRes.data || []);
+      // Fetch eligibility checklist from backend (checks Salary, Bank, and Statutory configurations)
+      const eligibilityRes = await api.get('/hrms/payroll/eligibility-check').catch(() => []);
+      const missing = Array.isArray(eligibilityRes) ? eligibilityRes : (eligibilityRes.data || []);
       
-      const configEmpIds = new Set(configs.map((c: any) => c.employee?.id || c.empId));
-      
-      // Find employees without a configuration
-      const missing = employees.filter(emp => !configEmpIds.has(emp.id));
       setMissingDataEmployees(missing);
       setEligibilityChecked(true);
       
@@ -92,7 +88,7 @@ export default function PayrollRunWizardPage() {
     
     // Block if missing data
     if (missingDataEmployees.length > 0) {
-      toast.error('Cannot run payroll. Some employees are missing salary configurations.');
+      toast.error('Cannot run payroll. Some employees are missing mandatory setup steps.');
       return;
     }
     
@@ -159,7 +155,7 @@ export default function PayrollRunWizardPage() {
                         <div>
                           <h4 className="font-semibold text-base mb-1">Payroll Run Blocked</h4>
                           <p className="text-sm">
-                            {missingDataEmployees.length} employee(s) are missing base salary configurations or PAN details. 
+                            {missingDataEmployees.length} employee(s) are missing mandatory setup steps (Salary Configuration, Bank Details, or Statutory info). 
                             You must configure their details in the Employee Directory before processing this batch to ensure compliance.
                           </p>
                         </div>
@@ -179,7 +175,9 @@ export default function PayrollRunWizardPage() {
                               <tr key={emp.id} className="bg-white dark:bg-[#181a1f]">
                                 <td className="px-4 py-3 text-gray-900 dark:text-white">{emp.name}</td>
                                 <td className="px-4 py-3 text-gray-500">{emp.empId}</td>
-                                <td className="px-4 py-3 text-red-600 dark:text-red-400">Missing Salary Configuration</td>
+                                <td className="px-4 py-3 text-red-600 dark:text-red-400">
+                                  {emp.missingSteps?.join(', ')}
+                                </td>
                               </tr>
                             ))}
                             {missingDataEmployees.length > 5 && (
@@ -207,8 +205,8 @@ export default function PayrollRunWizardPage() {
             )}
           </div>
         );
-      case 'verification': return <PayrollVerificationTab readOnly={false} />;
-      case 'payout':       return <PayoutTab readOnly={false} />;
+      case 'verification': return <PayrollVerificationTab readOnly={false} runId={runId} />;
+      case 'payout':       return <PayoutTab readOnly={false} runId={runId} />;
       default:             return null;
     }
   };

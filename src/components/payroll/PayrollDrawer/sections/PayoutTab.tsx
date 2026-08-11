@@ -1,14 +1,30 @@
 import { CheckCircle2, Circle, Send, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { api } from '../../../../lib/api';
 
 interface Props {
   readOnly?: boolean;
+  runId?: string | null;
 }
 
-export default function PayoutTab({ readOnly }: Props) {
+export default function PayoutTab({ readOnly, runId }: Props) {
+  const [totalNet, setTotalNet] = useState(0);
+
+  useEffect(() => {
+    if (runId) {
+      api.get(`/hrms/payroll/runs/${runId}`)
+        .then(res => {
+          const data = res.data || res;
+          setTotalNet(data.totalNet || 0);
+        })
+        .catch(err => console.error(err));
+    }
+  }, [runId]);
+
   // Visual representation of the payout workflow
   const steps = [
-    { id: 1, title: 'Payroll Batch Created', desc: 'Batch ID: BATCH-2026-07', status: 'completed', date: 'Jul 24, 2026 10:00 AM' },
-    { id: 2, title: 'Bank Transfer File Generated', desc: 'Ready for upload to corporate banking portal', status: 'completed', date: 'Jul 24, 2026 10:30 AM' },
+    { id: 1, title: 'Payroll Batch Created', desc: 'Batch ID: ' + (runId ? runId.split('-')[0].toUpperCase() : 'N/A'), status: 'completed', date: new Date().toLocaleDateString() },
+    { id: 2, title: 'Bank Transfer File Generated', desc: 'Ready for upload to corporate banking portal', status: 'completed', date: 'Now' },
     { id: 3, title: 'Bank Transfer Status', desc: 'Awaiting confirmation from bank', status: 'current', date: '--' },
     { id: 4, title: 'Payslip Generation', desc: 'Generate PDF payslips for all processed employees', status: 'pending', date: '--' },
     { id: 5, title: 'Publish Payslips', desc: 'Send email notifications and publish to employee portal', status: 'pending', date: '--' },
@@ -23,7 +39,7 @@ export default function PayoutTab({ readOnly }: Props) {
         </div>
         <div className="text-right">
           <p className="text-sm font-medium text-gray-500">Total Payout</p>
-          <p className="text-xl font-bold text-primary dark:text-secondary">₹11,70,000</p>
+          <p className="text-xl font-bold text-primary dark:text-secondary">₹{totalNet.toLocaleString('en-IN')}</p>
         </div>
       </div>
 

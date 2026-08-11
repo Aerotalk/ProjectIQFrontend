@@ -1,16 +1,25 @@
 import { FileText, ArrowRightLeft, AlertTriangle, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { api } from '../../../../lib/api';
 
 interface Props {
   readOnly?: boolean;
+  runId?: string | null;
 }
 
-export default function PayrollVerificationTab({ readOnly }: Props) {
-  // Dummy verification data
-  const variances = [
-    { component: 'Basic Pay', previous: '₹5,00,000', current: '₹5,25,000', difference: '+₹25,000', reason: 'Salary Revisions' },
-    { component: 'Overtime', previous: '₹45,000', current: '₹62,000', difference: '+₹17,000', reason: 'Project Deadline' },
-    { component: 'LOP Deductions', previous: '₹12,000', current: '₹8,000', difference: '-₹4,000', reason: 'Better Attendance' },
-  ];
+export default function PayrollVerificationTab({ readOnly, runId }: Props) {
+  const [variances, setVariances] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (runId) {
+      setLoading(true);
+      api.get(`/hrms/payroll/runs/${runId}/variances`)
+        .then(res => setVariances(res.data || res))
+        .catch(err => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [runId]);
 
   return (
     <div className="space-y-6">
@@ -62,17 +71,27 @@ export default function PayrollVerificationTab({ readOnly }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-            {variances.map((v, i) => (
-              <tr key={i}>
-                <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{v.component}</td>
-                <td className="px-5 py-3 text-right text-gray-500">{v.previous}</td>
-                <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{v.current}</td>
-                <td className={`px-5 py-3 text-right font-bold ${v.difference.startsWith('+') ? 'text-green-500' : 'text-orange-500'}`}>
-                  {v.difference}
-                </td>
-                <td className="px-5 py-3 text-gray-500">{v.reason}</td>
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-gray-500">Loading variances...</td>
               </tr>
-            ))}
+            ) : variances.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-5 py-8 text-center text-gray-500">No variances detected.</td>
+              </tr>
+            ) : (
+              variances.map((v, i) => (
+                <tr key={i}>
+                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{v.component}</td>
+                  <td className="px-5 py-3 text-right text-gray-500">{v.previous}</td>
+                  <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{v.current}</td>
+                  <td className={`px-5 py-3 text-right font-bold ${(v.difference || '').startsWith('+') ? 'text-green-500' : 'text-orange-500'}`}>
+                    {v.difference}
+                  </td>
+                  <td className="px-5 py-3 text-gray-500">{v.reason}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
