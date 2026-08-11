@@ -6,11 +6,15 @@ import { WorkforceService } from '../services';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
+import RegularizationDrawer from './RegularizationDrawer';
 import type { AttendanceException } from '../types';
 
 export default function Exceptions() {
   const [filters, setFilters] = useState({ search: '', resolved: '' });
   const { data, loading, refresh } = useAttendanceExceptions(filters);
+
+  const [isRegDrawerOpen, setIsRegDrawerOpen] = useState(false);
+  const [regInitialData, setRegInitialData] = useState<any>(null);
 
   const resolveMutation = useMutation(
     (id: string) => WorkforceService.updateAttendanceException(id, { resolved: true }),
@@ -19,6 +23,27 @@ export default function Exceptions() {
       onSuccess: () => refresh()
     }
   );
+
+  const createRegMutation = useMutation(
+    (newData: any) => WorkforceService.createRegularization(newData),
+    {
+      successMessage: 'Regularization request submitted successfully',
+      onSuccess: () => {
+        refresh();
+        setIsRegDrawerOpen(false);
+      }
+    }
+  );
+
+  const handleRequestRegularization = (row: AttendanceException) => {
+    setRegInitialData({
+      employeeId: row.employeeId,
+      employeeName: row.employeeName,
+      reason: `Exception regularization: ${row.exceptionType} - ${row.description || ''}`,
+      date: new Date().toISOString().split('T')[0]
+    });
+    setIsRegDrawerOpen(true);
+  };
 
   const columns = useMemo(() => [
     { 
@@ -32,7 +57,7 @@ export default function Exceptions() {
         </div>
       )
     },
-    { key: 'createdAt', label: 'Date', sortable: true, render: (val: string) => new Date(val).toLocaleDateString() },
+    { key: 'createdAt', label: 'Date', sortable: true, render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     { 
       key: 'exceptionType', 
       label: 'Exception Type', 
@@ -63,7 +88,7 @@ export default function Exceptions() {
           const [isOpen, setIsOpen] = useState(false);
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
-              <button onClick={() => { setIsOpen(false); /* view */ }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+              <button onClick={() => { setIsOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                 <Eye size={14} /> View Details
               </button>
               {!row.resolved && (
@@ -72,7 +97,7 @@ export default function Exceptions() {
                   <button onClick={() => { setIsOpen(false); resolveMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
                     <CheckCircle size={14} /> Mark Resolved
                   </button>
-                  <button onClick={() => { setIsOpen(false); /* trigger regularization modal */ }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); handleRequestRegularization(row); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-primary/5 flex items-center gap-2">
                     <AlertCircle size={14} /> Request Regularization
                   </button>
                 </>
@@ -83,7 +108,7 @@ export default function Exceptions() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [resolveMutation]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -131,6 +156,16 @@ export default function Exceptions() {
           )}
         </div>
       </div>
+
+      <RegularizationDrawer
+        isOpen={isRegDrawerOpen}
+        onClose={() => setIsRegDrawerOpen(false)}
+        mode="create"
+        initialData={regInitialData}
+        onSave={async (formData) => {
+          await createRegMutation.mutate(formData);
+        }}
+      />
     </div>
   );
 }

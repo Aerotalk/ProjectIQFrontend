@@ -16,7 +16,8 @@ export default function LeaveTypeSelector({ value, onChange, disabled, className
 
   useEffect(() => {
     WorkforceService.getLeaveTypes().then((res: any) => {
-      setOptions(res.data.filter((l: any) => l.active).map((leave: any) => ({
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setOptions(list.filter((l: any) => l.active !== false).map((leave: any) => ({
         label: leave.name,
         value: leave.id,
         subtitle: leave.category,

@@ -40,6 +40,22 @@ export default function Regularization() {
     }
   );
 
+  const approveMutation = useMutation(
+    (id: string) => WorkforceService.approveRegularization(id),
+    {
+      successMessage: 'Regularization request approved',
+      onSuccess: () => refresh()
+    }
+  );
+
+  const rejectMutation = useMutation(
+    (id: string) => WorkforceService.rejectRegularization(id),
+    {
+      successMessage: 'Regularization request rejected',
+      onSuccess: () => refresh()
+    }
+  );
+
   const handleAction = (item: RegularizationRequest | null, mode: 'create' | 'edit' | 'view') => {
     setDrawerMode(mode);
     setSelectedItem(item);
@@ -110,10 +126,10 @@ export default function Regularization() {
                     <Edit2 size={14} /> Edit Request
                   </button>
                   <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
-                  <button onClick={() => { setIsOpen(false); /* Hook up approve */ }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); approveMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
                     <CheckCircle size={14} /> Approve
                   </button>
-                  <button onClick={() => { setIsOpen(false); /* Hook up reject */ }} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); rejectMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">
                     <XCircle size={14} /> Reject
                   </button>
                 </>
@@ -124,7 +140,7 @@ export default function Regularization() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [approveMutation, rejectMutation]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">

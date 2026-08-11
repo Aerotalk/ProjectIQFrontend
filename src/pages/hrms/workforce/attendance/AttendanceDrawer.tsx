@@ -1,19 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Clock, MonitorSmartphone, AlertCircle, Save } from 'lucide-react';
 import type { AttendanceRecord } from '../types';
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import { Button } from '../../../../components/ui/button';
+import { WorkforceService } from '../services';
+import { useMutation } from '../hooks';
 
 interface AttendanceDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   record: AttendanceRecord | null;
   mode: 'view' | 'edit';
+  onSaveSuccess?: () => void;
 }
 
-export default function AttendanceDrawer({ isOpen, onClose, record, mode }: AttendanceDrawerProps) {
+export default function AttendanceDrawer({ isOpen, onClose, record, mode, onSaveSuccess }: AttendanceDrawerProps) {
   const [remarks, setRemarks] = useState('');
+  const [status, setStatus] = useState<string>('Present');
+  const [checkInTime, setCheckInTime] = useState<string>('');
+  const [checkOutTime, setCheckOutTime] = useState<string>('');
+
+  useEffect(() => {
+    if (record) {
+      setRemarks(record.remarks || '');
+      setStatus(record.status || 'Present');
+      setCheckInTime(record.checkIn || '');
+      setCheckOutTime(record.checkOut || '');
+    }
+  }, [record]);
+
+  const updateMutation = useMutation(
+    (data: any) => WorkforceService.updateAttendanceRecord(record?.id as string, data),
+    {
+      successMessage: 'Attendance record updated successfully',
+      onSuccess: () => {
+        if (onSaveSuccess) onSaveSuccess();
+        onClose();
+      }
+    }
+  );
+
+  const handleSave = async () => {
+    if (!record) return;
+    await updateMutation.mutate({
+      status,
+      checkIn: checkInTime,
+      checkOut: checkOutTime,
+      remarks
+    });
+  };
 
   if (!isOpen || !record) return null;
 
@@ -26,7 +62,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
               {mode === 'edit' ? 'Edit Attendance' : 'Attendance Details'}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              {record.date} • {record.shiftName}
+              {record.attendanceDate || record.date} • {record.shiftName || 'General'}
             </p>
           </div>
           <button 
@@ -43,7 +79,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
             {/* Employee Info */}
             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg">
               <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-secondary/10 flex items-center justify-center text-primary dark:text-secondary font-semibold text-lg">
-                {record.employeeName.charAt(0)}
+                {record.employeeName ? record.employeeName.charAt(0) : 'E'}
               </div>
               <div>
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">{record.employeeName}</h3>
@@ -59,7 +95,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
                   <Clock size={14} className="text-gray-400" />
                 </div>
                 {mode === 'edit' ? (
-                  <CustomInput type="time" defaultValue={record.checkIn} className="w-full" />
+                  <CustomInput type="time" value={checkInTime} onChange={(e: any) => setCheckInTime(e.target.value)} className="w-full" />
                 ) : (
                   <div className="text-lg font-semibold text-gray-900 dark:text-white">{record.checkIn || '--:--'}</div>
                 )}
@@ -70,7 +106,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
                   <Clock size={14} className="text-gray-400" />
                 </div>
                 {mode === 'edit' ? (
-                  <CustomInput type="time" defaultValue={record.checkOut} className="w-full" />
+                  <CustomInput type="time" value={checkOutTime} onChange={(e: any) => setCheckOutTime(e.target.value)} className="w-full" />
                 ) : (
                   <div className="text-lg font-semibold text-gray-900 dark:text-white">{record.checkOut || '--:--'}</div>
                 )}
@@ -81,7 +117,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
             <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-lg space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Working Hours</span>
-                <span className="font-medium text-gray-900 dark:text-white">{record.workingHours || 0} hrs</span>
+                <span className="font-medium text-gray-900 dark:text-white">{record.workingHours || record.hours || 0} hrs</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Late By</span>
@@ -99,7 +135,7 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
                 <span className="text-gray-500">Source</span>
                 <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-medium">
                   <MonitorSmartphone size={14} />
-                  {record.attendanceSource}
+                  {record.attendanceSource || 'Web'}
                 </div>
               </div>
             </div>
@@ -126,10 +162,11 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
                     options={[
                       { value: 'Present', label: 'Present' },
                       { value: 'Absent', label: 'Absent' },
-                      { value: 'Half Day', label: 'Half Day' }
+                      { value: 'Half Day', label: 'Half Day' },
+                      { value: 'Leave', label: 'Leave' }
                     ]}
-                    value={record.status}
-                    onChange={() => {}}
+                    value={status}
+                    onChange={(val) => setStatus(val)}
                     placeholder="Select Status"
                   />
                 </div>
@@ -154,9 +191,13 @@ export default function AttendanceDrawer({ isOpen, onClose, record, mode }: Atte
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button className="bg-primary hover:bg-[#681d4b] text-white">
+            <Button 
+              className="bg-primary hover:bg-[#681d4b] text-white" 
+              onClick={handleSave}
+              disabled={updateMutation.isMutating}
+            >
               <Save size={16} className="mr-2" />
-              Save Changes
+              {updateMutation.isMutating ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         )}

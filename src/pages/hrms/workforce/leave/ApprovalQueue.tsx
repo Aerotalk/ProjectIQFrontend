@@ -12,16 +12,28 @@ export default function ApprovalQueue() {
   const [searchTerm, setSearchTerm] = useState('');
   const { data, loading, refresh } = useLeaveApplications({ status: LeaveStatus.Pending, search: searchTerm });
 
-  const updateMutation = useMutation(
-    (payload: { id: string, status: LeaveStatus }) => WorkforceService.updateLeaveApplication(payload.id, { status: payload.status }),
+  const approveMutation = useMutation(
+    (id: string) => WorkforceService.approveLeaveApplication(id),
     {
-      successMessage: 'Action completed successfully',
+      successMessage: 'Leave application approved',
+      onSuccess: () => refresh()
+    }
+  );
+
+  const rejectMutation = useMutation(
+    (id: string) => WorkforceService.rejectLeaveApplication(id),
+    {
+      successMessage: 'Leave application rejected',
       onSuccess: () => refresh()
     }
   );
 
   const handleAction = (id: string, status: LeaveStatus) => {
-    updateMutation.mutate({ id, status });
+    if (status === LeaveStatus.Approved) {
+      approveMutation.mutate(id);
+    } else if (status === LeaveStatus.Rejected) {
+      rejectMutation.mutate(id);
+    }
   };
 
   const columns = useMemo(() => [
