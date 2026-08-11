@@ -11,25 +11,33 @@ export default function PerformanceReports() {
   const [cycles, setCycles] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchCycles = async () => {
       try {
-        const [apiDeptData, apiCycles] = await Promise.all([
-          api.get('/hrms/performance/reports/department-ratings').catch(() => []),
-          api.get('/hrms/performance/cycles').catch(() => [])
-        ]);
-        
-        setDepartmentData(Array.isArray(apiDeptData) ? apiDeptData : (apiDeptData.data || []));
-        const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : [];
+        const apiCycles = await api.get('/hrms/performance/cycles').catch(() => []);
+        const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : (apiCycles.data || []);
         setCycles(fetchedCycles);
         if (fetchedCycles.length > 0) {
           setSelectedCycle(fetchedCycles[0].id);
         }
       } catch (e) {
+        console.error('Failed to load cycles', e);
+      }
+    };
+    fetchCycles();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCycle) return;
+    const fetchReports = async () => {
+      try {
+        const apiDeptData = await api.get(`/hrms/performance/reports/department-ratings?cycleId=${selectedCycle}`).catch(() => []);
+        setDepartmentData(Array.isArray(apiDeptData) ? apiDeptData : (apiDeptData.data || []));
+      } catch (e) {
         console.error('Failed to load reports', e);
       }
     };
     fetchReports();
-  }, []);
+  }, [selectedCycle]);
 
   const deptColumns = [
     { key: 'department', label: 'Department' },

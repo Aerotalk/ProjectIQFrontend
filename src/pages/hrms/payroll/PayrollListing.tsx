@@ -262,7 +262,6 @@ export default function PayrollListing() {
                     {activeTab === 'it_declarations' && (
                       <ITDeclarationTab
                         key={`it-${employeeData.id}`}
-                        employeeId={employeeData.empId}
                         employeeDbId={employeeData.id}
                       />
                     )}

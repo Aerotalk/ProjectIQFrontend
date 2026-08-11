@@ -22,7 +22,8 @@ interface EmployeeLOP {
 }
 
 interface Props {
-  employeeDbId: string;
+  employeeDbId?: string;
+  readOnly?: boolean;
 }
 
 const SOURCE_OPTIONS = [

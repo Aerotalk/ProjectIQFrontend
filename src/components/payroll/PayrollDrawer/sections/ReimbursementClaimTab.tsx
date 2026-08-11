@@ -27,7 +27,8 @@ interface ReimbursementClaim {
 }
 
 interface Props {
-  employeeDbId: string;
+  employeeDbId?: string;
+  readOnly?: boolean;
 }
 
 const TYPE_OPTIONS = [

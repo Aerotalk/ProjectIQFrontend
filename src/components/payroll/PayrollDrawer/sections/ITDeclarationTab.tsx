@@ -28,8 +28,8 @@ interface ITDeclaration {
 }
 
 interface Props {
-  employeeId: string;
-  employeeDbId: string; // the UUID used in DB, not empId code
+  employeeDbId?: string; // the UUID used in DB, not empId code
+  readOnly?: boolean;
 }
 
 const EMPTY_ITEM: ITDeclarationItem = { taxSection: '', description: '', declaredAmount: '' };
@@ -41,7 +41,7 @@ const REGIME_OPTIONS = [
 
 const TAX_SECTIONS = ['80C', '80D', '80E', '80G', '80TTA', 'HRA', 'Home Loan Interest', 'NPS (80CCD)', 'Other'];
 
-export default function ITDeclarationTab({ employeeId, employeeDbId }: Props) {
+export default function ITDeclarationTab({ employeeDbId, readOnly }: Props) {
   const [declarations, setDeclarations] = useState<ITDeclaration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

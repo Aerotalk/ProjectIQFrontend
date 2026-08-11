@@ -3,7 +3,6 @@ import { FormSection, FormGrid } from '../../../ui/FormLayout';
 import { Input } from '../../../ui/input';
 import CustomSelect from '../../../ui/CustomSelect';
 import type { PayrollFormValues } from '../validators/payrollValidation';
-import { Users, Calculator, Wallet, Coins } from 'lucide-react';
 import { formStyles } from '../../../ui/form-styles';
 import CustomMonthPicker from '../../../ui/CustomMonthPicker';
 
