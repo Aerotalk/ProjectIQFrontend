@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
-import GoalDrawer from './GoalDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import type { Goal, AppraisalCycle } from '../types';
+import type { Goal } from '../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function GoalsList() {
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -23,10 +22,7 @@ export default function GoalsList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [apiGoals, apiCycles] = await Promise.all([
-        api.get('/hrms/performance/goals').catch(() => []),
-        api.get('/hrms/performance/cycles').catch(() => [])
-      ]);
+      const apiGoals = await api.get('/hrms/performance/goals').catch(() => []);
 
       if (Array.isArray(apiGoals)) {
         setGoals(apiGoals.map((g: any) => ({
@@ -52,66 +48,11 @@ export default function GoalsList() {
           progress: g.progress || 0
         })));
       }
-
-      if (Array.isArray(apiCycles)) {
-        setCycles(apiCycles.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          type: c.type || 'Annual',
-          period: c.period || '',
-          startDate: c.startDate || '',
-          endDate: c.endDate || '',
-          selfReviewDeadline: c.selfReviewDeadline || '',
-          managerReviewDeadline: c.managerReviewDeadline || '',
-          hrReviewDeadline: c.hrReviewDeadline || '',
-          departments: ['All'],
-          locations: ['All'],
-          grades: ['All'],
-          eligibleCount: c.eligibleCount || 0,
-          completionPercentage: c.completionPercentage || 0,
-          status: c.status || 'Active',
-          description: c.description || ''
-        })));
-      }
     } catch (e) {
       toast.error('Failed to load goals');
       setGoals([]);
-      setCycles([]);
     }
     setLoading(false);
-  };
-
-  const handleSave = async (data: any) => {
-    try {
-      const payload = {
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        weightage: data.weightage,
-        kpi: data.kpi,
-        targetValue: data.targetValue,
-        currentValue: data.currentValue,
-        unit: data.unit,
-        dueDate: data.dueDate,
-        priority: data.priority,
-        // Wrap IDs for backend JPA entity mapping. Since the form currently doesn't 
-        // have employee/cycle selectors, we use a placeholder that a real auth context would provide.
-        employee: { id: '00000000-0000-0000-0000-000000000001' }, 
-        cycle: { id: '00000000-0000-0000-0000-000000000002' }
-      };
-
-      if (drawerMode === 'create') {
-        await api.post('/hrms/performance/goals', { ...payload, status: 'In Progress' });
-        toast.success('Goal created');
-      } else if (drawerMode === 'edit' && selectedGoal) {
-        await api.put(`/hrms/performance/goals/${selectedGoal.id}`, payload);
-        toast.success('Goal updated');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error saving goal');
-    }
   };
 
   const columns = [
@@ -138,7 +79,7 @@ export default function GoalsList() {
       render: (_: any, row: Goal) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View / Edit', onClick: () => { setSelectedGoal(row); setDrawerMode('edit'); setIsDrawerOpen(true); } }
+            { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/performance/goal/${row.id}`) }
           ]}
         />
       )
@@ -166,7 +107,7 @@ export default function GoalsList() {
           </button>
         </div>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedGoal(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/performance/goal/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
@@ -177,15 +118,6 @@ export default function GoalsList() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={goals} />
       </div>
-
-      <GoalDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        cycles={cycles}
-        initialData={selectedGoal || undefined}
-      />
     </div>
   );
 }

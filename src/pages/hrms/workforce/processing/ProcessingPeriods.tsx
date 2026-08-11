@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CustomTable from '../../../../components/ui/CustomTable';
-import AttendanceWizardDrawer from './AttendanceWizardDrawer';
 import { useAttendancePeriods } from '../hooks';
 import { Settings, Play, CheckCircle, FileText } from 'lucide-react';
 import SmartActionMenu from '../../../../components/ui/SmartActionMenu';
@@ -9,10 +9,12 @@ import { ProcessingStatus } from '../types';
 import type { AttendancePeriod } from '../types';
 
 export default function ProcessingPeriods() {
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data, loading, refresh } = useAttendancePeriods({ search: searchTerm });
+  const { data, loading } = useAttendancePeriods({ search: searchTerm });
 
   const columns = useMemo(() => [
     { 
@@ -74,7 +76,7 @@ export default function ProcessingPeriods() {
           return (
             <SmartActionMenu isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)}>
               {!isProcessed ? (
-                <button onClick={() => { setIsOpen(false); setIsWizardOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
+                <button onClick={() => { setIsOpen(false); navigate(`${basePath}/hrms/workforce/process-attendance`); }} className="w-full text-left px-4 py-2 text-sm text-primary dark:text-secondary hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2">
                   <Play size={14} /> Process Attendance
                 </button>
               ) : (
@@ -88,7 +90,7 @@ export default function ProcessingPeriods() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [basePath, navigate]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">
@@ -98,7 +100,7 @@ export default function ProcessingPeriods() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Process attendance to finalize payable days for payroll</p>
         </div>
         <button 
-          onClick={() => setIsWizardOpen(true)} 
+          onClick={() => navigate(`${basePath}/hrms/workforce/process-attendance`)} 
           className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap shadow-sm"
         >
           New Processing Period
@@ -131,8 +133,6 @@ export default function ProcessingPeriods() {
           )}
         </div>
       </div>
-
-      <AttendanceWizardDrawer isOpen={isWizardOpen} onClose={() => { setIsWizardOpen(false); refresh(); }} />
     </div>
   );
 }

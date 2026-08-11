@@ -3,19 +3,17 @@ import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
-import TemplateDrawer from './components/TemplateDrawer';
-import type { ExpenseTemplate, ExpenseCategoryConfig } from '../../../../types/expense-claims.types';
+import type { ExpenseTemplate } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function TemplatesList() {
   const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategoryConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -24,10 +22,7 @@ export default function TemplatesList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [apiTemplates, apiCategories] = await Promise.all([
-        api.get('/hrms/expense-claims/templates'),
-        api.get('/hrms/expense-claims/categories')
-      ]);
+      const apiTemplates = await api.get('/hrms/expense-claims/templates');
       
       let tpls: ExpenseTemplate[] = [];
       if (Array.isArray(apiTemplates)) {
@@ -40,52 +35,12 @@ export default function TemplatesList() {
         }));
       }
 
-      let cats: ExpenseCategoryConfig[] = [];
-      if (Array.isArray(apiCategories)) {
-        cats = apiCategories.map((c: any) => ({
-          id: c.id,
-          category: c.category,
-          glCode: c.glCode || '',
-          receiptRequired: c.receiptRequired ?? false,
-          minReceiptAmount: c.minReceiptAmount || 0,
-          active: c.active ?? true
-        }));
-      }
-
       setTemplates(tpls);
-      setCategories(cats);
     } catch (e) {
       toast.error('Failed to load templates');
       setTemplates([]);
-      setCategories([]);
     }
     setLoading(false);
-  };
-
-  const handleSave = async (formData: any) => {
-    try {
-      if (drawerMode === 'create') {
-        await api.post('/hrms/expense-claims/templates', {
-          templateName: formData.templateName,
-          description: formData.description,
-          allowedCategories: formData.allowedCategories,
-          active: formData.active
-        });
-        toast.success('Template created successfully');
-      } else if (drawerMode === 'edit' && selectedTemplate) {
-        await api.put(`/hrms/expense-claims/templates/${selectedTemplate.id}`, {
-          templateName: formData.templateName,
-          description: formData.description,
-          allowedCategories: formData.allowedCategories,
-          active: formData.active
-        });
-        toast.success('Template updated successfully');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error saving template');
-    }
   };
 
   const handleDelete = async (id: string) => {
@@ -108,7 +63,7 @@ export default function TemplatesList() {
       render: (_: any, row: ExpenseTemplate) => (
         <TableRowActionMenu
           actions={[
-            { label: 'Edit', onClick: () => { setSelectedTemplate(row); setDrawerMode('edit'); setIsDrawerOpen(true); } },
+            { label: 'Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/configuration/template/${row.id}`) },
             { label: 'Delete', onClick: () => handleDelete(row.id), danger: true }
           ]}
         />
@@ -125,7 +80,7 @@ export default function TemplatesList() {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Expense Templates</h3>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedTemplate(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/expense-claims/configuration/template/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
@@ -136,20 +91,6 @@ export default function TemplatesList() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={templates} />
       </div>
-
-      <TemplateDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        categories={categories}
-        initialData={selectedTemplate ? {
-          templateName: selectedTemplate.templateName,
-          description: selectedTemplate.description,
-          allowedCategories: selectedTemplate.allowedCategories,
-          active: selectedTemplate.active
-        } : undefined}
-      />
     </div>
   );
 }

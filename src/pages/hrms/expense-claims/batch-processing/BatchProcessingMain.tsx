@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
-import BatchDrawer from './components/BatchDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import type { ClaimBatch } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function BatchProcessingMain() {
   const [batches, setBatches] = useState<ClaimBatch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedBatch, setSelectedBatch] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -47,25 +46,6 @@ export default function BatchProcessingMain() {
     setLoading(false);
   };
 
-  const handleSave = async (data: any) => {
-    try {
-      if (drawerMode === 'create') {
-        await api.post('/hrms/expense-claims/batches', {
-          payrollPeriod: data.payrollPeriod,
-          paymentMethod: data.paymentMethod,
-          claimsCount: 5,
-          totalAmount: 1250.00,
-          status: 'Draft'
-        });
-        toast.success('Payment batch created');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error creating batch');
-    }
-  };
-
   const handleMarkPaid = async (id: string) => {
     try {
       await api.put(`/hrms/expense-claims/batches/${id}/pay`);
@@ -93,7 +73,7 @@ export default function BatchProcessingMain() {
       render: (_: any, row: ClaimBatch) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View Batch', onClick: () => { setSelectedBatch(row); setDrawerMode('view'); setIsDrawerOpen(true); } },
+            { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/batch/${row.id}`) },
             ...(row.status !== 'Paid' ? [{ label: 'Mark as Paid', onClick: () => handleMarkPaid(row.id) }] : [])
           ]}
         />
@@ -110,7 +90,7 @@ export default function BatchProcessingMain() {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Batch Payment Processing</h3>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedBatch(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/expense-claims/batch/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
@@ -121,17 +101,6 @@ export default function BatchProcessingMain() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={batches} />
       </div>
-
-      <BatchDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        initialData={selectedBatch ? {
-          payrollPeriod: selectedBatch.payrollPeriod,
-          paymentMethod: selectedBatch.paymentMethod
-        } : undefined}
-      />
     </div>
   );
 }

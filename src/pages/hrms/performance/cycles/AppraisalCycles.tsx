@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
-import CycleDrawer from './CycleDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
 import type { AppraisalCycle } from '../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function AppraisalCycles() {
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedCycle, setSelectedCycle] = useState<AppraisalCycle | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -22,13 +22,13 @@ export default function AppraisalCycles() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiCycles = await api.get('/hrms/performance/cycles');
-      if (Array.isArray(apiCycles)) {
-        setCycles(apiCycles.map((c: any) => ({
+      const data = await api.get('/hrms/performance/cycles');
+      if (Array.isArray(data)) {
+        setCycles(data.map((c: any) => ({
           id: c.id,
           name: c.name,
           type: c.type || 'Annual',
-          period: c.period || `${c.startDate || ''} - ${c.endDate || ''}`,
+          period: c.period || '',
           startDate: c.startDate || '',
           endDate: c.endDate || '',
           selfReviewDeadline: c.selfReviewDeadline || '',
@@ -50,48 +50,12 @@ export default function AppraisalCycles() {
     setLoading(false);
   };
 
-  const handleSave = async (data: any) => {
-    try {
-      if (drawerMode === 'create') {
-        await api.post('/hrms/performance/cycles', {
-          name: data.name,
-          type: data.type,
-          period: `${data.startDate} - ${data.endDate}`,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          selfReviewDeadline: data.selfReviewDeadline,
-          managerReviewDeadline: data.managerReviewDeadline,
-          hrReviewDeadline: data.hrReviewDeadline,
-          status: 'Active',
-          description: data.description
-        });
-        toast.success('Appraisal cycle created');
-      } else if (drawerMode === 'edit' && selectedCycle) {
-        await api.put(`/hrms/performance/cycles/${selectedCycle.id}`, {
-          name: data.name,
-          type: data.type,
-          period: `${data.startDate} - ${data.endDate}`,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          selfReviewDeadline: data.selfReviewDeadline,
-          managerReviewDeadline: data.managerReviewDeadline,
-          hrReviewDeadline: data.hrReviewDeadline,
-          description: data.description
-        });
-        toast.success('Appraisal cycle updated');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error saving cycle');
-    }
-  };
-
   const columns = [
     { key: 'name', label: 'Cycle Name' },
-    { key: 'type', label: 'Type' },
-    { key: 'period', label: 'Period' },
-    { key: 'eligibleCount', label: 'Eligible Count' },
+    { key: 'type', label: 'Review Type' },
+    { key: 'startDate', label: 'Start Date' },
+    { key: 'endDate', label: 'End Date' },
+    { key: 'eligibleCount', label: 'Eligible Employees' },
     { 
       key: 'completionPercentage', 
       label: 'Completion',
@@ -111,7 +75,7 @@ export default function AppraisalCycles() {
       render: (_: any, row: AppraisalCycle) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View / Edit', onClick: () => { setSelectedCycle(row); setDrawerMode('edit'); setIsDrawerOpen(true); } }
+            { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/performance/cycle/${row.id}`) }
           ]}
         />
       )
@@ -139,25 +103,17 @@ export default function AppraisalCycles() {
           </button>
         </div>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedCycle(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/performance/cycle/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
-          New Appraisal Cycle
+          Create Cycle
         </button>
       </div>
 
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={cycles} />
       </div>
-
-      <CycleDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        initialData={selectedCycle || undefined}
-      />
     </div>
   );
 }

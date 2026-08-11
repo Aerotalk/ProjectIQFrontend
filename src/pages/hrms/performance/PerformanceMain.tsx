@@ -11,6 +11,9 @@ const ManagerReviewsQueue = lazy(() => import('./reviews/manager/ManagerReviewsQ
 const CalibrationDashboard = lazy(() => import('./calibration/CalibrationDashboard'));
 const TemplatesMain = lazy(() => import('./templates/TemplatesMain'));
 const PerformanceReports = lazy(() => import('./reports/PerformanceReports'));
+const GoalFormPage = lazy(() => import('./goals/GoalFormPage'));
+const CycleFormPage = lazy(() => import('./cycles/CycleFormPage'));
+const PerformanceFormPage = lazy(() => import('./reviews/PerformanceFormPage'));
 
 // Fallback loader for lazy-loaded modules
 const ModuleLoader = () => (
@@ -59,9 +62,12 @@ export default function PerformanceMain() {
             <Route path="/" element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<PerformanceDashboard />} />
             <Route path="cycles/*" element={<AppraisalCycles />} />
+            <Route path="cycle/:id" element={<CycleFormPage />} />
             <Route path="goals/*" element={<GoalsList />} />
+            <Route path="goal/:id" element={<GoalFormPage />} />
             <Route path="employee-reviews/*" element={<SelfReviewsList />} />
             <Route path="manager-reviews/*" element={<ManagerReviewsQueue />} />
+            <Route path="review/:id" element={<PerformanceFormPage />} />
             <Route path="calibration/*" element={<CalibrationDashboard />} />
             <Route path="templates/*" element={<TemplatesMain />} />
             <Route path="reports/*" element={<PerformanceReports />} />

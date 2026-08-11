@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
-import AdvanceDrawer from './components/AdvanceDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
 import type { ExpenseAdvance } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function AdvancesMain() {
   const [advances, setAdvances] = useState<ExpenseAdvance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedAdvance, setSelectedAdvance] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -51,29 +50,6 @@ export default function AdvancesMain() {
     setLoading(false);
   };
 
-  const handleSave = async (data: any) => {
-    try {
-      if (drawerMode === 'create') {
-        await api.post('/hrms/expense-claims/advances', {
-          tripOrProject: data.tripOrProject,
-          purpose: data.purpose,
-          currency: data.currency,
-          amount: data.amount,
-          requestedDate: data.date,
-          requiredDate: data.requiredDate,
-          status: 'Pending',
-          disbursed: false,
-          outstandingBalance: data.amount
-        });
-        toast.success('Advance request submitted');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error creating advance');
-    }
-  };
-
   const handleDisburse = async (id: string) => {
     try {
       await api.put(`/hrms/expense-claims/advances/${id}/disburse`);
@@ -101,7 +77,7 @@ export default function AdvancesMain() {
       render: (_: any, row: ExpenseAdvance) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View', onClick: () => { setSelectedAdvance(row); setDrawerMode('view'); setIsDrawerOpen(true); } },
+            { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/advance/${row.id}`) },
             ...(row.status === 'Approved' && !row.disbursed ? [{ label: 'Disburse', onClick: () => handleDisburse(row.id) }] : [])
           ]}
         />
@@ -130,7 +106,7 @@ export default function AdvancesMain() {
           </button>
         </div>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedAdvance(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/expense-claims/advance/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
@@ -141,22 +117,6 @@ export default function AdvancesMain() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={advances} />
       </div>
-
-      <AdvanceDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        initialData={selectedAdvance ? {
-          employee: selectedAdvance.employeeId,
-          tripOrProject: selectedAdvance.tripOrProject,
-          purpose: selectedAdvance.purpose,
-          currency: selectedAdvance.currency,
-          amount: selectedAdvance.amount,
-          requiredDate: selectedAdvance.requiredDate,
-          date: selectedAdvance.requestedDate
-        } : undefined}
-      />
     </div>
   );
 }

@@ -9,6 +9,9 @@ const AdvancesMain = React.lazy(() => import('./advances/AdvancesMain'));
 const ConfigMain = React.lazy(() => import('./configuration/ConfigMain'));
 const ApprovalsMain = React.lazy(() => import('./approvals/ApprovalsMain'));
 const BatchProcessingMain = React.lazy(() => import('./batch-processing/BatchProcessingMain'));
+const ExpenseClaimPage = React.lazy(() => import('./claims/ExpenseClaimPage'));
+const AdvanceFormPage = React.lazy(() => import('./advances/AdvanceFormPage'));
+const BatchFormPage = React.lazy(() => import('./batch-processing/BatchFormPage'));
 
 // Fallback loader for lazy-loaded modules
 const ModuleLoader = () => (
@@ -55,10 +58,13 @@ export default function ExpenseClaimsMain() {
             <Route path="/" element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<ExpenseClaimsDashboard />} />
             <Route path="claims/*" element={<ClaimsMain />} />
+            <Route path="claim/:id" element={<ExpenseClaimPage />} />
             <Route path="advances/*" element={<AdvancesMain />} />
+            <Route path="advance/:id" element={<AdvanceFormPage />} />
             <Route path="configuration/*" element={<ConfigMain />} />
             <Route path="approvals/*" element={<ApprovalsMain />} />
             <Route path="batch-processing/*" element={<BatchProcessingMain />} />
+            <Route path="batch/:id" element={<BatchFormPage />} />
           </Routes>
         </Suspense>
       </div>

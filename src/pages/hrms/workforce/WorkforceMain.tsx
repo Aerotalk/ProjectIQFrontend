@@ -9,6 +9,8 @@ const AttendanceMain = React.lazy(() => import('./attendance/AttendanceMain'));
 const ShiftsMain = React.lazy(() => import('./shifts/ShiftsMain'));
 const ConfigMain = React.lazy(() => import('./configuration/ConfigMain'));
 const ProcessingMain = React.lazy(() => import('./processing/ProcessingMain'));
+const ShiftFormPage = React.lazy(() => import('./shifts/ShiftFormPage'));
+const ShiftRotationFormPage = React.lazy(() => import('./shifts/ShiftRotationFormPage'));
 
 // Fallback loader for lazy-loaded modules
 const ModuleLoader = () => (
@@ -58,6 +60,8 @@ export default function WorkforceMain() {
             <Route path="leave/*" element={<LeaveMain />} />
             <Route path="attendance/*" element={<AttendanceMain />} />
             <Route path="shifts/*" element={<ShiftsMain />} />
+            <Route path="shift/:id" element={<ShiftFormPage />} />
+            <Route path="shift-rotation/:id" element={<ShiftRotationFormPage />} />
             <Route path="configuration/*" element={<ConfigMain />} />
             <Route path="processing/*" element={<ProcessingMain />} />
           </Routes>

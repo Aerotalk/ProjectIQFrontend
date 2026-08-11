@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
 import { 
- Users, DollarSign, Clock, FileText, CheckCircle, AlertTriangle, 
+ Users, DollarSign, Clock, CheckCircle, AlertTriangle, 
  Search, Plus, FileInput, Upload, Settings, Calculator, RefreshCw, FileImage, Loader2
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePayroll } from '../../../hooks/usePayroll';
-import PayrollDrawer from '../../../components/payroll/PayrollDrawer';
 
 export default function PayrollDashboard() {
  const navigate = useNavigate();
@@ -45,7 +44,7 @@ export default function PayrollDashboard() {
  { title: 'Pending Payroll', value: isLoading ? '...' : pendingPayroll.toString(), icon: AlertTriangle, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10' },
  { title: 'Total Payroll Amount', value: isLoading ? '...' : totalPayrollAmount, icon: DollarSign, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10' },
  { title: 'Held Salaries', value: '₹0', icon: AlertTriangle, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-500/10' },
- { title: 'Final Settlements', value: '0 Pending', icon: FileText, color: 'text-primary', bgColor: 'bg-primary/10' },
+ { title: 'Final Settlements', value: '0 Pending', icon: Clock, color: 'text-primary', bgColor: 'bg-primary/10' },
  ];
 
  const filteredRuns = payrollRuns?.filter((r: any) => 
@@ -53,9 +52,6 @@ export default function PayrollDashboard() {
    (r.status || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
    (r.runType || '').toLowerCase().includes(searchTerm.toLowerCase())
  ) || [];
-
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerStep, setDrawerStep] = useState(0);
 
   const handleQuickAction = (action: string) => {
     switch(action) {
@@ -72,14 +68,12 @@ export default function PayrollDashboard() {
         navigate(`${basePath}/hrms/payroll/list?tab=actions`);
         break;
       case 'Process Payroll':
-        setDrawerStep(5); // processing
-        setIsDrawerOpen(true);
+        navigate(`${basePath}/hrms/payroll/run`);
         break;
       case 'Pay Components':
       case 'Payslip Templates':
       case 'Configuration':
-        setDrawerStep(11); // configuration
-        setIsDrawerOpen(true);
+        navigate(`${basePath}/hrms/payroll/list`);
         break;
       default:
         navigate(`${basePath}/hrms/payroll/list`);
@@ -88,7 +82,7 @@ export default function PayrollDashboard() {
 
   const quickActions = [
     { label: 'Salary Inputs', icon: FileInput, color: 'text-blue-500' },
-    { label: 'IT Declaration', icon: FileText, color: 'text-purple-500' },
+    { label: 'IT Declaration', icon: FileImage, color: 'text-purple-500' },
     { label: 'Reimbursement', icon: Upload, color: 'text-green-500' },
     { label: 'Process Payroll', icon: RefreshCw, color: 'text-orange-500' },
     { label: 'Final Settlement', icon: CheckCircle, color: 'text-red-500' },
@@ -99,13 +93,6 @@ export default function PayrollDashboard() {
 
   return (
   <div className="flex flex-col gap-6">
-    <PayrollDrawer 
-      isOpen={isDrawerOpen} 
-      onClose={() => setIsDrawerOpen(false)} 
-      onSave={async () => { setIsDrawerOpen(false); }} 
-      mode="create" 
-      initialStep={drawerStep} 
-    />
   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
   <div>
   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll Dashboard</h1>
@@ -120,7 +107,7 @@ export default function PayrollDashboard() {
   <Users size={16} />
   View All Payrolls
   </button>
-  <button onClick={() => { setDrawerStep(5); setIsDrawerOpen(true); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
+  <button onClick={() => navigate(`${basePath}/hrms/payroll/run`)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-[#5d1944] transition-colors text-sm font-medium shadow-sm">
   <Plus size={16} />
   New Payroll Run
   </button>

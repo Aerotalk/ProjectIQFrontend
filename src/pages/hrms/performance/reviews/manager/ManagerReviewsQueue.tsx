@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react';
 import CustomTable from '../../../../../components/ui/CustomTable';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TableRowActionMenu from '../../../../../components/ui/TableRowActionMenu';
-import ManagerReviewDrawer from './ManagerReviewDrawer';
 import { Skeleton } from '../../../../../components/ui/skeleton';
-import type { ManagerReview, Goal, Competency, RatingScale } from '../../types';
+import type { ManagerReview } from '../../types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../../lib/api';
 
 export default function ManagerReviewsQueue() {
   const [reviews, setReviews] = useState<ManagerReview[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [competencies, setCompetencies] = useState<Competency[]>([]);
-  const [ratingScales, setRatingScales] = useState<RatingScale[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<ManagerReview | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -23,12 +21,7 @@ export default function ManagerReviewsQueue() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [apiReviews, apiGoals, apiCompetencies, apiScales] = await Promise.all([
-        api.get('/hrms/performance/reviews/manager').catch(() => []),
-        api.get('/hrms/performance/goals').catch(() => []),
-        api.get('/hrms/performance/competencies').catch(() => []),
-        api.get('/hrms/performance/rating-scales').catch(() => [])
-      ]);
+      const apiReviews = await api.get('/hrms/performance/reviews/manager').catch(() => []);
 
       if (Array.isArray(apiReviews)) {
         setReviews(apiReviews.map((r: any) => ({
@@ -59,32 +52,11 @@ export default function ManagerReviewsQueue() {
           status: r.status || 'Pending'
         })));
       }
-
-      const getArray = (res: any) => Array.isArray(res) ? res : (res?.data || res?.content || []);
-      setGoals(getArray(apiGoals));
-      setCompetencies(getArray(apiCompetencies));
-      setRatingScales(getArray(apiScales));
     } catch (e) {
       toast.error('Failed to load manager review queue');
       setReviews([]);
-      setGoals([]);
-      setCompetencies([]);
-      setRatingScales([]);
     }
     setLoading(false);
-  };
-
-  const handleSave = async (data: any) => {
-    try {
-      if (selectedReview) {
-        await api.put(`/hrms/performance/reviews/manager/${selectedReview.id}`, data);
-        toast.success('Manager review submitted');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error submitting manager review');
-    }
   };
 
   const columns = [
@@ -98,7 +70,7 @@ export default function ManagerReviewsQueue() {
       render: (_: any, row: ManagerReview) => (
         <TableRowActionMenu
           actions={[
-            { label: ['Manager Reviewed', 'HR Reviewed', 'Finalized'].includes(row.status) ? 'View Review' : 'Conduct Review', onClick: () => { setSelectedReview(row); setIsDrawerOpen(true); } }
+            { label: ['Manager Reviewed', 'HR Reviewed', 'Finalized'].includes(row.status) ? 'View Review' : 'Conduct Review', onClick: () => navigate(`${basePath}/hrms/performance/review/${row.id}?type=manager`) }
           ]}
         />
       )
@@ -118,18 +90,6 @@ export default function ManagerReviewsQueue() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={reviews} />
       </div>
-
-      {selectedReview && (
-        <ManagerReviewDrawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          onSave={handleSave}
-          goals={goals}
-          competencies={competencies}
-          ratingScale={ratingScales[0]!}
-          initialData={selectedReview}
-        />
-      )}
     </div>
   );
 }

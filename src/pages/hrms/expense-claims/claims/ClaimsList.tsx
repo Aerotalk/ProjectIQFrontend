@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CustomTable from '../../../../components/ui/CustomTable';
 import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
-import ClaimDrawer from './components/ClaimDrawer';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
-import type { ExpenseClaim, ExpenseTemplate } from '../../../../types/expense-claims.types';
+import type { ExpenseClaim } from '../../../../types/expense-claims.types';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
 
 export default function ClaimsList() {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [templates, setTemplates] = useState<ExpenseTemplate[]>([]);
-
-  const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | 'view'>('create');
-  const [selectedClaim, setSelectedClaim] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
   useEffect(() => {
     fetchData();
@@ -24,10 +22,7 @@ export default function ClaimsList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [apiClaims, apiTemplates] = await Promise.all([
-        api.get('/hrms/expense-claims/claims'),
-        api.get('/hrms/expense-claims/templates')
-      ]);
+      const apiClaims = await api.get('/hrms/expense-claims/claims');
       
       let claimsData: ExpenseClaim[] = [];
       if (Array.isArray(apiClaims)) {
@@ -48,47 +43,12 @@ export default function ClaimsList() {
         }));
       }
 
-      let tplsData: ExpenseTemplate[] = [];
-      if (Array.isArray(apiTemplates)) {
-        tplsData = apiTemplates.map((t: any) => ({
-          id: t.id,
-          templateName: t.templateName,
-          description: t.description || '',
-          allowedCategories: [],
-          active: t.active ?? true
-        }));
-      }
-
       setClaims(claimsData);
-      setTemplates(tplsData);
     } catch (e) {
       toast.error('Failed to load claims');
       setClaims([]);
-      setTemplates([]);
     }
     setLoading(false);
-  };
-
-  const handleSave = async (data: any) => {
-    try {
-      if (drawerMode === 'create') {
-        await api.post('/hrms/expense-claims/claims', {
-          title: data.title,
-          currency: data.currency,
-          status: 'Draft',
-          totalClaimed: 0,
-          approvedAmount: 0,
-          // Wrap IDs for JPA entity mapping. (Placeholder for auth context employee ID)
-          employee: { id: '00000000-0000-0000-0000-000000000001' },
-          template: data.template ? { id: data.template } : null
-        });
-        toast.success('Claim Envelope created successfully');
-      }
-      setIsDrawerOpen(false);
-      fetchData();
-    } catch (e) {
-      toast.error('Error saving claim');
-    }
   };
 
   const handleDelete = async (id: string) => {
@@ -118,7 +78,7 @@ export default function ClaimsList() {
       render: (_: any, row: ExpenseClaim) => (
         <TableRowActionMenu
           actions={[
-            { label: 'View / Edit', onClick: () => { setSelectedClaim(row); setDrawerMode('view'); setIsDrawerOpen(true); } },
+            { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/claim/${row.id}`) },
             { label: 'Delete', onClick: () => handleDelete(row.id), danger: true }
           ]}
         />
@@ -147,7 +107,7 @@ export default function ClaimsList() {
           </button>
         </div>
         <button 
-          onClick={() => { setDrawerMode('create'); setSelectedClaim(null); setIsDrawerOpen(true); }}
+          onClick={() => navigate(`${basePath}/hrms/expense-claims/claim/new`)}
           className="flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-md hover:bg-[#5d1943] transition-colors"
         >
           <Plus size={16} className="mr-2" />
@@ -158,19 +118,6 @@ export default function ClaimsList() {
       <div className="flex-1 overflow-auto">
         <CustomTable columns={columns} data={claims} />
       </div>
-
-      <ClaimDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSave}
-        mode={drawerMode}
-        templates={templates}
-        initialData={selectedClaim ? {
-          template: selectedClaim.templateId,
-          title: selectedClaim.title,
-          currency: selectedClaim.currency
-        } : undefined}
-      />
     </div>
   );
 }

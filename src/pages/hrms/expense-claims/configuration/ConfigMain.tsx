@@ -6,6 +6,8 @@ const CategoriesList = React.lazy(() => import('./CategoriesList'));
 const TemplatesList = React.lazy(() => import('./TemplatesList'));
 const PoliciesList = React.lazy(() => import('./PoliciesList'));
 const ReviewerAssignment = React.lazy(() => import('./ReviewerAssignment'));
+const TemplateFormPage = React.lazy(() => import('./TemplateFormPage'));
+const CategoryFormPage = React.lazy(() => import('./CategoryFormPage'));
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center p-12 w-full h-64">
@@ -44,7 +46,9 @@ export default function ConfigMain() {
           <Routes>
             <Route path="/" element={<Navigate to="categories" replace />} />
             <Route path="categories" element={<CategoriesList />} />
+            <Route path="category/:id" element={<CategoryFormPage />} />
             <Route path="templates" element={<TemplatesList />} />
+            <Route path="template/:id" element={<TemplateFormPage />} />
             <Route path="policies" element={<PoliciesList />} />
             <Route path="reviewer-assignment" element={<ReviewerAssignment />} />
           </Routes>
