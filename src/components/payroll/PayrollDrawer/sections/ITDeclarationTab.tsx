@@ -41,7 +41,7 @@ const REGIME_OPTIONS = [
 
 const TAX_SECTIONS = ['80C', '80D', '80E', '80G', '80TTA', 'HRA', 'Home Loan Interest', 'NPS (80CCD)', 'Other'];
 
-export default function ITDeclarationTab({ employeeDbId, readOnly }: Props) {
+export default function ITDeclarationTab({ employeeDbId }: Props) {
   const [declarations, setDeclarations] = useState<ITDeclaration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
