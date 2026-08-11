@@ -48,7 +48,7 @@ export default function DailyAttendance() {
     mode: 'view'
   });
 
-  const { data, loading } = useAttendanceRecords(filters);
+  const { data, loading, refresh } = useAttendanceRecords(filters);
 
   const handleAction = (record: AttendanceRecord, mode: 'view' | 'edit') => {
     setDrawerState({ isOpen: true, record, mode });
@@ -311,6 +311,7 @@ export default function DailyAttendance() {
           onClose={() => setDrawerState(prev => ({ ...prev, isOpen: false }))}
           record={drawerState.record}
           mode={drawerState.mode}
+          onSaveSuccess={refresh}
         />
       </div>
     </div>

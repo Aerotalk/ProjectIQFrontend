@@ -39,6 +39,22 @@ export default function LeaveApplications() {
     }
   );
 
+  const approveMutation = useMutation(
+    (id: string) => WorkforceService.approveLeaveApplication(id),
+    {
+      successMessage: 'Leave application approved',
+      onSuccess: () => refresh()
+    }
+  );
+
+  const rejectMutation = useMutation(
+    (id: string) => WorkforceService.rejectLeaveApplication(id),
+    {
+      successMessage: 'Leave application rejected',
+      onSuccess: () => refresh()
+    }
+  );
+
   const handleAction = (item: LeaveApplication | null, mode: 'create' | 'edit' | 'view') => {
     setDrawerMode(mode);
     setSelectedApp(item);
@@ -78,15 +94,16 @@ export default function LeaveApplications() {
       )
     },
     { 
-      key: 'period', 
+      key: 'duration', 
       label: 'Duration', 
       render: (_: any, row: LeaveApplication) => (
         <div className="text-sm">
-          <div>{row.fromDate} to {row.toDate}</div>
-          <div className="text-xs text-gray-500">{row.duration} Days</div>
+          <div>{row.duration} Days</div>
+          <div className="text-xs text-gray-500">{row.fromDate} - {row.toDate}</div>
         </div>
       )
     },
+    { key: 'appliedOn', label: 'Applied On', sortable: true },
     { 
       key: 'status', 
       label: 'Status', 
@@ -95,7 +112,7 @@ export default function LeaveApplications() {
         <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${
           val === LeaveStatus.Approved ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400' :
           val === LeaveStatus.Rejected ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' :
-          val === LeaveStatus.Cancelled ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400' :
+          val === LeaveStatus.Cancelled ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
           'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
         }`}>
           {val}
@@ -119,10 +136,10 @@ export default function LeaveApplications() {
                     <Edit2 size={14} /> Edit Request
                   </button>
                   <div className="h-px bg-gray-100 dark:bg-white/10 my-1" />
-                  <button onClick={() => { setIsOpen(false); /* Hook up approve */ }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); approveMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 flex items-center gap-2">
                     <CheckCircle size={14} /> Approve
                   </button>
-                  <button onClick={() => { setIsOpen(false); /* Hook up reject */ }} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">
+                  <button onClick={() => { setIsOpen(false); rejectMutation.mutate(row.id); }} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2">
                     <XCircle size={14} /> Reject
                   </button>
                 </>
@@ -133,7 +150,7 @@ export default function LeaveApplications() {
         return <ActionCell />;
       }
     }
-  ], []);
+  ], [approveMutation, rejectMutation]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#181a1f] p-4 lg:p-6">

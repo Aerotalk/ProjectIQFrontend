@@ -16,7 +16,8 @@ export default function ShiftSelector({ value, onChange, disabled, className, pl
 
   useEffect(() => {
     WorkforceService.getShifts().then((res: any) => {
-      setOptions(res.data.map((shift: any) => ({
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setOptions(list.map((shift: any) => ({
         label: shift.shiftName,
         value: shift.id,
         subtitle: `${shift.startTime} - ${shift.endTime}`,
