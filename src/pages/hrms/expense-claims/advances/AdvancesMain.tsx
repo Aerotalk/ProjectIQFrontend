@@ -60,6 +60,16 @@ export default function AdvancesMain() {
     }
   };
 
+  const handleApprove = async (id: string) => {
+    try {
+      await api.put(`/hrms/expense-claims/advances/${id}/approve`);
+      toast.success('Advance approved');
+      fetchData();
+    } catch (e) {
+      toast.error('Error approving advance');
+    }
+  };
+
   const columns = [
     { key: 'advanceNo', label: 'Advance No' },
     { key: 'employeeId', label: 'Employee' },
@@ -78,6 +88,7 @@ export default function AdvancesMain() {
         <TableRowActionMenu
           actions={[
             { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/advance/${row.id}`) },
+            ...(row.status === 'Pending' ? [{ label: 'Approve', onClick: () => handleApprove(row.id) }] : []),
             ...(row.status === 'Approved' && !row.disbursed ? [{ label: 'Disburse', onClick: () => handleDisburse(row.id) }] : [])
           ]}
         />

@@ -29,9 +29,9 @@ export default function ClaimsList() {
         claimsData = apiClaims.map((c: any) => ({
           id: c.id,
           claimNo: c.claimNo || `CLM-${c.id.slice(0, 4)}`,
-          employeeId: c.employee?.firstName ? `${c.employee.firstName} ${c.employee.lastName}` : (c.employeeId || 'EMP-001'),
-          departmentId: c.department?.departmentName,
-          templateId: c.template?.id || c.templateId,
+          employeeId: c.employeeName || (c.employee?.firstName ? `${c.employee.firstName} ${c.employee.lastName}` : (c.employeeId || 'EMP-001')),
+          departmentId: c.departmentName || c.department?.departmentName,
+          templateId: c.templateName || c.template?.id || c.templateId,
           title: c.title,
           totalClaimed: c.totalClaimed || 0,
           approvedAmount: c.approvedAmount || 0,
@@ -61,6 +61,16 @@ export default function ClaimsList() {
     }
   };
 
+  const handleSubmit = async (id: string) => {
+    try {
+      await api.post(`/hrms/expense-claims/claims/${id}/submit`);
+      toast.success('Claim submitted for approval');
+      fetchData();
+    } catch (e) {
+      toast.error('Failed to submit claim');
+    }
+  };
+
   const columns = [
     { key: 'claimNo', label: 'Claim No' },
     { key: 'title', label: 'Title' },
@@ -78,6 +88,7 @@ export default function ClaimsList() {
       render: (_: any, row: ExpenseClaim) => (
         <TableRowActionMenu
           actions={[
+            ...(row.status === 'Draft' ? [{ label: 'Submit Claim', onClick: () => handleSubmit(row.id) }] : []),
             { label: 'View / Edit', onClick: () => navigate(`${basePath}/hrms/expense-claims/claim/${row.id}`) },
             { label: 'Delete', onClick: () => handleDelete(row.id), danger: true }
           ]}

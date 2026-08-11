@@ -7,8 +7,10 @@ import { claimSchema } from '../validators/expenseValidation';
 import type { ClaimFormValues } from '../validators/expenseValidation';
 import { formStyles } from '../../../../components/ui/form-styles';
 import CustomSelect from '../../../../components/ui/CustomSelect';
+import EmployeeSelector from '../../../../components/hrms/EmployeeSelector';
 import { api } from '../../../../lib/api';
 import toast from 'react-hot-toast';
+import ExpenseItemsList from './ExpenseItemsList';
 
 export default function ExpenseClaimPage() {
   const navigate = useNavigate();
@@ -18,11 +20,11 @@ export default function ExpenseClaimPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [templates, setTemplates] = useState<{ id: string, templateName: string }[]>([]);
-  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
 
   const form = useForm<ClaimFormValues>({
     resolver: zodResolver(claimSchema) as any,
     defaultValues: {
+      employee: '',
       template: '',
       title: '',
       currency: 'USD',
@@ -50,12 +52,11 @@ export default function ExpenseClaimPage() {
     try {
       const data = await api.get(`/hrms/expense-claims/claims/${id}`);
       form.reset({
-        template: data.templateId || '',
+        employee: data.employee?.id || data.employeeId || '',
+        template: data.template?.id || data.templateId || '',
         title: data.title || '',
         currency: data.currency || 'USD',
       });
-      // Mocking receipt fetch if any
-      setReceiptPreview(null);
     } catch (err) {
       toast.error('Failed to load claim details');
       navigate('/companydashboard/hrms/expense-claims/claims');
@@ -64,26 +65,28 @@ export default function ExpenseClaimPage() {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Create a local object URL for preview
-      setReceiptPreview(URL.createObjectURL(file));
-      // In a real scenario, you'd upload this file to S3 or similar
-    }
-  };
-
   const onSubmit = async (data: ClaimFormValues) => {
     setIsSubmitting(true);
     try {
+      const payload = {
+        title: data.title,
+        currency: data.currency,
+        template: { id: data.template },
+        employee: { id: data.employee }
+      };
       if (isEdit) {
-        await api.put(`/hrms/expense-claims/claims/${id}`, data);
+        await api.put(`/hrms/expense-claims/claims/${id}`, payload);
         toast.success('Claim updated successfully!');
+        navigate('/companydashboard/hrms/expense-claims/claims');
       } else {
-        await api.post('/hrms/expense-claims/claims', data);
-        toast.success('Claim submitted successfully!');
+        const res = await api.post('/hrms/expense-claims/claims', payload);
+        toast.success('Claim saved! Now add line items.');
+        if (res && res.id) {
+          navigate(`/companydashboard/hrms/expense-claims/claim/${res.id}`);
+        } else {
+          navigate('/companydashboard/hrms/expense-claims/claims');
+        }
       }
-      navigate('/companydashboard/hrms/expense-claims/claims');
     } catch (err: any) {
       toast.error(err.message || 'Failed to save claim');
     } finally {
@@ -121,41 +124,23 @@ export default function ExpenseClaimPage() {
       </div>
 
       <FormProvider {...form}>
-        <form id="expense-form" onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-hidden flex flex-col md:flex-row">
+        <form id="expense-form" onSubmit={form.handleSubmit(onSubmit)} className={`${isEdit ? 'flex-none min-h-[50%]' : 'flex-1'} overflow-hidden flex flex-col md:flex-row`}>
           
-          {/* Left Panel: Receipt Uploader */}
-          <div className="w-full md:w-1/2 p-8 border-b md:border-b-0 md:border-r border-gray-200 dark:border-white/10 bg-gray-50/30 dark:bg-[#121212]/50 flex flex-col overflow-y-auto custom-scrollbar">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Receipt Details</h3>
-            
-            <div className="flex-1 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl flex flex-col items-center justify-center p-6 text-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors relative group">
-              {receiptPreview ? (
-                <div className="absolute inset-0 p-4">
-                  <div className="w-full h-full relative rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 bg-white">
-                    <img src={receiptPreview} alt="Receipt preview" className="w-full h-full object-contain" />
-                    <label className="absolute bottom-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg cursor-pointer hover:bg-primary-dark transition-colors">
-                      Change Receipt
-                      <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileUpload} />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label className="cursor-pointer flex flex-col items-center">
-                  <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Upload size={28} />
-                  </div>
-                  <span className="text-base font-medium text-gray-900 dark:text-white">Click to upload receipt</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">SVG, PNG, JPG or PDF (max. 5MB)</span>
-                  <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileUpload} />
-                </label>
-              )}
-            </div>
-          </div>
-
-          {/* Right Panel: Form */}
-          <div className="w-full md:w-1/2 p-8 overflow-y-auto custom-scrollbar">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Claim Details</h3>
+          {/* Form Content */}
+          <div className="w-full p-8 overflow-y-auto custom-scrollbar flex justify-center">
+            <div className="w-full max-w-2xl">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Claim Details</h3>
             
             <div className="space-y-6 max-w-md">
+              <div>
+                <label className={formStyles.label}>Employee *</label>
+                <EmployeeSelector 
+                  value={form.watch('employee')}
+                  onChange={(val) => form.setValue('employee', val)}
+                />
+                {form.formState.errors.employee && <p className="text-red-500 text-xs mt-1">{form.formState.errors.employee.message}</p>}
+              </div>
+
               <div>
                 <label className={formStyles.label}>Template *</label>
                 <CustomSelect
@@ -190,6 +175,12 @@ export default function ExpenseClaimPage() {
           </div>
         </form>
       </FormProvider>
+
+      {isEdit && (
+        <div className="flex-1 overflow-hidden border-t border-gray-200 dark:border-white/10 bg-gray-50/20 dark:bg-black/20">
+          <ExpenseItemsList claimId={id as string} currency={form.watch('currency')} />
+        </div>
+      )}
 
       {/* Footer */}
       <div className="px-8 py-5 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#181a1f] flex items-center justify-between shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">

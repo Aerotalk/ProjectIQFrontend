@@ -13,6 +13,7 @@ export const advanceSchema = z.object({
 export type AdvanceFormValues = z.infer<typeof advanceSchema>;
 
 export const claimSchema = z.object({
+  employee: z.string().min(1, 'Employee is required'),
   template: z.string().min(1, 'Template is required'),
   title: z.string().min(1, 'Title or Purpose is required'),
   currency: z.string().min(1, 'Currency is required'),

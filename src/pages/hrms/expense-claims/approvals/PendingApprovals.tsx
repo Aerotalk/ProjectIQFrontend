@@ -68,6 +68,17 @@ export default function PendingApprovals() {
     }
   };
 
+  const handleSendBack = async (claimId: string, comment: string) => {
+    try {
+      await api.put(`/hrms/expense-claims/claims/${claimId}/send-back`, { comment });
+      toast.success('Claim Sent Back to Employee');
+      setSelectedClaim(null);
+      fetchData();
+    } catch (e) {
+      toast.error('Error sending claim back');
+    }
+  };
+
   const columns = [
     { key: 'claimNo', label: 'Claim No' },
     { key: 'title', label: 'Title' },
@@ -142,6 +153,12 @@ export default function PendingApprovals() {
                 className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-md text-sm font-medium transition-colors"
               >
                 Reject Claim
+              </button>
+              <button
+                onClick={() => handleSendBack(selectedClaim.id, 'Need more information')}
+                className="px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-md text-sm font-medium transition-colors"
+              >
+                Send Back
               </button>
               <button
                 onClick={() => handleApprove(selectedClaim.id, selectedClaim.totalClaimed)}
