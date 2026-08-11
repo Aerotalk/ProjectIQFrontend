@@ -10,9 +10,9 @@ import { api } from '../../../lib/api';
 
 // Tab Sections
 import SalaryInputsTab from '../../../components/payroll/PayrollDrawer/sections/SalaryInputsTab';
-import EmployeeLOPTab from '../../../components/payroll/PayrollDrawer/sections/EmployeeLOPTab';
 import ITDeclarationTab from '../../../components/payroll/PayrollDrawer/sections/ITDeclarationTab';
 import FBPDeclarationTab from '../../../components/payroll/PayrollDrawer/sections/FBPDeclarationTab';
+import EmployeeLOPTab from '../../../components/payroll/PayrollDrawer/sections/EmployeeLOPTab';
 import ReimbursementClaimTab from '../../../components/payroll/PayrollDrawer/sections/ReimbursementClaimTab';
 import SalaryHoldTab from '../../../components/payroll/PayrollDrawer/sections/SalaryHoldTab';
 import StopSalaryProcessingTab from '../../../components/payroll/PayrollDrawer/sections/StopSalaryProcessingTab';
@@ -27,6 +27,9 @@ const TABS = [
   { id: 'actions', label: 'Advanced Actions' },
 ];
 
+// Tabs that manage their own state/API — no global save bar needed
+const SELF_MANAGED_TABS = new Set(['employee_lop', 'it_declarations', 'reimbursement']);
+
 export default function PayrollListing() {
   const { employees, allPayrolls, isLoading, refreshData } = usePayroll();
   const location = useLocation();
@@ -35,36 +38,29 @@ export default function PayrollListing() {
   const [activeTab, setActiveTab] = useState(() => new URLSearchParams(location.search).get('tab') || 'salary_inputs');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const filteredEmployees = employees.filter(e => 
-    (e.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredEmployees = employees.filter(e =>
+    (e.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (e.empId || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedEmployee = employees.find(e => e.id === selectedEmpId || e.empId === selectedEmpId);
   const employeeData = selectedEmployee;
-
-  // Let's get the latest payroll record for this employee to show in the header
   const employeePayroll = allPayrolls.find(p => p.empId === employeeData?.empId);
 
-  // Form handling for the current tab
   const methods = useForm<PayrollFormValues>({
     resolver: zodResolver(payrollValidationSchema),
     defaultValues: {
       salaryInputs: { employee: employeeData?.empId },
-      employeeLOP: { employee: employeeData?.empId },
       salaryHold: { employee: employeeData?.empId },
       stopSalary: { employee: employeeData?.empId },
       finalSettlement: { employee: employeeData?.empId },
     }
   });
 
-  // When selected employee changes, update form default values
   useEffect(() => {
     if (employeeData) {
       methods.reset({
         salaryInputs: { employee: employeeData.empId, inputType: 'Addition' },
-        employeeLOP: { employee: employeeData.empId, source: 'Attendance' },
-        itDeclarations: { taxRegime: 'New Regime' },
         fbpDeclarations: { items: [] },
         salaryHold: { employee: employeeData.empId },
         stopSalary: { employee: employeeData.empId },
@@ -75,14 +71,14 @@ export default function PayrollListing() {
 
   const parseCurrency = (val: string | undefined): number => {
     if (!val) return 0;
-    return Number(val.replace(/[^0-9.-]+/g,""));
+    return Number(val.replace(/[^0-9.-]+/g, ''));
   };
 
   const onSubmit = async (data: PayrollFormValues) => {
     setIsSubmitting(true);
     try {
       const toast = (await import('react-hot-toast')).default;
-      
+
       if (activeTab === 'salary_inputs' && data.salaryInputs) {
         const payload = {
           ...data.salaryInputs,
@@ -90,24 +86,7 @@ export default function PayrollListing() {
           amount: parseCurrency(data.salaryInputs.amount)
         };
         await api.post('/hrms/payroll/salary-inputs', payload);
-        toast.success("Salary inputs saved successfully.");
-      } else if (activeTab === 'employee_lop' && data.employeeLOP) {
-        const payload = {
-          ...data.employeeLOP,
-          employee: { id: data.employeeLOP.employee },
-          lopDays: Number(data.employeeLOP.lopDays)
-        };
-        await api.post('/hrms/payroll/employee-lop', payload);
-        toast.success("LOP details saved successfully.");
-      } else if (activeTab === 'it_declarations' && data.itDeclarations) {
-        toast.success("IT Declarations saved successfully.");
-      } else if (activeTab === 'reimbursement' && data.reimbursement) {
-        const payload = {
-          ...data.reimbursement,
-          claimedAmount: parseCurrency(data.reimbursement.claimedAmount)
-        };
-        await api.post('/hrms/payroll/reimbursements', payload);
-        toast.success("Reimbursement saved successfully.");
+        toast.success('Salary inputs saved successfully.');
       } else if (activeTab === 'actions') {
         if (data.salaryHold?.holdAmount) {
           await api.post('/hrms/payroll/salary-holds', {
@@ -115,14 +94,14 @@ export default function PayrollListing() {
             employee: { id: data.salaryHold.employee },
             holdAmount: parseCurrency(data.salaryHold.holdAmount)
           });
-          toast.success("Salary hold saved successfully.");
+          toast.success('Salary hold saved successfully.');
         }
         if (data.stopSalary?.stopFromDate) {
           await api.post('/hrms/payroll/salary-stops', {
             ...data.stopSalary,
             employee: { id: data.stopSalary.employee }
           });
-          toast.success("Stop salary saved successfully.");
+          toast.success('Stop salary saved successfully.');
         }
         if (data.finalSettlement?.settlementDate) {
           await api.post('/hrms/payroll/final-settlements', {
@@ -130,10 +109,13 @@ export default function PayrollListing() {
             employee: { id: data.finalSettlement.employee },
             items: data.finalSettlement.items?.map(i => ({ ...i, amount: parseCurrency(i.amount) })) || []
           });
-          toast.success("Final settlement saved successfully.");
+          toast.success('Final settlement saved successfully.');
         }
+      } else if (activeTab === 'fbp_declarations' && data.fbpDeclarations) {
+        // FBP handled separately if needed
+        toast.success('FBP Declarations saved.');
       }
-      
+
       await refreshData();
     } catch (err: any) {
       const toast = (await import('react-hot-toast')).default;
@@ -143,10 +125,12 @@ export default function PayrollListing() {
     }
   };
 
+  const isSelfManaged = SELF_MANAGED_TABS.has(activeTab);
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex h-full bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-lg shadow-sm overflow-hidden">
-        
+
         {/* Left Pane (Master) */}
         <div className="w-80 border-r border-gray-200 dark:border-white/10 flex flex-col shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
           <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#1f2229]">
@@ -162,7 +146,7 @@ export default function PayrollListing() {
               />
             </div>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
             {isLoading ? (
               <div className="p-4 text-center text-sm text-gray-500">Loading directory...</div>
@@ -171,28 +155,28 @@ export default function PayrollListing() {
             ) : (
               filteredEmployees.map(emp => (
                 <button
-                  key={emp.empId}
-                  onClick={() => setSelectedEmpId(emp.empId)}
+                  key={emp.id}
+                  onClick={() => setSelectedEmpId(emp.id)}
                   className={`w-full text-left p-3 rounded-md transition-all flex items-center gap-3 group ${
-                    selectedEmpId === emp.empId 
-                      ? 'bg-primary/10 border border-primary/20 shadow-sm' 
+                    selectedEmpId === emp.id
+                      ? 'bg-primary/10 border border-primary/20 shadow-sm'
                       : 'hover:bg-white dark:hover:bg-white/5 border border-transparent hover:shadow-sm'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${
-                    selectedEmpId === emp.empId
+                    selectedEmpId === emp.id
                       ? 'bg-primary text-white shadow-md ring-2 ring-primary/20'
                       : 'bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary group-hover:bg-primary/20'
                   }`}>
                     {emp.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <p className={`text-sm font-semibold truncate transition-colors ${selectedEmpId === emp.empId ? 'text-primary dark:text-secondary' : 'text-gray-900 dark:text-white'}`}>
+                    <p className={`text-sm font-semibold truncate transition-colors ${selectedEmpId === emp.id ? 'text-primary dark:text-secondary' : 'text-gray-900 dark:text-white'}`}>
                       {emp.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{emp.empId}</p>
                   </div>
-                  <ChevronRight size={16} className={`shrink-0 transition-all ${selectedEmpId === emp.empId ? 'text-primary dark:text-secondary translate-x-1' : 'text-gray-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                  <ChevronRight size={16} className={`shrink-0 transition-all ${selectedEmpId === emp.id ? 'text-primary dark:text-secondary translate-x-1' : 'text-gray-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`} />
                 </button>
               ))
             )}
@@ -215,7 +199,7 @@ export default function PayrollListing() {
               <div className="shrink-0 p-6 border-b border-gray-200 dark:border-white/10 relative overflow-hidden bg-gradient-to-r from-gray-50/80 to-white dark:from-[#181a1f] dark:to-[#1a1c23]">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-bl-full -z-0 pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-primary/20 via-transparent to-transparent"></div>
-                
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
                   <div className="flex items-center gap-5">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-[#8b2566] text-white flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg ring-4 ring-white dark:ring-[#181a1f]">
@@ -229,7 +213,7 @@ export default function PayrollListing() {
                           <>
                             <span className="text-gray-300 dark:text-gray-600">•</span>
                             <span className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${
-                              employeePayroll.status === 'Processed' 
+                              employeePayroll.status === 'Processed'
                                 ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
                                 : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20'
                             }`}>
@@ -240,8 +224,7 @@ export default function PayrollListing() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Financial Quick Look */}
+
                   {employeePayroll && (
                     <div className="flex gap-6 bg-white dark:bg-[#121317] px-6 py-3 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
                       <div>
@@ -267,58 +250,79 @@ export default function PayrollListing() {
 
               {/* Tab Content Area */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-gray-50/50 dark:bg-[#121317]/50 relative">
-                <FormProvider {...methods}>
-                  <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-6 pb-20">
-                    
-                    {/* The individual sections from PayrollDrawer */}
-                    <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
-                      {activeTab === 'salary_inputs' && <SalaryInputsTab readOnly={false} />}
-                      {activeTab === 'employee_lop' && <EmployeeLOPTab readOnly={false} />}
-                      {activeTab === 'it_declarations' && <ITDeclarationTab readOnly={false} />}
-                      {activeTab === 'fbp_declarations' && <FBPDeclarationTab readOnly={false} />}
-                      {activeTab === 'reimbursement' && <ReimbursementClaimTab readOnly={false} />}
-                      {activeTab === 'actions' && (
-                        <div className="space-y-8">
-                          <SalaryHoldTab readOnly={false} />
-                          <div className="h-px bg-gray-200 dark:bg-white/10"></div>
-                          <StopSalaryProcessingTab readOnly={false} />
-                          <div className="h-px bg-gray-200 dark:bg-white/10"></div>
-                          <FinalSettlementTab readOnly={false} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Fixed Bottom Save Bar */}
-                    <div className="fixed bottom-6 right-8 left-[22rem] z-30 flex justify-end">
-                      <div className="bg-white/90 dark:bg-[#1f2229]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => methods.reset()}
-                          className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors font-medium text-sm"
-                        >
-                          Reset
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-[#5d1944] transition-all font-medium text-sm shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50 active:scale-95"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                              Saving...
-                            </>
-                          ) : (
-                            <>
-                              <Send size={16} />
-                              Save Changes
-                            </>
-                          )}
-                        </button>
+                {/* Self-managed tabs (LOP, IT Declarations, Reimbursements) */}
+                {isSelfManaged ? (
+                  <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm animate-in fade-in duration-200">
+                    {activeTab === 'employee_lop' && (
+                      <EmployeeLOPTab
+                        key={`lop-${employeeData.id}`}
+                        employeeDbId={employeeData.id}
+                      />
+                    )}
+                    {activeTab === 'it_declarations' && (
+                      <ITDeclarationTab
+                        key={`it-${employeeData.id}`}
+                        employeeId={employeeData.empId}
+                        employeeDbId={employeeData.id}
+                      />
+                    )}
+                    {activeTab === 'reimbursement' && (
+                      <ReimbursementClaimTab
+                        key={`reimb-${employeeData.id}`}
+                        employeeDbId={employeeData.id}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  /* Form-managed tabs with global Save bar */
+                  <FormProvider {...methods}>
+                    <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-6 pb-20">
+                      <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+                        {activeTab === 'salary_inputs' && <SalaryInputsTab readOnly={false} />}
+                        {activeTab === 'fbp_declarations' && <FBPDeclarationTab readOnly={false} />}
+                        {activeTab === 'actions' && (
+                          <div className="space-y-8">
+                            <SalaryHoldTab readOnly={false} />
+                            <div className="h-px bg-gray-200 dark:bg-white/10"></div>
+                            <StopSalaryProcessingTab readOnly={false} />
+                            <div className="h-px bg-gray-200 dark:bg-white/10"></div>
+                            <FinalSettlementTab readOnly={false} />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </form>
-                </FormProvider>
+
+                      {/* Fixed Bottom Save Bar */}
+                      <div className="fixed bottom-6 right-8 left-[22rem] z-30 flex justify-end">
+                        <div className="bg-white/90 dark:bg-[#1f2229]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => methods.reset()}
+                            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors font-medium text-sm"
+                          >
+                            Reset
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-[#5d1944] transition-all font-medium text-sm shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50 active:scale-95"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Send size={16} />
+                                Save Changes
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </FormProvider>
+                )}
               </div>
             </div>
           )}
