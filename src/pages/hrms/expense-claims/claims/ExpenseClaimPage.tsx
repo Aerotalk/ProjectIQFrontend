@@ -20,6 +20,7 @@ export default function ExpenseClaimPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [templates, setTemplates] = useState<{ id: string, templateName: string }[]>([]);
+  const [localItems, setLocalItems] = useState<any[]>([]);
 
   const form = useForm<ClaimFormValues>({
     resolver: zodResolver(claimSchema) as any,
@@ -80,12 +81,17 @@ export default function ExpenseClaimPage() {
         navigate('/companydashboard/hrms/expense-claims/claims');
       } else {
         const res = await api.post('/hrms/expense-claims/claims', payload);
-        toast.success('Claim saved! Now add line items.');
-        if (res && res.id) {
-          navigate(`/companydashboard/hrms/expense-claims/claim/${res.id}`);
-        } else {
-          navigate('/companydashboard/hrms/expense-claims/claims');
+        if (res && res.id && localItems.length > 0) {
+          // Save local items to the newly created claim
+          for (const item of localItems) {
+            await api.post(`/hrms/expense-claims/claims/${res.id}/items`, {
+              ...item,
+              currency: data.currency
+            });
+          }
         }
+        toast.success('Claim saved successfully!');
+        navigate('/companydashboard/hrms/expense-claims/claims');
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to save claim');
@@ -177,9 +183,14 @@ export default function ExpenseClaimPage() {
       </form>
       </FormProvider>
 
-      {isEdit && (
+      {(isEdit || !!form.watch('template')) && (
         <div className="flex-1 overflow-hidden border-t border-gray-200 dark:border-white/10 bg-gray-50/20 dark:bg-black/20">
-          <ExpenseItemsList claimId={id as string} currency={form.watch('currency')} />
+          <ExpenseItemsList 
+            claimId={id || 'new'} 
+            currency={form.watch('currency')} 
+            localItems={localItems}
+            setLocalItems={setLocalItems}
+          />
         </div>
       )}
 

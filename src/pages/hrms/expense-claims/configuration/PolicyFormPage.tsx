@@ -24,6 +24,7 @@ export default function PolicyFormPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{ id: string, category: string }[]>([]);
+  const [designations, setDesignations] = useState<{ id: string, designationName: string }[]>([]);
 
   const form = useForm<PolicyFormValues>({
     resolver: zodResolver(policySchema) as any,
@@ -38,6 +39,7 @@ export default function PolicyFormPage() {
 
   useEffect(() => {
     fetchCategories();
+    fetchDesignations();
   }, []);
 
   const fetchCategories = async () => {
@@ -46,6 +48,15 @@ export default function PolicyFormPage() {
       setCategories(data || []);
     } catch (err) {
       toast.error('Failed to load categories');
+    }
+  };
+
+  const fetchDesignations = async () => {
+    try {
+      const data = await api.get('/admin/designations');
+      setDesignations(data || []);
+    } catch (err) {
+      toast.error('Failed to load designations');
     }
   };
 
@@ -97,11 +108,14 @@ export default function PolicyFormPage() {
 
               <div>
                 <label className={formStyles.label}>Employee Grade *</label>
-                <input
-                  type="text"
-                  {...form.register('grade')}
-                  className={formStyles.field(!!form.formState.errors.grade, false)}
-                  placeholder="e.g., L1, Manager, All"
+                <CustomSelect
+                  options={[
+                    { label: '-- Select Grade/Designation --', value: '' },
+                    { label: 'All (Any Grade)', value: 'All' },
+                    ...designations.map(d => ({ label: d.designationName, value: d.designationName }))
+                  ]}
+                  value={form.watch('grade')}
+                  onChange={(val) => form.setValue('grade', val)}
                 />
                 {form.formState.errors.grade && <p className="text-red-500 text-xs mt-1">{form.formState.errors.grade.message}</p>}
               </div>

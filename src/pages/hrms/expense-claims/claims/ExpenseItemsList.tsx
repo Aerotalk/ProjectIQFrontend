@@ -20,7 +20,17 @@ const itemSchema = z.object({
 
 type ItemFormValues = z.infer<typeof itemSchema>;
 
-export default function ExpenseItemsList({ claimId, currency }: { claimId: string, currency: string }) {
+export default function ExpenseItemsList({ 
+  claimId, 
+  currency, 
+  localItems = [], 
+  setLocalItems 
+}: { 
+  claimId: string, 
+  currency: string, 
+  localItems?: any[], 
+  setLocalItems?: React.Dispatch<React.SetStateAction<any[]>> 
+}) {
   const [items, setItems] = useState<any[]>([]);
   const [categories, setCategories] = useState<{ id: string, category: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +55,12 @@ export default function ExpenseItemsList({ claimId, currency }: { claimId: strin
   useEffect(() => {
     if (claimId && claimId !== 'new') {
       fetchItems();
+    } else if (claimId === 'new') {
+      setItems(localItems);
+      setIsLoading(false);
     }
     fetchCategories();
-  }, [claimId]);
+  }, [claimId, localItems]);
 
   const fetchItems = async () => {
     try {
@@ -99,6 +112,15 @@ export default function ExpenseItemsList({ claimId, currency }: { claimId: strin
 
   const handleDelete = async (itemId: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
+    
+    if (claimId === 'new') {
+      const newItems = items.filter(i => i.id !== itemId);
+      setItems(newItems);
+      if (setLocalItems) setLocalItems(newItems);
+      toast.success('Item deleted');
+      return;
+    }
+
     try {
       await api.delete(`/hrms/expense-claims/claims/${claimId}/items/${itemId}`);
       toast.success('Item deleted');
@@ -111,6 +133,17 @@ export default function ExpenseItemsList({ claimId, currency }: { claimId: strin
   const onSubmit = async (data: ItemFormValues) => {
     setIsSubmitting(true);
     try {
+      if (claimId === 'new') {
+        const newItem = { ...data, id: Date.now().toString(), currency };
+        const newItems = [...items, newItem];
+        setItems(newItems);
+        if (setLocalItems) setLocalItems(newItems);
+        toast.success('Item added successfully');
+        setIsAdding(false);
+        form.reset();
+        return;
+      }
+
       await api.post(`/hrms/expense-claims/claims/${claimId}/items`, {
         ...data,
         currency
