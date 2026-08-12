@@ -1,17 +1,50 @@
-import { useFormContext } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { FormSection, FormGrid } from '../../../ui/FormLayout';
 import { Input } from '../../../ui/input';
-import type { PayrollFormValues } from '../validators/payrollValidation';
-import { Image as ImageIcon } from 'lucide-react';
 import { formStyles } from '../../../ui/form-styles';
+import { Loader2 } from 'lucide-react';
+import { api } from '../../../../lib/api';
+import toast from 'react-hot-toast';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function PayrollConfigurationTab({ readOnly }: Props) {
-  const { register } = useFormContext<PayrollFormValues>();
+  const [templateName, setTemplateName] = useState('Standard Professional');
+  const [layoutHTML, setLayoutHTML] = useState('');
+  const [setAsDefault, setSetAsDefault] = useState(true);
+  const [saving, setSaving] = useState(false);
   
+  useEffect(() => {
+    // Fetch existing templates
+    api.get('/hrms/payroll/payslip-templates').then(res => {
+      const data = res.data || res;
+      if (Array.isArray(data) && data.length > 0) {
+        const t = data.find((d: any) => d.setAsDefault) || data[0];
+        setTemplateName(t.templateName);
+        setLayoutHTML(t.layoutHTML || '');
+        setSetAsDefault(t.setAsDefault);
+      }
+    }).catch(err => console.error(err));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.post('/hrms/payroll/payslip-templates', {
+        templateName,
+        layoutHTML,
+        setAsDefault
+      });
+      toast.success('Payslip template saved successfully');
+    } catch (err) {
+      toast.error('Failed to save template');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Payslip Templates */}
@@ -22,7 +55,8 @@ export default function PayrollConfigurationTab({ readOnly }: Props) {
               Template Name *
             </label>
             <Input
-              {...register('payrollConfiguration.templateName')}
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
               placeholder="e.g., Standard Professional"
               disabled={readOnly}
             />
@@ -33,35 +67,35 @@ export default function PayrollConfigurationTab({ readOnly }: Props) {
               Layout HTML *
             </label>
             <textarea
-              {...register('payrollConfiguration.layoutHTML')}
+              value={layoutHTML}
+              onChange={(e) => setLayoutHTML(e.target.value)}
               disabled={readOnly}
               className="w-full h-32 p-3 text-sm font-mono bg-gray-50 dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="<div>Payslip HTML goes here...</div>"
             />
           </div>
 
-          <div className="space-y-2 sm:col-span-2">
-            <label className={formStyles.label}>Preview Image</label>
-            <div className="flex items-center gap-3">
-              <div className="w-24 h-32 bg-gray-100 dark:bg-white/5 border border-dashed border-gray-300 dark:border-white/20 rounded-sm flex items-center justify-center text-gray-400">
-                <ImageIcon size={24} />
-              </div>
-              <div>
-                <button type="button" disabled={readOnly} className="px-3 py-1.5 text-sm bg-white dark:bg-[#1f2229] border border-gray-300 dark:border-white/10 rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50">
-                  Upload Preview
-                </button>
-                <p className="text-xs text-gray-500 mt-2">Upload a thumbnail of how this payslip looks.</p>
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-2 sm:col-span-2 mt-2">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" {...register('payrollConfiguration.setAsDefault')} disabled={readOnly} className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" />
+              <input 
+                type="checkbox" 
+                checked={setAsDefault} 
+                onChange={(e) => setSetAsDefault(e.target.checked)} 
+                disabled={readOnly} 
+                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700" 
+              />
               <span className={formStyles.label}>Set as Default Template</span>
             </label>
           </div>
         </FormGrid>
+        
+        {!readOnly && (
+          <div className="mt-6 flex justify-end">
+             <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-primary text-white rounded-sm flex items-center gap-2">
+               {saving && <Loader2 size={16} className="animate-spin" />} Save Template
+             </button>
+          </div>
+        )}
       </FormSection>
     </div>
   );

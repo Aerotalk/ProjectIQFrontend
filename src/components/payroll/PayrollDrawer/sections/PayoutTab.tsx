@@ -80,10 +80,28 @@ export default function PayoutTab({ readOnly, runId }: Props) {
                 {/* Actions for current step */}
                 {step.status === 'current' && !readOnly && step.id === 3 && (
                   <div className="mt-4 flex gap-3">
-                    <button type="button" className="px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (runId) {
+                          api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Failed' }).then(() => {
+                            window.location.reload();
+                          }).catch(err => console.error(err));
+                        }
+                      }}
+                      className="px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
                       Mark as Failed
                     </button>
-                    <button type="button" className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (runId) {
+                          api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Paid' }).then(() => {
+                            window.location.reload();
+                          }).catch(err => console.error(err));
+                        }
+                      }}
+                      className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
                       Confirm Transfer Success
                     </button>
                   </div>
@@ -92,7 +110,14 @@ export default function PayoutTab({ readOnly, runId }: Props) {
                 {/* Actions for step 2 */}
                 {step.id === 2 && (
                   <div className="mt-3">
-                    <button type="button" className="flex items-center gap-2 text-sm text-primary dark:text-secondary font-medium hover:underline">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (runId) {
+                          window.open(`http://localhost:8080/api/hrms/payroll/runs/${runId}/bank-export`, '_blank');
+                        }
+                      }}
+                      className="flex items-center gap-2 text-sm text-primary dark:text-secondary font-medium hover:underline">
                       <Download size={14} /> Download Bank File (.csv)
                     </button>
                   </div>

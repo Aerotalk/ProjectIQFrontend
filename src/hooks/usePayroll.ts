@@ -26,6 +26,7 @@ export function usePayroll() {
   const [payrolls, setPayrolls] = useState<PayrollRecord[]>([]);
   const [employees, setEmployees] = useState<{id: string, name: string, empId: string}[]>([]);
   const [departments, setDepartments] = useState<{id: string, name: string}[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   const [filters, setFilters] = useState<PayrollFilters>({
@@ -39,10 +40,11 @@ export function usePayroll() {
   const refreshData = async () => {
     setIsLoading(true);
     try {
-      const [apiRuns, rawEmployeesData, rawDeptsData] = await Promise.all([
+      const [apiRuns, rawEmployeesData, rawDeptsData, statsData] = await Promise.all([
         api.get('/hrms/payroll/runs').catch(() => []),
         api.get('/admin/employees').catch(() => []),
-        api.get('/admin/departments').catch(() => [])
+        api.get('/admin/departments').catch(() => []),
+        api.get('/hrms/payroll/dashboard-stats').catch(() => null)
       ]);
       
       const employeesData = (rawEmployeesData || []).map((e: any) => ({
@@ -70,9 +72,9 @@ export function usePayroll() {
             details.forEach((d: any) => {
               mappedPayrolls.push({
                 id: d.id,
-                employee: d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : 'Unknown',
-                empId: d.employee?.employeeCode || 'Unknown',
-                dept: d.employee?.department?.departmentName || run.department?.departmentName || 'Unknown',
+                employee: d.employeeName || (d.employee ? `${d.employee.firstName} ${d.employee.lastName}` : 'Unknown'),
+                empId: d.employeeCode || d.employee?.employeeCode || 'Unknown',
+                dept: d.departmentName || d.employee?.department?.departmentName || run.department?.departmentName || 'Unknown',
                 period: run.payrollPeriod,
                 gross: `₹${(d.gross || 0).toLocaleString('en-IN')}`,
                 net: `₹${(d.net || 0).toLocaleString('en-IN')}`,
@@ -88,6 +90,7 @@ export function usePayroll() {
       setPayrolls(mappedPayrolls);
       setEmployees(employeesData);
       setDepartments(deptsData);
+      setDashboardStats(statsData);
     } catch (error) {
       console.error('Failed to fetch payroll data', error);
       setPayrolls([]);
@@ -132,6 +135,7 @@ export function usePayroll() {
     payrollRuns,
     employees,
     departments,
+    dashboardStats,
     isLoading,
     filters,
     updateFilter,

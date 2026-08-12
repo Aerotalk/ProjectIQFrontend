@@ -9,6 +9,7 @@ import { formStyles } from '../../../ui/form-styles';
 
 interface Props {
   readOnly?: boolean;
+  employeeDbId?: string;
 }
 
 export default function FBPDeclarationTab({ readOnly }: Props) {
@@ -101,7 +102,7 @@ export default function FBPDeclarationTab({ readOnly }: Props) {
                 )}
               </div>
             ))}
-            
+
             {fields.length === 0 && (
               <div className="text-center py-8 bg-gray-50 dark:bg-white/[0.02] border border-dashed border-gray-300 dark:border-white/20 rounded-sm">
                 <p className="text-sm text-gray-500 dark:text-gray-400">No FBP components added.</p>
