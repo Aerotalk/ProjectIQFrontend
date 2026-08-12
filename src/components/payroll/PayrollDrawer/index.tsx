@@ -4,6 +4,7 @@ import type { PayrollFormValues } from './validators/payrollValidation';
 
 // Tabs
 import SalaryInputsTab from './sections/SalaryInputsTab';
+import PayComponentSetupTab from './sections/PayComponentSetupTab';
 import EmployeeLOPTab from './sections/EmployeeLOPTab';
 import ITDeclarationTab from './sections/ITDeclarationTab';
 import ReimbursementClaimTab from './sections/ReimbursementClaimTab';
@@ -28,6 +29,7 @@ interface Props {
 
 const STEPS = [
   { id: 'salary_inputs',      label: 'Salary Inputs' },
+  { id: 'pay_component_setup', label: 'Pay Component Setup' },
   { id: 'employee_lop',       label: 'Employee LOP' },
   { id: 'it_declaration',     label: 'IT Declaration' },
   { id: 'reimbursement',      label: 'Reimbursement' },
@@ -83,6 +85,7 @@ export default function PayrollDrawer({ isOpen, onClose, onSave, mode, initialDa
   const renderStep = () => {
     switch (STEPS[currentStep].id) {
       case 'salary_inputs':    return <SalaryInputsTab readOnly={readOnly} />;
+      case 'pay_component_setup': return <PayComponentSetupTab readOnly={readOnly} />;
       case 'employee_lop':     return <EmployeeLOPTab readOnly={readOnly} />;
       case 'it_declaration':   return <ITDeclarationTab readOnly={readOnly} />;
       case 'reimbursement':    return <ReimbursementClaimTab readOnly={readOnly} />;

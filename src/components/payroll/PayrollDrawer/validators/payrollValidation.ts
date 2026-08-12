@@ -13,6 +13,27 @@ export const payrollValidationSchema = z.object({
     recurringUntil: z.string().optional(),
   }).optional(),
 
+  // Step 1.5 - Pay Component Setup
+  payComponentSetup: z.object({
+    components: z.array(
+      z.object({
+        componentName: z.string().min(1, "Required"),
+        code: z.string().min(1, "Required"),
+        type: z.string().min(1, "Required"),
+        subType: z.string().optional(),
+        calculationType: z.string().min(1, "Required"),
+        percentageOf: z.string().optional(),
+        percentageValue: z.string().optional(),
+        maxLimit: z.string().optional(),
+        displayOrder: z.string().optional(),
+        taxable: z.boolean().optional(),
+        proRata: z.boolean().optional(),
+        partOfCTC: z.boolean().optional(),
+        partOfGross: z.boolean().optional(),
+      })
+    ).optional(),
+  }).optional(),
+
   // Step 2 - Employee LOP
   employeeLOP: z.object({
     employee: z.string().min(1, "Employee is required"),
@@ -99,24 +120,6 @@ export const payrollValidationSchema = z.object({
 
   // Step 12 - Payroll Configuration
   payrollConfiguration: z.object({
-    // Pay Component Setup as line items
-    components: z.array(
-      z.object({
-        componentName: z.string().min(1, "Required"),
-        code: z.string().min(1, "Required"),
-        type: z.string().min(1, "Required"),
-        calculationType: z.string().min(1, "Required"),
-        percentageOf: z.string().optional(),
-        percentageValue: z.string().optional(),
-        maxLimit: z.string().optional(),
-        displayOrder: z.string().optional(),
-        taxable: z.boolean().optional(),
-        proRata: z.boolean().optional(),
-        partOfCTC: z.boolean().optional(),
-        partOfGross: z.boolean().optional(),
-      })
-    ).optional(),
-    
     // Payslip Templates
     templateName: z.string().optional(),
     layoutHTML: z.string().optional(),

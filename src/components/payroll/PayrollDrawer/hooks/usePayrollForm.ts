@@ -14,6 +14,9 @@ export function usePayrollForm(initialData?: Partial<PayrollFormValues>) {
         inputType: 'Addition',
         recurring: false,
       },
+      payComponentSetup: {
+        components: [],
+      },
       employeeLOP: {
         employee: '',
         payrollPeriod: '',
@@ -60,7 +63,6 @@ export function usePayrollForm(initialData?: Partial<PayrollFormValues>) {
         items: [],
       },
       payrollConfiguration: {
-        components: [],
         setAsDefault: false,
       },
       ...initialData,
