@@ -102,11 +102,29 @@ export default function PayrollVerificationTab({ readOnly, runId }: Props) {
             <XCircle size={16} />
             Return for Corrections
           </button>
-          <button type="button" className="flex items-center gap-2 px-4 py-2 border border-orange-200 dark:border-orange-500/20 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 rounded-sm hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors font-medium text-sm">
+          <button 
+            type="button" 
+            onClick={() => {
+              if (runId) {
+                api.post(`/hrms/payroll/runs/${runId}/reprocess`).then(() => {
+                  window.location.reload();
+                }).catch(err => console.error(err));
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 border border-orange-200 dark:border-orange-500/20 bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 rounded-sm hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors font-medium text-sm">
             <RotateCcw size={16} />
             Reprocess
           </button>
-          <button type="button" className="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-sm transition-colors font-medium text-sm">
+          <button 
+            type="button" 
+            onClick={() => {
+              if (runId) {
+                api.put(`/hrms/payroll/runs/${runId}/approve`).then(() => {
+                  window.location.reload();
+                }).catch(err => console.error(err));
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-sm shadow-sm transition-colors font-medium text-sm">
             <CheckCircle size={16} />
             Approve Payroll
           </button>

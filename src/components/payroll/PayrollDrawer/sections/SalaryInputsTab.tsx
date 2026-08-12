@@ -1,173 +1,184 @@
-import { useFormContext, Controller, useWatch } from 'react-hook-form';
-import { FormSection, FormGrid } from '../../../ui/FormLayout';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { api } from '../../../../lib/api';
+import Drawer from '../../../ui/Drawer';
+import { FormGrid } from '../../../ui/FormLayout';
 import { Input } from '../../../ui/input';
-import { CurrencyInput } from '../../../ui/CurrencyInput';
-import type { PayrollFormValues } from '../validators/payrollValidation';
 import { formStyles } from '../../../ui/form-styles';
-import CustomMonthPicker from '../../../ui/CustomMonthPicker';
-import CustomSelect from '../../../ui/CustomSelect';
-import { usePayroll } from '../../../../hooks/usePayroll';
+
+interface SalaryInput {
+  id: string;
+  payrollPeriod: string;
+  payComponent: string;
+  amount: number;
+  inputType: string;
+  reason: string;
+  recurring: boolean;
+}
 
 interface Props {
+  employeeDbId?: string;
   readOnly?: boolean;
 }
 
-export default function SalaryInputsTab({ readOnly }: Props) {
-  const { register, control, formState: { errors } } = useFormContext<PayrollFormValues>();
-  const { employees } = usePayroll();
+export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
+  const [inputs, setInputs] = useState<SalaryInput[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const employeeOptions = employees.map(e => ({
-    value: e.empId,
-    label: e.name,
-    subtitle: e.empId
-  }));
+  // Form
+  const [period, setPeriod] = useState('');
+  const [component, setComponent] = useState('');
+  const [amount, setAmount] = useState('');
+  const [type, setType] = useState('Addition');
+  const [reason] = useState('');
 
-  const recurring = useWatch({
-    control,
-    name: 'salaryInputs.recurring',
-    defaultValue: false
-  });
+  const fetchInputs = useCallback(async () => {
+    if (!employeeDbId) return;
+    setLoading(true);
+    try {
+      // We don't have a specific endpoint for employee inputs yet, fetch all and filter
+      const res = await api.get('/hrms/payroll/salary-inputs');
+      const all = Array.isArray(res) ? res : (res.data || []);
+      setInputs(all.filter((x: any) => x.employee?.id === employeeDbId));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [employeeDbId]);
 
-  const inputTypeOptions = [
-    { value: 'Addition', label: 'Addition' },
-    { value: 'Override', label: 'Override' },
-    { value: 'Deduction', label: 'Deduction' },
-  ];
+  useEffect(() => {
+    fetchInputs();
+  }, [fetchInputs]);
+
+  const handleSave = async () => {
+    if (!employeeDbId) return;
+    setSaving(true);
+    try {
+      await api.post('/hrms/payroll/salary-inputs', {
+        employee: { id: employeeDbId },
+        payrollPeriod: period,
+        payComponent: component,
+        amount: Number(amount.replace(/[^0-9.-]+/g, '')),
+        inputType: type,
+        reason: reason,
+        recurring: false
+      });
+      toast.success('Salary input added');
+      setDrawerOpen(false);
+      fetchInputs();
+    } catch (err) {
+      toast.error('Failed to add salary input');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/hrms/payroll/salary-inputs/${id}`);
+      toast.success('Deleted successfully');
+      fetchInputs();
+    } catch (err) {
+      toast.error('Failed to delete');
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <FormSection title="Salary Input Details" description="Add or override salary components for an employee.">
-        <FormGrid>
-          <div className="space-y-2">
-            <label className={formStyles.label}>
-              Employee *
-            </label>
-            <Controller
-              name="salaryInputs.employee"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  options={employeeOptions}
-                  value={field.value || ''}
-                  onChange={field.onChange}
-                  disabled={readOnly}
-                  className={errors.salaryInputs?.employee ? 'border-red-500' : ''}
-                />
-              )}
-            />
-            {errors.salaryInputs?.employee && (
-              <p className="text-xs text-red-500">{errors.salaryInputs.employee.message}</p>
-            )}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Salary Inputs</h2>
+          <p className="text-sm text-gray-500">Manage custom additions or deductions for this employee.</p>
+        </div>
+        {!readOnly && employeeDbId && (
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={fetchInputs} className="p-2 text-gray-500 hover:text-primary transition-colors">
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button type="button" onClick={() => setDrawerOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
+              <Plus size={16} /> Add Input
+            </button>
           </div>
+        )}
+      </div>
 
-          <div className="space-y-2">
-            <label className={formStyles.label}>
-              Payroll Period *
-            </label>
-            <CustomMonthPicker
-              name="salaryInputs.payrollPeriod"
-              disabled={readOnly}
-              hasError={!!errors.salaryInputs?.payrollPeriod}
-            />
-            {errors.salaryInputs?.payrollPeriod && (
-              <p className="text-xs text-red-500">{errors.salaryInputs.payrollPeriod.message}</p>
+      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/10 text-gray-500 font-medium">
+            <tr>
+              <th className="px-5 py-3">Period</th>
+              <th className="px-5 py-3">Component</th>
+              <th className="px-5 py-3">Type</th>
+              <th className="px-5 py-3 text-right">Amount</th>
+              <th className="px-5 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+            {loading ? (
+              <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-500">Loading...</td></tr>
+            ) : inputs.length === 0 ? (
+              <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-500">No salary inputs found.</td></tr>
+            ) : (
+              inputs.map(item => (
+                <tr key={item.id}>
+                  <td className="px-5 py-3">{item.payrollPeriod}</td>
+                  <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{item.payComponent}</td>
+                  <td className="px-5 py-3">
+                    <span className={`px-2 py-1 text-xs rounded-full ${item.inputType === 'Addition' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {item.inputType}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹{item.amount.toLocaleString()}</td>
+                  <td className="px-5 py-3 text-right">
+                    {!readOnly && (
+                      <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-700 p-1">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
             )}
-          </div>
+          </tbody>
+        </table>
+      </div>
 
-          <div className="space-y-2">
-            <label className={formStyles.label}>
-              Pay Component *
-            </label>
-            <Input
-              {...register('salaryInputs.payComponent')}
-              placeholder="e.g., Bonus, Overtime"
-              disabled={readOnly}
-              className={errors.salaryInputs?.payComponent ? 'border-red-500' : ''}
-            />
-            {errors.salaryInputs?.payComponent && (
-              <p className="text-xs text-red-500">{errors.salaryInputs.payComponent.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className={formStyles.label}>
-              Amount *
-            </label>
-            <CurrencyInput
-              {...register('salaryInputs.amount')}
-              placeholder="0.00"
-              disabled={readOnly}
-              className={errors.salaryInputs?.amount ? 'border-red-500' : ''}
-            />
-            {errors.salaryInputs?.amount && (
-              <p className="text-xs text-red-500">{errors.salaryInputs.amount.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <label className={formStyles.label}>
-              Input Type *
-            </label>
-            <div className="flex items-center gap-4 mt-2">
-              {inputTypeOptions.map((option) => (
-                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    value={option.value}
-                    {...register('salaryInputs.inputType')}
-                    disabled={readOnly}
-                    className="w-4 h-4 text-primary border-gray-300 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                  />
-                  <span className={formStyles.label}>{option.label}</span>
-                </label>
-              ))}
+      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="Add Salary Input" size="md">
+        <div className="p-6">
+          <FormGrid>
+            <div className="space-y-2">
+              <label className={formStyles.label}>Payroll Period *</label>
+              <input type="month" className="w-full p-2 border rounded-sm dark:bg-[#121212]" value={period} onChange={e => setPeriod(e.target.value)} />
             </div>
+            <div className="space-y-2">
+              <label className={formStyles.label}>Pay Component *</label>
+              <Input placeholder="e.g. Bonus" value={component} onChange={e => setComponent(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className={formStyles.label}>Amount *</label>
+              <Input placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <label className={formStyles.label}>Input Type *</label>
+              <select className="w-full p-2 border rounded-sm dark:bg-[#121212]" value={type} onChange={e => setType(e.target.value)}>
+                <option value="Addition">Addition</option>
+                <option value="Deduction">Deduction</option>
+                <option value="Override">Override</option>
+              </select>
+            </div>
+          </FormGrid>
+          <div className="mt-8 flex justify-end gap-3">
+            <button onClick={() => setDrawerOpen(false)} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-sm">Cancel</button>
+            <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-primary text-white rounded-sm flex items-center gap-2">
+              {saving && <Loader2 size={16} className="animate-spin" />} Save Input
+            </button>
           </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <label className={formStyles.label}>
-              Reason
-            </label>
-            <Input
-              {...register('salaryInputs.reason')}
-              placeholder="Enter reason..."
-              disabled={readOnly}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer mt-6">
-              <Controller
-                name="salaryInputs.recurring"
-                control={control}
-                render={({ field: { value, onChange, onBlur, ref } }) => (
-                  <input
-                    type="checkbox"
-                    checked={!!value}
-                    onChange={(e) => onChange(e.target.checked)}
-                    onBlur={onBlur}
-                    ref={ref}
-                    disabled={readOnly}
-                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                  />
-                )}
-              />
-              <span className={formStyles.label}>Recurring</span>
-            </label>
-          </div>
-
-          <div className="space-y-2">
-            <label className={formStyles.label}>
-              Recurring Until
-            </label>
-            <CustomMonthPicker
-              name="salaryInputs.recurringUntil"
-              disabled={!recurring || readOnly}
-            />
-          </div>
-
-        </FormGrid>
-      </FormSection>
+        </div>
+      </Drawer>
     </div>
   );
 }

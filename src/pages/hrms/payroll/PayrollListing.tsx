@@ -28,7 +28,7 @@ const TABS = [
 ];
 
 // Tabs that manage their own state/API — no global save bar needed
-const SELF_MANAGED_TABS = new Set(['employee_lop', 'it_declarations', 'reimbursement']);
+const SELF_MANAGED_TABS = new Set(['salary_inputs', 'employee_lop', 'it_declarations', 'reimbursement']);
 
 export default function PayrollListing() {
   const { employees, allPayrolls, isLoading, refreshData } = usePayroll();
@@ -37,6 +37,8 @@ export default function PayrollListing() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(() => new URLSearchParams(location.search).get('tab') || 'salary_inputs');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // FBP state: tracks whether the employee already has a saved declaration
+  const [existingFbpId, setExistingFbpId] = useState<string | null>(null);
 
   const filteredEmployees = employees.filter(e =>
     (e.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,17 +59,54 @@ export default function PayrollListing() {
     }
   });
 
+  // Reset form fields when employee changes
   useEffect(() => {
     if (employeeData) {
       methods.reset({
         salaryInputs: { employee: employeeData.empId, inputType: 'Addition' },
-        fbpDeclarations: { items: [] },
+        fbpDeclarations: { financialYear: '', items: [] },
         salaryHold: { employee: employeeData.empId },
         stopSalary: { employee: employeeData.empId },
         finalSettlement: { employee: employeeData.empId },
       });
+      setExistingFbpId(null);
     }
-  }, [employeeData, methods]);
+  }, [employeeData?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-populate FBP form from existing backend record when the tab becomes active
+  useEffect(() => {
+    if (activeTab !== 'fbp_declarations' || !employeeData?.id) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const raw = await api.get(`/hrms/payroll/fbp-declarations?employeeId=${employeeData.id}`);
+        const list: any[] = Array.isArray(raw) ? raw : (raw?.data ?? []);
+        if (!cancelled && list.length > 0) {
+          // Use the most recently updated record
+          const decl = list.sort((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime())[0];
+          setExistingFbpId(decl.id);
+          const itemsRaw = await api.get(`/hrms/payroll/fbp-declarations/${decl.id}/items`);
+          const items: any[] = Array.isArray(itemsRaw) ? itemsRaw : (itemsRaw?.data ?? []);
+          if (!cancelled) {
+            methods.setValue('fbpDeclarations', {
+              financialYear: decl.financialYear ?? '',
+              items: items.map((i: any) => ({
+                reimbursementType: i.reimbursementType ?? '',
+                annualAmount: String(i.annualAmount ?? ''),
+              })),
+            });
+          }
+        } else if (!cancelled) {
+          setExistingFbpId(null);
+          methods.setValue('fbpDeclarations', { financialYear: '', items: [] });
+        }
+      } catch {
+        // silently ignore — user can still enter data manually
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [activeTab, employeeData?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const parseCurrency = (val: string | undefined): number => {
     if (!val) return 0;
@@ -112,8 +151,45 @@ export default function PayrollListing() {
           toast.success('Final settlement saved successfully.');
         }
       } else if (activeTab === 'fbp_declarations' && data.fbpDeclarations) {
-        // FBP handled separately if needed
-        toast.success('FBP Declarations saved.');
+        const { financialYear, items } = data.fbpDeclarations;
+        if (financialYear && employeeData?.id) {
+          let declId = existingFbpId;
+          const isUpdate = !!existingFbpId;
+
+          if (isUpdate) {
+            // Update existing declaration header
+            await api.put(`/hrms/payroll/fbp-declarations/${existingFbpId}`, {
+              employee: { id: employeeData.id },
+              financialYear,
+            });
+            // Delete all current items so we can replace them cleanly
+            const existingItemsRaw = await api.get(`/hrms/payroll/fbp-declarations/${existingFbpId}/items`);
+            const existingItems: any[] = Array.isArray(existingItemsRaw) ? existingItemsRaw : (existingItemsRaw?.data ?? []);
+            for (const ei of existingItems) {
+              await api.delete(`/hrms/payroll/fbp-declarations/${existingFbpId}/items/${ei.id}`);
+            }
+          } else {
+            // Create new declaration header
+            const created = await api.post('/hrms/payroll/fbp-declarations', {
+              employee: { id: employeeData.id },
+              financialYear,
+            });
+            declId = created?.data?.id ?? created?.id ?? null;
+            if (declId) setExistingFbpId(declId);
+          }
+
+          // Save (new) items
+          if (declId && items && items.length > 0) {
+            const validItems = items.filter((i: any) => i.reimbursementType && i.annualAmount);
+            for (const item of validItems) {
+              await api.post(`/hrms/payroll/fbp-declarations/${declId}/items`, {
+                reimbursementType: item.reimbursementType,
+                annualAmount: parseCurrency(item.annualAmount),
+              });
+            }
+          }
+          toast.success(isUpdate ? 'FBP Declarations updated successfully.' : 'FBP Declarations saved successfully.');
+        }
       }
 
       await refreshData();
@@ -157,17 +233,15 @@ export default function PayrollListing() {
                 <button
                   key={emp.id}
                   onClick={() => setSelectedEmpId(emp.id)}
-                  className={`w-full text-left p-3 rounded-md transition-all flex items-center gap-3 group ${
-                    selectedEmpId === emp.id
+                  className={`w-full text-left p-3 rounded-md transition-all flex items-center gap-3 group ${selectedEmpId === emp.id
                       ? 'bg-primary/10 border border-primary/20 shadow-sm'
                       : 'hover:bg-white dark:hover:bg-white/5 border border-transparent hover:shadow-sm'
-                  }`}
+                    }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${
-                    selectedEmpId === emp.id
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${selectedEmpId === emp.id
                       ? 'bg-primary text-white shadow-md ring-2 ring-primary/20'
                       : 'bg-[#f0e4ec] dark:bg-primary/20 text-primary dark:text-secondary group-hover:bg-primary/20'
-                  }`}>
+                    }`}>
                     {emp.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 overflow-hidden">
@@ -212,11 +286,10 @@ export default function PayrollListing() {
                         {employeePayroll && (
                           <>
                             <span className="text-gray-300 dark:text-gray-600">•</span>
-                            <span className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${
-                              employeePayroll.status === 'Processed'
+                            <span className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${employeePayroll.status === 'Processed'
                                 ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
                                 : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20'
-                            }`}>
+                              }`}>
                               {employeePayroll.status}
                             </span>
                           </>
@@ -253,6 +326,12 @@ export default function PayrollListing() {
                 {/* Self-managed tabs (LOP, IT Declarations, Reimbursements) */}
                 {isSelfManaged ? (
                   <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm animate-in fade-in duration-200">
+                    {activeTab === 'salary_inputs' && (
+                      <SalaryInputsTab
+                        key={`salary-${employeeData.id}`}
+                        employeeDbId={employeeData.id}
+                      />
+                    )}
                     {activeTab === 'employee_lop' && (
                       <EmployeeLOPTab
                         key={`lop-${employeeData.id}`}
@@ -265,6 +344,7 @@ export default function PayrollListing() {
                         employeeDbId={employeeData.id}
                       />
                     )}
+
                     {activeTab === 'reimbursement' && (
                       <ReimbursementClaimTab
                         key={`reimb-${employeeData.id}`}
@@ -277,8 +357,12 @@ export default function PayrollListing() {
                   <FormProvider {...methods}>
                     <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-6 pb-20">
                       <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
-                        {activeTab === 'salary_inputs' && <SalaryInputsTab readOnly={false} />}
-                        {activeTab === 'fbp_declarations' && <FBPDeclarationTab readOnly={false} />}
+                        {activeTab === 'fbp_declarations' && (
+                          <FBPDeclarationTab
+                            readOnly={false}
+                            employeeDbId={employeeData.id}
+                          />
+                        )}
                         {activeTab === 'actions' && (
                           <div className="space-y-8">
                             <SalaryHoldTab readOnly={false} />

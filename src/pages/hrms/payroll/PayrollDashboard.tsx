@@ -12,40 +12,30 @@ export default function PayrollDashboard() {
  const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
  const [searchTerm, setSearchTerm] = useState('');
  
- const { payrollRuns, allPayrolls, isLoading } = usePayroll();
+  const { payrollRuns, dashboardStats, isLoading } = usePayroll();
 
- const currentPeriod = useMemo(() => {
-   if (!payrollRuns || payrollRuns.length === 0) return 'No Active Runs';
-   return payrollRuns[0]?.payrollPeriod || 'Unknown';
- }, [payrollRuns]);
+  const currentPeriod = useMemo(() => {
+    if (!payrollRuns || payrollRuns.length === 0) return 'No Active Runs';
+    return payrollRuns[0]?.payrollPeriod || 'Unknown';
+  }, [payrollRuns]);
 
- const employeesProcessed = useMemo(() => {
-   return allPayrolls.length;
- }, [allPayrolls]);
+  const employeesProcessed = dashboardStats?.activeEmployees || 0;
+  const pendingPayroll = dashboardStats?.pendingSettlements || 0;
+  const totalPayrollAmount = dashboardStats?.totalPayrollCost 
+    ? `₹${dashboardStats.totalPayrollCost.toLocaleString('en-IN')}` 
+    : '₹0';
+  const heldSalaries = dashboardStats?.heldSalaries 
+    ? `₹${dashboardStats.heldSalaries.toLocaleString('en-IN')}` 
+    : '₹0';
 
- const pendingPayroll = useMemo(() => {
-   return allPayrolls.filter(p => p.status === 'Draft' || p.status === 'Processing').length;
- }, [allPayrolls]);
-
- const totalPayrollAmount = useMemo(() => {
-   let sum = 0;
-   allPayrolls.forEach(p => {
-     if (p.gross) {
-       const num = parseFloat(p.gross.replace(/[^0-9.-]+/g,""));
-       if (!isNaN(num)) sum += num;
-     }
-   });
-   return `₹${sum.toLocaleString('en-IN')}`;
- }, [allPayrolls]);
-
- const stats = [
- { title: 'Current Payroll Period', value: isLoading ? '...' : currentPeriod, icon: Clock, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-500/10' },
- { title: 'Employees Processed', value: isLoading ? '...' : employeesProcessed.toString(), icon: Users, color: 'text-green-500', bgColor: 'bg-green-50 dark:bg-green-500/10' },
- { title: 'Pending Payroll', value: isLoading ? '...' : pendingPayroll.toString(), icon: AlertTriangle, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10' },
- { title: 'Total Payroll Amount', value: isLoading ? '...' : totalPayrollAmount, icon: DollarSign, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10' },
- { title: 'Held Salaries', value: '₹0', icon: AlertTriangle, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-500/10' },
- { title: 'Final Settlements', value: '0 Pending', icon: Clock, color: 'text-primary', bgColor: 'bg-primary/10' },
- ];
+  const stats = [
+  { title: 'Current Payroll Period', value: isLoading ? '...' : currentPeriod, icon: Clock, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-500/10' },
+  { title: 'Active Employees', value: isLoading ? '...' : employeesProcessed.toString(), icon: Users, color: 'text-green-500', bgColor: 'bg-green-50 dark:bg-green-500/10' },
+  { title: 'Pending Settlements', value: isLoading ? '...' : pendingPayroll.toString(), icon: AlertTriangle, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-500/10' },
+  { title: 'Total Payroll Cost', value: isLoading ? '...' : totalPayrollAmount, icon: DollarSign, color: 'text-purple-500', bgColor: 'bg-purple-50 dark:bg-purple-500/10' },
+  { title: 'Held Salaries', value: isLoading ? '...' : heldSalaries, icon: AlertTriangle, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-500/10' },
+  { title: 'Processed Runs', value: isLoading ? '...' : (dashboardStats?.processedRuns || 0).toString(), icon: CheckCircle, color: 'text-primary', bgColor: 'bg-primary/10' },
+  ];
 
  const filteredRuns = payrollRuns?.filter((r: any) => 
    (r.payrollPeriod || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
