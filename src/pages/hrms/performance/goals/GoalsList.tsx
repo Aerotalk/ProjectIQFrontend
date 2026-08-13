@@ -5,7 +5,7 @@ import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
 import type { Goal } from '../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function GoalsList() {
@@ -22,10 +22,9 @@ export default function GoalsList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiGoals = await api.get('/hrms/performance/goals').catch(() => []);
-
-      if (Array.isArray(apiGoals)) {
-        setGoals(apiGoals.map((g: any) => ({
+      const apiGoals = await performanceService.getGoals();
+      const fetchedGoals = Array.isArray(apiGoals) ? apiGoals : (apiGoals?.data || []);
+      setGoals(fetchedGoals.map((g: any) => ({
           id: g.id,
           title: g.title,
           description: g.description || '',
@@ -47,7 +46,6 @@ export default function GoalsList() {
           status: g.status || 'In Progress',
           progress: g.progress || 0
         })));
-      }
     } catch (e) {
       toast.error('Failed to load goals');
       setGoals([]);

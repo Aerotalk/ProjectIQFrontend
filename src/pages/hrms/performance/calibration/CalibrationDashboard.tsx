@@ -4,7 +4,7 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import type { CalibrationRecord } from './../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 
 export default function CalibrationDashboard() {
   const [records, setRecords] = useState<CalibrationRecord[]>([]);
@@ -17,7 +17,7 @@ export default function CalibrationDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiRecords = await api.get('/hrms/performance/calibration');
+      const apiRecords = await performanceService.getCalibrationRecords();
       if (Array.isArray(apiRecords)) {
         setRecords(apiRecords.map((r: any) => ({
           id: r.id,
@@ -44,7 +44,7 @@ export default function CalibrationDashboard() {
 
   const handleUpdateRating = async (id: string, proposedRating: number) => {
     try {
-      await api.put(`/hrms/performance/calibration/${id}`, { proposedRating, status: 'Pending' });
+      await performanceService.updateCalibration(id, { proposedRating, status: 'Pending' });
       toast.success('Calibration rating updated');
       fetchData();
     } catch (e) {
@@ -54,8 +54,7 @@ export default function CalibrationDashboard() {
 
   const handleFinalize = async (id: string) => {
     try {
-      const target = records.find(r => r.id === id);
-      await api.put(`/hrms/performance/calibration/${id}`, { finalRating: target?.proposedRating || target?.currentRating, status: 'Finalized' });
+      await performanceService.finalizeCalibration(id);
       toast.success('Rating finalized');
       fetchData();
     } catch (e) {

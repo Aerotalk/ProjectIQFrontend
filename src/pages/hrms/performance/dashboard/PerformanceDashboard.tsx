@@ -8,7 +8,7 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -29,9 +29,9 @@ export default function PerformanceDashboard() {
   });
 
   useEffect(() => {
-    const fetchKpis = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const data = await api.get('/hrms/performance/dashboard/kpis');
+        const data = await performanceService.getDashboardKPIs();
         setKpis(data);
       } catch (e) {
         console.error(e);
@@ -39,7 +39,7 @@ export default function PerformanceDashboard() {
         setLoading(false);
       }
     };
-    fetchKpis();
+    fetchDashboardData();
   }, []);
 
   const statCards = [
@@ -83,14 +83,14 @@ export default function PerformanceDashboard() {
         <div className="flex gap-2">
           <button 
             className="flex items-center px-4 py-2 bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm" 
-            onClick={() => navigate('../goals')}
+            onClick={() => navigate('../goal/new')}
           >
             <Plus size={16} className="mr-2" />
             Create Goal
           </button>
           <button 
             className="flex items-center px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-sm shadow-sm transition-colors" 
-            onClick={() => navigate('../cycles')}
+            onClick={() => navigate('../cycle/new')}
           >
             <Plus size={16} className="mr-2" />
             New Cycle

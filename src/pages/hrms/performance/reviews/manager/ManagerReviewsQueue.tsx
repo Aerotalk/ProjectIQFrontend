@@ -5,7 +5,7 @@ import TableRowActionMenu from '../../../../../components/ui/TableRowActionMenu'
 import { Skeleton } from '../../../../../components/ui/skeleton';
 import type { ManagerReview } from '../../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../../lib/api';
+import { performanceService } from '../../../../../services/performance.service';
 
 export default function ManagerReviewsQueue() {
   const [reviews, setReviews] = useState<ManagerReview[]>([]);
@@ -21,10 +21,10 @@ export default function ManagerReviewsQueue() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiReviews = await api.get('/hrms/performance/reviews/manager').catch(() => []);
+      const apiReviews = await performanceService.getManagerReviews();
+      const fetchedReviews = Array.isArray(apiReviews) ? apiReviews : (apiReviews?.data || []);
 
-      if (Array.isArray(apiReviews)) {
-        setReviews(apiReviews.map((r: any) => ({
+      setReviews(fetchedReviews.map((r: any) => ({
           id: r.id,
           selfReviewId: r.selfReview?.id || '',
           employee: {
@@ -35,12 +35,12 @@ export default function ManagerReviewsQueue() {
           },
           cycle: r.cycle?.name || 'Annual Review 2026',
           goalAssessment: r.goalRatings?.map((gr: any) => ({
-            goalId: gr.goal?.id,
+            goalId: gr.goalId || gr.goal?.id,
             managerRating: gr.managerRating,
             managerComment: gr.managerComment
           })) || [],
           competencyAssessment: r.competencyRatings?.map((cr: any) => ({
-            competencyId: cr.competency?.id,
+            competencyId: cr.competencyId || cr.competency?.id,
             managerRating: cr.managerRating,
             managerComment: cr.managerComment
           })) || [],
@@ -51,7 +51,6 @@ export default function ManagerReviewsQueue() {
           managerComments: r.managerComments || '',
           status: r.status || 'Pending'
         })));
-      }
     } catch (e) {
       toast.error('Failed to load manager review queue');
       setReviews([]);

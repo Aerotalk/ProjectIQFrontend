@@ -5,7 +5,7 @@ import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus, Search, Filter } from 'lucide-react';
 import type { AppraisalCycle } from '../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function AppraisalCycles() {
@@ -22,27 +22,26 @@ export default function AppraisalCycles() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await api.get('/hrms/performance/cycles');
-      if (Array.isArray(data)) {
-        setCycles(data.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          type: c.type || 'Annual',
-          period: c.period || '',
-          startDate: c.startDate || '',
-          endDate: c.endDate || '',
-          selfReviewDeadline: c.selfReviewDeadline || '',
-          managerReviewDeadline: c.managerReviewDeadline || '',
-          hrReviewDeadline: c.hrReviewDeadline || '',
-          departments: ['All'],
-          locations: ['All'],
-          grades: ['All'],
-          eligibleCount: c.eligibleCount || 0,
-          completionPercentage: c.completionPercentage || 0,
-          status: c.status || 'Active',
-          description: c.description || ''
-        })));
-      }
+      const data = await performanceService.getCycles();
+      const cycleArray = Array.isArray(data) ? data : (data?.data || []);
+      setCycles(cycleArray.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        type: c.type || 'Annual',
+        period: c.period || '',
+        startDate: c.startDate || '',
+        endDate: c.endDate || '',
+        selfReviewDeadline: c.selfReviewDeadline || '',
+        managerReviewDeadline: c.managerReviewDeadline || '',
+        hrReviewDeadline: c.hrReviewDeadline || '',
+        departments: ['All'],
+        locations: ['All'],
+        grades: ['All'],
+        eligibleCount: c.eligibleCount || 0,
+        completionPercentage: c.completionPercentage || 0,
+        status: c.status || 'Active',
+        description: c.description || ''
+      })));
     } catch (e) {
       toast.error('Failed to load appraisal cycles');
       setCycles([]);

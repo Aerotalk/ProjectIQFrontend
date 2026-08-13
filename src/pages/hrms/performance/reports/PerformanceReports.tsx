@@ -3,18 +3,19 @@ import CustomTable from '../../../../components/ui/CustomTable';
 
 import { Download, FileText, PieChart, BarChart2 } from 'lucide-react';
 import { useEffect } from 'react';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 export default function PerformanceReports() {
   const [activeReport, setActiveReport] = useState('department');
   const [selectedCycle, setSelectedCycle] = useState('');
   const [departmentData, setDepartmentData] = useState<any[]>([]);
+  const [promotionsData, setPromotionsData] = useState<any[]>([]);
   const [cycles, setCycles] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCycles = async () => {
       try {
-        const apiCycles = await api.get('/hrms/performance/cycles').catch(() => []);
-        const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : (apiCycles.data || []);
+        const apiCycles = await performanceService.getCycles();
+        const fetchedCycles = Array.isArray(apiCycles) ? apiCycles : (apiCycles?.data || []);
         setCycles(fetchedCycles);
         if (fetchedCycles.length > 0) {
           setSelectedCycle(fetchedCycles[0].id);
@@ -30,8 +31,12 @@ export default function PerformanceReports() {
     if (!selectedCycle) return;
     const fetchReports = async () => {
       try {
-        const apiDeptData = await api.get(`/hrms/performance/reports/department-ratings?cycleId=${selectedCycle}`).catch(() => []);
-        setDepartmentData(Array.isArray(apiDeptData) ? apiDeptData : (apiDeptData.data || []));
+        const [apiDeptData, apiPromoData] = await Promise.all([
+          performanceService.getDepartmentRatings(selectedCycle).catch(() => []),
+          performanceService.getPromotionRecommendations(selectedCycle).catch(() => [])
+        ]);
+        setDepartmentData(Array.isArray(apiDeptData) ? apiDeptData : (apiDeptData?.data || []));
+        setPromotionsData(Array.isArray(apiPromoData) ? apiPromoData : (apiPromoData?.data || []));
       } catch (e) {
         console.error('Failed to load reports', e);
       }
@@ -48,8 +53,12 @@ export default function PerformanceReports() {
   ];
 
   const handleExport = (format: string) => {
-    if (departmentData.length === 0 || activeReport === 'promotions') {
+    if (departmentData.length === 0 && activeReport !== 'promotions') {
       alert(`No data available to export for ${activeReport.replace('-', ' ')} report.`);
+      return;
+    }
+    if (activeReport === 'promotions' && promotionsData.length === 0) {
+      alert(`No promotion data available to export.`);
       return;
     }
 
@@ -68,6 +77,11 @@ export default function PerformanceReports() {
         headers = ['Department', 'Goals Completed', 'Goals Behind'].join(',');
         rows = departmentData.map(d => 
           `"${d.department}",${d.topPerformers},${d.needsImprovement}`
+        ).join('\n');
+      } else if (activeReport === 'promotions') {
+        headers = ['Employee Name', 'Department', 'Recommendation', 'Manager'].join(',');
+        rows = promotionsData.map(d => 
+          `"${d.employeeName}","${d.department}","${d.recommendation}","${d.managerName}"`
         ).join('\n');
       } else {
         return;
@@ -106,15 +120,15 @@ export default function PerformanceReports() {
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-sm p-1">
             <button 
               onClick={() => handleExport('PDF')} 
-              disabled={departmentData.length === 0 || activeReport === 'promotions'}
-              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${departmentData.length > 0 && activeReport !== 'promotions' ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
+              disabled={activeReport === 'promotions' ? promotionsData.length === 0 : departmentData.length === 0}
+              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${(activeReport === 'promotions' ? promotionsData.length > 0 : departmentData.length > 0) ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
             >
               <FileText size={14} className="mr-1" /> PDF
             </button>
             <button 
               onClick={() => handleExport('Excel')} 
-              disabled={departmentData.length === 0 || activeReport === 'promotions'}
-              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${departmentData.length > 0 && activeReport !== 'promotions' ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
+              disabled={activeReport === 'promotions' ? promotionsData.length === 0 : departmentData.length === 0}
+              className={`px-3 py-1.5 text-xs font-medium rounded-sm transition-colors flex items-center ${(activeReport === 'promotions' ? promotionsData.length > 0 : departmentData.length > 0) ? 'text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700' : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'}`}
             >
               <Download size={14} className="mr-1" /> Excel
             </button>
@@ -169,11 +183,23 @@ export default function PerformanceReports() {
               />
             )}
             {activeReport === 'promotions' && (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
-                <BarChart2 size={48} className="text-gray-300 dark:text-gray-700 mb-4" />
-                <p>No promotion recommendation data available yet.</p>
-                <p className="text-sm mt-2">Data will appear once reviews are finalized.</p>
-              </div>
+              promotionsData.length > 0 ? (
+                <CustomTable 
+                  columns={[
+                    { key: 'employeeName', label: 'Employee Name' },
+                    { key: 'department', label: 'Department' },
+                    { key: 'recommendation', label: 'Recommendation' },
+                    { key: 'managerName', label: 'Manager' }
+                  ]} 
+                  data={promotionsData} 
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
+                  <BarChart2 size={48} className="text-gray-300 dark:text-gray-700 mb-4" />
+                  <p>No promotion recommendation data available yet.</p>
+                  <p className="text-sm mt-2">Data will appear once manager reviews with recommendations are finalized.</p>
+                </div>
+              )
             )}
           </div>
         </div>

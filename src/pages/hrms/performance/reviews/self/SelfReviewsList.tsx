@@ -6,7 +6,7 @@ import { Skeleton } from '../../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import type { SelfReview } from '../../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../../lib/api';
+import { performanceService } from '../../../../../services/performance.service';
 
 export default function SelfReviewsList() {
   const [reviews, setReviews] = useState<SelfReview[]>([]);
@@ -22,20 +22,21 @@ export default function SelfReviewsList() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const apiReviews = await api.get('/hrms/performance/reviews/self').catch(() => []);
+      const apiReviews = await performanceService.getSelfReviews();
+      const fetchedReviews = Array.isArray(apiReviews) ? apiReviews : (apiReviews?.data || []);
 
-      if (Array.isArray(apiReviews)) {
-        setReviews(apiReviews.map((r: any) => ({
+      setReviews(fetchedReviews.map((r: any) => ({
           id: r.id,
           employeeId: r.employee?.id || 'EMP-01',
           cycleId: r.cycle?.id || 'C-2026-01',
+          cycleName: r.cycle?.name || 'Annual Review',
           goalAchievement: r.goalRatings?.map((gr: any) => ({
-            goalId: gr.goal?.id,
+            goalId: gr.goalId || gr.goal?.id,
             employeeRating: gr.employeeRating,
             employeeComment: gr.employeeComment
           })) || [],
           competencyRatings: r.competencyRatings?.map((cr: any) => ({
-            competencyId: cr.competency?.id,
+            competencyId: cr.competencyId || cr.competency?.id,
             employeeRating: cr.employeeRating,
             employeeComment: cr.employeeComment
           })) || [],
@@ -45,7 +46,6 @@ export default function SelfReviewsList() {
           status: r.status || 'Draft',
           submittedOn: r.submittedOn || ''
         })));
-      }
     } catch (e) {
       toast.error('Failed to load self-reviews');
       setReviews([]);
@@ -54,7 +54,7 @@ export default function SelfReviewsList() {
   };
 
   const columns = [
-    { key: 'cycleId', label: 'Cycle' },
+    { key: 'cycleName', label: 'Cycle' },
     { key: 'overallRating', label: 'Overall Self Rating', render: (val: number) => val ? val.toFixed(1) : '-' },
     { key: 'status', label: 'Status' },
     { key: 'submittedOn', label: 'Submitted On', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },

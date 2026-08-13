@@ -5,11 +5,11 @@ import CustomInput from '../../../../components/ui/CustomInput';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
 import { formStyles } from '../../../../components/ui/form-styles';
-import type { Goal } from '../types';
 import { Target, Save, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';
 import { Skeleton } from '../../../../components/ui/skeleton';
+import { performanceService } from '../../../../services/performance.service';
 
 export default function GoalFormPage() {
   const navigate = useNavigate();
@@ -19,10 +19,40 @@ export default function GoalFormPage() {
   const mode = id === 'new' ? 'create' : (queryParams.get('mode') === 'view' ? 'view' : 'edit');
   const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
   
-  const [formData, setFormData] = useState<Partial<Goal>>({});
+  const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(mode !== 'create');
   
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [cycles, setCycles] = useState<any[]>([]);
+  
   const isReadOnly = mode === 'view';
+
+  useEffect(() => {
+    fetchOptions();
+  }, []);
+
+  const fetchOptions = async () => {
+    try {
+      const [empsData, cyclesData] = await Promise.all([
+        api.get('/admin/employees'),
+        performanceService.getCycles()
+      ]);
+      const emps = Array.isArray(empsData) ? empsData : (empsData?.data || []);
+      setEmployees(emps);
+      setCycles(cyclesData || []);
+      
+      if (mode === 'create') {
+        const meRes = await api.get('/admin/employees/me').catch(() => null);
+        setFormData((prev: any) => ({
+          ...prev,
+          employeeId: meRes?.id || '',
+          cycleId: (cyclesData && cyclesData.length > 0) ? cyclesData[0].id : ''
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to load options', e);
+    }
+  };
 
   useEffect(() => {
     if (mode !== 'create' && id) {
@@ -33,11 +63,13 @@ export default function GoalFormPage() {
   const fetchGoal = async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/hrms/performance/goals/${id}`);
+      const data = await performanceService.getGoalById(id as string);
       setFormData({
         id: data.id,
         title: data.title,
         description: data.description || '',
+        employeeId: data.employee?.id || '',
+        cycleId: data.cycleId || '',
         category: data.category || 'Strategic',
         weightage: data.weightage || 20,
         kpi: data.kpi || '',
@@ -74,15 +106,15 @@ export default function GoalFormPage() {
         dueDate: formData.dueDate,
         priority: formData.priority,
         status: formData.status || 'In Progress',
-        employee: { id: '00000000-0000-0000-0000-000000000001' }, 
-        cycle: { id: '00000000-0000-0000-0000-000000000002' }
+        employeeId: formData.employeeId, 
+        cycleId: formData.cycleId
       };
 
       if (mode === 'create') {
-        await api.post('/hrms/performance/goals', payload);
+        await performanceService.createGoal(payload);
         toast.success('Goal created successfully');
       } else {
-        await api.put(`/hrms/performance/goals/${id}`, payload);
+        await performanceService.updateGoal(id as string, payload);
         toast.success('Goal updated successfully');
       }
       navigate(`${basePath}/hrms/performance/goals`);
@@ -152,6 +184,28 @@ export default function GoalFormPage() {
                 disabled={isReadOnly}
                 required
               />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={formStyles.label}>Employee</label>
+                  <CustomSelect 
+                    options={employees.map(e => ({ value: e.id, label: `${e.firstName} ${e.lastName}` }))}
+                    value={formData.employeeId || ''}
+                    onChange={(val) => setFormData({...formData, employeeId: val})}
+                    disabled={isReadOnly}
+                  />
+                </div>
+                
+                <div>
+                  <label className={formStyles.label}>Appraisal Cycle</label>
+                  <CustomSelect 
+                    options={cycles.map(c => ({ value: c.id, label: c.name }))}
+                    value={formData.cycleId || ''}
+                    onChange={(val) => setFormData({...formData, cycleId: val})}
+                    disabled={isReadOnly}
+                  />
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

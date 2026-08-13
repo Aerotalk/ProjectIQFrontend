@@ -4,7 +4,7 @@ import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import type { Competency, RatingScale } from './../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 
 export default function TemplatesMain() {
   const [competencies, setCompetencies] = useState<Competency[]>([]);
@@ -24,8 +24,8 @@ export default function TemplatesMain() {
     setLoading(true);
     try {
       const [apiCompetencies, apiScales] = await Promise.all([
-        api.get('/hrms/performance/competencies'),
-        api.get('/hrms/performance/rating-scales')
+        performanceService.getCompetencies(),
+        performanceService.getRatingScales()
       ]);
 
       setCompetencies(Array.isArray(apiCompetencies) ? apiCompetencies : []);
@@ -46,7 +46,7 @@ export default function TemplatesMain() {
     
     setIsSubmitting(true);
     try {
-      await api.post('/hrms/performance/competencies', {
+      await performanceService.createCompetency({
         name: newCompetency.name,
         description: newCompetency.description,
         category: 'Core',
