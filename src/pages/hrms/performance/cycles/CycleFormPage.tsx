@@ -8,7 +8,7 @@ import { formStyles } from '../../../../components/ui/form-styles';
 import type { AppraisalCycle } from '../types';
 import { Save, ArrowLeft, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
+import { performanceService } from '../../../../services/performance.service';
 import { Skeleton } from '../../../../components/ui/skeleton';
 
 export default function CycleFormPage() {
@@ -36,7 +36,7 @@ export default function CycleFormPage() {
   const fetchCycle = async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/hrms/performance/cycles/${id}`);
+      const data = await performanceService.getCycleById(id as string);
       setFormData(data);
     } catch (e) {
       toast.error('Failed to load cycle details');
@@ -53,11 +53,11 @@ export default function CycleFormPage() {
 
     try {
       if (mode === 'create') {
-        await api.post('/hrms/performance/cycles', formData);
-        toast.success('Cycle created successfully');
+        await performanceService.createCycle(formData);
+        toast.success('Appraisal cycle created successfully');
       } else {
-        await api.put(`/hrms/performance/cycles/${id}`, formData);
-        toast.success('Cycle updated successfully');
+        await performanceService.updateCycle(id as string, formData);
+        toast.success('Appraisal cycle updated successfully');
       }
       navigate(`${basePath}/hrms/performance/cycles`);
     } catch (e) {
@@ -139,6 +139,25 @@ export default function CycleFormPage() {
                     ]}
                     value={formData.type || ''}
                     onChange={(val) => setFormData({ ...formData, type: val as any })}
+                    disabled={isViewMode}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className={formStyles.label}>Status</label>
+                  <CustomSelect
+                    options={[
+                      { value: 'Draft', label: 'Draft' },
+                      { value: 'Active', label: 'Active' },
+                      { value: 'Review Phase', label: 'Review Phase' },
+                      { value: 'Calibration', label: 'Calibration' },
+                      { value: 'Completed', label: 'Completed' },
+                      { value: 'Archived', label: 'Archived' }
+                    ]}
+                    value={formData.status || 'Draft'}
+                    onChange={(val) => setFormData({ ...formData, status: val as any })}
                     disabled={isViewMode}
                   />
                 </div>

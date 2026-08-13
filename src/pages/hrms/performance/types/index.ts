@@ -85,7 +85,9 @@ export interface ReviewTemplate {
 export interface SelfReview {
   id: string;
   employeeId: string;
+  employee?: EmployeeInfo;
   cycleId: string;
+  cycleName?: string;
   goalAchievement: { goalId: string; employeeRating: number; employeeComment: string }[];
   competencyRatings: { competencyId: string; employeeRating: number; employeeComment: string }[];
   strengths: string;
@@ -99,6 +101,7 @@ export interface ManagerReview {
   id: string;
   selfReviewId: string; // Link to self review
   employee: EmployeeInfo;
+  manager?: EmployeeInfo;
   cycle: string;
   goalAssessment: { goalId: string; managerRating: number; managerComment: string }[];
   competencyAssessment: { competencyId: string; managerRating: number; managerComment: string }[];
