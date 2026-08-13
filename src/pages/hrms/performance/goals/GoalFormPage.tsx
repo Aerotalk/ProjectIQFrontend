@@ -5,7 +5,6 @@ import CustomInput from '../../../../components/ui/CustomInput';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import CustomDatePicker from '../../../../components/ui/CustomDatePicker';
 import { formStyles } from '../../../../components/ui/form-styles';
-import type { Goal } from '../types';
 import { Target, Save, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '../../../../lib/api';

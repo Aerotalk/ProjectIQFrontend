@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react';
-import { api } from '../../../../lib/api';
 import { performanceService } from '../../../../services/performance.service';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -40,7 +39,7 @@ export default function PerformanceDashboard() {
         setLoading(false);
       }
     };
-    fetchKpis();
+    fetchDashboardData();
   }, []);
 
   const statCards = [

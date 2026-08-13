@@ -4,7 +4,6 @@ import TableRowActionMenu from '../../../../components/ui/TableRowActionMenu';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import type { CalibrationRecord } from './../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
 import { performanceService } from '../../../../services/performance.service';
 
 export default function CalibrationDashboard() {

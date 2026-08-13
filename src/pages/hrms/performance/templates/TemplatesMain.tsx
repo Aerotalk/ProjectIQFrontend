@@ -4,7 +4,6 @@ import { Skeleton } from '../../../../components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import type { Competency, RatingScale } from './../types';
 import toast from 'react-hot-toast';
-import { api } from '../../../../lib/api';
 import { performanceService } from '../../../../services/performance.service';
 
 export default function TemplatesMain() {

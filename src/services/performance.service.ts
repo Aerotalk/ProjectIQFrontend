@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import { AppraisalCycle, Goal, SelfReview, ManagerReview, CalibrationRecord, Competency, RatingScale } from '../pages/hrms/performance/types';
+import type { AppraisalCycle, Competency, RatingScale } from '../pages/hrms/performance/types';
 
 const BASE_URL = '/hrms/performance';
 
