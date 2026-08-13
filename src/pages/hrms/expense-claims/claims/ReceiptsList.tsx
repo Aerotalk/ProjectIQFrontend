@@ -35,9 +35,7 @@ export default function ReceiptsList() {
     formData.append('module', 'expense_claims');
 
     try {
-      await api.post('/admin/files/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/admin/files/upload', formData);
       toast.success('Receipt uploaded successfully');
       fetchData();
     } catch (err) {
