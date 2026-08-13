@@ -16,10 +16,8 @@ export default function ReceiptsList() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get('/admin/files/my-files');
-      // Filter out only ones tagged as expense_claims if needed, or just show all
-      const expenseFiles = (res || []).filter((f: any) => f.storagePath?.includes('expense_claims') || f.mimeType?.includes('image') || f.mimeType?.includes('pdf'));
-      setFiles(expenseFiles);
+      const res = await api.get('/admin/files/my-files?module=expense_claims');
+      setFiles(res || []);
     } catch (err) {
       toast.error('Failed to load receipts');
     } finally {
