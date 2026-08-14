@@ -131,7 +131,7 @@ const baseEmployeeFormSchema = z.object({
   separationType: z.string().optional(),
   resignationDate: z.string().optional(),
   lastWorkingDate: z.string().optional(),
-  exitNoticePeriod: z.number().optional(),
+  exitNoticePeriod: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
   separationReason: z.string().optional(),
   exitInterview: z.boolean().default(false),
   separationRemarks: z.string().optional(),
@@ -139,8 +139,8 @@ const baseEmployeeFormSchema = z.object({
   // Tab 9 - Salary Revision
   revisionType: z.string().optional(),
   revisionEffectiveDate: z.string().optional(),
-  revisionAnnualCTC: z.number().optional(),
-  revisionIncrementPercentage: z.number().optional(),
+  revisionAnnualCTC: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
+  revisionIncrementPercentage: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
   revisionSalaryComponents: z.array(z.object({
     componentName: z.string().min(1, 'Name is required'),
     percentage: z.number().optional(),
@@ -158,8 +158,8 @@ const baseEmployeeFormSchema = z.object({
   contractType: z.string().optional(),
   contractStartDate: z.string().optional(),
   contractEndDate: z.string().optional(),
-  contractAnnualCTC: z.number().optional(),
-  contractNoticePeriod: z.number().optional(),
+  contractAnnualCTC: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
+  contractNoticePeriod: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
   contractTerms: z.string().optional(),
   signedContractUpload: z.any().optional(),
 
