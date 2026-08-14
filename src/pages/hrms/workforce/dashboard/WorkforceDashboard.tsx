@@ -7,7 +7,10 @@ import { useNavigate } from 'react-router-dom';
 export default function WorkforceDashboard() {
   const navigate = useNavigate();
   const { kpis, loading: kpisLoading } = useDashboardKPIs();
-  const { data: attendanceData, loading: attLoading } = useAttendanceRecords({ page: 1, limit: 5 });
+  // Temporarily commented out because backend throws 500 LazyInitializationException for AttendanceRecord
+  // const { data: attendanceData, loading: attLoading } = useAttendanceRecords({ page: 1, limit: 5 });
+  const attendanceData: any[] = [];
+  const attLoading = false;
   const { data: leaveDataRes, loading: leaveLoading } = useLeaveApplications({ page: 1, limit: 5, status: 'Pending' });
 
   const loading = kpisLoading || attLoading || leaveLoading;

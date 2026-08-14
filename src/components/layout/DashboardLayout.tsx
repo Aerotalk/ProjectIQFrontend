@@ -241,11 +241,16 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }
   }
 
+  // Update expandedMenu only when activeModuleName changes and is valid
   useEffect(() => {
     if (activeModuleName) {
-      setExpandedMenu(activeModuleName);
+      setExpandedMenu((prev) => {
+        // Prevent unnecessary state updates if it's already expanded
+        if (prev === activeModuleName) return prev;
+        return activeModuleName;
+      });
     }
-  }, [location.pathname, activeModuleName]);
+  }, [activeModuleName]);
 
 
   const { breadcrumbs } = useBreadcrumbContext();
