@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function SalaryRevisionTab({ readOnly }: Props) {
-  const { register, control } = useFormContext();
+  const { register, control, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'revisionSalaryComponents'
@@ -142,18 +142,38 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
                         <Input
                           type="number"
                           step="0.01"
-                          {...register(`revisionSalaryComponents.${index}.percentage`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
+                          {...register(`revisionSalaryComponents.${index}.percentage`, { 
+                            setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v),
+                            onChange: (e) => {
+                              const p = parseFloat(e.target.value);
+                              if (!isNaN(p) && annualCTC > 0) {
+                                setValue(`revisionSalaryComponents.${index}.amount`, Number((annualCTC * p / 100).toFixed(2)), { shouldValidate: true, shouldDirty: true });
+                              } else if (e.target.value === "") {
+                                setValue(`revisionSalaryComponents.${index}.amount`, undefined, { shouldValidate: true, shouldDirty: true });
+                              }
+                            }
+                          })}
                           placeholder="Percentage %"
-                          disabled={readOnly || isFlat}
+                          disabled={readOnly}
                         />
                       </div>
                       <div className="w-40">
                         <Input
                           type="number"
                           step="0.01"
-                          {...register(`revisionSalaryComponents.${index}.amount`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
+                          {...register(`revisionSalaryComponents.${index}.amount`, { 
+                            setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v),
+                            onChange: (e) => {
+                              const a = parseFloat(e.target.value);
+                              if (!isNaN(a) && annualCTC > 0) {
+                                setValue(`revisionSalaryComponents.${index}.percentage`, Number((a / annualCTC * 100).toFixed(2)), { shouldValidate: true, shouldDirty: true });
+                              } else if (e.target.value === "") {
+                                setValue(`revisionSalaryComponents.${index}.percentage`, undefined, { shouldValidate: true, shouldDirty: true });
+                              }
+                            }
+                          })}
                           placeholder="Annual Amount ₹"
-                          disabled={readOnly || isPercentage}
+                          disabled={readOnly}
                         />
                       </div>
                       {!readOnly && (

@@ -168,10 +168,25 @@ const baseEmployeeFormSchema = z.object({
   employmentStatus: z.string().default('ACTIVE'),
 });
 
-export const employeeFormSchema = baseEmployeeFormSchema.refine(data => !data.confirmAccountNumber || data.accountNumber === data.confirmAccountNumber, {
-  message: "Account numbers don't match",
-  path: ["confirmAccountNumber"]
-});
+export const employeeFormSchema = baseEmployeeFormSchema
+  .refine(data => !data.confirmAccountNumber || data.accountNumber === data.confirmAccountNumber, {
+    message: "Account numbers don't match",
+    path: ["confirmAccountNumber"]
+  })
+  .refine(data => {
+    if (!data.revisionSalaryComponents || !data.revisionAnnualCTC) return true;
+    let totalEarnings = 0;
+    data.revisionSalaryComponents.forEach(c => {
+      if (c.type === 'EARNING') {
+        if (c.amount) totalEarnings += c.amount;
+        else if (c.percentage) totalEarnings += (data.revisionAnnualCTC! * c.percentage) / 100;
+      }
+    });
+    return totalEarnings <= data.revisionAnnualCTC;
+  }, {
+    message: "Total earnings cannot exceed Annual CTC",
+    path: ["revisionAnnualCTC"]
+  });
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>;
 export const editEmployeeFormSchema = baseEmployeeFormSchema.partial();
