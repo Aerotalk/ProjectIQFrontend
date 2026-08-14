@@ -6,6 +6,38 @@ interface PayrollProfileViewProps {
 }
 
 export default function PayrollProfileView({ payroll, onClose }: PayrollProfileViewProps) {
+  const handleDownloadPayslip = async () => {
+    try {
+      // Use the detail ID if available, otherwise fallback (assuming payroll.id is the PayrollRunDetail ID)
+      const detailId = payroll.id || payroll.detailId;
+      if (!detailId) {
+        alert("Cannot download payslip: Detail ID not found.");
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8080/api/hrms/payroll/runs/details/${detailId}/payslip`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error("Failed to download payslip");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `payslip_${payroll.period}_${payroll.employee}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download payslip.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-gray-50/30 dark:bg-[#121317]">
       {/* Header */}
@@ -21,7 +53,7 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
             <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               Payroll Summary
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                payroll.status === 'Processed' 
+                payroll.status === 'Processed' || payroll.status === 'Approved'
                   ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20'
                   : 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20'
               }`}>
@@ -35,7 +67,10 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
         </div>
         
         <div className="flex items-center gap-2 flex-wrap">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm font-medium shadow-sm">
+          <button 
+            onClick={handleDownloadPayslip}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors text-sm font-medium shadow-sm"
+          >
             <Download size={16} />
             <span className="hidden sm:inline">Payslip</span>
           </button>
