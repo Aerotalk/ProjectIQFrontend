@@ -100,8 +100,7 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
             <div className="space-y-3">
               {fields.map((item, index) => {
                 const comp = components[index] || {};
-                const isPercentage = !!comp.percentage;
-                const isFlat = !!comp.amount;
+
                 
                 let monthlyPreview = 0;
                 if (comp.percentage) {
