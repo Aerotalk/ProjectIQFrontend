@@ -84,8 +84,9 @@ export default function ExpenseClaimPage() {
         if (res && res.id && localItems.length > 0) {
           // Save local items to the newly created claim
           for (const item of localItems) {
+            const { id: _tempId, ...itemData } = item;
             await api.post(`/hrms/expense-claims/claims/${res.id}/items`, {
-              ...item,
+              ...itemData,
               currency: data.currency
             });
           }
