@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { employeeFormSchema, type EmployeeFormValues } from '../validators/employeeValidation';
+import { employeeFormSchema, createEmployeeFormSchema, type EmployeeFormValues } from '../validators/employeeValidation';
 
 const removeNulls = (obj: any): any => {
   if (obj === null) return undefined;
@@ -18,11 +18,11 @@ const removeNulls = (obj: any): any => {
   return obj;
 };
 
-export const useEmployeeForm = (initialData?: Partial<EmployeeFormValues>) => {
+export const useEmployeeForm = (initialData?: Partial<EmployeeFormValues>, mode: 'create' | 'edit' | 'view' = 'create') => {
   const sanitizedData = initialData ? removeNulls(initialData) : {};
   
   return useForm<EmployeeFormValues>({
-    resolver: zodResolver(employeeFormSchema) as any,
+    resolver: zodResolver(mode === 'create' ? createEmployeeFormSchema : employeeFormSchema) as any,
     defaultValues: {
       firstName: '',
       lastName: '',

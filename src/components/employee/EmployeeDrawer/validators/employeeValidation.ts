@@ -38,7 +38,7 @@ const baseEmployeeFormSchema = z.object({
   lastName: z.string().min(1, 'Last Name is required'),
   workEmail: z.string().email('Invalid email format').min(1, 'Work Email is required'),
   phone: z.string().min(1, 'Phone is required'),
-  alternatePhone: z.string().min(1, 'Alternate Phone is required'),
+  alternatePhone: z.string().optional().or(z.literal('')),
   dateOfBirth: z.string().min(1, 'Date of Birth is required'),
   gender: z.string().min(1, 'Gender is required'),
   maritalStatus: z.string().min(1, 'Marital Status is required'),
@@ -174,7 +174,7 @@ export const employeeFormSchema = baseEmployeeFormSchema
     path: ["confirmAccountNumber"]
   })
   .refine(data => {
-    if (!data.revisionSalaryComponents || !data.revisionAnnualCTC) return true;
+    if (!data.revisionSalaryComponents || data.revisionAnnualCTC === undefined || data.revisionAnnualCTC === null) return true;
     let totalEarnings = 0;
     data.revisionSalaryComponents.forEach(c => {
       if (c.type === 'EARNING') {
@@ -189,4 +189,11 @@ export const employeeFormSchema = baseEmployeeFormSchema
   });
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>;
-export const editEmployeeFormSchema = baseEmployeeFormSchema.partial();
+
+export const createEmployeeFormSchema = employeeFormSchema.refine(
+  data => data.alternatePhone && data.alternatePhone.trim().length > 0,
+  {
+    message: "Alternate Phone is required",
+    path: ["alternatePhone"]
+  }
+);

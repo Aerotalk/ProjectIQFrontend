@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 import { Plus, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function SalaryRevisionTab({ readOnly }: Props) {
-  const { register, control, setValue } = useFormContext();
+  const { register, control, setValue, getValues } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'revisionSalaryComponents'
@@ -20,6 +20,30 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
 
   const annualCTC = useWatch({ control, name: 'revisionAnnualCTC' }) || 0;
   const components = useWatch({ control, name: 'revisionSalaryComponents' }) || [];
+
+  const prevAnnualCTCRef = useRef(annualCTC);
+
+  useEffect(() => {
+    if (annualCTC !== prevAnnualCTCRef.current) {
+      if (annualCTC > 0) {
+        const currentComponents = getValues('revisionSalaryComponents') || [];
+        currentComponents.forEach((c: any, index: number) => {
+          if (c.percentage !== undefined && c.percentage !== null && c.percentage !== "") {
+            const newAmount = Number((annualCTC * c.percentage / 100).toFixed(2));
+            if (c.amount !== newAmount) {
+              setValue(`revisionSalaryComponents.${index}.amount`, newAmount, { shouldValidate: true, shouldDirty: true });
+            }
+          } else if (c.amount !== undefined && c.amount !== null && c.amount !== "") {
+            const newPercentage = Number((c.amount / annualCTC * 100).toFixed(2));
+            if (c.percentage !== newPercentage) {
+              setValue(`revisionSalaryComponents.${index}.percentage`, newPercentage, { shouldValidate: true, shouldDirty: true });
+            }
+          }
+        });
+      }
+      prevAnnualCTCRef.current = annualCTC;
+    }
+  }, [annualCTC, getValues, setValue]);
 
   const { totalEarnings, totalDeductions, totalReimbursements } = useMemo(() => {
     let e = 0, d = 0, r = 0;
