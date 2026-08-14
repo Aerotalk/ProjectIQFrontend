@@ -428,14 +428,14 @@ export default function EmployeeDirectory() {
       }
 
       // Salary Revision (Tab 7) — POST (append) only if filled
-      if (data.revisionType && data.revisionEffectiveDate) {
+      if (data.revisionAnnualCTC || (data.revisionSalaryComponents && data.revisionSalaryComponents.length > 0)) {
         subSaveTasks.push(
           api.post(`/admin/employees/${employeeId}/salary-revision`, {
             revisionType: data.revisionType,
             effectiveDate: data.revisionEffectiveDate,
             annualCTC: data.revisionAnnualCTC,
             incrementPercentage: data.revisionIncrementPercentage,
-            salaryComponents: Array.isArray(data.revisionSalaryComponents) ? JSON.stringify(data.revisionSalaryComponents) : data.revisionSalaryComponents,
+            salaryComponents: data.revisionSalaryComponents ?? [],
             reason: data.revisionReason,
           }).catch(e => console.warn('Salary revision save failed', e))
         );
