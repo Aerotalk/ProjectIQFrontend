@@ -17,10 +17,8 @@ import ReimbursementClaimTab from '../../../components/payroll/PayrollDrawer/sec
 import SalaryHoldTab from '../../../components/payroll/PayrollDrawer/sections/SalaryHoldTab';
 import StopSalaryProcessingTab from '../../../components/payroll/PayrollDrawer/sections/StopSalaryProcessingTab';
 import FinalSettlementTab from '../../../components/payroll/PayrollDrawer/sections/FinalSettlementTab';
-import FixedSalaryTab from '../../../components/payroll/PayrollDrawer/sections/FixedSalaryTab';
 
 const TABS = [
-  { id: 'fixed_salary', label: 'Fixed Salary' },
   { id: 'salary_inputs', label: 'Salary Inputs' },
   { id: 'employee_lop', label: 'LOP & Attendance' },
   { id: 'it_declarations', label: 'IT Declarations' },
@@ -30,14 +28,14 @@ const TABS = [
 ];
 
 // Tabs that manage their own state/API — no global save bar needed
-const SELF_MANAGED_TABS = new Set(['fixed_salary', 'salary_inputs', 'employee_lop', 'it_declarations', 'reimbursement']);
+const SELF_MANAGED_TABS = new Set(['salary_inputs', 'employee_lop', 'it_declarations', 'reimbursement']);
 
 export default function PayrollListing() {
   const { employees, allPayrolls, isLoading, refreshData } = usePayroll();
   const location = useLocation();
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState(() => new URLSearchParams(location.search).get('tab') || 'fixed_salary');
+  const [activeTab, setActiveTab] = useState(() => new URLSearchParams(location.search).get('tab') || 'salary_inputs');
   const [isSubmitting, setIsSubmitting] = useState(false);
   // FBP state: tracks whether the employee already has a saved declaration
   const [existingFbpId, setExistingFbpId] = useState<string | null>(null);
@@ -325,14 +323,9 @@ export default function PayrollListing() {
 
               {/* Tab Content Area */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-gray-50/50 dark:bg-[#121317]/50 relative">
+                {/* Self-managed tabs (LOP, IT Declarations, Reimbursements) */}
                 {isSelfManaged ? (
                   <div className="bg-white dark:bg-[#181a1f] p-6 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm animate-in fade-in duration-200">
-                    {activeTab === 'fixed_salary' && (
-                      <FixedSalaryTab
-                        key={`fixed-${employeeData.id}`}
-                        employeeDbId={employeeData.id}
-                      />
-                    )}
                     {activeTab === 'salary_inputs' && (
                       <SalaryInputsTab
                         key={`salary-${employeeData.id}`}
