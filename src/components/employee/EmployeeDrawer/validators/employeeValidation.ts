@@ -38,7 +38,7 @@ const baseEmployeeFormSchema = z.object({
   lastName: z.string().min(1, 'Last Name is required'),
   workEmail: z.string().email('Invalid email format').min(1, 'Work Email is required'),
   phone: z.string().min(1, 'Phone is required'),
-  alternatePhone: z.string().optional(),
+  alternatePhone: z.string().min(1, 'Alternate Phone is required'),
   dateOfBirth: z.string().min(1, 'Date of Birth is required'),
   gender: z.string().min(1, 'Gender is required'),
   maritalStatus: z.string().min(1, 'Marital Status is required'),
