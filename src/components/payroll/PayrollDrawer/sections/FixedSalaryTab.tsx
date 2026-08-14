@@ -59,8 +59,8 @@ export default function FixedSalaryTab({ employeeDbId }: Props) {
     }
   }, [revision?.salaryComponents]);
 
-  const { totalEarnings, totalDeductions, totalReimbursements } = useMemo(() => {
-    let e = 0, d = 0, r = 0;
+  const { totalEarnings, totalDeductions } = useMemo(() => {
+    let e = 0, d = 0;
     const ctc = revision?.annualCTC || 0;
     components.forEach((c) => {
       let annualAmount = 0;
@@ -72,13 +72,11 @@ export default function FixedSalaryTab({ employeeDbId }: Props) {
       
       if (c.type === 'EARNING') e += annualAmount;
       else if (c.type === 'DEDUCTION') d += annualAmount;
-      else if (c.type === 'REIMBURSEMENT') r += annualAmount;
     });
-    return { totalEarnings: e, totalDeductions: d, totalReimbursements: r };
+    return { totalEarnings: e, totalDeductions: d };
   }, [revision?.annualCTC, components]);
 
   const monthlyGross = totalEarnings / 12;
-  const monthlyNet = (totalEarnings - totalDeductions) / 12;
 
   if (loading) {
     return (
