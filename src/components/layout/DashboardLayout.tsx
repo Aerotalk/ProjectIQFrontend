@@ -28,7 +28,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState<string | null>('Sales');
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   // @ts-ignore
   const [expandedSubMenu, setExpandedSubMenu] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -240,6 +240,12 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
       activePageName = 'Profile Settings';
     }
   }
+
+  useEffect(() => {
+    if (activeModuleName) {
+      setExpandedMenu(activeModuleName);
+    }
+  }, [location.pathname, activeModuleName]);
 
 
   const { breadcrumbs } = useBreadcrumbContext();

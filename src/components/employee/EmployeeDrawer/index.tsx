@@ -42,7 +42,7 @@ const STEPS = [
 ];
 
 export default function EmployeeDrawer({ isOpen, onClose, onSave, mode, initialData, employeeId, isSubmitting }: Props) {
-  const form = useEmployeeForm(initialData);
+  const form = useEmployeeForm(initialData, mode);
   const [currentStep, setCurrentStep] = useState(0);
   const stepperRef = useRef<HTMLDivElement>(null);
 

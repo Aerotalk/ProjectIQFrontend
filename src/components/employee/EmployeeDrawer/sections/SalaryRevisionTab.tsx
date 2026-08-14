@@ -5,14 +5,14 @@ import { Input } from '@/components/ui/input';
 import { formStyles } from '@/components/ui/form-styles';
 import { FormSection, FormGrid, FormRow } from '@/components/ui/FormLayout';
 import { Plus, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 
 interface Props {
   readOnly?: boolean;
 }
 
 export default function SalaryRevisionTab({ readOnly }: Props) {
-  const { register, control } = useFormContext();
+  const { register, control, setValue, getValues } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'revisionSalaryComponents'
@@ -20,6 +20,30 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
 
   const annualCTC = useWatch({ control, name: 'revisionAnnualCTC' }) || 0;
   const components = useWatch({ control, name: 'revisionSalaryComponents' }) || [];
+
+  const prevAnnualCTCRef = useRef(annualCTC);
+
+  useEffect(() => {
+    if (annualCTC !== prevAnnualCTCRef.current) {
+      if (annualCTC > 0) {
+        const currentComponents = getValues('revisionSalaryComponents') || [];
+        currentComponents.forEach((c: any, index: number) => {
+          if (c.percentage !== undefined && c.percentage !== null && c.percentage !== "") {
+            const newAmount = Number((annualCTC * c.percentage / 100).toFixed(2));
+            if (c.amount !== newAmount) {
+              setValue(`revisionSalaryComponents.${index}.amount`, newAmount, { shouldValidate: true, shouldDirty: true });
+            }
+          } else if (c.amount !== undefined && c.amount !== null && c.amount !== "") {
+            const newPercentage = Number((c.amount / annualCTC * 100).toFixed(2));
+            if (c.percentage !== newPercentage) {
+              setValue(`revisionSalaryComponents.${index}.percentage`, newPercentage, { shouldValidate: true, shouldDirty: true });
+            }
+          }
+        });
+      }
+      prevAnnualCTCRef.current = annualCTC;
+    }
+  }, [annualCTC, getValues, setValue]);
 
   const { totalEarnings, totalDeductions, totalReimbursements } = useMemo(() => {
     let e = 0, d = 0, r = 0;
@@ -100,8 +124,7 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
             <div className="space-y-3">
               {fields.map((item, index) => {
                 const comp = components[index] || {};
-                const isPercentage = !!comp.percentage;
-                const isFlat = !!comp.amount;
+
                 
                 let monthlyPreview = 0;
                 if (comp.percentage) {
@@ -142,18 +165,38 @@ export default function SalaryRevisionTab({ readOnly }: Props) {
                         <Input
                           type="number"
                           step="0.01"
-                          {...register(`revisionSalaryComponents.${index}.percentage`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
+                          {...register(`revisionSalaryComponents.${index}.percentage`, { 
+                            setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v),
+                            onChange: (e) => {
+                              const p = parseFloat(e.target.value);
+                              if (!isNaN(p) && annualCTC > 0) {
+                                setValue(`revisionSalaryComponents.${index}.amount`, Number((annualCTC * p / 100).toFixed(2)), { shouldValidate: true, shouldDirty: true });
+                              } else if (e.target.value === "") {
+                                setValue(`revisionSalaryComponents.${index}.amount`, undefined, { shouldValidate: true, shouldDirty: true });
+                              }
+                            }
+                          })}
                           placeholder="Percentage %"
-                          disabled={readOnly || isFlat}
+                          disabled={readOnly}
                         />
                       </div>
                       <div className="w-40">
                         <Input
                           type="number"
                           step="0.01"
-                          {...register(`revisionSalaryComponents.${index}.amount`, { setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v) })}
+                          {...register(`revisionSalaryComponents.${index}.amount`, { 
+                            setValueAs: (v: any) => v === "" || isNaN(v) ? undefined : Number(v),
+                            onChange: (e) => {
+                              const a = parseFloat(e.target.value);
+                              if (!isNaN(a) && annualCTC > 0) {
+                                setValue(`revisionSalaryComponents.${index}.percentage`, Number((a / annualCTC * 100).toFixed(2)), { shouldValidate: true, shouldDirty: true });
+                              } else if (e.target.value === "") {
+                                setValue(`revisionSalaryComponents.${index}.percentage`, undefined, { shouldValidate: true, shouldDirty: true });
+                              }
+                            }
+                          })}
                           placeholder="Annual Amount ₹"
-                          disabled={readOnly || isPercentage}
+                          disabled={readOnly}
                         />
                       </div>
                       {!readOnly && (

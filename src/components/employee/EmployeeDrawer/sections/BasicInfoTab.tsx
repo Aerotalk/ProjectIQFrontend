@@ -113,8 +113,9 @@ export default function BasicInfoTab({ readOnly }: Props) {
 
           {/* Row: Alternate Phone | Gender */}
           <div>
-            <label className={formStyles.label}>Alternate Phone</label>
+            <label className={formStyles.label}>Alternate Phone *</label>
             <SharedPhoneInput name="alternatePhone" disabled={readOnly} />
+            {errors.alternatePhone && <p className="text-red-500 text-xs mt-1">{errors.alternatePhone.message as string}</p>}
           </div>
           <div>
             <label className={formStyles.label}>Gender *</label>
