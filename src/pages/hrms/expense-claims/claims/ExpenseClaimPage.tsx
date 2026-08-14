@@ -109,10 +109,10 @@ export default function ExpenseClaimPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
+    <div className="relative bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
       
       {/* Header */}
-      <div className="px-8 py-5 border-b border-gray-200 dark:border-white/10 flex items-center justify-between shrink-0 bg-gray-50/50 dark:bg-white/[0.02]">
+      <div className="px-8 py-5 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02] rounded-t-xl">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
@@ -129,15 +129,16 @@ export default function ExpenseClaimPage() {
         </div>
       </div>
 
-      <FormProvider {...form}>
-        <form id="expense-form" onSubmit={form.handleSubmit(onSubmit)} className={`${isEdit ? 'flex-none min-h-[50%]' : 'flex-1'} overflow-hidden flex flex-col md:flex-row`}>
-          
-          {/* Form Content */}
-          <div className="w-full p-8 overflow-y-auto custom-scrollbar flex justify-center">
-            <div className="w-full max-w-2xl">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Claim Details</h3>
+      <div className="flex flex-col pb-[84px]">
+        <FormProvider {...form}>
+          <form id="expense-form" onSubmit={form.handleSubmit(onSubmit)} className="w-full">
             
-            <div className="space-y-6 max-w-md">
+            {/* Form Content */}
+            <div className="w-full p-8 flex justify-center">
+              <div className="w-full max-w-2xl">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Claim Details</h3>
+              
+              <div className="space-y-6 max-w-md">
               <div>
                 <label className={formStyles.label}>Employee *</label>
                 <EmployeeSelector 
@@ -178,24 +179,26 @@ export default function ExpenseClaimPage() {
                 {form.formState.errors.currency && <p className="text-red-500 text-xs mt-1">{form.formState.errors.currency.message}</p>}
               </div>
             </div>
-          </div>
-        </div>
-      </form>
-      </FormProvider>
+              </div>
+            </div>
+          </form>
+        </FormProvider>
+        
 
-      {(isEdit || !!form.watch('template')) && (
-        <div className="flex-1 overflow-hidden border-t border-gray-200 dark:border-white/10 bg-gray-50/20 dark:bg-black/20">
-          <ExpenseItemsList 
-            claimId={id || 'new'} 
-            currency={form.watch('currency')} 
-            localItems={localItems}
-            setLocalItems={setLocalItems}
-          />
-        </div>
-      )}
+        {(isEdit || !!form.watch('template')) && (
+          <div className="border-t border-gray-200 dark:border-white/10 bg-gray-50/20 dark:bg-black/20">
+            <ExpenseItemsList 
+              claimId={id || 'new'} 
+              currency={form.watch('currency')} 
+              localItems={localItems}
+              setLocalItems={setLocalItems}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Footer */}
-      <div className="px-8 py-5 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#181a1f] flex items-center justify-between shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <div className="sticky bottom-0 left-0 right-0 px-8 py-5 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#181a1f] flex items-center justify-between rounded-b-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10">
         <button
           type="button"
           onClick={() => navigate(-1)}
