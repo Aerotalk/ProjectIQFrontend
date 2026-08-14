@@ -143,8 +143,9 @@ const baseEmployeeFormSchema = z.object({
   revisionIncrementPercentage: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
   revisionSalaryComponents: z.array(z.object({
     componentName: z.string().min(1, 'Name is required'),
-    percentage: z.number().optional(),
-    amount: z.number().optional()
+    type: z.string().min(1, 'Type is required'),
+    percentage: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional()),
+    amount: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : Number(v)), z.number().optional())
   })).optional(),
   revisionReason: z.string().optional(),
 
