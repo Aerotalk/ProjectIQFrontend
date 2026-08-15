@@ -6,6 +6,7 @@ import Drawer from '../../../ui/Drawer';
 import { FormGrid } from '../../../ui/FormLayout';
 import { Input } from '../../../ui/input';
 import { formStyles } from '../../../ui/form-styles';
+import CustomMonthPicker from '../../../ui/CustomMonthPicker';
 
 interface SalaryInput {
   id: string;
@@ -34,15 +35,21 @@ export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('Addition');
   const [reason] = useState('');
+  const [payComponents, setPayComponents] = useState<{id: string, componentName: string}[]>([]);
 
   const fetchInputs = useCallback(async () => {
     if (!employeeDbId) return;
     setLoading(true);
     try {
-      // We don't have a specific endpoint for employee inputs yet, fetch all and filter
-      const res = await api.get('/hrms/payroll/salary-inputs');
+      const [res, compRes] = await Promise.all([
+        api.get(`/hrms/payroll/salary-inputs?employeeId=${employeeDbId}`),
+        api.get('/hrms/payroll/pay-components')
+      ]);
       const all = Array.isArray(res) ? res : (res.data || []);
-      setInputs(all.filter((x: any) => x.employee?.id === employeeDbId));
+      setInputs(all);
+      
+      const allComps = Array.isArray(compRes) ? compRes : (compRes.data || []);
+      setPayComponents(allComps);
     } catch (err) {
       console.error(err);
     } finally {
@@ -156,16 +163,19 @@ export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
           <FormGrid>
             <div className="space-y-2">
               <label className={formStyles.label}>Payroll Period *</label>
-              <input 
-                type="month" 
-                className="w-full p-2 border rounded-sm dark:bg-[#121212] [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:block [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
-                value={period} 
-                onChange={e => setPeriod(e.target.value)} 
+              <CustomMonthPicker
+                value={period}
+                onChange={setPeriod}
               />
             </div>
             <div className="space-y-2">
               <label className={formStyles.label}>Pay Component *</label>
-              <Input placeholder="e.g. Bonus" value={component} onChange={e => setComponent(e.target.value)} />
+              <select className="w-full p-2 border rounded-sm dark:bg-[#121212]" value={component} onChange={e => setComponent(e.target.value)}>
+                <option value="">Select a component</option>
+                {payComponents.map(comp => (
+                  <option key={comp.id} value={comp.componentName}>{comp.componentName}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <label className={formStyles.label}>Amount *</label>
