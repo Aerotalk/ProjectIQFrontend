@@ -170,12 +170,18 @@ export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
             </div>
             <div className="space-y-2">
               <label className={formStyles.label}>Pay Component *</label>
-              <select className="w-full p-2 border rounded-sm dark:bg-[#121212]" value={component} onChange={e => setComponent(e.target.value)}>
-                <option value="">Select a component</option>
+              <input 
+                list="pay-components-list"
+                className="w-full p-2 border rounded-sm dark:bg-[#121212]" 
+                placeholder="e.g. Bonus" 
+                value={component} 
+                onChange={e => setComponent(e.target.value)} 
+              />
+              <datalist id="pay-components-list">
                 {payComponents.map(comp => (
-                  <option key={comp.id} value={comp.componentName}>{comp.componentName}</option>
+                  <option key={comp.id} value={comp.componentName} />
                 ))}
-              </select>
+              </datalist>
             </div>
             <div className="space-y-2">
               <label className={formStyles.label}>Amount *</label>
