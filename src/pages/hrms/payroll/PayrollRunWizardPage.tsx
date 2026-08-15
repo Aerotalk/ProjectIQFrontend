@@ -86,10 +86,9 @@ export default function PayrollRunWizardPage() {
       return;
     }
     
-    // Block if missing data
+    // Warn if missing data, but allow proceeding
     if (missingDataEmployees.length > 0) {
-      toast.error('Cannot run payroll. Some employees are missing mandatory setup steps.');
-      return;
+      toast.error('Some employees are missing setup steps and will be skipped.');
     }
     
     setIsProcessing(true);
@@ -153,10 +152,10 @@ export default function PayrollRunWizardPage() {
                       <div className="flex items-start gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 rounded-lg text-red-800 dark:text-red-400">
                         <AlertTriangle size={24} className="shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="font-semibold text-base mb-1">Payroll Run Blocked</h4>
+                          <h4 className="font-semibold text-base mb-1">Payroll Run Warning</h4>
                           <p className="text-sm">
                             {missingDataEmployees.length} employee(s) are missing mandatory setup steps (Salary Configuration, Bank Details, or Statutory info). 
-                            You must configure their details in the Employee Directory before processing this batch to ensure compliance.
+                            They will be skipped in this run. You can configure their details in the Employee Directory later.
                           </p>
                         </div>
                       </div>
@@ -273,7 +272,7 @@ export default function PayrollRunWizardPage() {
               <button
                 type="button"
                 onClick={handleRunEngine}
-                disabled={isProcessing || missingDataEmployees.length > 0 || !payrollPeriod}
+                disabled={isProcessing || !payrollPeriod}
                 className="flex items-center gap-2 px-8 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg shadow-md transition-all active:scale-95"
               >
                 {isProcessing ? <><Loader2 size={18} className="animate-spin" /> Processing Data...</> : <><PlayCircle size={18} /> Run Payroll Engine</>}

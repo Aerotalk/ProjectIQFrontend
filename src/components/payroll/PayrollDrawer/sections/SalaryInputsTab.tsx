@@ -56,6 +56,10 @@ export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
 
   const handleSave = async () => {
     if (!employeeDbId) return;
+    if (!period || !component || !amount) {
+      toast.error('Please fill in all required fields (Period, Component, Amount).');
+      return;
+    }
     setSaving(true);
     try {
       await api.post('/hrms/payroll/salary-inputs', {
@@ -152,7 +156,12 @@ export default function SalaryInputsTab({ employeeDbId, readOnly }: Props) {
           <FormGrid>
             <div className="space-y-2">
               <label className={formStyles.label}>Payroll Period *</label>
-              <input type="month" className="w-full p-2 border rounded-sm dark:bg-[#121212]" value={period} onChange={e => setPeriod(e.target.value)} />
+              <input 
+                type="month" 
+                className="w-full p-2 border rounded-sm dark:bg-[#121212] [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:block [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+                value={period} 
+                onChange={e => setPeriod(e.target.value)} 
+              />
             </div>
             <div className="space-y-2">
               <label className={formStyles.label}>Pay Component *</label>
