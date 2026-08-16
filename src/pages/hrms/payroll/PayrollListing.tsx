@@ -207,13 +207,13 @@ export default function PayrollListing() {
   };
 
   const handleDownloadPayslip = async () => {
-    if (!employeePayroll || (!employeePayroll.id && !employeePayroll.detailId)) {
+    if (!employeePayroll || (!employeePayroll.id && !(employeePayroll as any).detailId)) {
       const toast = (await import('react-hot-toast')).default;
       toast.error("Cannot download payslip: Latest payroll detail not found.");
       return;
     }
     
-    const detailId = employeePayroll.id || employeePayroll.detailId;
+    const detailId = employeePayroll.id || (employeePayroll as any).detailId;
     
     try {
       const toast = (await import('react-hot-toast')).default;
