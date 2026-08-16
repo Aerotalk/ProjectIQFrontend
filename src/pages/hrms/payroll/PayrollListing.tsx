@@ -343,15 +343,15 @@ export default function PayrollListing() {
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    {employeePayroll && (
-                      <button 
-                        onClick={handleDownloadPayslip}
-                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm font-medium text-sm"
-                      >
-                        <Download size={16} />
-                        <span className="hidden sm:inline">Download Latest Payslip</span>
-                      </button>
-                    )}
+                    <button 
+                      onClick={handleDownloadPayslip}
+                      disabled={!employeePayroll}
+                      title={!employeePayroll ? "No payroll processed for this employee yet" : "Download Latest Payslip"}
+                      className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors shadow-sm font-medium text-sm ${!employeePayroll ? 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'bg-white dark:bg-[#1f2229] border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                    >
+                      <Download size={16} />
+                      <span className="hidden sm:inline">Download Latest Payslip</span>
+                    </button>
                   </div>
                 </div>
 
