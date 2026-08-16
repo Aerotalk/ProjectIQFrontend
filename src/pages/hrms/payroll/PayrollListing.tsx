@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronRight, Briefcase, User, Send } from 'lucide-react';
+import { Search, ChevronRight, Briefcase, User, Send, Download } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { usePayroll } from '../../../hooks/usePayroll';
 import Tabs from '../../../components/Tabs';
@@ -206,6 +206,45 @@ export default function PayrollListing() {
     }
   };
 
+  const handleDownloadPayslip = async () => {
+    if (!employeePayroll || (!employeePayroll.id && !employeePayroll.detailId)) {
+      const toast = (await import('react-hot-toast')).default;
+      toast.error("Cannot download payslip: Latest payroll detail not found.");
+      return;
+    }
+    
+    const detailId = employeePayroll.id || employeePayroll.detailId;
+    
+    try {
+      const toast = (await import('react-hot-toast')).default;
+      toast.loading("Generating Payslip...", { id: 'payslip' });
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8080/api/hrms/payroll/runs/details/${detailId}/payslip`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error("Failed to download payslip");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `payslip_${employeePayroll.period || 'latest'}_${employeeData?.empId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Payslip downloaded successfully!", { id: 'payslip' });
+    } catch (err) {
+      console.error(err);
+      const toast = (await import('react-hot-toast')).default;
+      toast.error("Failed to download payslip.", { id: 'payslip' });
+    }
+  };
+
   const isSelfManaged = SELF_MANAGED_TABS.has(activeTab);
 
   return (
@@ -302,9 +341,22 @@ export default function PayrollListing() {
                       </div>
                     </div>
                   </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {employeePayroll && (
+                      <button 
+                        onClick={handleDownloadPayslip}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1f2229] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-colors shadow-sm font-medium text-sm"
+                      >
+                        <Download size={16} />
+                        <span className="hidden sm:inline">Download Latest Payslip</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-                  {employeePayroll && (
-                    <div className="flex gap-6 bg-white dark:bg-[#121317] px-6 py-3 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
+                {employeePayroll && (
+                    <div className="flex gap-6 bg-white dark:bg-[#121317] px-6 py-3 mt-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm">
                       <div>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Gross Pay</p>
                         <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{employeePayroll.gross}</p>
@@ -317,7 +369,6 @@ export default function PayrollListing() {
                     </div>
                   )}
                 </div>
-              </div>
 
               {/* Tabs Nav */}
               <div className="shrink-0 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#181a1f] sticky top-0 z-20">
