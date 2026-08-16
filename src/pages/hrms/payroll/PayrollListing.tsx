@@ -67,9 +67,6 @@ export default function PayrollListing() {
       methods.reset({
         salaryInputs: { employee: employeeData.empId, inputType: 'Addition' },
         fbpDeclarations: { financialYear: '', items: [] },
-        salaryHold: { employee: employeeData.empId },
-        stopSalary: { employee: employeeData.empId },
-        finalSettlement: { employee: employeeData.empId },
       });
       setExistingFbpId(null);
     }
@@ -77,6 +74,12 @@ export default function PayrollListing() {
 
   // Pre-populate FBP form from existing backend record when the tab becomes active
   useEffect(() => {
+    if (activeTab === 'actions' && employeeData?.empId) {
+      methods.setValue('salaryHold.employee', employeeData.empId);
+      methods.setValue('stopSalary.employee', employeeData.empId);
+      methods.setValue('finalSettlement.employee', employeeData.empId);
+    }
+    
     if (activeTab !== 'fbp_declarations' || !employeeData?.id) return;
     let cancelled = false;
     const load = async () => {
