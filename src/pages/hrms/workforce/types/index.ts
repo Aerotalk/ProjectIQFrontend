@@ -176,7 +176,13 @@ export interface AttendanceRecord extends BaseEntity {
   shiftId: string;
   shiftName: string;
   checkIn?: string;
+  checkInLatitude?: number;
+  checkInLongitude?: number;
+  checkInLocation?: string;
   checkOut?: string;
+  checkOutLatitude?: number;
+  checkOutLongitude?: number;
+  checkOutLocation?: string;
   workingHours?: number;
   hours?: number; // Keep for backward compatibility
   breakHours?: number;

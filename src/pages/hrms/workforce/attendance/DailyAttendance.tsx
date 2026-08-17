@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutList, Calendar as CalendarIcon, Eye, Edit2, AlertCircle, Clock, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutList, Calendar as CalendarIcon, Eye, Edit2, AlertCircle, Clock, RefreshCw, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { format, addMonths, subMonths, parse } from 'date-fns';
 import CustomTable from '../../../../components/ui/CustomTable';
 import AttendanceCalendar from './AttendanceCalendar';
@@ -68,8 +68,48 @@ export default function DailyAttendance() {
       )
     },
     { key: 'shiftName', label: 'Shift', sortable: true },
-    { key: 'checkIn', label: 'Check In', sortable: true },
-    { key: 'checkOut', label: 'Check Out', sortable: true },
+    { 
+      key: 'checkIn', 
+      label: 'Check In', 
+      sortable: true,
+      render: (val: string, row: AttendanceRecord) => (
+        <div className="flex flex-col">
+          <span>{val || '-'}</span>
+          {row.checkInLocation && (
+            <a 
+              href={`https://www.google.com/maps/search/?api=1&query=${row.checkInLatitude},${row.checkInLongitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[10px] text-primary hover:underline mt-0.5"
+            >
+              <MapPin size={10} />
+              <span className="truncate max-w-[120px]" title={row.checkInLocation}>{row.checkInLocation}</span>
+            </a>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'checkOut', 
+      label: 'Check Out', 
+      sortable: true,
+      render: (val: string, row: AttendanceRecord) => (
+        <div className="flex flex-col">
+          <span>{val || '-'}</span>
+          {row.checkOutLocation && (
+            <a 
+              href={`https://www.google.com/maps/search/?api=1&query=${row.checkOutLatitude},${row.checkOutLongitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[10px] text-primary hover:underline mt-0.5"
+            >
+              <MapPin size={10} />
+              <span className="truncate max-w-[120px]" title={row.checkOutLocation}>{row.checkOutLocation}</span>
+            </a>
+          )}
+        </div>
+      )
+    },
     { key: 'workingHours', label: 'Hours', sortable: true },
     { 
       key: 'status', 
