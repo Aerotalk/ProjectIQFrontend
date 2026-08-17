@@ -4,7 +4,8 @@ import { ArrowLeft, Save, Loader2, Clock, MonitorSmartphone, AlertCircle } from 
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import { WorkforceService } from '../services';
-import type { AttendanceRecord, AttendanceStatus } from '../types';
+import type { AttendanceRecord } from '../types';
+import { AttendanceStatus } from '../types';
 import toast from 'react-hot-toast';
 
 export default function AttendanceFormPage() {
@@ -208,10 +209,10 @@ export default function AttendanceFormPage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
                     <CustomSelect
                       options={[
-                        { value: 'Present', label: 'Present' },
-                        { value: 'Absent', label: 'Absent' },
-                        { value: 'Half Day', label: 'Half Day' },
-                        { value: 'Leave', label: 'Leave' }
+                        { value: AttendanceStatus.Present, label: 'Present' },
+                        { value: AttendanceStatus.Absent, label: 'Absent' },
+                        { value: AttendanceStatus.HalfDay, label: 'Half Day' },
+                        { value: AttendanceStatus.Leave, label: 'Leave' }
                       ]}
                       value={status || ''}
                       onChange={(val) => setStatus(val as AttendanceStatus)}

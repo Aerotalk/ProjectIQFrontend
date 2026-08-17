@@ -75,15 +75,18 @@ export default function DailyAttendance() {
       key: 'status', 
       label: 'Status', 
       sortable: true,
-      render: (val: AttendanceStatus) => (
-        <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${
-          val === AttendanceStatus.Present ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400' : 
-          val === AttendanceStatus.Absent ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' :
-          'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-        }`}>
-          {val}
-        </span>
-      )
+      render: (val: AttendanceStatus) => {
+        const displayVal = val ? val.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-';
+        return (
+          <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide ${
+            val === AttendanceStatus.Present ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400' : 
+            val === AttendanceStatus.Absent ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400' :
+            'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+          }`}>
+            {displayVal}
+          </span>
+        );
+      }
     },
     { key: 'exceptionType', label: 'Exception', sortable: true, render: (val: string) => val || '-' },
     { 

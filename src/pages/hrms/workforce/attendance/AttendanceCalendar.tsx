@@ -80,6 +80,11 @@ export default function AttendanceCalendar({ data, monthYear }: AttendanceCalend
     }
   };
 
+  const formatStatusText = (s: string) => {
+    if (!s) return '';
+    return s.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  };
+
   const renderDayContent = (date: Date) => {
     const dateString = format(date, 'yyyy-MM-dd');
     const record = data.find(d => d.attendanceDate === dateString || d.date === dateString);
@@ -100,7 +105,7 @@ export default function AttendanceCalendar({ data, monthYear }: AttendanceCalend
         <div className="flex items-center gap-1.5 mb-1.5">
           {getStatusIcon(record.status)}
           <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 truncate">
-            {record.status}
+            {formatStatusText(record.status)}
           </span>
         </div>
 
