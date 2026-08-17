@@ -1,70 +1,70 @@
 // Common Enums
 export const AttendanceStatus = {
-  Present: 'Present',
-  Absent: 'Absent',
-  Leave: 'Leave',
-  Holiday: 'Holiday',
-  Weekend: 'Weekend',
-  HalfDay: 'Half Day'
+  Present: 'PRESENT',
+  Absent: 'ABSENT',
+  Leave: 'LEAVE',
+  Holiday: 'HOLIDAY',
+  Weekend: 'WEEKEND',
+  HalfDay: 'HALF_DAY'
 } as const;
 export type AttendanceStatus = typeof AttendanceStatus[keyof typeof AttendanceStatus];
 
 export const LeaveStatus = {
-  Pending: 'Pending',
-  Approved: 'Approved',
-  Rejected: 'Rejected',
-  Cancelled: 'Cancelled',
-  Withdrawn: 'Withdrawn',
-  PartiallyApproved: 'Partially Approved'
+  Pending: 'PENDING',
+  Approved: 'APPROVED',
+  Rejected: 'REJECTED',
+  Cancelled: 'CANCELLED',
+  Withdrawn: 'WITHDRAWN',
+  PartiallyApproved: 'PARTIALLY_APPROVED'
 } as const;
 export type LeaveStatus = typeof LeaveStatus[keyof typeof LeaveStatus];
 
 export const ApprovalStatus = {
-  Pending: 'Pending',
-  Approved: 'Approved',
-  Rejected: 'Rejected',
-  Cancelled: 'Cancelled'
+  Pending: 'PENDING',
+  Approved: 'APPROVED',
+  Rejected: 'REJECTED',
+  Cancelled: 'CANCELLED'
 } as const;
 export type ApprovalStatus = typeof ApprovalStatus[keyof typeof ApprovalStatus];
 
 export const AttendanceSource = {
-  Biometric: 'Biometric',
-  Mobile: 'Mobile',
-  Manual: 'Manual',
-  Web: 'Web',
-  Import: 'Import'
+  Biometric: 'BIOMETRIC',
+  Mobile: 'MOBILE',
+  Manual: 'MANUAL',
+  Web: 'WEB',
+  Import: 'IMPORT'
 } as const;
 export type AttendanceSource = typeof AttendanceSource[keyof typeof AttendanceSource];
 
 export const PermissionStatus = {
-  Pending: 'Pending',
-  Approved: 'Approved',
-  Rejected: 'Rejected',
-  Cancelled: 'Cancelled'
+  Pending: 'PENDING',
+  Approved: 'APPROVED',
+  Rejected: 'REJECTED',
+  Cancelled: 'CANCELLED'
 } as const;
 export type PermissionStatus = typeof PermissionStatus[keyof typeof PermissionStatus];
 
 export const ExceptionType = {
-  MissingSwipe: 'Missing Swipe',
-  LateIn: 'Late In',
-  EarlyOut: 'Early Out',
-  LessHours: 'Less Hours',
-  UnauthorizedAbsence: 'Unauthorized Absence'
+  MissingSwipe: 'MISSING_SWIPE',
+  LateIn: 'LATE_IN',
+  EarlyOut: 'EARLY_OUT',
+  LessHours: 'LESS_HOURS',
+  UnauthorizedAbsence: 'UNAUTHORIZED_ABSENCE'
 } as const;
 export type ExceptionType = typeof ExceptionType[keyof typeof ExceptionType];
 
 export const ShiftType = {
-  Fixed: 'Fixed',
-  Flexible: 'Flexible',
-  Open: 'Open'
+  Fixed: 'FIXED',
+  Flexible: 'FLEXIBLE',
+  Open: 'OPEN'
 } as const;
 export type ShiftType = typeof ShiftType[keyof typeof ShiftType];
 
 export const ProcessingStatus = {
-  Open: 'Open',
-  Locked: 'Locked',
-  Processed: 'Processed',
-  InProgress: 'InProgress'
+  Open: 'OPEN',
+  Locked: 'LOCKED',
+  Processed: 'PROCESSED',
+  InProgress: 'IN_PROGRESS'
 } as const;
 export type ProcessingStatus = typeof ProcessingStatus[keyof typeof ProcessingStatus];
 
