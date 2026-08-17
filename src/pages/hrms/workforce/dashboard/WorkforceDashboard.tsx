@@ -1,6 +1,6 @@
 import { Users, UserMinus, Clock, Calendar, CheckSquare, FileText, ShieldAlert, Fingerprint } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
-import { useDashboardKPIs, useLeaveApplications } from '../hooks';
+import { useDashboardKPIs, useLeaveApplications, useAttendanceRecords } from '../hooks';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 

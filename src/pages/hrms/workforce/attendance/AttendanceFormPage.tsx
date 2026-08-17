@@ -4,7 +4,8 @@ import { ArrowLeft, Save, Loader2, Clock, MonitorSmartphone, AlertCircle } from 
 import { Input as CustomInput } from '../../../../components/ui/input';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import { WorkforceService } from '../services';
-import type { AttendanceRecord, AttendanceStatus } from '../types';
+import type { AttendanceRecord } from '../types';
+import { AttendanceStatus } from '../types';
 import toast from 'react-hot-toast';
 
 export default function AttendanceFormPage() {
