@@ -96,18 +96,18 @@ export default function WorkforceDashboard() {
                 {attendanceData?.slice(0, 5).map((att: any, i: number) => (
                   <tr key={i} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                     <td className="px-3 py-2 text-gray-900 dark:text-gray-100 font-medium">
-                      {att.employee?.firstName ? `${att.employee.firstName} ${att.employee.lastName}` : 'John Doe'}
+                      {att.employeeName || (att.employee?.firstName ? `${att.employee.firstName} ${att.employee.lastName}` : 'John Doe')}
                     </td>
-                    <td className="px-3 py-2 text-gray-500">{att.shift?.shiftName || 'GS'}</td>
-                    <td className="px-3 py-2 text-gray-500">{att.checkInTime ? new Date(att.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
-                    <td className="px-3 py-2 text-gray-500">{att.checkOutTime ? new Date(att.checkOutTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
+                    <td className="px-3 py-2 text-gray-500">{att.shiftName || att.shift?.shiftName || 'GS'}</td>
+                    <td className="px-3 py-2 text-gray-500">{att.checkIn ? new Date(att.checkIn).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
+                    <td className="px-3 py-2 text-gray-500">{att.checkOut ? new Date(att.checkOut).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</td>
                     <td className="px-3 py-2 text-right">
                       <span className={`px-2 py-0.5 rounded-sm text-[10px] ${
-                        att.status === 'Present' ? 'bg-emerald-100 text-emerald-700' :
-                        att.status === 'Absent' ? 'bg-red-100 text-red-700' :
+                        att.status === 'PRESENT' || att.status === 'Present' ? 'bg-emerald-100 text-emerald-700' :
+                        att.status === 'ABSENT' || att.status === 'Absent' ? 'bg-red-100 text-red-700' :
                         'bg-amber-100 text-amber-700'
                       }`}>
-                        {att.status || 'Present'}
+                        {att.status ? att.status.replace(/_/g, ' ') : 'Present'}
                       </span>
                     </td>
                   </tr>

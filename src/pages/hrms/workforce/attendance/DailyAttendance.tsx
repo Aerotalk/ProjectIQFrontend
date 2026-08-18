@@ -45,7 +45,7 @@ export default function DailyAttendance() {
     }
   }, [searchParams]);
 
-  const { data, loading } = useAttendanceRecords(filters);
+  const { data, loading, refresh } = useAttendanceRecords(filters);
 
   const currentMonthDate = useMemo(() => {
     return parse(filters.monthYear, 'MMMM yyyy', new Date());
@@ -213,6 +213,7 @@ export default function DailyAttendance() {
             value={filters.employeeId}
             onChange={(val) => setFilters(prev => ({ ...prev, employeeId: val }))}
             placeholder="Employee"
+            allowAll
           />
         </div>
         <div className="w-36">
@@ -252,11 +253,12 @@ export default function DailyAttendance() {
         </div>
 
         <button 
-          onClick={handleResetFilters}
-          className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 rounded-sm transition-colors tooltip-trigger"
-          title="Reset Filters"
+          onClick={refresh}
+          disabled={loading}
+          className={`p-2 rounded-sm transition-colors tooltip-trigger ${loading ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:text-primary dark:hover:text-secondary hover:bg-primary/10 dark:hover:bg-secondary/10'}`}
+          title="Refresh Data"
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
         </button>
 
         <div className="ml-auto flex items-center bg-gray-50 dark:bg-white/5 rounded-md border border-gray-200 dark:border-white/10">

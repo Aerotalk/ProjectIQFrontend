@@ -8,9 +8,10 @@ interface EmployeeSelectorProps {
   disabled?: boolean;
   className?: string;
   placeholder?: string;
+  allowAll?: boolean;
 }
 
-export default function EmployeeSelector({ value, onChange, disabled, className, placeholder = 'Select Employee' }: EmployeeSelectorProps) {
+export default function EmployeeSelector({ value, onChange, disabled, className, placeholder = 'Select Employee', allowAll }: EmployeeSelectorProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,12 +30,16 @@ export default function EmployeeSelector({ value, onChange, disabled, className,
     fetchEmployees();
   }, []);
 
-  const options: SelectOption[] = employees.map(emp => ({
+  const employeeOptions = employees.map(emp => ({
     label: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unknown Employee',
-    value: emp.id || emp.employeeId || '',
+    value: emp.id || emp.employeeId || `unknown-${Math.random()}`,
     subtitle: emp.designationId || 'Employee', // Ideally resolve designation name, but ID/placeholder for now
     subLabel: emp.employeeId || (emp.id && typeof emp.id === 'string' ? emp.id.substring(0, 8) : '')
   }));
+
+  const options: SelectOption[] = allowAll 
+    ? [{ label: 'All Employees', value: '' }, ...employeeOptions]
+    : employeeOptions;
 
   return (
     <CustomSelect
