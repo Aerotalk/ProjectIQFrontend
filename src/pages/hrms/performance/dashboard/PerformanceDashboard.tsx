@@ -153,13 +153,10 @@ export default function PerformanceDashboard() {
       </div>
 
       {/* Charts & Lists Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-
-          {/* Goal Completion Tracking */}
-          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm">
+        {/* Goal Completion Tracking (Row 1) */}
+        <div className="lg:col-span-2 bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
                 <Target size={20} className="mr-2 text-primary dark:text-secondary" />
@@ -210,8 +207,44 @@ export default function PerformanceDashboard() {
             )}
           </div>
 
-          {/* Department Performance Trend */}
-          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm h-80 animate-in slide-in-from-bottom fade-in duration-500 fill-mode-both" style={{ animationDelay: '500ms' }}>
+          {/* Active Cycles (Row 1) */}
+          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b border-gray-100 dark:border-white/10 pb-2">
+              Active Cycles
+            </h3>
+            {hasCycles ? (
+              <div className="space-y-4 flex-grow">
+                {kpis.cycleStatuses.map((cycle: any, index: number) => (
+                  <div key={index} className="flex flex-col p-3 bg-gray-50 dark:bg-white/5 rounded-sm">
+                    <span className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{cycle.name}</span>
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span>{cycle.value}% Completed</span>
+                      <span className="text-primary dark:text-secondary">Active</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+                      <div 
+                        className="h-1.5 rounded-full bg-primary dark:bg-secondary animate-grow-width"
+                        style={{ width: `${cycle.value}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col flex-grow justify-center">
+                <EmptyState
+                  icon={GitCommitHorizontal}
+                  title="No active cycles"
+                  description="Start an appraisal cycle to begin tracking employee performance across departments."
+                  actionLabel="+ New Cycle"
+                  onAction={() => navigate('../cycles/new')}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Department Performance Trend (Row 2) */}
+          <div className="lg:col-span-2 bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm min-h-[320px] flex flex-col animate-in slide-in-from-bottom fade-in duration-500 fill-mode-both" style={{ animationDelay: '500ms' }}>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Department Performance Trend</h3>
             {hasDeptRatings ? (
               <div className="w-full h-full pb-8">
@@ -244,50 +277,13 @@ export default function PerformanceDashboard() {
               />
             )}
           </div>
-        </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-
-          {/* Active Cycles */}
-          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b border-gray-100 dark:border-white/10 pb-2">
-              Active Cycles
-            </h3>
-            {hasCycles ? (
-              <div className="space-y-4">
-                {kpis.cycleStatuses.map((cycle: any, index: number) => (
-                  <div key={index} className="flex flex-col p-3 bg-gray-50 dark:bg-white/5 rounded-sm">
-                    <span className="font-semibold text-sm text-gray-900 dark:text-white mb-1">{cycle.name}</span>
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>{cycle.value}% Completed</span>
-                      <span className="text-primary dark:text-secondary">Active</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
-                      <div 
-                        className="h-1.5 rounded-full bg-primary dark:bg-secondary animate-grow-width"
-                        style={{ width: `${cycle.value}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={GitCommitHorizontal}
-                title="No active cycles"
-                description="Start an appraisal cycle to begin tracking employee performance across departments."
-                actionLabel="+ New Cycle"
-                onAction={() => navigate('../cycles/new')}
-              />
-            )}
-          </div>
-
-          {/* Requires Attention */}
-          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm">
+          {/* Requires Attention (Row 2) */}
+          <div className="bg-white dark:bg-[#181a1f] p-6 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm flex flex-col">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 border-b border-gray-100 dark:border-white/10 pb-2">
               Requires Attention
             </h3>
+
             <div className="space-y-3">
               {hasPendingSelf && (
                 <div className="flex items-start gap-3">
@@ -322,7 +318,6 @@ export default function PerformanceDashboard() {
               )}
             </div>
           </div>
-        </div>
 
       </div>
     </div>

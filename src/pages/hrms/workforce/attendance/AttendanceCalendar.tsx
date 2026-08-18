@@ -112,7 +112,7 @@ export default function AttendanceCalendar({ data, monthYear }: AttendanceCalend
         <div className="mt-auto w-full space-y-1">
            {(record.checkIn || record.checkOut) && (
              <div className="text-[10px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
-               {record.checkIn || '--:--'} - {record.checkOut || '--:--'}
+               {record.checkIn ? (record.checkIn.includes('T') ? new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : record.checkIn) : '--:--'} - {record.checkOut ? (record.checkOut.includes('T') ? new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : record.checkOut) : '--:--'}
              </div>
            )}
            

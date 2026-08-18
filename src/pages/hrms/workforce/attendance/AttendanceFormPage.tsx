@@ -125,11 +125,13 @@ export default function AttendanceFormPage() {
             {/* Employee Info */}
             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg mb-6 border border-gray-100 dark:border-white/5">
               <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-primary-light font-semibold text-lg">
-                {record.employeeName ? record.employeeName.charAt(0) : 'E'}
+                {(record.employeeName || (record as any).employee?.firstName) ? (record.employeeName || (record as any).employee?.firstName).charAt(0).toUpperCase() : 'E'}
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">{record.employeeName}</h3>
-                <p className="text-sm text-gray-500">{record.employeeCode}</p>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                  {record.employeeName || `${(record as any).employee?.firstName || 'Unknown'} ${(record as any).employee?.lastName || ''}`.trim()}
+                </h3>
+                <p className="text-sm text-gray-500">{record.employeeCode || (record as any).employee?.employeeCode || 'No Employee Code'}</p>
               </div>
             </div>
 
@@ -143,7 +145,9 @@ export default function AttendanceFormPage() {
                 {mode === 'edit' ? (
                   <CustomInput type="time" value={checkInTime} onChange={(e: any) => setCheckInTime(e.target.value)} className="w-full" />
                 ) : (
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{record.checkIn || '--:--'}</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {record.checkIn ? (record.checkIn.includes('T') ? new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : record.checkIn) : '--:--'}
+                  </div>
                 )}
               </div>
               <div className="p-4 border border-gray-200 dark:border-white/10 rounded-lg">
@@ -154,7 +158,9 @@ export default function AttendanceFormPage() {
                 {mode === 'edit' ? (
                   <CustomInput type="time" value={checkOutTime} onChange={(e: any) => setCheckOutTime(e.target.value)} className="w-full" />
                 ) : (
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{record.checkOut || '--:--'}</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {record.checkOut ? (record.checkOut.includes('T') ? new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : record.checkOut) : '--:--'}
+                  </div>
                 )}
               </div>
             </div>

@@ -30,10 +30,10 @@ export default function EmployeeSelector({ value, onChange, disabled, className,
   }, []);
 
   const options: SelectOption[] = employees.map(emp => ({
-    label: `${emp.firstName} ${emp.lastName}`,
-    value: emp.id,
+    label: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unknown Employee',
+    value: emp.id || emp.employeeId || '',
     subtitle: emp.designationId || 'Employee', // Ideally resolve designation name, but ID/placeholder for now
-    subLabel: emp.employeeId || emp.id.substring(0, 8)
+    subLabel: emp.employeeId || (emp.id && typeof emp.id === 'string' ? emp.id.substring(0, 8) : '')
   }));
 
   return (
