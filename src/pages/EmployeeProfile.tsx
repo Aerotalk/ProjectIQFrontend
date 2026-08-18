@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Camera, Save, Key, User, Mail, Bell, Loader2, CheckCircle2, Eye, EyeOff, UserX } from 'lucide-react';
 import CustomSelect from '../components/ui/CustomSelect';
 import { api } from '../lib/api';
 import PermissionGate from '../components/PermissionGate';
@@ -24,6 +24,7 @@ export default function EmployeeProfile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [noProfile, setNoProfile] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,8 +44,13 @@ export default function EmployeeProfile() {
         if (response.profilePicture) {
           setAvatarUrl(response.profilePicture);
         }
-      } catch (err) {
-        console.error('Failed to fetch profile', err);
+      } catch (err: any) {
+        // 404 = no employee record linked to this account (e.g. admin/super-admin user)
+        if (err?.status === 404 || err?.message?.includes('404') || err?.message?.includes('not found')) {
+          setNoProfile(true);
+        } else {
+          console.error('Failed to fetch profile', err);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -102,6 +108,22 @@ export default function EmployeeProfile() {
       <DashboardLayout role="employee">
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (noProfile) {
+    return (
+      <DashboardLayout role="employee">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+          <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mb-6">
+            <UserX size={36} className="text-gray-400 dark:text-gray-500" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Employee Profile Found</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+            Your account is not linked to an employee record. If you believe this is a mistake, please contact your HR administrator to have your employee profile created.
+          </p>
         </div>
       </DashboardLayout>
     );

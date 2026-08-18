@@ -6,6 +6,7 @@ import {
 import { CheckCircle, Clock, AlertCircle, FileText, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../../../lib/api';
+import { Skeleton } from '../../../../components/ui/skeleton';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -102,12 +103,51 @@ export default function ExpenseClaimsDashboard() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-200 dark:bg-white/5 animate-pulse rounded-md" />)}
+        {/* KPI cards skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-md border border-gray-200 dark:border-white/5 shadow-sm flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-3.5 w-28 rounded" />
+                <Skeleton className="h-8 w-16 rounded" />
+              </div>
+              <Skeleton className="h-12 w-12 rounded-full" />
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="h-80 bg-gray-200 dark:bg-white/5 animate-pulse rounded-md" />
-          <div className="h-80 bg-gray-200 dark:bg-white/5 animate-pulse rounded-md" />
+        {/* Chart panels skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-[#181a1f] p-5 rounded-md border border-gray-200 dark:border-white/5 shadow-sm space-y-4">
+              <Skeleton className="h-5 w-40 rounded" />
+              <div className="h-64 flex items-end gap-3 pt-4">
+                {[...Array(i === 0 ? 4 : 6)].map((_, j) => (
+                  <Skeleton
+                    key={j}
+                    className="flex-1 rounded-t"
+                    style={{ height: `${40 + Math.sin(j * 1.2) * 30 + 40}%`, opacity: 1 - j * 0.05 }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Recent claims table skeleton */}
+        <div className="bg-white dark:bg-[#181a1f] rounded-md border border-gray-200 dark:border-white/5 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-200 dark:border-white/5 flex justify-between items-center">
+            <Skeleton className="h-5 w-32 rounded" />
+            <Skeleton className="h-4 w-16 rounded" />
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-white/5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex gap-8 px-5 py-3.5" style={{ opacity: 1 - i * 0.15 }}>
+                <Skeleton className="h-4 w-20 rounded" />
+                <Skeleton className="h-4 w-36 rounded" />
+                <Skeleton className="h-4 w-16 rounded" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

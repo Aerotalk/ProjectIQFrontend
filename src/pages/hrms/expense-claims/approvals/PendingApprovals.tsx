@@ -104,7 +104,25 @@ export default function PendingApprovals() {
   ];
 
   if (loading) {
-    return <div className="p-4"><Skeleton className="h-64 w-full" /></div>;
+    return (
+      <div className="h-full flex flex-col bg-white dark:bg-[#181a1f] p-4 space-y-4">
+        <Skeleton className="h-7 w-52 rounded" />
+        <div className="border border-gray-100 dark:border-white/5 rounded-md overflow-hidden">
+          <div className="flex gap-6 px-4 py-3 bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
+            {[80, 160, 110, 90, 70, 90, 40].map((w, i) => (
+              <Skeleton key={i} className="h-3.5 rounded" style={{ width: w }} />
+            ))}
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex gap-6 px-4 py-4 border-b border-gray-100 dark:border-white/5 last:border-0" style={{ opacity: 1 - i * 0.12 }}>
+              {[80, 160, 110, 90, 70, 90, 40].map((w, j) => (
+                <Skeleton key={j} className="h-4 rounded" style={{ width: w }} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

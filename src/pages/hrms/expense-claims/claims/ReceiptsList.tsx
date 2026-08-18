@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Loader2, Upload, Paperclip, FileText, Download } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import toast from 'react-hot-toast';
+import { Skeleton } from '../../../../components/ui/skeleton';
 
 export default function ReceiptsList() {
   const [files, setFiles] = useState<any[]>([]);
@@ -60,7 +61,31 @@ export default function ReceiptsList() {
   };
 
   if (isLoading) {
-    return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+    return (
+      <div className="flex flex-col h-full bg-white dark:bg-[#181a1f]">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-36 rounded" />
+            <Skeleton className="h-3.5 w-64 rounded" />
+          </div>
+          <Skeleton className="h-9 w-36 rounded-lg" />
+        </div>
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden" style={{ opacity: 1 - i * 0.08 }}>
+              <Skeleton className="h-32 w-full rounded-none" />
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-4 w-3/4 rounded" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-20 rounded" />
+                  <Skeleton className="h-3 w-12 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

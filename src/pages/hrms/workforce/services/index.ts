@@ -46,7 +46,26 @@ export const WorkforceService = {
   getDashboardKPIs: () => api.get('/hrms/attendance/dashboard/kpis'),
 
   // Attendance
-  getAttendanceRecords: (params?: any) => api.get('/hrms/attendance/records', { params }),
+  getAttendanceRecords: (params?: any) => {
+    const cleanParams: any = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== '' && params[key] !== null && params[key] !== undefined) {
+          cleanParams[key] = params[key];
+        }
+      });
+      if (cleanParams.monthYear) {
+        const date = new Date(cleanParams.monthYear);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        cleanParams.startDate = `${year}-${month}-01`;
+        const lastDay = new Date(year, date.getMonth() + 1, 0).getDate();
+        cleanParams.endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+        delete cleanParams.monthYear;
+      }
+    }
+    return api.get('/hrms/attendance/records', { params: cleanParams });
+  },
   getAttendanceRecordById: (id: string) => api.get(`/hrms/attendance/records/${id}`),
   createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => {
     const payload = {
