@@ -62,8 +62,8 @@ export default function DailyAttendance() {
       sortable: true,
       render: (_: any, row: AttendanceRecord) => (
         <div>
-          <div className="font-medium text-gray-900 dark:text-white">{row.employeeName}</div>
-          <div className="text-xs text-gray-500">{row.employeeCode}</div>
+          <div className="font-medium text-gray-900 dark:text-white">{row.employeeName || `${(row as any).employee?.firstName || 'Unknown'} ${(row as any).employee?.lastName || ''}`.trim() || 'Unknown Employee'}</div>
+          <div className="text-xs text-gray-500">{row.employeeCode || (row as any).employee?.employeeCode || 'No Employee Code'}</div>
         </div>
       )
     },
@@ -74,7 +74,7 @@ export default function DailyAttendance() {
       sortable: true,
       render: (val: string, row: AttendanceRecord) => (
         <div className="flex flex-col">
-          <span>{val || '-'}</span>
+          <span>{val ? (val.includes('T') ? new Date(val).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : val) : '-'}</span>
           {row.checkInLocation && (
             <a 
               href={`https://www.google.com/maps/search/?api=1&query=${row.checkInLatitude},${row.checkInLongitude}`}
@@ -95,7 +95,7 @@ export default function DailyAttendance() {
       sortable: true,
       render: (val: string, row: AttendanceRecord) => (
         <div className="flex flex-col">
-          <span>{val || '-'}</span>
+          <span>{val ? (val.includes('T') ? new Date(val).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : val) : '-'}</span>
           {row.checkOutLocation && (
             <a 
               href={`https://www.google.com/maps/search/?api=1&query=${row.checkOutLatitude},${row.checkOutLongitude}`}

@@ -67,6 +67,7 @@ export const WorkforceService = {
     return api.get('/hrms/attendance/records', { params: cleanParams });
   },
   getAttendanceRecordById: (id: string) => api.get(`/hrms/attendance/records/${id}`),
+  getAttendanceLogsForRecord: (id: string) => api.get(`/hrms/attendance/${id}/logs`),
   createAttendanceRecord: (data: Omit<AttendanceRecord, 'id'>) => {
     const payload = {
       ...data,

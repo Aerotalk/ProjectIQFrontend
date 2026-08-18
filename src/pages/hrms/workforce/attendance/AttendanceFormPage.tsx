@@ -18,6 +18,7 @@ export default function AttendanceFormPage() {
   const readOnly = mode === 'view';
 
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
+  const [punchLogs, setPunchLogs] = useState<any[]>([]);
   const [remarks, setRemarks] = useState('');
   const [status, setStatus] = useState<AttendanceStatus | undefined>(undefined);
   const [checkInTime, setCheckInTime] = useState<string>('');
@@ -40,6 +41,13 @@ export default function AttendanceFormPage() {
       setStatus((data.status as AttendanceStatus) || undefined);
       setCheckInTime(data.checkIn || '');
       setCheckOutTime(data.checkOut || '');
+
+      try {
+        const logsData = await WorkforceService.getAttendanceLogsForRecord(id!);
+        setPunchLogs(logsData || []);
+      } catch (logErr) {
+        console.warn('Failed to fetch punch logs', logErr);
+      }
     } catch (e) {
       toast.error('Failed to fetch attendance details');
       navigate(`${basePath}/hrms/workforce/attendance/daily`);
@@ -139,7 +147,7 @@ export default function AttendanceFormPage() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="p-4 border border-gray-200 dark:border-white/10 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</span>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">First Check In</span>
                   <Clock size={14} className="text-gray-400" />
                 </div>
                 {mode === 'edit' ? (
@@ -152,7 +160,7 @@ export default function AttendanceFormPage() {
               </div>
               <div className="p-4 border border-gray-200 dark:border-white/10 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</span>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Last Check Out</span>
                   <Clock size={14} className="text-gray-400" />
                 </div>
                 {mode === 'edit' ? (
@@ -191,6 +199,30 @@ export default function AttendanceFormPage() {
                 </div>
               </div>
             </div>
+
+            {/* Activity Timeline */}
+            {punchLogs.length > 0 && (
+              <div className="mb-6 p-5 border border-gray-100 dark:border-white/10 rounded-xl bg-white dark:bg-[#13141a]">
+                <h3 className="text-[15px] font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Clock size={16} className="text-primary" /> Activity Timeline
+                </h3>
+                <div className="relative border-l-2 border-gray-100 dark:border-white/10 ml-3 pl-5 space-y-6">
+                  {punchLogs.map((log: any, idx: number) => (
+                    <div key={idx} className="relative">
+                      <div className={`absolute -left-[27px] w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#13141a] ${log.direction === 'In' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Punched {log.direction}
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          {log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'} • {log.locationLabel || log.source || 'Unknown'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Exceptions */}
             {record.exceptionType && (

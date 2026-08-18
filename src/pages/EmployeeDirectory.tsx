@@ -637,11 +637,11 @@ export default function EmployeeDirectory() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
-                    {emp.firstName.charAt(0)}{emp.lastName.charAt(0)}
+                    {(emp.firstName || 'U').charAt(0)}{(emp.lastName || '').charAt(0)}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                      {emp.firstName} {emp.middleName ? emp.middleName + ' ' : ''}{emp.lastName}
+                      {emp.firstName || 'Unknown'} {emp.middleName ? emp.middleName + ' ' : ''}{emp.lastName || ''}
                     </h3>
                     <p className="text-xs font-medium text-primary dark:text-secondary truncate">
                       {emp.designation?.designationName || 'No Designation'}
@@ -684,7 +684,21 @@ export default function EmployeeDirectory() {
                 >
                   <Edit2 size={14} /> Edit
                 </button>
-                <button className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                <button 
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this employee?')) {
+                      api.delete(`/admin/employees/${emp.id}`)
+                        .then(() => {
+                          toast.success('Employee deleted successfully');
+                          fetchEmployees();
+                        })
+                        .catch(err => {
+                          toast.error(err.message || 'Failed to delete employee');
+                        });
+                    }
+                  }}
+                  className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                >
                   <Trash2 size={14} /> Delete
                 </button>
               </div>
