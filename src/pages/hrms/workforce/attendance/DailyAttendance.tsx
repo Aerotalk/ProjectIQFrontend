@@ -27,16 +27,6 @@ export default function DailyAttendance() {
   const location = useLocation();
   const basePath = location.pathname.split('/hrms')[0] || '/companydashboard';
 
-  const handleResetFilters = () => {
-    setFilters({
-      employeeId: '',
-      department: '',
-      location: '',
-      shift: '',
-      status: '',
-      monthYear: format(new Date(), 'MMMM yyyy')
-    });
-  };
 
   useEffect(() => {
     const statusParam = searchParams.get('status');

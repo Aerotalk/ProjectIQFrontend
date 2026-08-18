@@ -148,9 +148,9 @@ export default function EmployeeDirectory() {
           reportingManagerId: (emp as any).reportingManagerId || (emp as any).reportingManager?.id || '',
           hrManagerId: (emp as any).hrManagerId || (emp as any).hrManager?.id || '',
           // workEmail: prefer the column on Employee, fall back to linked User email
-          workEmail: emp.workEmail || emp.user?.email || '',
+          workEmail: emp?.workEmail || (emp as any)?.user?.email || '',
           // phone: prefer the column on Employee, fall back to linked User mobile
-          phone: emp.phone || emp.user?.mobile || '',
+          phone: emp?.phone || (emp as any)?.user?.mobile || '',
 
           // Address
           presentCountry: presentAddr.country || 'IN',

@@ -8,8 +8,7 @@ import {
   AlertCircle,
   Plus,
   BarChart2,
-  GitCommitHorizontal,
-  Inbox
+  GitCommitHorizontal
 } from 'lucide-react';
 import { performanceService } from '../../../../services/performance.service';
 import { useNavigate } from 'react-router-dom';
