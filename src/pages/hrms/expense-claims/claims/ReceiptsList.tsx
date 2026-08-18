@@ -57,7 +57,7 @@ export default function ReceiptsList() {
   };
 
   const getFileUrl = (id: string) => {
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/admin/files/${id}`;
+    return `${import.meta.env.VITE_API_URL || ''}/api/admin/files/${id}`;
   };
 
   if (isLoading) {

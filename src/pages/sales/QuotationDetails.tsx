@@ -201,7 +201,7 @@ export default function QuotationDetails() {
     }
   })();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
   const uploadedDocuments = parsedCommunications.flatMap((note: any) => {
     if (note.text?.includes('PO/WO Document(s):')) {

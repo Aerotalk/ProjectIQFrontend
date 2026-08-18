@@ -98,7 +98,7 @@ export default function ExpenseItemsList({
       // Assuming the backend File entity returns its ID or a storagePath
       const fileId = res.id;
       // You can store the ID or build a URL based on how your backend serves files
-      const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/admin/files/${fileId}`;
+      const url = `${import.meta.env.VITE_API_URL || ''}/api/admin/files/${fileId}`;
       form.setValue('receiptUrl', url);
       toast.success('Receipt uploaded successfully');
     } catch (err) {

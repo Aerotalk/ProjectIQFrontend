@@ -41,7 +41,7 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
   const orgName = user?.companyName || user?.organizationName || 'My Organization';
   const userInitials = userEmail.substring(0, 2).toUpperCase();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
   const companyLogoUrl = user?.companyLogoId ? `${API_BASE_URL}/admin/files/${user.companyLogoId}` : null;
   const avatarUrl = useAvatarUrl(user?.profilePhotoId);
 

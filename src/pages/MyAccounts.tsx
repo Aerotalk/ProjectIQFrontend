@@ -90,7 +90,7 @@ const AccountForm = ({
   onSave: (data: AccountData) => void; 
   onCancel: () => void;
 }) => {
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
   const primaryAddress = initialData?.addresses?.[0];
   const mappedBanks = initialData?.bankAccounts?.map((b: any) => ({

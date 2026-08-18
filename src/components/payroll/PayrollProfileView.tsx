@@ -1,4 +1,5 @@
 import { ArrowLeft, Download, Send, CheckCircle2, Building, Calendar, DollarSign, Briefcase } from 'lucide-react';
+import { api } from '../../lib/api';
 
 interface PayrollProfileViewProps {
   payroll: any;
@@ -8,29 +9,19 @@ interface PayrollProfileViewProps {
 export default function PayrollProfileView({ payroll, onClose }: PayrollProfileViewProps) {
   const handleDownloadPayslip = async () => {
     try {
-      // Use the detail ID if available, otherwise fallback (assuming payroll.id is the PayrollRunDetail ID)
       const detailId = payroll.id || payroll.detailId;
       if (!detailId) {
         alert("Cannot download payslip: Detail ID not found.");
         return;
       }
-      
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8080/api/hrms/payroll/runs/details/${detailId}/payslip`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error("Failed to download payslip");
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blob = await api.get(`/hrms/payroll/runs/details/${detailId}/payslip`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(blob as Blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `payslip_${payroll.period}_${payroll.employee}.pdf`;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
@@ -121,7 +112,7 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
             <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-gray-200 dark:border-white/10 shadow-sm relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-transparent to-red-50 dark:to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 relative z-10">Total Deductions</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1 relative z-10">₹35,000</h3>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1 relative z-10">{payroll.totalDeductions ?? payroll.deductions ?? '—'}</h3>
             </div>
             <div className="bg-white dark:bg-[#181a1f] p-5 rounded-sm border border-primary/30 shadow-sm relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>

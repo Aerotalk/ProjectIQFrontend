@@ -219,22 +219,14 @@ export default function PayrollListing() {
       const toast = (await import('react-hot-toast')).default;
       toast.loading("Generating Payslip...", { id: 'payslip' });
       
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8080/api/hrms/payroll/runs/details/${detailId}/payslip`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) throw new Error("Failed to download payslip");
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blob = await api.get(`/hrms/payroll/runs/details/${detailId}/payslip`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(blob as Blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `payslip_${employeePayroll.period || 'latest'}_${employeeData?.empId}.pdf`;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       
       toast.success("Payslip downloaded successfully!", { id: 'payslip' });
