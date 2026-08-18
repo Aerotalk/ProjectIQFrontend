@@ -38,6 +38,8 @@ export default function EmployeeDirectory() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [editInitialData, setEditInitialData] = useState<Partial<EmployeeFormValues> | null>(null);
 
   useEffect(() => {
@@ -70,7 +72,8 @@ export default function EmployeeDirectory() {
     setDrawerMode(mode);
     setSelectedEmployee(emp || null);
 
-    if ((mode === 'edit' || mode === 'view') && emp?.id) {
+    const empId = emp?.id || (emp as any)?.employeeId;
+    if ((mode === 'edit' || mode === 'view') && empId) {
       try {
         // Fetch core employee + all sub-resources in parallel
         const [
@@ -86,17 +89,17 @@ export default function EmployeeDirectory() {
           positionChanges,
           separation,
         ] = await Promise.allSettled([
-          api.get(`/admin/employees/${emp.id}/address`),
-          api.get(`/admin/employees/${emp.id}/emergency-contact`),
-          api.get(`/admin/employees/${emp.id}/statutory`),
-          api.get(`/admin/employees/${emp.id}/bank-account`),
-          api.get(`/admin/employees/${emp.id}/documents`),
-          api.get(`/admin/employees/${emp.id}/salary-revision`),
-          api.get(`/admin/employees/${emp.id}/educations`),
-          api.get(`/admin/employees/${emp.id}/families`),
-          api.get(`/admin/employees/${emp.id}/contract`),
-          api.get(`/admin/employees/${emp.id}/position-change`),
-          api.get(`/admin/employees/${emp.id}/separation`),
+          api.get(`/admin/employees/${empId}/address`),
+          api.get(`/admin/employees/${empId}/emergency-contact`),
+          api.get(`/admin/employees/${empId}/statutory`),
+          api.get(`/admin/employees/${empId}/bank-account`),
+          api.get(`/admin/employees/${empId}/documents`),
+          api.get(`/admin/employees/${empId}/salary-revision`),
+          api.get(`/admin/employees/${empId}/educations`),
+          api.get(`/admin/employees/${empId}/families`),
+          api.get(`/admin/employees/${empId}/contract`),
+          api.get(`/admin/employees/${empId}/position-change`),
+          api.get(`/admin/employees/${empId}/separation`),
         ]);
 
         const val = <T,>(r: PromiseSettledResult<T>) =>
@@ -527,7 +530,7 @@ export default function EmployeeDirectory() {
 
   if (isDrawerOpen) {
     return (
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-350 mx-auto">
         <EmployeeDrawer
           isOpen={isDrawerOpen}
           onClose={() => { setIsDrawerOpen(false); setEditInitialData(null); }}
@@ -543,7 +546,7 @@ export default function EmployeeDirectory() {
 
   if (viewingEmployee) {
     return (
-      <div className="max-w-[1400px] mx-auto animate-in fade-in zoom-in-95 duration-300">
+      <div className="max-w-350 mx-auto animate-in fade-in zoom-in-95 duration-300">
         <EmployeeProfileView
           employee={viewingEmployee}
           onClose={() => setViewingEmployee(null)}
@@ -557,7 +560,7 @@ export default function EmployeeDirectory() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
+    <div className="max-w-350 mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Employee Directory</h1>
@@ -632,12 +635,12 @@ export default function EmployeeDirectory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredEmployees.map((emp) => (
-            <div key={emp.id} className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col p-5">
+          {filteredEmployees.map((emp, index) => (
+            <div key={emp.id || (emp as any).employeeId || index} className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden flex flex-col p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
-                    {(emp.firstName || 'U').charAt(0)}{(emp.lastName || '').charAt(0)}
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-[#b8458f] flex items-center justify-center text-white text-base font-bold shadow-sm shrink-0">
+                    {(emp.firstName || 'U')?.charAt(0) || 'U'}{(emp.lastName || '')?.charAt(0) || ''}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
@@ -685,18 +688,7 @@ export default function EmployeeDirectory() {
                   <Edit2 size={14} /> Edit
                 </button>
                 <button 
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this employee?')) {
-                      api.delete(`/admin/employees/${emp.id}`)
-                        .then(() => {
-                          toast.success('Employee deleted successfully');
-                          fetchEmployees();
-                        })
-                        .catch(err => {
-                          toast.error(err.message || 'Failed to delete employee');
-                        });
-                    }
-                  }}
+                  onClick={() => setEmployeeToDelete(emp)}
                   className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                 >
                   <Trash2 size={14} /> Delete
@@ -704,6 +696,49 @@ export default function EmployeeDirectory() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {employeeToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Employee</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              Are you sure you want to delete {employeeToDelete.firstName} {employeeToDelete.lastName}? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setEmployeeToDelete(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setIsDeleting(true);
+                  api.delete(`/admin/employees/${employeeToDelete.id || (employeeToDelete as any).employeeId}`)
+                    .then(() => {
+                      toast.success('Employee deleted successfully');
+                      fetchEmployees();
+                      setEmployeeToDelete(null);
+                    })
+                    .catch(err => {
+                      toast.error(err.message || 'Failed to delete employee');
+                    })
+                    .finally(() => {
+                      setIsDeleting(false);
+                    });
+                }}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

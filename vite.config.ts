@@ -19,8 +19,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        // target: 'https://projectiqbackend-production.up.railway.app',
-        target: 'http://localhost:8080',
+        target: 'https://projectiqbackend-production.up.railway.app',
+        // target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       }

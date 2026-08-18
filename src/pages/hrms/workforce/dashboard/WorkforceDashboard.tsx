@@ -159,19 +159,25 @@ export default function WorkforceDashboard() {
           <div className="flex-1 flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-600 dark:text-gray-300">Missing Swipes</span>
-              <span className="text-xs font-bold text-red-500">4</span>
+              <span className="text-xs font-bold text-red-500">{kpis?.missingSwipes || 0}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-600 dark:text-gray-300">Late Arrivals</span>
-              <span className="text-xs font-bold text-amber-500">12</span>
+              <span className="text-xs font-bold text-amber-500">{kpis?.lateArrivals || 0}</span>
             </div>
             
             <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/10">
               <h2 className="text-[13px] font-bold text-gray-900 dark:text-white mb-2">Upcoming Holidays</h2>
-              <div className="flex justify-between items-center bg-green-50 dark:bg-green-900/10 p-2 rounded-sm text-xs">
-                <span className="text-green-700 dark:text-green-400 font-semibold">Independence Day</span>
-                <span className="text-green-600 dark:text-green-500">Aug 15</span>
-              </div>
+              {kpis?.upcomingHolidays && kpis.upcomingHolidays.length > 0 ? (
+                kpis.upcomingHolidays.map((holiday: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center bg-green-50 dark:bg-green-900/10 p-2 rounded-sm text-xs mb-2">
+                    <span className="text-green-700 dark:text-green-400 font-semibold">{holiday.name}</span>
+                    <span className="text-green-600 dark:text-green-500">{holiday.date}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-gray-500 text-center py-2">No upcoming holidays</div>
+              )}
             </div>
           </div>
         </div>

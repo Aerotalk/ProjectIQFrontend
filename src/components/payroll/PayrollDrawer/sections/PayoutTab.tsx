@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, Send, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '../../../../lib/api';
+import toast from 'react-hot-toast';
 
 interface Props {
   readOnly?: boolean;
@@ -84,9 +85,14 @@ export default function PayoutTab({ readOnly, runId }: Props) {
                       type="button" 
                       onClick={() => {
                         if (runId) {
-                          api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Failed' }).then(() => {
-                            window.location.reload();
-                          }).catch(err => console.error(err));
+                          const promise = api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Failed' });
+                          toast.promise(promise, {
+                            loading: 'Marking as failed...',
+                            success: 'Payout marked as failed',
+                            error: 'Failed to update status'
+                          }).then(() => {
+                            setTimeout(() => window.location.reload(), 1000);
+                          });
                         }
                       }}
                       className="px-4 py-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
@@ -96,9 +102,14 @@ export default function PayoutTab({ readOnly, runId }: Props) {
                       type="button" 
                       onClick={() => {
                         if (runId) {
-                          api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Paid' }).then(() => {
-                            window.location.reload();
-                          }).catch(err => console.error(err));
+                          const promise = api.put(`/hrms/payroll/runs/${runId}/payout`, { payoutStatus: 'Paid' });
+                          toast.promise(promise, {
+                            loading: 'Confirming transfer...',
+                            success: 'Transfer confirmed successfully',
+                            error: 'Failed to confirm transfer'
+                          }).then(() => {
+                            setTimeout(() => window.location.reload(), 1000);
+                          });
                         }
                       }}
                       className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors">
@@ -112,9 +123,22 @@ export default function PayoutTab({ readOnly, runId }: Props) {
                   <div className="mt-3">
                     <button 
                       type="button" 
-                      onClick={() => {
+                      onClick={async () => {
                         if (runId) {
-                          window.open(`http://localhost:8080/api/hrms/payroll/runs/${runId}/bank-export`, '_blank');
+                          try {
+                            const blob = await api.get(`/hrms/payroll/runs/${runId}/bank-export`, { responseType: 'blob' });
+                            const url = window.URL.createObjectURL(blob as any);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `bank-export-${runId}.csv`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                          } catch (err) {
+                            toast.error('Failed to download bank export.')
+                            console.error('Failed to download bank export', err);
+                          }
                         }
                       }}
                       className="flex items-center gap-2 text-sm text-primary dark:text-secondary font-medium hover:underline">
