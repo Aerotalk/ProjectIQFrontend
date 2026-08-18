@@ -53,7 +53,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     if (sessionStorage.getItem('showWelcomeToast') === 'true') {
       setShowWelcome(true);
       sessionStorage.removeItem('showWelcomeToast');
-      setTimeout(() => setShowWelcome(false), 4000);
+      const id = setTimeout(() => setShowWelcome(false), 4000);
+      return () => clearTimeout(id);
     }
   }, []);
 
@@ -199,7 +200,8 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
     }))
     .filter(item => (item.subItems?.length ?? 0) > 0 || !item.subItems);
 
-  console.log("NAV ITEMS AFTER FILTER:", navItems.find(i => i.name === 'Sales'));
+
+
 
   // Determine active breadcrumb based on current path for sidebar highlighting
   let activeModuleName = '';
@@ -373,10 +375,19 @@ export default function DashboardLayout({ children, role = 'org' }: { children: 
         </div>
       </aside>
 
+      {/* Mobile overlay backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-[252px] xl:ml-[292px]' : 'ml-[72px]'
-          }`}
+        className={`flex-1 flex flex-col min-h-screen min-w-0 transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'md:ml-[252px] xl:ml-[292px]' : 'md:ml-[72px]'
+        }`}
       >
 
         {/* Top Header - Floating Card Style */}

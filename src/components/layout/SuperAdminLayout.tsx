@@ -31,7 +31,8 @@ export default function SuperAdminLayout({ children }: { children?: React.ReactN
     if (sessionStorage.getItem('showWelcomeToast') === 'true') {
       setShowWelcome(true);
       sessionStorage.removeItem('showWelcomeToast');
-      setTimeout(() => setShowWelcome(false), 4000);
+      const id = setTimeout(() => setShowWelcome(false), 4000);
+      return () => clearTimeout(id);
     }
   }, []);
 

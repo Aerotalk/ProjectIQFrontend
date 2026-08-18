@@ -119,12 +119,12 @@ export default function TicketList() {
             <span className="text-gray-300">/</span>
             <span className="text-gray-900">All Tickets</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Incidents</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Incidents</h1>
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button 
             onClick={handleExport} 
-            className="shrink-0 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-sm text-sm font-medium hover:bg-gray-50 flex items-center gap-2 shadow-sm transition-colors"
+            className="shrink-0 px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10 flex items-center gap-2 shadow-sm transition-colors"
           >
             <Download size={14} /> Export
           </button>
@@ -138,7 +138,7 @@ export default function TicketList() {
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col sm:flex-row items-center gap-4 p-4">
+      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm flex flex-col sm:flex-row items-center gap-4 p-4">
         <div className="relative flex-1 min-w-[250px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
           <input 
@@ -146,7 +146,7 @@ export default function TicketList() {
             placeholder="Search incident number, subject, or client..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white text-gray-900 transition-colors" 
+            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-[#181a1f] text-gray-900 dark:text-white transition-colors placeholder:text-gray-400 dark:placeholder:text-gray-600" 
           />
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -183,7 +183,7 @@ export default function TicketList() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex justify-center py-20 text-gray-400">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -191,7 +191,7 @@ export default function TicketList() {
         ) : (
           <div className="overflow-x-auto min-h-[400px]">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-[#F8F9FC] border-b border-gray-200 text-gray-600 font-semibold text-[12px] uppercase tracking-wider">
+              <thead className="bg-[#F8F9FC] dark:bg-white/[0.03] border-b border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 font-semibold text-[12px] uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Incident Number</th>
                   <th className="px-6 py-3 cursor-pointer hover:text-gray-900">Subject</th>
@@ -203,7 +203,7 @@ export default function TicketList() {
                   <th className="px-6 py-3 text-center"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                 {filteredTickets.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-6 py-16 text-center text-gray-500">
@@ -213,18 +213,18 @@ export default function TicketList() {
                 ) : (
                   filteredTickets.map((t) => (
                     <tr 
-                      key={t.ticketNo || t.id || Math.random().toString()} 
+                      key={t.ticketNo || t.id || `ticket-${t.shortDescription?.substring(0,8)}`} 
                       onClick={() => navigate(t.id || '')}
-                      className="hover:bg-gray-50 cursor-pointer transition-colors group"
+                      className="hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group"
                     >
                       <td className="px-6 py-3.5 text-sm font-semibold text-primary dark:text-[#c43890] group-hover:underline">
                         {t.ticketNo || (t.id ? String(t.id).substring(0,10).toUpperCase() : 'Unknown')}
                       </td>
-                      <td className="px-6 py-3.5 text-gray-900 font-medium truncate max-w-[200px]">
+                      <td className="px-6 py-3.5 text-gray-900 dark:text-white font-medium truncate max-w-[200px]">
                         {t.shortDescription || 'No description provided'}
                       </td>
                       <td className="px-6 py-3.5">
-                        <div className="text-gray-900 font-medium truncate max-w-[150px]">
+                        <div className="text-gray-900 dark:text-white font-medium truncate max-w-[150px]">
                           {t.projectId 
                             ? (projects.find(p => p.id === t.projectId)?.projectName || t.projectId.substring(0, 8))
                             : 'Unknown Project'}
@@ -239,7 +239,7 @@ export default function TicketList() {
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
+                          <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-300">
                             {t.assignedTo ? t.assignedTo.substring(0, 1).toUpperCase() : <UserIcon size={12} />}
                           </div>
                           <span className="text-gray-600 text-[13px]">{t.assignedTo || 'Unassigned'}</span>
@@ -261,7 +261,7 @@ export default function TicketList() {
         )}
         
         {/* Pagination Footer */}
-        <div className="px-6 py-3 border-t border-gray-200 bg-[#F8F9FC] flex items-center justify-between text-[13px] text-gray-600">
+        <div className="px-6 py-3 border-t border-gray-200 dark:border-white/10 bg-[#F8F9FC] dark:bg-white/[0.02] flex items-center justify-between text-[13px] text-gray-600 dark:text-gray-400">
           <span>Showing {filteredTickets.length > 0 ? 1 : 0} to {filteredTickets.length} of {filteredTickets.length} incidents</span>
           <div className="flex gap-1">
             <button className="px-2.5 py-1 rounded-sm bg-primary text-white font-medium shadow-sm">1</button>

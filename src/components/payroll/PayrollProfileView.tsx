@@ -133,26 +133,41 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
               <div className="p-0">
                 <table className="w-full text-sm text-left">
                   <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Basic Pay</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹75,000</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">House Rent Allowance (HRA)</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹30,000</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Special Allowance</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹25,000</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Leave Travel Allowance</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹10,000</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Reimbursements</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹10,000</td>
-                    </tr>
+                    {payroll.basicPay != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Basic Pay</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.basicPay}</td>
+                      </tr>
+                    )}
+                    {payroll.hra != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">House Rent Allowance (HRA)</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.hra}</td>
+                      </tr>
+                    )}
+                    {payroll.specialAllowance != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Special Allowance</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.specialAllowance}</td>
+                      </tr>
+                    )}
+                    {payroll.lta != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Leave Travel Allowance</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.lta}</td>
+                      </tr>
+                    )}
+                    {payroll.reimbursements != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Reimbursements</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.reimbursements}</td>
+                      </tr>
+                    )}
+                    {payroll.basicPay == null && payroll.hra == null && (
+                      <tr>
+                        <td colSpan={2} className="px-5 py-8 text-center text-gray-400 dark:text-gray-600 text-sm">Itemized breakdown not available</td>
+                      </tr>
+                    )}
                   </tbody>
                   <tfoot className="bg-gray-50 dark:bg-white/[0.02] border-t border-gray-200 dark:border-white/10">
                     <tr>
@@ -174,27 +189,40 @@ export default function PayrollProfileView({ payroll, onClose }: PayrollProfileV
               <div className="p-0">
                 <table className="w-full text-sm text-left">
                   <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Income Tax (TDS)</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹25,000</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Provident Fund (PF)</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹4,800</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Professional Tax (PT)</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹200</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300">LOP (Loss of Pay)</td>
-                      <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">₹5,000</td>
-                    </tr>
+                    {payroll.tds != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Income Tax (TDS)</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.tds}</td>
+                      </tr>
+                    )}
+                    {payroll.pf != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Provident Fund (PF)</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.pf}</td>
+                      </tr>
+                    )}
+                    {payroll.pt != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">Professional Tax (PT)</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.pt}</td>
+                      </tr>
+                    )}
+                    {payroll.lop != null && (
+                      <tr className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300">LOP (Loss of Pay)</td>
+                        <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">{payroll.lop}</td>
+                      </tr>
+                    )}
+                    {payroll.tds == null && payroll.pf == null && (
+                      <tr>
+                        <td colSpan={2} className="px-5 py-8 text-center text-gray-400 dark:text-gray-600 text-sm">Itemized breakdown not available</td>
+                      </tr>
+                    )}
                   </tbody>
                   <tfoot className="bg-gray-50 dark:bg-white/[0.02] border-t border-gray-200 dark:border-white/10 mt-auto">
                     <tr>
                       <td className="px-5 py-3 font-bold text-gray-900 dark:text-white">Total Deductions</td>
-                      <td className="px-5 py-3 text-right font-bold text-gray-900 dark:text-white">₹35,000</td>
+                      <td className="px-5 py-3 text-right font-bold text-gray-900 dark:text-white">{payroll.totalDeductions ?? payroll.deductions ?? '—'}</td>
                     </tr>
                   </tfoot>
                 </table>

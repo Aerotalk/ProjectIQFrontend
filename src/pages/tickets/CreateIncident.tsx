@@ -134,22 +134,22 @@ export default function CreateIncident() {
   return (
     <div className="max-w-[1400px] mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigateBack('/companydashboard/tickets')}
-            className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+            className="w-8 h-8 rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
           >
             <ArrowLeft size={16} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Create Incident</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Create Incident</h1>
           </div>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={() => navigateBack('/companydashboard/tickets')}
-            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-sm text-sm font-medium hover:bg-gray-50"
+            className="px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
           >
             Cancel
           </button>
@@ -171,9 +171,9 @@ export default function CreateIncident() {
         <div className="flex-1 space-y-6">
           
           {/* Step 1: Project Selection */}
-          <div className="bg-white border border-gray-200 rounded-sm shadow-sm">
-            <div className="px-6 py-4 border-b border-gray-100 bg-[#F8F9FC] rounded-t-sm">
-              <h2 className="text-[15px] font-semibold text-gray-800">1. Select Project</h2>
+          <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-[#F8F9FC] dark:bg-white/[0.02] rounded-t-sm">
+              <h2 className="text-[15px] font-semibold text-gray-800 dark:text-white">1. Select Project</h2>
             </div>
             <div className="p-6">
               <label className={formStyles.label}>Project <span className="text-red-500">*</span></label>
@@ -195,9 +195,9 @@ export default function CreateIncident() {
           </div>
 
           {/* Step 2: Incident Information */}
-          <div className={`bg-white border border-gray-200 rounded-sm shadow-sm transition-opacity duration-300 ${!watchProjectId ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          <div className={`bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm transition-opacity duration-300 ${!watchProjectId ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
             <div className="px-6 py-4 border-b border-gray-100 bg-[#F8F9FC] rounded-t-sm">
-              <h2 className="text-[15px] font-semibold text-gray-800">2. Incident Information</h2>
+              <h2 className="text-[15px] font-semibold text-gray-800 dark:text-white">2. Incident Information</h2>
             </div>
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -305,7 +305,7 @@ export default function CreateIncident() {
                   type="text"
                   {...register('shortDescription')}
                   placeholder="Brief summary of the issue"
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                  className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 />
               </div>
 
@@ -315,16 +315,16 @@ export default function CreateIncident() {
                   {...register('description')}
                   rows={5}
                   placeholder="Provide all necessary details to reproduce or investigate the issue..."
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-sm text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-sm text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Step 3: Assignment */}
-          <div className={`bg-white border border-gray-200 rounded-sm shadow-sm transition-opacity duration-300 ${!watchProjectId ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-            <div className="px-6 py-4 border-b border-gray-100 bg-[#F8F9FC] rounded-t-sm">
-              <h2 className="text-[15px] font-semibold text-gray-800">3. Assignment & SLA</h2>
+          <div className={`bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm transition-opacity duration-300 ${!watchProjectId ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 bg-[#F8F9FC] dark:bg-white/[0.02] rounded-t-sm">
+              <h2 className="text-[15px] font-semibold text-gray-800 dark:text-white">3. Assignment & SLA</h2>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -372,14 +372,14 @@ export default function CreateIncident() {
         {/* Right Sidebar - Dynamic Data (30%) */}
         <div className="w-full lg:w-[350px] shrink-0 space-y-4">
           {!watchProjectId ? (
-            <div className="bg-gray-50 border border-gray-200 border-dashed rounded-sm p-8 text-center text-gray-500">
+            <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 border-dashed rounded-sm p-8 text-center text-gray-500 dark:text-gray-500">
               <Briefcase className="w-8 h-8 mx-auto mb-3 text-gray-400" />
               <p className="text-sm">Select a project to automatically load client, project, and ERP finance details.</p>
             </div>
           ) : (
             <>
               {/* Project & Client Card */}
-              <div className="bg-white border border-primary/20 rounded-sm shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-[#181a1f] border border-primary/20 rounded-sm shadow-sm overflow-hidden">
                 <div className="bg-primary/5 px-4 py-3 border-b border-primary/10">
                   <h3 className="font-semibold text-primary text-sm flex items-center gap-2">
                     <Briefcase size={15} /> Project Details
@@ -387,14 +387,14 @@ export default function CreateIncident() {
                 </div>
                 <div className="p-4 space-y-3 text-sm">
                   <div>
-                    <span className="text-gray-500 block text-xs">Project</span>
-                    <span className="font-medium text-gray-900">{selectedProjectData?.projectCode} - {selectedProjectData?.projectName}</span>
+                    <span className="text-gray-500 dark:text-gray-400 block text-xs">Project</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{selectedProjectData?.projectCode} - {selectedProjectData?.projectName}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500 block text-xs">Client</span>
+                    <span className="text-gray-500 dark:text-gray-400 block text-xs">Client</span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Building2 size={14} className="text-gray-400" />
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {(() => {
                           const clientId = selectedProjectData?.client;
                           if (!clientId) return 'Not Assigned';
@@ -405,10 +405,10 @@ export default function CreateIncident() {
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500 block text-xs">Project Manager</span>
+                    <span className="text-gray-500 dark:text-gray-400 block text-xs">Project Manager</span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <UserCircle size={14} className="text-gray-400" />
-                      <span className="text-gray-900">
+                      <span className="text-gray-900 dark:text-white">
                         {(() => {
                           const pmId = selectedProjectData?.projectManager;
                           if (!pmId) return 'Not Assigned';
@@ -422,46 +422,28 @@ export default function CreateIncident() {
               </div>
 
               {/* Finance Data Card */}
-              <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
-                <div className="bg-[#F8F9FC] px-4 py-3 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+              <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-[#F8F9FC] dark:bg-white/[0.02] px-4 py-3 border-b border-gray-100 dark:border-white/5">
+                  <h3 className="font-semibold text-gray-800 dark:text-white text-sm flex items-center gap-2">
                     <IndianRupee size={15} /> Finance & Billing
                   </h3>
                 </div>
-                <div className="p-4 space-y-3 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Quotation</span>
-                    <span className="font-medium text-primary cursor-pointer hover:underline">QT-2025-089</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Purchase Order</span>
-                    <span className="font-medium text-primary cursor-pointer hover:underline">PO-99234</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <span className="text-gray-500">Latest Invoice</span>
-                    <span className="inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-sm text-green-700 bg-green-50 border border-green-200">Paid</span>
-                  </div>
+                <div className="p-4 flex flex-col items-center justify-center py-8 text-center">
+                  <IndianRupee size={24} className="text-gray-300 dark:text-gray-600 mb-2" />
+                  <p className="text-sm text-gray-400 dark:text-gray-500">Finance data will be linked after ticket creation.</p>
                 </div>
               </div>
 
               {/* Previous History */}
-              <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
-                <div className="bg-[#F8F9FC] px-4 py-3 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+              <div className="bg-white dark:bg-[#181a1f] border border-gray-200 dark:border-white/10 rounded-sm shadow-sm overflow-hidden">
+                <div className="bg-[#F8F9FC] dark:bg-white/[0.02] px-4 py-3 border-b border-gray-100 dark:border-white/5">
+                  <h3 className="font-semibold text-gray-800 dark:text-white text-sm flex items-center gap-2">
                     <FileText size={15} /> Previous Incidents
                   </h3>
                 </div>
-                <div className="p-4 space-y-3">
-                  <div className="text-sm pb-2 border-b border-gray-50">
-                    <div className="font-medium text-primary cursor-pointer hover:underline">INC-2024099</div>
-                    <div className="text-gray-600 truncate mt-0.5">Database connectivity timeout</div>
-                    <div className="text-xs text-gray-400 mt-1">Closed on 12 Dec 2024</div>
-                  </div>
-                  <div className="text-sm">
-                    <div className="font-medium text-primary cursor-pointer hover:underline">INC-2024045</div>
-                    <div className="text-gray-600 truncate mt-0.5">SSO Login failing for external users</div>
-                    <div className="text-xs text-gray-400 mt-1">Closed on 05 Nov 2024</div>
-                  </div>
+                <div className="p-4 flex flex-col items-center justify-center py-8 text-center">
+                  <FileText size={24} className="text-gray-300 dark:text-gray-600 mb-2" />
+                  <p className="text-sm text-gray-400 dark:text-gray-500">No previous incidents found for this project.</p>
                 </div>
               </div>
             </>
