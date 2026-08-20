@@ -73,7 +73,7 @@ export default function DailyAttendance() {
               className="flex items-center gap-1 text-[10px] text-primary hover:underline mt-0.5"
             >
               <MapPin size={10} />
-              <span className="truncate max-w-[120px]" title={row.checkInLocation}>{row.checkInLocation}</span>
+              <span className="truncate max-w-30" title={row.checkInLocation}>{row.checkInLocation}</span>
             </a>
           )}
         </div>
@@ -94,7 +94,7 @@ export default function DailyAttendance() {
               className="flex items-center gap-1 text-[10px] text-primary hover:underline mt-0.5"
             >
               <MapPin size={10} />
-              <span className="truncate max-w-[120px]" title={row.checkOutLocation}>{row.checkOutLocation}</span>
+              <span className="truncate max-w-30" title={row.checkOutLocation}>{row.checkOutLocation}</span>
             </a>
           )}
         </div>
@@ -166,7 +166,7 @@ export default function DailyAttendance() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-xs font-medium text-gray-600 dark:text-gray-300 hidden md:flex">
+          <div className="items-center gap-3 text-xs font-medium text-gray-600 dark:text-gray-300 hidden md:flex">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Present</span>
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Leave</span>
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500"></span> Absent</span>
@@ -255,7 +255,7 @@ export default function DailyAttendance() {
            <button onClick={handlePrevMonth} className="px-3 py-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-r border-gray-200 dark:border-white/10">
              <ChevronLeft size={16} />
            </button>
-           <button onClick={handleCurrentMonth} className="px-4 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-secondary transition-colors min-w-[130px] text-center">
+           <button onClick={handleCurrentMonth} className="px-4 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-secondary transition-colors min-w-32.5 text-center">
              {filters.monthYear}
            </button>
            <button onClick={handleNextMonth} className="px-3 py-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-l border-gray-200 dark:border-white/10">
