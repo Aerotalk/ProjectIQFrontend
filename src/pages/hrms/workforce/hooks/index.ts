@@ -27,6 +27,12 @@ function useQuery<T>(fetcher: (params?: any) => Promise<PaginatedResponse<T>>, d
   }, [fetcher, params]);
 
   useEffect(() => {
+    if (defaultParams) {
+      setParams(defaultParams);
+    }
+  }, [JSON.stringify(defaultParams)]);
+
+  useEffect(() => {
     fetchData();
   }, [fetchData]);
 

@@ -2,7 +2,7 @@ import { api } from '@/lib/api';
 
 import type { 
   LeaveType, LeaveScheme, LeaveApplication, 
-  AttendanceRecord, Shift, RegularizationRequest, PermissionRequest
+  AttendanceRecord, Shift, PermissionRequest
 } from '../types';
 
 export const WorkforceService = {
@@ -94,15 +94,24 @@ export const WorkforceService = {
   // Regularization
   getRegularizations: (params?: any) => api.get('/hrms/attendance/regularizations', { params }),
   getRegularizationById: (id: string) => api.get(`/hrms/attendance/regularizations/${id}`),
-  createRegularization: (data: Omit<RegularizationRequest, 'id'>) => {
+  createRegularization: (data: any) => {
     const payload = {
       ...data,
       employee: data.employeeId ? { id: data.employeeId } : null,
-      shift: data.shift ? { id: data.shift } : null
+      shift: data.shift ? { id: data.shift } : null,
+      requestedCheckIn: data.requestedCheckIn || data.checkIn,
+      requestedCheckOut: data.requestedCheckOut || data.checkOut
     };
     return api.post('/hrms/attendance/regularizations', payload);
   },
-  updateRegularization: (id: string, data: Partial<RegularizationRequest>) => api.put(`/hrms/attendance/regularizations/${id}`, data),
+  updateRegularization: (id: string, data: Partial<any>) => {
+    const payload = {
+      ...data,
+      requestedCheckIn: data.requestedCheckIn || data.checkIn,
+      requestedCheckOut: data.requestedCheckOut || data.checkOut
+    };
+    return api.put(`/hrms/attendance/regularizations/${id}`, payload);
+  },
   deleteRegularization: (id: string) => api.delete(`/hrms/attendance/regularizations/${id}`),
   approveRegularization: (id: string, remarks?: string) => api.put(`/hrms/attendance/regularizations/${id}/approve`, { remarks }),
   rejectRegularization: (id: string, remarks?: string) => api.put(`/hrms/attendance/regularizations/${id}/reject`, { remarks }),
@@ -161,7 +170,13 @@ export const WorkforceService = {
   getShiftRosters: (params?: any) => api.get('/hrms/shifts/roster', { params }),
   getShiftRosterById: (id: string) => api.get(`/hrms/shifts/roster/${id}`),
   createShiftRoster: (data: Omit<any, 'id'>) => api.post('/hrms/shifts/roster', data),
-  updateShiftRoster: (id: string, data: Partial<any>) => api.put(`/hrms/shifts/roster/${id}`, data),
+  updateShiftRoster: (id: string, data: Partial<any>) => {
+    const payload = { ...data };
+    if (data.assignedShiftId) {
+      payload.assignedShift = { id: data.assignedShiftId };
+    }
+    return api.put(`/hrms/shifts/roster/${id}`, payload);
+  },
   deleteShiftRoster: (id: string) => api.delete(`/hrms/shifts/roster/${id}`),
 
   // Holiday

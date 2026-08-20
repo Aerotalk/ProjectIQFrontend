@@ -59,9 +59,9 @@ export default function LeaveSchemes() {
         </div>
         <button 
           onClick={() => navigate(`${basePath}/hrms/workforce/leave-scheme/new`)}
-          className="px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-sm text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap shadow-sm"
         >
-          <Plus size={16} className="mr-2" />
+          <Plus size={16} />
           Add Scheme
         </button>
       </div>
